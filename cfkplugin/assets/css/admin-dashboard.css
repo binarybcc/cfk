@@ -1,0 +1,283 @@
+/**
+ * CFK Admin Dashboard Styles
+ * Design token-based CSS following WordPress and Universal Methodology standards
+ */
+
+:root {
+    /* Color Tokens */
+    --cfk-primary: #0073aa;
+    --cfk-secondary: #27ae60;
+    --cfk-danger: #e74c3c;
+    --cfk-warning: #f39c12;
+    --cfk-info: #3498db;
+    --cfk-accent: #9b59b6;
+    --cfk-success: #1abc9c;
+    
+    /* Neutral Colors */
+    --cfk-gray-100: #f9f9f9;
+    --cfk-gray-200: #f0f0f0;
+    --cfk-gray-300: #e1e1e1;
+    --cfk-gray-400: #c3c4c7;
+    --cfk-gray-500: #666;
+    --cfk-gray-600: #555;
+    --cfk-gray-700: #23282d;
+    --cfk-gray-800: #1a1a1a;
+    --cfk-white: #ffffff;
+    
+    /* Spacing Tokens */
+    --cfk-spacing-xs: 4px;
+    --cfk-spacing-sm: 8px;
+    --cfk-spacing-md: 15px;
+    --cfk-spacing-lg: 20px;
+    --cfk-spacing-xl: 30px;
+    
+    /* Typography Tokens */
+    --cfk-font-size-xs: 12px;
+    --cfk-font-size-sm: 13px;
+    --cfk-font-size-md: 16px;
+    --cfk-font-size-lg: 18px;
+    --cfk-font-size-xl: 28px;
+    --cfk-font-size-xxl: 32px;
+    
+    /* Border Tokens */
+    --cfk-border-radius-sm: 3px;
+    --cfk-border-radius-md: 4px;
+    --cfk-border-radius-lg: 6px;
+    --cfk-border-radius-xl: 24px;
+    
+    /* Shadow Tokens */
+    --cfk-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.04);
+    --cfk-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+    
+    /* Transition Tokens */
+    --cfk-transition-fast: 0.3s;
+    --cfk-transition-base: all 0.3s ease;
+}
+
+/* Dashboard Layout */
+.cfk-dashboard {
+    margin-right: var(--cfk-spacing-lg);
+}
+
+/* Dashboard Title Component */
+.cfk-dashboard__title {
+    display: flex;
+    align-items: center;
+    gap: var(--cfk-spacing-md);
+    margin-bottom: var(--cfk-spacing-lg);
+}
+
+.cfk-dashboard__version {
+    background: var(--cfk-primary);
+    color: var(--cfk-white);
+    padding: var(--cfk-spacing-xs) var(--cfk-spacing-sm);
+    border-radius: var(--cfk-border-radius-sm);
+    font-size: var(--cfk-font-size-xs);
+    font-weight: normal;
+}
+
+/* Quick Actions Component */
+.cfk-quick-actions {
+    background: var(--cfk-white);
+    border: 1px solid var(--cfk-gray-400);
+    border-radius: var(--cfk-border-radius-lg);
+    padding: var(--cfk-spacing-lg);
+    margin-bottom: var(--cfk-spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--cfk-shadow-sm);
+}
+
+/* Toggle Component */
+.cfk-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--cfk-spacing-md);
+}
+
+.cfk-toggle__switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+
+.cfk-toggle__input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.cfk-toggle__slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: var(--cfk-gray-400);
+    border-radius: var(--cfk-border-radius-xl);
+    transition: var(--cfk-transition-fast);
+}
+
+.cfk-toggle__slider::before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--cfk-white);
+    border-radius: 50%;
+    transition: var(--cfk-transition-fast);
+}
+
+.cfk-toggle__input:checked + .cfk-toggle__slider {
+    background-color: var(--cfk-secondary);
+}
+
+.cfk-toggle__input:checked + .cfk-toggle__slider::before {
+    transform: translateX(26px);
+}
+
+/* Dashboard Grid Layout */
+.cfk-dashboard__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: var(--cfk-spacing-lg);
+}
+
+/* Section Component */
+.cfk-section {
+    background: var(--cfk-white);
+    border: 1px solid var(--cfk-gray-400);
+    border-radius: var(--cfk-border-radius-lg);
+    padding: var(--cfk-spacing-lg);
+    box-shadow: var(--cfk-shadow-sm);
+}
+
+.cfk-section__title {
+    margin: 0 0 var(--cfk-spacing-md) 0;
+    color: var(--cfk-gray-700);
+    border-bottom: 2px solid var(--cfk-primary);
+    padding-bottom: var(--cfk-spacing-sm);
+}
+
+/* Stats Grid Component */
+.cfk-stats__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--cfk-spacing-md);
+}
+
+/* Stat Card Component */
+.cfk-stat-card {
+    background: var(--cfk-gray-100);
+    border: 1px solid var(--cfk-gray-300);
+    border-left: 4px solid var(--cfk-primary);
+    border-radius: var(--cfk-border-radius-md);
+    padding: var(--cfk-spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--cfk-transition-base);
+}
+
+.cfk-stat-card:hover {
+    box-shadow: var(--cfk-shadow-md);
+    transform: translateY(-2px);
+}
+
+.cfk-stat-card__content h3 {
+    margin: 0 0 5px 0;
+    font-size: var(--cfk-font-size-sm);
+    color: var(--cfk-gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cfk-stat-card__number {
+    font-size: var(--cfk-font-size-xl);
+    font-weight: bold;
+    line-height: 1;
+}
+
+.cfk-stat-card__icon {
+    font-size: var(--cfk-font-size-xxl);
+    opacity: 0.7;
+}
+
+/* Chart Component */
+.cfk-chart {
+    margin-bottom: var(--cfk-spacing-xl);
+}
+
+.cfk-chart__title {
+    margin-bottom: var(--cfk-spacing-md);
+    color: var(--cfk-gray-700);
+}
+
+.cfk-chart__canvas {
+    position: relative;
+    height: 200px;
+    margin-bottom: var(--cfk-spacing-md);
+}
+
+/* Progress Component */
+.cfk-progress {
+    text-align: center;
+}
+
+.cfk-progress__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--cfk-spacing-sm) 0;
+    border-bottom: 1px solid var(--cfk-gray-200);
+}
+
+.cfk-progress__label {
+    font-weight: 600;
+    color: var(--cfk-gray-600);
+}
+
+.cfk-progress__value {
+    font-size: var(--cfk-font-size-lg);
+    font-weight: bold;
+    color: var(--cfk-primary);
+}
+
+/* Responsive Design */
+@container (max-width: 600px) {
+    .cfk-dashboard__grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cfk-stats__grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .cfk-quick-actions {
+        flex-direction: column;
+        gap: var(--cfk-spacing-md);
+    }
+}
+
+/* Color Variants for Stat Cards */
+.cfk-stat-card--sponsored {
+    border-left-color: var(--cfk-secondary);
+}
+
+.cfk-stat-card--available {
+    border-left-color: var(--cfk-danger);
+}
+
+.cfk-stat-card--families {
+    border-left-color: var(--cfk-accent);
+}
+
+.cfk-stat-card--sponsors {
+    border-left-color: var(--cfk-warning);
+}
+
+.cfk-stat-card--emails {
+    border-left-color: var(--cfk-success);
+}

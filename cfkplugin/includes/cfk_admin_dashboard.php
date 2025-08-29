@@ -33,8 +33,15 @@ class CFK_Admin_Dashboard {
         wp_enqueue_script('jquery');
         wp_enqueue_script('chart-js', 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js', array(), '3.9.1', true);
         
+        wp_enqueue_style(
+            'cfk-admin-dashboard',
+            CFK_PLUGIN_URL . 'assets/css/admin-dashboard.css',
+            array(),
+            CFK_PLUGIN_VERSION,
+            'all'
+        );
+        
         wp_add_inline_script('jquery', $this->get_dashboard_javascript());
-        wp_add_inline_style('wp-admin', $this->get_dashboard_css());
     }
     
     /**
@@ -48,24 +55,24 @@ class CFK_Admin_Dashboard {
         
         ?>
         <div class="wrap cfk-dashboard">
-            <h1 class="cfk-dashboard-title">
+            <h1 class="cfk-dashboard__title">
                 <?php _e('Christmas for Kids Dashboard', 'cfk-sponsorship'); ?>
-                <span class="cfk-version">v<?php echo CFK_PLUGIN_VERSION; ?></span>
+                <span class="cfk-dashboard__version">v<?php echo CFK_PLUGIN_VERSION; ?></span>
             </h1>
             
             <?php $this->render_quick_actions(); ?>
             
-            <div class="cfk-dashboard-grid">
+            <div class="cfk-dashboard__grid">
                 <!-- Main Statistics Cards -->
-                <div class="cfk-stats-section">
-                    <h2><?php _e('Overview', 'cfk-sponsorship'); ?></h2>
-                    <div class="cfk-stats-grid">
-                        <?php $this->render_stat_card(__('Total Children', 'cfk-sponsorship'), $stats['total_children'], 'children', '#3498db'); ?>
-                        <?php $this->render_stat_card(__('Children Sponsored', 'cfk-sponsorship'), $stats['sponsored_children'], 'sponsored', '#27ae60'); ?>
-                        <?php $this->render_stat_card(__('Available Children', 'cfk-sponsorship'), $stats['available_children'], 'available', '#e74c3c'); ?>
-                        <?php $this->render_stat_card(__('Total Families', 'cfk-sponsorship'), $stats['total_families'], 'families', '#9b59b6'); ?>
-                        <?php $this->render_stat_card(__('Active Sponsors', 'cfk-sponsorship'), $stats['total_sponsors'], 'sponsors', '#f39c12'); ?>
-                        <?php $this->render_stat_card(__('Emails Sent', 'cfk-sponsorship'), $stats['emails_sent'], 'emails', '#1abc9c'); ?>
+                <div class="cfk-section">
+                    <h2 class="cfk-section__title"><?php _e('Overview', 'cfk-sponsorship'); ?></h2>
+                    <div class="cfk-stats__grid">
+                        <?php $this->render_stat_card(__('Total Children', 'cfk-sponsorship'), $stats['total_children'], 'children'); ?>
+                        <?php $this->render_stat_card(__('Children Sponsored', 'cfk-sponsorship'), $stats['sponsored_children'], 'sponsored'); ?>
+                        <?php $this->render_stat_card(__('Available Children', 'cfk-sponsorship'), $stats['available_children'], 'available'); ?>
+                        <?php $this->render_stat_card(__('Total Families', 'cfk-sponsorship'), $stats['total_families'], 'families'); ?>
+                        <?php $this->render_stat_card(__('Active Sponsors', 'cfk-sponsorship'), $stats['total_sponsors'], 'sponsors'); ?>
+                        <?php $this->render_stat_card(__('Emails Sent', 'cfk-sponsorship'), $stats['emails_sent'], 'emails'); ?>
                     </div>
                 </div>
                 
@@ -279,14 +286,14 @@ class CFK_Admin_Dashboard {
     /**
      * Render individual stat card
      */
-    private function render_stat_card($title, $value, $type, $color) {
+    private function render_stat_card($title, $value, $type) {
         ?>
-        <div class="cfk-stat-card cfk-stat-<?php echo esc_attr($type); ?>" style="border-left-color: <?php echo esc_attr($color); ?>">
-            <div class="cfk-stat-content">
+        <div class="cfk-stat-card cfk-stat-card--<?php echo esc_attr($type); ?>">
+            <div class="cfk-stat-card__content">
                 <h3><?php echo esc_html($title); ?></h3>
-                <div class="cfk-stat-number" style="color: <?php echo esc_attr($color); ?>"><?php echo number_format($value); ?></div>
+                <div class="cfk-stat-card__number"><?php echo number_format($value); ?></div>
             </div>
-            <div class="cfk-stat-icon" style="color: <?php echo esc_attr($color); ?>">
+            <div class="cfk-stat-card__icon">
                 <?php echo $this->get_stat_icon($type); ?>
             </div>
         </div>
@@ -730,458 +737,6 @@ class CFK_Admin_Dashboard {
         if (isset($_GET['error'])) {
             echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($_GET['error']) . '</p></div>';
         }
-    }
-    
-    /**
-     * Get dashboard CSS
-     */
-    private function get_dashboard_css() {
-        return '
-        .cfk-dashboard {
-            margin-right: 20px;
-        }
-        
-        .cfk-dashboard-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        
-        .cfk-version {
-            background: #0073aa;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-            font-weight: normal;
-        }
-        
-        .cfk-quick-actions {
-            background: white;
-            border: 1px solid #c3c4c7;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-        }
-        
-        .cfk-sponsorship-toggle {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .cfk-toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        
-        .cfk-toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .cfk-toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            border-radius: 24px;
-            transition: 0.3s;
-        }
-        
-        .cfk-toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 18px;
-            width: 18px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            border-radius: 50%;
-            transition: 0.3s;
-        }
-        
-        input:checked + .cfk-toggle-slider {
-            background-color: #27ae60;
-        }
-        
-        input:checked + .cfk-toggle-slider:before {
-            transform: translateX(26px);
-        }
-        
-        .cfk-quick-links {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .cfk-dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-        }
-        
-        .cfk-stats-section,
-        .cfk-charts-section,
-        .cfk-status-section,
-        .cfk-activity-section,
-        .cfk-breakdown-section,
-        .cfk-tools-section {
-            background: white;
-            border: 1px solid #c3c4c7;
-            border-radius: 6px;
-            padding: 20px;
-            box-shadow: 0 1px 1px rgba(0,0,0,0.04);
-        }
-        
-        .cfk-stats-section h2,
-        .cfk-charts-section h3,
-        .cfk-status-section h3,
-        .cfk-activity-section h3,
-        .cfk-breakdown-section h3,
-        .cfk-tools-section h3 {
-            margin: 0 0 15px 0;
-            color: #23282d;
-            border-bottom: 2px solid #0073aa;
-            padding-bottom: 8px;
-        }
-        
-        .cfk-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .cfk-stat-card {
-            background: #f9f9f9;
-            border: 1px solid #e1e1e1;
-            border-left: 4px solid #0073aa;
-            border-radius: 4px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s ease;
-        }
-        
-        .cfk-stat-card:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateY(-2px);
-        }
-        
-        .cfk-stat-content h3 {
-            margin: 0 0 5px 0;
-            font-size: 13px;
-            color: #666;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .cfk-stat-number {
-            font-size: 28px;
-            font-weight: bold;
-            line-height: 1;
-        }
-        
-        .cfk-stat-icon {
-            font-size: 32px;
-            opacity: 0.7;
-        }
-        
-        .cfk-chart-container {
-            margin-bottom: 30px;
-        }
-        
-        .cfk-chart-container h3 {
-            margin-bottom: 15px;
-            color: #23282d;
-        }
-        
-        .cfk-progress-chart,
-        .cfk-age-chart {
-            position: relative;
-            height: 200px;
-            margin-bottom: 15px;
-        }
-        
-        .cfk-progress-details {
-            text-align: center;
-        }
-        
-        .cfk-progress-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .cfk-progress-label {
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .cfk-progress-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #0073aa;
-        }
-        
-        .cfk-status-grid {
-            display: grid;
-            gap: 15px;
-        }
-        
-        .cfk-status-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 15px;
-            border-radius: 6px;
-            border-left: 4px solid;
-        }
-        
-        .cfk-status-good {
-            background: #f0f9ff;
-            border-left-color: #27ae60;
-        }
-        
-        .cfk-status-warning {
-            background: #fffbf0;
-            border-left-color: #f39c12;
-        }
-        
-        .cfk-status-error {
-            background: #fef2f2;
-            border-left-color: #e74c3c;
-        }
-        
-        .cfk-status-icon {
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-        
-        .cfk-status-content h4 {
-            margin: 0 0 5px 0;
-            color: #23282d;
-        }
-        
-        .cfk-status-content p {
-            margin: 0;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .cfk-status-action {
-            display: inline-block;
-            margin-top: 8px;
-            color: #0073aa;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .cfk-status-action:hover {
-            color: #005a87;
-        }
-        
-        .cfk-activity-feed {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .cfk-activity-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .cfk-activity-item:last-child {
-            border-bottom: none;
-        }
-        
-        .cfk-activity-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-            margin-top: 2px;
-        }
-        
-        .cfk-activity-content h4 {
-            margin: 0 0 4px 0;
-            font-size: 14px;
-            color: #23282d;
-        }
-        
-        .cfk-activity-content p {
-            margin: 0 0 4px 0;
-            font-size: 13px;
-            color: #666;
-        }
-        
-        .cfk-activity-time {
-            font-size: 12px;
-            color: #999;
-        }
-        
-        .cfk-activity-footer {
-            text-align: center;
-            margin-top: 15px;
-            padding-top: 15px;
-            border-top: 1px solid #f0f0f0;
-        }
-        
-        .cfk-no-activity {
-            text-align: center;
-            padding: 40px 20px;
-            color: #666;
-        }
-        
-        .cfk-breakdown-grid {
-            display: grid;
-            gap: 15px;
-        }
-        
-        .cfk-breakdown-item {
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 6px;
-            border-left: 4px solid #0073aa;
-        }
-        
-        .cfk-breakdown-item h4 {
-            margin: 0 0 10px 0;
-            color: #23282d;
-        }
-        
-        .cfk-breakdown-numbers {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .cfk-breakdown-total {
-            font-size: 24px;
-            font-weight: bold;
-            color: #0073aa;
-        }
-        
-        .cfk-breakdown-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
-        }
-        
-        .cfk-breakdown-progress {
-            margin-top: 10px;
-        }
-        
-        .cfk-progress-bar {
-            height: 8px;
-            background: #e1e1e1;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 5px;
-        }
-        
-        .cfk-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #27ae60, #2ecc71);
-            transition: width 0.3s ease;
-        }
-        
-        .cfk-breakdown-percentage {
-            font-size: 12px;
-            color: #666;
-        }
-        
-        .cfk-tools-grid {
-            display: grid;
-            gap: 20px;
-        }
-        
-        .cfk-tool-card {
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 6px;
-            border: 1px solid #e1e1e1;
-        }
-        
-        .cfk-tool-card h4 {
-            margin: 0 0 8px 0;
-            color: #23282d;
-        }
-        
-        .cfk-tool-card p {
-            margin: 0 0 15px 0;
-            color: #666;
-            font-size: 14px;
-        }
-        
-        .cfk-export-buttons,
-        .cfk-bulk-actions,
-        .cfk-maintenance-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        
-        .cfk-export-btn,
-        .cfk-cleanup-btn,
-        .cfk-refresh-stats-btn {
-            font-size: 13px;
-        }
-        
-        .cfk-bulk-actions select {
-            margin-right: 8px;
-        }
-        
-        @media (max-width: 1200px) {
-            .cfk-dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .cfk-quick-actions {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-            }
-            
-            .cfk-quick-links {
-                justify-content: center;
-                flex-wrap: wrap;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .cfk-stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .cfk-stat-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-            
-            .cfk-export-buttons,
-            .cfk-bulk-actions,
-            .cfk-maintenance-actions {
-                flex-direction: column;
-            }
-        }
-        ';
     }
     
     /**
