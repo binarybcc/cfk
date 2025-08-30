@@ -11,7 +11,15 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
+// Include trait files for modular architecture
+require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_ajax_trait.php';
+require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_export_trait.php';
+require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_stats_trait.php';
+
 class CFK_Admin_Dashboard {
+    use CFK_Dashboard_Ajax_Trait;
+    use CFK_Dashboard_Export_Trait;
+    use CFK_Dashboard_Stats_Trait;
     
     public function __construct() {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
@@ -41,7 +49,38 @@ class CFK_Admin_Dashboard {
             'all'
         );
         
-        wp_add_inline_script('jquery', $this->get_dashboard_javascript());
+        wp_enqueue_script(
+            'cfk-admin-dashboard',
+            CFK_PLUGIN_URL . 'assets/js/admin-dashboard.js',
+            array('jquery', 'chart-js'),
+            CFK_PLUGIN_VERSION,
+            true
+        );
+        
+        $stats = $this->get_dashboard_stats();
+        wp_localize_script('cfk-admin-dashboard', 'cfkDashboardConfig', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('cfk_admin_nonce'),
+            'chartData' => array(
+                'progress' => array(
+                    'sponsored' => $stats['sponsored_children'],
+                    'available' => $stats['available_children']
+                ),
+                'ageBreakdown' => $stats['age_breakdown']
+            ),
+            'labels' => array(
+                'sponsored' => __('Sponsored', 'cfk-sponsorship'),
+                'available' => __('Available', 'cfk-sponsorship'),
+                'exporting' => __('Exporting...', 'cfk-sponsorship'),
+                'refreshing' => __('Refreshing...', 'cfk-sponsorship'),
+                'sending' => __('Sending...', 'cfk-sponsorship'),
+                'error' => __('An error occurred', 'cfk-sponsorship'),
+                'networkError' => __('Network error occurred', 'cfk-sponsorship'),
+                'exportSuccess' => __('Export completed successfully', 'cfk-sponsorship'),
+                'statsUpdated' => __('Statistics updated successfully', 'cfk-sponsorship'),
+                'confirmBulkReminder' => __('Are you sure you want to send bulk reminders? This action cannot be undone.', 'cfk-sponsorship')
+            )
+        ));
     }
     
     /**
@@ -227,16 +266,6 @@ class CFK_Admin_Dashboard {
             </div>
         </div>
         
-        <script>
-        // Chart data for JavaScript
-        window.cfkChartData = {
-            progress: {
-                sponsored: <?php echo $stats['sponsored_children']; ?>,
-                available: <?php echo $stats['available_children']; ?>
-            },
-            ageBreakdown: <?php echo json_encode($stats['age_breakdown']); ?>
-        };
-        </script>
         <?php
     }
     
@@ -317,381 +346,6 @@ class CFK_Admin_Dashboard {
     }
     
     /**
-     * Get comprehensive statistics
-     */
-    private function get_comprehensive_stats() {
-        global $wpdb;
-        
-        // Basic children stats
-        $children_stats = CFK_Children_Manager::get_sponsorship_stats();
-        
-        // Sponsorship stats
-        $sponsorship_table = $wpdb->prefix . 'cfk_sponsorships';
-        $total_sponsors = $wpdb->get_var("SELECT COUNT(DISTINCT session_id) FROM $sponsorship_table WHERE status = 'confirmed'");
-        
-        // Email stats
-        $email_table = $wpdb->prefix . 'cfk_email_log';
-        $emails_sent = $wpdb->get_var("SELECT COUNT(*) FROM $email_table WHERE delivery_status = 'sent'");
-        
-        // Age breakdown
-        $age_breakdown = $this->get_age_breakdown();
-        
-        return array_merge($children_stats, array(
-            'total_sponsors' => intval($total_sponsors),
-            'emails_sent' => intval($emails_sent),
-            'age_breakdown' => $age_breakdown
-        ));
-    }
-    
-    /**
-     * Get age breakdown statistics
-     */
-    private function get_age_breakdown() {
-        global $wpdb;
-        
-        $age_ranges = array('Infant', 'Elementary', 'Middle School', 'High School');
-        $breakdown = array();
-        
-        foreach ($age_ranges as $age_range) {
-            // Total children in this age range
-            $total = $wpdb->get_var($wpdb->prepare("
-                SELECT COUNT(*) 
-                FROM {$wpdb->postmeta} pm
-                INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
-                WHERE pm.meta_key = '_child_age_range'
-                AND pm.meta_value = %s
-                AND p.post_type = 'child'
-                AND p.post_status = 'publish'
-            ", $age_range));
-            
-            // Sponsored children in this age range
-            $sponsored = $wpdb->get_var($wpdb->prepare("
-                SELECT COUNT(*) 
-                FROM {$wpdb->postmeta} pm1
-                INNER JOIN {$wpdb->posts} p ON pm1.post_id = p.ID
-                INNER JOIN {$wpdb->postmeta} pm2 ON pm1.post_id = pm2.post_id
-                WHERE pm1.meta_key = '_child_age_range'
-                AND pm1.meta_value = %s
-                AND pm2.meta_key = '_child_sponsored'
-                AND pm2.meta_value = '1'
-                AND p.post_type = 'child'
-                AND p.post_status = 'publish'
-            ", $age_range));
-            
-            $breakdown[$age_range] = array(
-                'total' => intval($total),
-                'sponsored' => intval($sponsored),
-                'available' => intval($total) - intval($sponsored)
-            );
-        }
-        
-        return $breakdown;
-    }
-    
-    /**
-     * Get recent activity
-     */
-    private function get_recent_activity() {
-        global $wpdb;
-        
-        $activities = array();
-        
-        // Recent sponsorships
-        $sponsorship_table = $wpdb->prefix . 'cfk_sponsorships';
-        $recent_sponsorships = $wpdb->get_results("
-            SELECT sponsor_name, confirmed_time, COUNT(*) as child_count
-            FROM $sponsorship_table 
-            WHERE status = 'confirmed' 
-            GROUP BY session_id 
-            ORDER BY confirmed_time DESC 
-            LIMIT 5
-        ");
-        
-        foreach ($recent_sponsorships as $sponsorship) {
-            $activities[] = array(
-                'icon' => '🎄',
-                'title' => sprintf(__('New Sponsorship: %s', 'cfk-sponsorship'), $sponsorship->sponsor_name),
-                'description' => sprintf(
-                    _n('Sponsored %d child', 'Sponsored %d children', $sponsorship->child_count, 'cfk-sponsorship'),
-                    $sponsorship->child_count
-                ),
-                'time' => human_time_diff(strtotime($sponsorship->confirmed_time), current_time('timestamp')) . ' ' . __('ago', 'cfk-sponsorship')
-            );
-        }
-        
-        // Recent emails
-        $email_table = $wpdb->prefix . 'cfk_email_log';
-        $recent_emails = $wpdb->get_results("
-            SELECT email_type, recipient_email, sent_time, delivery_status
-            FROM $email_table 
-            ORDER BY sent_time DESC 
-            LIMIT 3
-        ");
-        
-        foreach ($recent_emails as $email) {
-            $activities[] = array(
-                'icon' => $email->delivery_status === 'sent' ? '📧' : '❌',
-                'title' => sprintf(__('%s Email Sent', 'cfk-sponsorship'), ucfirst($email->email_type)),
-                'description' => sprintf(__('To: %s', 'cfk-sponsorship'), $email->recipient_email),
-                'time' => human_time_diff(strtotime($email->sent_time), current_time('timestamp')) . ' ' . __('ago', 'cfk-sponsorship')
-            );
-        }
-        
-        // Sort by time
-        usort($activities, function($a, $b) {
-            return strcmp($b['time'], $a['time']);
-        });
-        
-        return array_slice($activities, 0, 8);
-    }
-    
-    /**
-     * Get system status
-     */
-    private function get_system_status() {
-        $status = array();
-        
-        // Sponsorships status
-        $sponsorships_open = ChristmasForKidsPlugin::get_option('cfk_sponsorships_open', false);
-        if ($sponsorships_open) {
-            $status[] = array(
-                'status' => 'good',
-                'icon' => '✅',
-                'title' => __('Sponsorships Active', 'cfk-sponsorship'),
-                'message' => __('The sponsorship system is currently accepting new sponsors.', 'cfk-sponsorship')
-            );
-        } else {
-            $status[] = array(
-                'status' => 'warning',
-                'icon' => '⚠️',
-                'title' => __('Sponsorships Closed', 'cfk-sponsorship'),
-                'message' => __('Sponsorships are currently closed to new applicants.', 'cfk-sponsorship'),
-                'action' => array(
-                    'text' => __('Open Sponsorships', 'cfk-sponsorship'),
-                    'url' => '#toggle-sponsorships'
-                )
-            );
-        }
-        
-        // Email configuration
-        $from_email = ChristmasForKidsPlugin::get_option('cfk_email_from_email');
-        if (empty($from_email)) {
-            $status[] = array(
-                'status' => 'error',
-                'icon' => '❌',
-                'title' => __('Email Not Configured', 'cfk-sponsorship'),
-                'message' => __('Email settings need to be configured for proper functionality.', 'cfk-sponsorship'),
-                'action' => array(
-                    'text' => __('Configure Email', 'cfk-sponsorship'),
-                    'url' => admin_url('admin.php?page=cfk-settings#email')
-                )
-            );
-        } else {
-            $status[] = array(
-                'status' => 'good',
-                'icon' => '✅',
-                'title' => __('Email Configured', 'cfk-sponsorship'),
-                'message' => sprintf(__('Emails will be sent from: %s', 'cfk-sponsorship'), $from_email)
-            );
-        }
-        
-        // Database status
-        global $wpdb;
-        $sponsorship_table = $wpdb->prefix . 'cfk_sponsorships';
-        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$sponsorship_table'") === $sponsorship_table;
-        
-        if ($table_exists) {
-            $status[] = array(
-                'status' => 'good',
-                'icon' => '✅',
-                'title' => __('Database Ready', 'cfk-sponsorship'),
-                'message' => __('All required database tables are properly installed.', 'cfk-sponsorship')
-            );
-        } else {
-            $status[] = array(
-                'status' => 'error',
-                'icon' => '❌',
-                'title' => __('Database Issue', 'cfk-sponsorship'),
-                'message' => __('Required database tables are missing. Try deactivating and reactivating the plugin.', 'cfk-sponsorship')
-            );
-        }
-        
-        // Deadline check
-        $deadline = ChristmasForKidsPlugin::get_option('cfk_deadline_date');
-        if (empty($deadline) || $deadline === '[DEADLINE DATE]') {
-            $status[] = array(
-                'status' => 'warning',
-                'icon' => '⚠️',
-                'title' => __('Deadline Not Set', 'cfk-sponsorship'),
-                'message' => __('Gift drop-off deadline should be configured for sponsor emails.', 'cfk-sponsorship'),
-                'action' => array(
-                    'text' => __('Set Deadline', 'cfk-sponsorship'),
-                    'url' => admin_url('admin.php?page=cfk-settings#general')
-                )
-            );
-        }
-        
-        return $status;
-    }
-    
-    /**
-     * AJAX handler for toggling sponsorships
-     */
-    public function ajax_toggle_sponsorships() {
-        check_ajax_referer('cfk_admin_nonce', 'nonce');
-        
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions', 'cfk-sponsorship'));
-        }
-        
-        $current_status = ChristmasForKidsPlugin::get_option('cfk_sponsorships_open', false);
-        $new_status = !$current_status;
-        
-        ChristmasForKidsPlugin::update_option('cfk_sponsorships_open', $new_status);
-        
-        wp_send_json_success(array(
-            'status' => $new_status,
-            'message' => $new_status 
-                ? __('Sponsorships are now open', 'cfk-sponsorship')
-                : __('Sponsorships are now closed', 'cfk-sponsorship')
-        ));
-    }
-    
-    /**
-     * AJAX handler for refreshing dashboard stats
-     */
-    public function ajax_get_dashboard_stats() {
-        check_ajax_referer('cfk_admin_nonce', 'nonce');
-        
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions', 'cfk-sponsorship'));
-        }
-        
-        $stats = $this->get_comprehensive_stats();
-        wp_send_json_success($stats);
-    }
-    
-    /**
-     * AJAX handler for data export
-     */
-    public function ajax_export_data() {
-        check_ajax_referer('cfk_admin_nonce', 'nonce');
-        
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(__('Insufficient permissions', 'cfk-sponsorship'));
-        }
-        
-        $export_type = sanitize_text_field($_POST['export_type']);
-        
-        switch ($export_type) {
-            case 'sponsorships':
-                $this->export_sponsorships();
-                break;
-            case 'children':
-                $this->export_children();
-                break;
-            case 'emails':
-                $this->export_emails();
-                break;
-            default:
-                wp_send_json_error(__('Invalid export type', 'cfk-sponsorship'));
-        }
-    }
-    
-    /**
-     * Export sponsorships data
-     */
-    private function export_sponsorships() {
-        global $wpdb;
-        
-        $sponsorship_table = $wpdb->prefix . 'cfk_sponsorships';
-        
-        $data = $wpdb->get_results("
-            SELECT s.session_id, s.sponsor_name, s.sponsor_email, s.sponsor_phone, 
-                   s.sponsor_address, s.confirmed_time, s.child_id, s.sponsor_notes
-            FROM $sponsorship_table s
-            WHERE s.status = 'confirmed'
-            ORDER BY s.confirmed_time DESC
-        ", ARRAY_A);
-        
-        $this->output_csv('sponsorships-' . date('Y-m-d'), $data);
-    }
-    
-    /**
-     * Export children data
-     */
-    private function export_children() {
-        $children = get_posts(array(
-            'post_type' => 'child',
-            'posts_per_page' => -1,
-            'post_status' => 'publish'
-        ));
-        
-        $data = array();
-        foreach ($children as $child) {
-            $data[] = array(
-                'child_id' => get_post_meta($child->ID, '_child_id', true),
-                'name' => $child->post_title,
-                'age' => get_post_meta($child->ID, '_child_age', true),
-                'gender' => get_post_meta($child->ID, '_child_gender', true),
-                'family_id' => get_post_meta($child->ID, '_child_family_id', true),
-                'age_range' => get_post_meta($child->ID, '_child_age_range', true),
-                'clothing_info' => get_post_meta($child->ID, '_child_clothing_info', true),
-                'gift_requests' => get_post_meta($child->ID, '_child_gift_requests', true),
-                'sponsored' => get_post_meta($child->ID, '_child_sponsored', true) == '1' ? 'Yes' : 'No'
-            );
-        }
-        
-        $this->output_csv('children-' . date('Y-m-d'), $data);
-    }
-    
-    /**
-     * Export email log
-     */
-    private function export_emails() {
-        global $wpdb;
-        
-        $email_table = $wpdb->prefix . 'cfk_email_log';
-        
-        $data = $wpdb->get_results("
-            SELECT session_id, email_type, recipient_email, subject, 
-                   sent_time, delivery_status
-            FROM $email_table
-            ORDER BY sent_time DESC
-        ", ARRAY_A);
-        
-        $this->output_csv('email-log-' . date('Y-m-d'), $data);
-    }
-    
-    /**
-     * Output CSV file
-     */
-    private function output_csv($filename, $data) {
-        if (empty($data)) {
-            wp_send_json_error(__('No data to export', 'cfk-sponsorship'));
-            return;
-        }
-        
-        header('Content-Type: text/csv');
-        header('Content-Disposition: attachment; filename="' . $filename . '.csv"');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        
-        $output = fopen('php://output', 'w');
-        
-        // Output headers
-        fputcsv($output, array_keys($data[0]));
-        
-        // Output data
-        foreach ($data as $row) {
-            fputcsv($output, $row);
-        }
-        
-        fclose($output);
-        exit;
-    }
-    
-    /**
      * Handle bulk reminder emails
      */
     public function handle_bulk_reminder() {
@@ -739,232 +393,6 @@ class CFK_Admin_Dashboard {
         }
     }
     
-    /**
-     * Get dashboard JavaScript
-     */
-    private function get_dashboard_javascript() {
-        $nonce = wp_create_nonce('cfk_admin_nonce');
-        
-        return "
-        jQuery(document).ready(function($) {
-            // Initialize charts when Chart.js is loaded
-            function initCharts() {
-                if (typeof Chart !== 'undefined' && window.cfkChartData) {
-                    // Progress Chart (Doughnut)
-                    const progressCtx = document.getElementById('cfk-progress-chart');
-                    if (progressCtx) {
-                        new Chart(progressCtx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: ['" . esc_js(__('Sponsored', 'cfk-sponsorship')) . "', '" . esc_js(__('Available', 'cfk-sponsorship')) . "'],
-                                datasets: [{
-                                    data: [window.cfkChartData.progress.sponsored, window.cfkChartData.progress.available],
-                                    backgroundColor: ['#27ae60', '#e74c3c'],
-                                    borderWidth: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    
-                    // Age Range Chart (Bar)
-                    const ageCtx = document.getElementById('cfk-age-chart');
-                    if (ageCtx && window.cfkChartData.ageBreakdown) {
-                        const ageData = window.cfkChartData.ageBreakdown;
-                        const labels = Object.keys(ageData);
-                        const sponsored = labels.map(label => ageData[label].sponsored);
-                        const available = labels.map(label => ageData[label].available);
-                        
-                        new Chart(ageCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: labels,
-                                datasets: [
-                                    {
-                                        label: '" . esc_js(__('Sponsored', 'cfk-sponsorship')) . "',
-                                        data: sponsored,
-                                        backgroundColor: '#27ae60'
-                                    },
-                                    {
-                                        label: '" . esc_js(__('Available', 'cfk-sponsorship')) . "',
-                                        data: available,
-                                        backgroundColor: '#e74c3c'
-                                    }
-                                ]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                scales: {
-                                    x: {
-                                        stacked: true
-                                    },
-                                    y: {
-                                        stacked: true,
-                                        beginAtZero: true
-                                    }
-                                },
-                                plugins: {
-                                    legend: {
-                                        position: 'bottom'
-                                    }
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-            
-            // Wait for Chart.js to load, then initialize
-            function waitForChart() {
-                if (typeof Chart !== 'undefined') {
-                    initCharts();
-                } else {
-                    setTimeout(waitForChart, 100);
-                }
-            }
-            waitForChart();
-            
-            // Sponsorship toggle
-            $('#cfk-toggle-sponsorships').change(function() {
-                const isChecked = $(this).is(':checked');
-                
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: {
-                        action: 'cfk_toggle_sponsorships',
-                        nonce: '$nonce'
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            location.reload();
-                        } else {
-                            alert(response.data);
-                            $('#cfk-toggle-sponsorships').prop('checked', !isChecked);
-                        }
-                    },
-                    error: function() {
-                        alert('" . esc_js(__('Network error. Please try again.', 'cfk-sponsorship')) . "');
-                        $('#cfk-toggle-sponsorships').prop('checked', !isChecked);
-                    }
-                });
-            });
-            
-            // Export buttons
-            $('.cfk-export-btn').click(function() {
-                const exportType = $(this).data('type');
-                const button = $(this);
-                const originalText = button.text();
-                
-                button.text('" . esc_js(__('Exporting...', 'cfk-sponsorship')) . "').prop('disabled', true);
-                
-                // Create a form and submit for file download
-                const form = $('<form>', {
-                    method: 'POST',
-                    action: ajaxurl
-                });
-                
-                form.append($('<input>', {
-                    type: 'hidden',
-                    name: 'action',
-                    value: 'cfk_export_data'
-                }));
-                
-                form.append($('<input>', {
-                    type: 'hidden',
-                    name: 'export_type',
-                    value: exportType
-                }));
-                
-                form.append($('<input>', {
-                    type: 'hidden',
-                    name: 'nonce',
-                    value: '$nonce'
-                }));
-                
-                $('body').append(form);
-                form.submit();
-                form.remove();
-                
-                // Reset button after delay
-                setTimeout(function() {
-                    button.text(originalText).prop('disabled', false);
-                }, 2000);
-            });
-            
-            // Cleanup button
-            $('.cfk-cleanup-btn').click(function() {
-                if (confirm('" . esc_js(__('Are you sure you want to clean up abandoned selections?', 'cfk-sponsorship')) . "')) {
-                    const button = $(this);
-                    const originalText = button.text();
-                    
-                    button.text('" . esc_js(__('Cleaning...', 'cfk-sponsorship')) . "').prop('disabled', true);
-                    
-                    $.ajax({
-                        url: ajaxurl,
-                        type: 'POST',
-                        data: {
-                            action: 'cfk_cleanup_abandoned',
-                            nonce: '$nonce'
-                        },
-                        success: function(response) {
-                            button.text(originalText).prop('disabled', false);
-                            if (response.success) {
-                                alert('" . esc_js(__('Cleanup completed successfully.', 'cfk-sponsorship')) . "');
-                                location.reload();
-                            } else {
-                                alert(response.data);
-                            }
-                        },
-                        error: function() {
-                            button.text(originalText).prop('disabled', false);
-                            alert('" . esc_js(__('Network error. Please try again.', 'cfk-sponsorship')) . "');
-                        }
-                    });
-                }
-            });
-            
-            // Refresh stats button
-            $('.cfk-refresh-stats-btn').click(function() {
-                const button = $(this);
-                const originalText = button.text();
-                
-                button.text('" . esc_js(__('Refreshing...', 'cfk-sponsorship')) . "').prop('disabled', true);
-                
-                $.ajax({
-                    url: ajaxurl,
-                    type: 'POST',
-                    data: {
-                        action: 'cfk_dashboard_stats',
-                        nonce: '$nonce'
-                    },
-                    success: function(response) {
-                        button.text(originalText).prop('disabled', false);
-                        if (response.success) {
-                            alert('" . esc_js(__('Statistics refreshed successfully.', 'cfk-sponsorship')) . "');
-                            location.reload();
-                        } else {
-                            alert(response.data);
-                        }
-                    },
-                    error: function() {
-                        button.text(originalText).prop('disabled', false);
-                        alert('" . esc_js(__('Network error. Please try again.', 'cfk-sponsorship')) . "');
-                    }
-                });
-            });
-        });
-        ";
-    }
 }
 
 ?>
