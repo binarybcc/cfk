@@ -17,7 +17,7 @@ trait CFK_Dashboard_Ajax_Trait {
         }
 
         $status = isset($_POST['status']) ? intval($_POST['status']) : 0;
-        $result = update_option('cfk_sponsorships_open', $status);
+        $result = CFK_Config_Manager::set('sponsorships_open', (bool) $status);
         
         if ($result) {
             $message = $status ? 

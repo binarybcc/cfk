@@ -148,8 +148,8 @@ trait CFK_Dashboard_Stats_Trait {
             'database_status' => 'healthy',
             'email_system' => $this->check_email_system(),
             'file_permissions' => $this->check_file_permissions(),
-            'sponsorships_open' => ChristmasForKidsPlugin::get_option('cfk_sponsorships_open', false),
-            'last_backup' => ChristmasForKidsPlugin::get_option('cfk_last_backup', 'Never')
+            'sponsorships_open' => CFK_Config_Manager::get('sponsorships_open'),
+            'last_backup' => get_option('cfk_last_backup', 'Never')
         );
     }
     

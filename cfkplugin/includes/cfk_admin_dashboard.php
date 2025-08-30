@@ -273,7 +273,7 @@ class CFK_Admin_Dashboard {
      * Render quick actions bar
      */
     private function render_quick_actions() {
-        $sponsorships_open = ChristmasForKidsPlugin::get_option('cfk_sponsorships_open', false);
+        $sponsorships_open = CFK_Config_Manager::get('sponsorships_open');
         
         ?>
         <div class="cfk-quick-actions">

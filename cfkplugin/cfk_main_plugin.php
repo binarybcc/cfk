@@ -63,6 +63,8 @@ readonly class CFK_Config {
         public string $version = CFK_PLUGIN_VERSION,
         public string $text_domain = 'cfk-sponsorship',
         public array $required_files = [
+            'includes/cfk_config_manager.php',
+            'includes/cfk_settings_helper.php',
             'includes/cfk_children_manager.php',
             'includes/cfk_csv_importer.php', 
             'includes/cfk_sponsorship_manager.php',
@@ -382,7 +384,7 @@ class ChristmasForKidsPlugin {
     public function activate(): void {
         try {
             $this->create_database_tables();
-            $this->set_default_options();
+            CFK_Config_Manager::initialize_defaults();
             wp_clear_scheduled_hook('cfk_cleanup_abandoned_selections');
             flush_rewrite_rules();
             update_option('cfk_plugin_activated', time());
@@ -453,28 +455,30 @@ class ChristmasForKidsPlugin {
         }
     }
     
-    private function set_default_options(): void {
-        $defaults = [
-            'cfk_admin_email' => get_option('admin_email'),
-            'cfk_selection_timeout' => 2,
-            'cfk_email_from_name' => 'Christmas for Kids',
-            'cfk_email_from_email' => 'noreply@' . parse_url(home_url(), PHP_URL_HOST),
-            'cfk_sponsorships_open' => false,
-            'cfk_plugin_version' => $this->config->version
-        ];
-        
-        foreach ($defaults as $option => $value) {
-            if (get_option($option) === false) {
-                update_option($option, $value);
-            }
-        }
-    }
     
     public static function get_option(string $option_name, mixed $default = false): mixed {
+        // Support both old cfk_ prefixed keys and new clean keys
+        $clean_key = str_replace('cfk_', '', $option_name);
+        
+        // If it's a known config key, use the config manager
+        if (array_key_exists($clean_key, CFK_Config_Manager::get_schema())) {
+            return CFK_Config_Manager::get($clean_key, $default);
+        }
+        
+        // Fall back to direct WordPress option for unknown keys
         return get_option($option_name, $default);
     }
     
     public static function update_option(string $option_name, mixed $value): bool {
+        // Support both old cfk_ prefixed keys and new clean keys
+        $clean_key = str_replace('cfk_', '', $option_name);
+        
+        // If it's a known config key, use the config manager
+        if (array_key_exists($clean_key, CFK_Config_Manager::get_schema())) {
+            return CFK_Config_Manager::set($clean_key, $value);
+        }
+        
+        // Fall back to direct WordPress option for unknown keys
         return update_option($option_name, $value);
     }
     
