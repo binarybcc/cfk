@@ -109,7 +109,7 @@ readonly class CFK_SelectedChild {
     }
 }
 
-readonly class CFK_SponsorshipStats {
+readonly class CFK_SponsorStats {
     public function __construct(
         public int $total_sponsors,
         public int $children_sponsored,
@@ -166,7 +166,6 @@ class CFK_Sponsorship_Manager {
         }
         
         // Admin hooks
-        add_action('admin_menu', $this->add_admin_menus(...));
         add_action('admin_post_cfk_resend_sponsor_email', $this->resend_sponsor_email(...));
         add_action('admin_post_cfk_cancel_sponsorship', $this->cancel_sponsorship(...));
         add_action('admin_post_cfk_export_sponsorships', $this->export_sponsorships_csv(...));
@@ -487,16 +486,6 @@ class CFK_Sponsorship_Manager {
         return $thank_you_page ? get_permalink($thank_you_page->ID) : home_url('/');
     }
     
-    public function add_admin_menus(): void {
-        add_submenu_page(
-            'cfk-dashboard',
-            __('Sponsorships', 'cfk-sponsorship'),
-            __('Sponsorships', 'cfk-sponsorship'),
-            'manage_options',
-            'cfk-sponsorships',
-            $this->sponsorships_admin_page(...)
-        );
-    }
     
     public function display_sponsorships_page(): void {
         $this->sponsorships_admin_page();
@@ -535,7 +524,7 @@ class CFK_Sponsorship_Manager {
         <?php
     }
     
-    private function render_stats_grid(CFK_SponsorshipStats $stats): void {
+    private function render_stats_grid(CFK_SponsorStats $stats): void {
         ?>
         <div class="cfk-stats-grid">
             <div class="cfk-stat-card">
@@ -722,7 +711,7 @@ class CFK_Sponsorship_Manager {
         <?php
     }
     
-    private function get_sponsorship_stats(): CFK_SponsorshipStats {
+    private function get_sponsorship_stats(): CFK_SponsorStats {
         global $wpdb;
         
         $table_name = $wpdb->prefix . 'cfk_sponsorships';
@@ -745,7 +734,7 @@ class CFK_Sponsorship_Manager {
         $avg_children = $total_sponsors > 0 ? round($children_sponsored / $total_sponsors, 1) : 0.0;
         $total_value = $children_sponsored * $this->config->average_sponsorship_value;
         
-        return new CFK_SponsorshipStats(
+        return new CFK_SponsorStats(
             total_sponsors: $total_sponsors,
             children_sponsored: $children_sponsored,
             pending_selections: $pending_selections,

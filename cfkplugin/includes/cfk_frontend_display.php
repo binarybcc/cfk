@@ -554,4 +554,28 @@ class CFK_Frontend_Display {
             <div class="cfk-stats-display">
                 <div class="cfk-stat">
                     <span class="cfk-stat-number"><?php echo $stats['sponsored_children']; ?></span>
-                    <span class="cfk-stat-label"><?php _e('Children Sponsored', 'cfk-sponsorship'); ?
+                    <span class="cfk-stat-label"><?php _e('Children Sponsored', 'cfk-sponsorship'); ?></span>
+                </div>
+                <div class="cfk-stat">
+                    <span class="cfk-stat-number"><?php echo $stats['available_children']; ?></span>
+                    <span class="cfk-stat-label"><?php _e('Still Available', 'cfk-sponsorship'); ?></span>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+    
+    private function get_sponsorships_closed_message(): string {
+        ob_start();
+        ?>
+        <div class="cfk-status-closed">
+            <div class="cfk-status-icon">🎁</div>
+            <h3><?php _e('Sponsorships Are Currently Closed', 'cfk-sponsorship'); ?></h3>
+            <p><?php _e('Thank you for your interest! Sponsorships typically open in early November. Please check back next year.', 'cfk-sponsorship'); ?></p>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+}

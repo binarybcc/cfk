@@ -12,9 +12,9 @@ if (!defined('ABSPATH')) {
 }
 
 // Include trait files for modular architecture
-require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_ajax_trait.php';
-require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_export_trait.php';
-require_once CFK_PLUGIN_DIR . 'includes/traits/cfk_dashboard_stats_trait.php';
+require_once CFK_PLUGIN_PATH . 'includes/traits/cfk_dashboard_ajax_trait.php';
+require_once CFK_PLUGIN_PATH . 'includes/traits/cfk_dashboard_export_trait.php';
+require_once CFK_PLUGIN_PATH . 'includes/traits/cfk_dashboard_stats_trait.php';
 
 class CFK_Admin_Dashboard {
     use CFK_Dashboard_Ajax_Trait;

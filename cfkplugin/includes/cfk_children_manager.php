@@ -392,10 +392,10 @@ class CFK_Children_Manager {
         
         match($column_type) {
             CFK_ColumnType::PHOTO => $this->render_photo_column($post_id),
-            CFK_ColumnType::CHILD_ID => echo esc_html(get_post_meta($post_id, '_child_id', true)),
+            CFK_ColumnType::CHILD_ID => $this->render_child_id_column($post_id),
             CFK_ColumnType::AGE_GENDER => $this->render_age_gender_column($post_id),
-            CFK_ColumnType::FAMILY_ID => echo esc_html(get_post_meta($post_id, '_child_family_id', true)),
-            CFK_ColumnType::AGE_RANGE => echo esc_html(get_post_meta($post_id, '_child_age_range', true)),
+            CFK_ColumnType::FAMILY_ID => $this->render_family_id_column($post_id),
+            CFK_ColumnType::AGE_RANGE => $this->render_age_range_column($post_id),
             CFK_ColumnType::SPONSORED => $this->render_sponsored_column($post_id),
             default => null
         };
@@ -418,13 +418,26 @@ class CFK_Children_Manager {
         echo esc_html("$age / $gender");
     }
     
+    private function render_child_id_column(int $post_id): void {
+        echo esc_html(get_post_meta($post_id, '_child_id', true));
+    }
+    
+    private function render_family_id_column(int $post_id): void {
+        echo esc_html(get_post_meta($post_id, '_child_family_id', true));
+    }
+    
+    private function render_age_range_column(int $post_id): void {
+        echo esc_html(get_post_meta($post_id, '_child_age_range', true));
+    }
+    
     private function render_sponsored_column(int $post_id): void {
         $sponsored = get_post_meta($post_id, '_child_sponsored', true);
         
-        match($sponsored) {
-            '1' => echo '<span style="color: #46b450; font-weight: bold;">✓ ' . __('Yes', 'cfk-sponsorship') . '</span>',
-            default => echo '<span style="color: #dc3232;">✗ ' . __('Available', 'cfk-sponsorship') . '</span>'
-        };
+        if ($sponsored === '1') {
+            echo '<span style="color: #46b450; font-weight: bold;">✓ ' . __('Yes', 'cfk-sponsorship') . '</span>';
+        } else {
+            echo '<span style="color: #dc3232;">✗ ' . __('Available', 'cfk-sponsorship') . '</span>';
+        }
     }
     
     public function sortable_child_columns(array $columns): array {
