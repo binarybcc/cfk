@@ -852,11 +852,126 @@ jQuery(document).ready(function($) {
 
 <?php
 
+/**
+ * Helper function to get all current settings with safe defaults
+ */
+function cfk_get_all_settings() {
+    // Check if plugin class exists and has the get_option method
+    if (class_exists('ChristmasForKidsPlugin')) {
+        $get_option_func = array('ChristmasForKidsPlugin', 'get_option');
+    } else {
+        $get_option_func = 'get_option';
+    }
+    
+    return array(
+        // General Settings
+        'cfk_sponsorships_open' => call_user_func($get_option_func, 'cfk_sponsorships_open', false),
+        'cfk_deadline_date' => call_user_func($get_option_func, 'cfk_deadline_date', ''),
+        'cfk_selection_timeout' => call_user_func($get_option_func, 'cfk_selection_timeout', 2),
+        'cfk_drop_off_locations' => call_user_func($get_option_func, 'cfk_drop_off_locations', array()),
+        'cfk_average_sponsorship_value' => call_user_func($get_option_func, 'cfk_average_sponsorship_value', 100),
+        
+        // Email Settings
+        'cfk_email_from_name' => call_user_func($get_option_func, 'cfk_email_from_name', 'Christmas for Kids'),
+        'cfk_email_from_email' => call_user_func($get_option_func, 'cfk_email_from_email', 'noreply@' . parse_url(home_url(), PHP_URL_HOST)),
+        'cfk_admin_email' => call_user_func($get_option_func, 'cfk_admin_email', get_option('admin_email')),
+        'cfk_email_footer_text' => call_user_func($get_option_func, 'cfk_email_footer_text', ''),
+        'cfk_additional_instructions' => call_user_func($get_option_func, 'cfk_additional_instructions', ''),
+        
+        // Frontend Settings
+        'cfk_children_per_page' => call_user_func($get_option_func, 'cfk_children_per_page', 12),
+        'cfk_default_columns' => call_user_func($get_option_func, 'cfk_default_columns', 3),
+        'cfk_show_filters' => call_user_func($get_option_func, 'cfk_show_filters', true),
+        'cfk_show_clothing_info' => call_user_func($get_option_func, 'cfk_show_clothing_info', true),
+        'cfk_require_phone' => call_user_func($get_option_func, 'cfk_require_phone', false),
+        'cfk_require_address' => call_user_func($get_option_func, 'cfk_require_address', false),
+        'cfk_closed_message' => call_user_func($get_option_func, 'cfk_closed_message', ''),
+        'cfk_thank_you_message' => call_user_func($get_option_func, 'cfk_thank_you_message', ''),
+        
+        // Advanced Settings
+        'cfk_enable_logging' => call_user_func($get_option_func, 'cfk_enable_logging', false),
+        'cfk_delete_data_on_uninstall' => call_user_func($get_option_func, 'cfk_delete_data_on_uninstall', false),
+        'cfk_allow_duplicate_emails' => call_user_func($get_option_func, 'cfk_allow_duplicate_emails', true),
+        'cfk_max_children_per_sponsor' => call_user_func($get_option_func, 'cfk_max_children_per_sponsor', 0),
+        'cfk_custom_css' => call_user_func($get_option_func, 'cfk_custom_css', '')
+    );
+}
 
 /**
  * Helper function to save all settings with proper validation
  */
-// Duplicate function removed - using cfk_settings_helper.php version
+function cfk_save_settings($post_data) {
+    try {
+        // Check if plugin class exists and has the update_option method
+        if (class_exists('ChristmasForKidsPlugin')) {
+            $update_option_func = array('ChristmasForKidsPlugin', 'update_option');
+        } else {
+            $update_option_func = 'update_option';
+        }
+        
+        // General Settings
+        call_user_func($update_option_func, 'cfk_sponsorships_open', !empty($post_data['cfk_sponsorships_open']));
+        call_user_func($update_option_func, 'cfk_deadline_date', sanitize_text_field($post_data['cfk_deadline_date'] ?? ''));
+        call_user_func($update_option_func, 'cfk_selection_timeout', max(1, min(24, intval($post_data['cfk_selection_timeout'] ?? 2))));
+        
+        // Process drop-off locations - handle both string and array input
+        $locations_input = $post_data['cfk_drop_off_locations'] ?? '';
+        if (is_string($locations_input)) {
+            $locations = array_filter(array_map('trim', explode("\n", $locations_input)));
+        } else {
+            $locations = is_array($locations_input) ? $locations_input : array();
+        }
+        call_user_func($update_option_func, 'cfk_drop_off_locations', $locations);
+        
+        call_user_func($update_option_func, 'cfk_average_sponsorship_value', max(0, floatval($post_data['cfk_average_sponsorship_value'] ?? 100)));
+        
+        // Email Settings - with validation
+        $from_name = sanitize_text_field($post_data['cfk_email_from_name'] ?? 'Christmas for Kids');
+        $from_email = sanitize_email($post_data['cfk_email_from_email'] ?? '');
+        $admin_email = sanitize_email($post_data['cfk_admin_email'] ?? get_option('admin_email'));
+        
+        if (empty($from_name)) $from_name = 'Christmas for Kids';
+        if (empty($from_email) || !is_email($from_email)) {
+            $from_email = 'noreply@' . parse_url(home_url(), PHP_URL_HOST);
+        }
+        if (empty($admin_email) || !is_email($admin_email)) {
+            $admin_email = get_option('admin_email');
+        }
+        
+        call_user_func($update_option_func, 'cfk_email_from_name', $from_name);
+        call_user_func($update_option_func, 'cfk_email_from_email', $from_email);
+        call_user_func($update_option_func, 'cfk_admin_email', $admin_email);
+        call_user_func($update_option_func, 'cfk_email_footer_text', sanitize_textarea_field($post_data['cfk_email_footer_text'] ?? ''));
+        call_user_func($update_option_func, 'cfk_additional_instructions', sanitize_textarea_field($post_data['cfk_additional_instructions'] ?? ''));
+        
+        // Frontend Settings
+        call_user_func($update_option_func, 'cfk_children_per_page', max(1, min(50, intval($post_data['cfk_children_per_page'] ?? 12))));
+        call_user_func($update_option_func, 'cfk_default_columns', max(2, min(4, intval($post_data['cfk_default_columns'] ?? 3))));
+        call_user_func($update_option_func, 'cfk_show_filters', !empty($post_data['cfk_show_filters']));
+        call_user_func($update_option_func, 'cfk_show_clothing_info', !empty($post_data['cfk_show_clothing_info']));
+        call_user_func($update_option_func, 'cfk_require_phone', !empty($post_data['cfk_require_phone']));
+        call_user_func($update_option_func, 'cfk_require_address', !empty($post_data['cfk_require_address']));
+        call_user_func($update_option_func, 'cfk_closed_message', sanitize_textarea_field($post_data['cfk_closed_message'] ?? ''));
+        call_user_func($update_option_func, 'cfk_thank_you_message', sanitize_textarea_field($post_data['cfk_thank_you_message'] ?? ''));
+        
+        // Advanced Settings
+        call_user_func($update_option_func, 'cfk_enable_logging', !empty($post_data['cfk_enable_logging']));
+        call_user_func($update_option_func, 'cfk_delete_data_on_uninstall', !empty($post_data['cfk_delete_data_on_uninstall']));
+        call_user_func($update_option_func, 'cfk_allow_duplicate_emails', !empty($post_data['cfk_allow_duplicate_emails']));
+        call_user_func($update_option_func, 'cfk_max_children_per_sponsor', max(0, min(50, intval($post_data['cfk_max_children_per_sponsor'] ?? 0))));
+        
+        // Custom CSS - strip potentially harmful content but preserve CSS
+        $custom_css = $post_data['cfk_custom_css'] ?? '';
+        $custom_css = wp_kses($custom_css, array()); // Remove all HTML tags
+        call_user_func($update_option_func, 'cfk_custom_css', $custom_css);
+        
+        return true;
+        
+    } catch (Exception $e) {
+        error_log('CFK Settings Save Error: ' . $e->getMessage());
+        return false;
+    }
+}
 
 /**
  * AJAX handler for test email functionality

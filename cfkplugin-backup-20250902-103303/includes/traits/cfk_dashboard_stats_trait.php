@@ -7,31 +7,15 @@
 trait CFK_Dashboard_Stats_Trait {
     
     /**
-     * Get dashboard statistics for admin interface
-     */
-    public function get_dashboard_stats() {
-        return $this->get_comprehensive_stats();
-    }
-    
-    /**
      * Get comprehensive dashboard statistics
      */
     private function get_comprehensive_stats() {
-        $sponsored_children = $this->get_sponsored_count();
-        $available_children = $this->get_available_count();
-        $total_children = $sponsored_children + $available_children;
-        $total_sponsors = $this->get_sponsors_count();
-        $sponsorship_percentage = $total_children > 0 ? round(($sponsored_children / $total_children) * 100, 1) : 0;
-        
         return array(
-            'sponsored_children' => $sponsored_children,
-            'available_children' => $available_children,
-            'total_children' => $total_children,
+            'sponsored_children' => $this->get_sponsored_count(),
+            'available_children' => $this->get_available_count(),
             'total_families' => $this->get_families_count(),
-            'active_sponsors' => $total_sponsors,
-            'total_sponsors' => $total_sponsors, // Alias for compatibility
+            'active_sponsors' => $this->get_sponsors_count(),
             'emails_sent' => $this->get_emails_sent_count(),
-            'sponsorship_percentage' => $sponsorship_percentage,
             'age_breakdown' => $this->get_age_breakdown(),
             'recent_activity' => $this->get_recent_activity(),
             'system_status' => $this->get_system_status()

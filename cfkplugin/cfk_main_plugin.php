@@ -114,7 +114,10 @@ class ChristmasForKidsPlugin {
         add_action('plugins_loaded', [$this, 'init'], 10);
         register_activation_hook(__FILE__, [$this, 'activate']);
         register_deactivation_hook(__FILE__, [$this, 'deactivate']);
+        
+        // Also check for missing tables on init
         add_action('init', [$this, 'check_plugin_health'], 20);
+        add_action('admin_init', [$this, 'maybe_create_missing_tables'], 5);
         
         $this->hooks_registered = true;
     }
@@ -570,14 +573,18 @@ class ChristmasForKidsPlugin {
     }
     
     public function activate(): void {
+        error_log("CFK: Plugin activation started");
         try {
             // Load required files for activation
             $config_file = $this->config->plugin_path . 'includes/cfk_config_manager.php';
             if (file_exists($config_file)) {
                 require_once $config_file;
+                error_log("CFK: Config manager loaded");
             }
             
+            error_log("CFK: Starting database table creation");
             $this->create_database_tables();
+            error_log("CFK: Database table creation completed");
             
             // Only initialize defaults if config manager is available
             if (class_exists('CFK_Config_Manager')) {
@@ -596,158 +603,145 @@ class ChristmasForKidsPlugin {
     }
     
     public function deactivate(): void {
-        wp_clear_scheduled_hook('cfk_cleanup_abandoned_selections');
-        flush_rewrite_rules();
-        update_option('cfk_plugin_deactivated', time());
+        try {
+            wp_clear_scheduled_hook('cfk_cleanup_abandoned_selections');
+            flush_rewrite_rules();
+            
+            // Clear any transients
+            delete_transient('cfk_stats_cache');
+            delete_transient('cfk_activity_cache');
+            
+            // Log deactivation
+            update_option('cfk_plugin_deactivated', time());
+            error_log('CFK: Plugin deactivated successfully');
+            
+        } catch (Exception $e) {
+            error_log('CFK: Error during deactivation - ' . $e->getMessage());
+            // Don't throw exception during deactivation to prevent critical error
+        }
     }
     
     private function create_database_tables(): void {
         global $wpdb;
         
+        error_log("CFK: Starting database table creation - WordPress " . get_bloginfo('version') . ", PHP " . PHP_VERSION);
+        
+        // Test database connection first
+        $db_test = $wpdb->get_var("SELECT 1");
+        if ($db_test !== '1') {
+            throw new Exception("Database connection test failed");
+        }
+        error_log("CFK: ✓ Database connection verified");
+        
         $charset_collate = $wpdb->get_charset_collate();
+        $table_sponsorships = $wpdb->prefix . 'cfk_sponsorships';
+        $table_email_log = $wpdb->prefix . 'cfk_email_log';
         
-        // WordPress 6.8.2 compatible SQL - proper formatting is critical for dbDelta()
-        // Each line must have exact spacing, data types must be precise
-        $sql_sponsorships = "CREATE TABLE {$wpdb->prefix}cfk_sponsorships (
-  id mediumint(9) NOT NULL AUTO_INCREMENT,
-  session_id varchar(100) NOT NULL,
-  child_id varchar(20) NOT NULL,
-  sponsor_name varchar(100) NOT NULL,
-  sponsor_email varchar(100) NOT NULL,
-  sponsor_phone varchar(20) NOT NULL,
-  sponsor_address text NOT NULL,
-  sponsor_notes text NOT NULL,
-  status varchar(20) NOT NULL DEFAULT 'selected',
-  selected_time datetime NOT NULL,
-  confirmed_time datetime DEFAULT NULL,
-  created_at datetime NOT NULL,
-  updated_at datetime NOT NULL,
-  PRIMARY KEY  (id),
-  KEY session_id (session_id),
-  KEY child_id (child_id),
-  KEY status (status),
-  KEY selected_time (selected_time)
-) $charset_collate;";
+        // Use direct SQL - more reliable than dbDelta
+        $sql_sponsorships = "CREATE TABLE IF NOT EXISTS `{$table_sponsorships}` (
+            `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+            `session_id` varchar(100) NOT NULL,
+            `child_id` varchar(20) NOT NULL,
+            `sponsor_name` varchar(100) DEFAULT '',
+            `sponsor_email` varchar(100) DEFAULT '',
+            `sponsor_phone` varchar(20) DEFAULT '',
+            `sponsor_address` text DEFAULT '',
+            `sponsor_notes` text DEFAULT '',
+            `status` varchar(20) DEFAULT 'selected',
+            `selected_time` datetime DEFAULT CURRENT_TIMESTAMP,
+            `confirmed_time` datetime DEFAULT NULL,
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            KEY `session_id` (`session_id`),
+            KEY `child_id` (`child_id`),
+            KEY `status` (`status`),
+            KEY `selected_time` (`selected_time`)
+        ) {$charset_collate};";
         
-        $sql_email_log = "CREATE TABLE {$wpdb->prefix}cfk_email_log (
-  id mediumint(9) NOT NULL AUTO_INCREMENT,
-  session_id varchar(100) NOT NULL,
-  email_type varchar(20) NOT NULL,
-  recipient_email varchar(100) NOT NULL,
-  subject varchar(255) NOT NULL,
-  message longtext NOT NULL,
-  sent_time datetime NOT NULL,
-  delivery_status varchar(20) NOT NULL DEFAULT 'sent',
-  created_at datetime NOT NULL,
-  PRIMARY KEY  (id),
-  KEY session_id (session_id),
-  KEY email_type (email_type),
-  KEY delivery_status (delivery_status),
-  KEY sent_time (sent_time)
-) $charset_collate;";
+        $sql_email_log = "CREATE TABLE IF NOT EXISTS `{$table_email_log}` (
+            `id` mediumint(9) NOT NULL AUTO_INCREMENT,
+            `session_id` varchar(100) NOT NULL,
+            `email_type` varchar(20) NOT NULL,
+            `recipient_email` varchar(100) NOT NULL,
+            `subject` varchar(255) NOT NULL,
+            `message` longtext NOT NULL,
+            `sent_time` datetime DEFAULT CURRENT_TIMESTAMP,
+            `delivery_status` varchar(20) DEFAULT 'sent',
+            `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (`id`),
+            KEY `session_id` (`session_id`),
+            KEY `email_type` (`email_type`),
+            KEY `delivery_status` (`delivery_status`),
+            KEY `sent_time` (`sent_time`)
+        ) {$charset_collate};";
         
-        // Ensure upgrade functions are available
-        if (!function_exists('dbDelta')) {
-            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        // Execute SQL directly
+        $result1 = $wpdb->query($sql_sponsorships);
+        error_log("CFK: Sponsorships table result: " . ($result1 === false ? "FAILED - " . $wpdb->last_error : "SUCCESS"));
+        
+        $result2 = $wpdb->query($sql_email_log);
+        error_log("CFK: Email log table result: " . ($result2 === false ? "FAILED - " . $wpdb->last_error : "SUCCESS"));
+        
+        // Verify tables exist
+        $sponsorship_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_sponsorships));
+        $email_log_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_email_log));
+        
+        $tables_created = [];
+        if ($sponsorship_exists === $table_sponsorships) {
+            $tables_created[] = 'sponsorships';
+        }
+        if ($email_log_exists === $table_email_log) {
+            $tables_created[] = 'email_log';
         }
         
-        error_log("CFK: Starting database table creation...");
-        error_log("CFK: WordPress version: " . get_bloginfo('version'));
-        error_log("CFK: PHP version: " . PHP_VERSION);
-        error_log("CFK: Charset collate: " . $charset_collate);
-        
-        $tables_to_create = [
-            'cfk_sponsorships' => $sql_sponsorships,
-            'cfk_email_log' => $sql_email_log
-        ];
-        
-        $creation_results = [];
-        $verification_results = [];
-        
-        foreach ($tables_to_create as $table_name => $sql) {
-            $full_table_name = $wpdb->prefix . $table_name;
-            
-            try {
-                // Log the SQL being executed
-                error_log("CFK: Creating table $full_table_name with SQL: " . preg_replace('/\s+/', ' ', trim($sql)));
-                
-                // Execute dbDelta
-                $result = dbDelta($sql);
-                $creation_results[$table_name] = $result;
-                
-                // Log dbDelta results
-                if (is_array($result) && !empty($result)) {
-                    error_log("CFK: dbDelta result for $table_name: " . print_r($result, true));
-                } else {
-                    error_log("CFK: dbDelta returned empty result for $table_name");
-                }
-                
-                // Verify table exists
-                $table_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $full_table_name));
-                
-                if ($table_exists === $full_table_name) {
-                    // Get table structure to verify creation
-                    $columns = $wpdb->get_results("DESCRIBE $full_table_name");
-                    $column_count = count($columns);
-                    
-                    $verification_results[$table_name] = [
-                        'exists' => true,
-                        'columns' => $column_count,
-                        'structure' => array_column($columns, 'Field')
-                    ];
-                    
-                    error_log("CFK: Table $full_table_name created successfully with $column_count columns");
-                    error_log("CFK: Columns: " . implode(', ', array_column($columns, 'Field')));
-                } else {
-                    $verification_results[$table_name] = ['exists' => false];
-                    error_log("CFK: ERROR - Table $full_table_name was not created");
-                }
-                
-            } catch (Throwable $e) {
-                error_log("CFK: ERROR creating table $table_name: " . $e->getMessage());
-                error_log("CFK: Stack trace: " . $e->getTraceAsString());
-                $verification_results[$table_name] = [
-                    'exists' => false, 
-                    'error' => $e->getMessage()
-                ];
-            }
+        if (count($tables_created) < 2) {
+            throw new Exception("Database table creation failed. Created: " . implode(', ', $tables_created));
         }
         
-        // Final verification and comprehensive logging
-        $successfully_created = array_filter(
-            $verification_results, 
-            fn($result) => $result['exists'] ?? false
-        );
-        
-        $failed_tables = array_filter(
-            $verification_results,
-            fn($result) => !($result['exists'] ?? false)
-        );
-        
-        if (!empty($successfully_created)) {
-            error_log("CFK: Successfully created tables: " . implode(', ', array_keys($successfully_created)));
-        }
-        
-        if (!empty($failed_tables)) {
-            $error_message = "CFK: Failed to create tables: " . implode(', ', array_keys($failed_tables));
-            error_log($error_message);
-            
-            // Store failed table info for admin notice
-            update_option('cfk_table_creation_errors', $failed_tables);
-            
-            throw new RuntimeException($error_message);
-        } else {
-            // Clear any previous errors
-            delete_option('cfk_table_creation_errors');
-        }
-        
-        // Store creation timestamp and version for future upgrades
         update_option('cfk_db_version', CFK_PLUGIN_VERSION);
-        update_option('cfk_db_created_time', current_time('mysql'));
-        
-        error_log("CFK: Database table creation completed successfully");
+        delete_option('cfk_missing_tables');
+        error_log("CFK: ✓ Database tables created successfully: " . implode(', ', $tables_created));
     }
     
+    /**
+     * Check if database tables exist - for diagnostics
+     */
+    public function check_tables_exist(): array {
+        global $wpdb;
+        
+        $table_sponsorships = $wpdb->prefix . 'cfk_sponsorships';
+        $table_email_log = $wpdb->prefix . 'cfk_email_log';
+        
+        $sponsorship_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_sponsorships));
+        $email_log_exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_email_log));
+        
+        return [
+            'sponsorships' => $sponsorship_exists === $table_sponsorships,
+            'email_log' => $email_log_exists === $table_email_log,
+            'all_exist' => ($sponsorship_exists === $table_sponsorships) && ($email_log_exists === $table_email_log)
+        ];
+    }
+    
+    /**
+     * Check and create missing database tables if needed
+     */
+    public function maybe_create_missing_tables(): void {
+        if (!current_user_can('activate_plugins')) {
+            return;
+        }
+        
+        $tables_status = $this->check_tables_exist();
+        if (!$tables_status['all_exist']) {
+            error_log("CFK: Missing tables detected, attempting to create them...");
+            try {
+                $this->create_database_tables();
+                update_option('cfk_tables_created_manually', time());
+            } catch (Exception $e) {
+                error_log("CFK: Failed to create missing tables: " . $e->getMessage());
+            }
+        }
+    }    
     
     public static function get_option(string $option_name, mixed $default = false): mixed {
         // Support both old cfk_ prefixed keys and new clean keys

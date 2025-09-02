@@ -446,9 +446,9 @@ function cfk_get_plugin_status() {
     
     // Get basic statistics
     $stats = CFK_Children_Manager::get_sponsorship_stats();
-    $status['total_children'] = $stats->total_children;
-    $status['sponsored_children'] = $stats->sponsored_children;
-    $status['available_children'] = $stats->available_children;
+    $status['total_children'] = $stats['total_children'];
+    $status['sponsored_children'] = $stats['sponsored_children'];
+    $status['available_children'] = $stats['available_children'];
     
     return $status;
 }
@@ -678,15 +678,11 @@ function cfk_cleanup_on_deactivation() {
  * Cleanup function for plugin uninstallation
  */
 function cfk_cleanup_on_uninstall() {
-    try {
-        // Use direct WordPress get_option since plugin class may not be available during uninstall
-        if (!get_option('cfk_delete_data_on_uninstall', false)) {
-            error_log('CFK: Uninstall - keeping data as requested');
-            return; // User chose to keep data
-        }
-        
-        error_log('CFK: Starting uninstall cleanup');
-        global $wpdb;
+    if (!ChristmasForKidsPlugin::get_option('cfk_delete_data_on_uninstall', false)) {
+        return; // User chose to keep data
+    }
+    
+    global $wpdb;
     
     // Delete all children posts
     $children = get_posts(array(
@@ -719,16 +715,11 @@ function cfk_cleanup_on_uninstall() {
         delete_option($option);
     }
     
-        // Clear any remaining transients
-        delete_transient('cfk_stats_cache');
-        delete_transient('cfk_activity_cache');
-        
-        error_log('CFK: Uninstall cleanup completed successfully');
-        
-    } catch (Exception $e) {
-        error_log('CFK: Error during uninstall - ' . $e->getMessage());
-        // Don't throw exception during uninstall to prevent critical error
-    }
+    // Clear any remaining transients
+    delete_transient('cfk_stats_cache');
+    delete_transient('cfk_activity_cache');
+    
+    cfk_log_activity('Plugin uninstalled - all data deleted', 'info');
 }
 
 /**
@@ -788,6 +779,14 @@ function cfk_admin_notices() {
     }
 }
 
+/**
+ * Register activation hook
+ */
+register_activation_hook(CFK_PLUGIN_BASENAME, 'cfk_cleanup_on_deactivation');
 
+/**
+ * Register uninstall hook
+ */
+register_uninstall_hook(CFK_PLUGIN_BASENAME, 'cfk_cleanup_on_uninstall');
 
 ?>

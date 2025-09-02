@@ -553,11 +553,11 @@ class CFK_Frontend_Display {
             <?php if ($atts['show_stats'] === 'yes'): ?>
             <div class="cfk-stats-display">
                 <div class="cfk-stat">
-                    <span class="cfk-stat-number"><?php echo $stats->sponsored_children; ?></span>
+                    <span class="cfk-stat-number"><?php echo $stats['sponsored_children']; ?></span>
                     <span class="cfk-stat-label"><?php _e('Children Sponsored', 'cfk-sponsorship'); ?></span>
                 </div>
                 <div class="cfk-stat">
-                    <span class="cfk-stat-number"><?php echo $stats->available_children; ?></span>
+                    <span class="cfk-stat-number"><?php echo $stats['available_children']; ?></span>
                     <span class="cfk-stat-label"><?php _e('Still Available', 'cfk-sponsorship'); ?></span>
                 </div>
             </div>
@@ -577,17 +577,5 @@ class CFK_Frontend_Display {
         </div>
         <?php
         return ob_get_clean();
-    }
-    
-    public function add_frontend_javascript(): void {
-        // Only add JavaScript on pages that might have the shortcode
-        if (!is_admin()) {
-            ?>
-            <script type="text/javascript">
-            // Frontend JavaScript for CFK functionality
-            console.log('CFK Frontend JavaScript loaded');
-            </script>
-            <?php
-        }
     }
 }
