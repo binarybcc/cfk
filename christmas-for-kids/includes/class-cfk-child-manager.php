@@ -28,6 +28,37 @@ class CFK_Child_Manager {
      * @var array<string, array<string, mixed>>
      */
     private const META_FIELDS = [
+        'family_id' => [
+            'type' => 'text',
+            'label' => 'Family ID (e.g., 123A)',
+            'required' => true,
+            'pattern' => '[0-9]{1,4}[A-Z]',
+            'maxlength' => 10,
+            'placeholder' => 'e.g., 123A'
+        ],
+        'family_number' => [
+            'type' => 'text',
+            'label' => 'Family Number (e.g., 123)',
+            'required' => true,
+            'pattern' => '[0-9]{1,4}',
+            'maxlength' => 5,
+            'placeholder' => 'e.g., 123'
+        ],
+        'child_letter' => [
+            'type' => 'text',
+            'label' => 'Child Letter (e.g., A)',
+            'required' => true,
+            'pattern' => '[A-Z]',
+            'maxlength' => 2,
+            'placeholder' => 'e.g., A'
+        ],
+        'family_name' => [
+            'type' => 'text',
+            'label' => 'Family Name (e.g., The Doe Family)',
+            'required' => false,
+            'maxlength' => 255,
+            'placeholder' => 'e.g., The Doe Family'
+        ],
         'age' => [
             'type' => 'number',
             'label' => 'Age',
@@ -425,5 +456,182 @@ class CFK_Child_Manager {
      */
     public static function get_post_type(): string {
         return self::POST_TYPE;
+    }
+    
+    /**
+     * Get all siblings for a given family number
+     * 
+     * @since 1.2.0
+     * @param string $family_number Family number (e.g., "123")
+     * @return array<WP_Post> Sibling posts
+     */
+    public function get_family_siblings(string $family_number): array {
+        if (empty($family_number)) {
+            return [];
+        }
+        
+        $args = [
+            'post_type' => self::POST_TYPE,
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [
+                [
+                    'key' => 'cfk_child_family_number',
+                    'value' => $family_number,
+                    'compare' => '='
+                ]
+            ],
+            'orderby' => 'meta_value',
+            'meta_key' => 'cfk_child_child_letter',
+            'order' => 'ASC'
+        ];
+        
+        return get_posts($args);
+    }
+    
+    /**
+     * Get family statistics for a given family number
+     * 
+     * @since 1.2.0
+     * @param string $family_number Family number
+     * @return array<string, mixed> Family statistics
+     */
+    public function get_family_stats(string $family_number): array {
+        $siblings = $this->get_family_siblings($family_number);
+        $total_children = count($siblings);
+        $sponsored_count = 0;
+        $available_count = 0;
+        
+        foreach ($siblings as $child) {
+            if ($this->is_child_sponsored($child->ID)) {
+                $sponsored_count++;
+            } else {
+                $available_count++;
+            }
+        }
+        
+        return [
+            'family_number' => $family_number,
+            'total_children' => $total_children,
+            'sponsored_count' => $sponsored_count,
+            'available_count' => $available_count,
+            'completion_percentage' => $total_children > 0 ? 
+                round(($sponsored_count / $total_children) * 100, 1) : 0,
+            'children' => $siblings
+        ];
+    }
+    
+    /**
+     * Parse family ID into components
+     * 
+     * @since 1.2.0
+     * @param string $family_id Family ID (e.g., "123A")
+     * @return array<string, string> Family components
+     */
+    public static function parse_family_id(string $family_id): array {
+        $matches = [];
+        if (preg_match('/^(\d{1,4})([A-Z])$/', $family_id, $matches)) {
+            return [
+                'family_number' => $matches[1],
+                'child_letter' => $matches[2]
+            ];
+        }
+        
+        return [
+            'family_number' => '',
+            'child_letter' => ''
+        ];
+    }
+    
+    /**
+     * Validate family ID format
+     * 
+     * @since 1.2.0
+     * @param string $family_id Family ID to validate
+     * @return bool True if valid format
+     */
+    public static function validate_family_id(string $family_id): bool {
+        return (bool) preg_match('/^[0-9]{1,4}[A-Z]$/', $family_id);
+    }
+    
+    /**
+     * Generate next available child letter for a family
+     * 
+     * @since 1.2.0
+     * @param string $family_number Family number
+     * @return string Next available letter
+     */
+    public function get_next_child_letter(string $family_number): string {
+        $siblings = $this->get_family_siblings($family_number);
+        $used_letters = [];
+        
+        foreach ($siblings as $child) {
+            $child_letter = get_post_meta($child->ID, 'cfk_child_child_letter', true);
+            if (!empty($child_letter)) {
+                $used_letters[] = $child_letter;
+            }
+        }
+        
+        // Find first available letter starting from A
+        $letters = range('A', 'Z');
+        foreach ($letters as $letter) {
+            if (!in_array($letter, $used_letters)) {
+                return $letter;
+            }
+        }
+        
+        // Fallback if somehow all 26 letters are used
+        return 'Z';
+    }
+    
+    /**
+     * Get children by family ID search (supports partial matches)
+     * 
+     * @since 1.2.0
+     * @param string $search_term Search term (family number, family ID, or name)
+     * @param int $limit Maximum results to return
+     * @return array<WP_Post> Matching children
+     */
+    public function search_children_by_family(string $search_term, int $limit = 10): array {
+        if (empty($search_term)) {
+            return [];
+        }
+        
+        $meta_query = ['relation' => 'OR'];
+        
+        // Search by family number
+        if (is_numeric($search_term)) {
+            $meta_query[] = [
+                'key' => 'cfk_child_family_number',
+                'value' => $search_term,
+                'compare' => '='
+            ];
+        }
+        
+        // Search by family ID
+        if (self::validate_family_id($search_term)) {
+            $meta_query[] = [
+                'key' => 'cfk_child_family_id',
+                'value' => $search_term,
+                'compare' => '='
+            ];
+        }
+        
+        // Search by family name
+        $meta_query[] = [
+            'key' => 'cfk_child_family_name',
+            'value' => $search_term,
+            'compare' => 'LIKE'
+        ];
+        
+        $args = [
+            'post_type' => self::POST_TYPE,
+            'post_status' => 'publish',
+            'posts_per_page' => $limit,
+            'meta_query' => $meta_query,
+            's' => $search_term // Also search post title and content
+        ];
+        
+        return get_posts($args);
     }
 }

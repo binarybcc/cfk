@@ -94,6 +94,9 @@ class CFK_Children_Manager {
             'child_age' => ['sanitize' => 'intval', 'required' => true],
             'child_gender' => ['sanitize' => 'sanitize_text_field', 'required' => true],
             'child_family_id' => ['sanitize' => 'sanitize_text_field', 'required' => false],
+            'child_family_number' => ['sanitize' => 'sanitize_text_field', 'required' => false],
+            'child_family_letter' => ['sanitize' => 'sanitize_text_field', 'required' => false],
+            'child_family_name' => ['sanitize' => 'sanitize_text_field', 'required' => false],
             'child_age_range' => ['sanitize' => 'sanitize_text_field', 'required' => true],
             'child_clothing_info' => ['sanitize' => 'sanitize_textarea_field', 'required' => false],
             'child_gift_requests' => ['sanitize' => 'sanitize_textarea_field', 'required' => false],
@@ -355,8 +358,24 @@ class CFK_Children_Manager {
             
             match($field) {
                 'child_sponsored' => $this->handle_checkbox_field($post_id, $field, $value),
+                'child_family_id' => $this->handle_family_id_field($post_id, $value),
                 default => $this->handle_regular_field($post_id, $field, $value, $config['sanitize'])
             };
+        }
+    }
+    
+    private function handle_family_id_field(int $post_id, string $family_id): void {
+        $sanitized_family_id = sanitize_text_field($family_id);
+        
+        if (!empty($sanitized_family_id)) {
+            // Parse and store family components
+            self::update_child_family_info($post_id, $sanitized_family_id);
+        } else {
+            // Clear family fields if family ID is empty
+            delete_post_meta($post_id, '_child_family_id');
+            delete_post_meta($post_id, '_child_family_number');
+            delete_post_meta($post_id, '_child_family_letter');
+            delete_post_meta($post_id, '_child_family_name');
         }
     }
     
@@ -1068,6 +1087,221 @@ class CFK_Children_Manager {
             'sponsored' => $stats->sponsored_children,
             'available' => $stats->available_children,
             'families' => $stats->total_families
+        ];
+    }
+    
+    /**
+     * Parse family ID into components (e.g., "123A" -> ['123', 'A'])
+     */
+    public static function parse_family_id(string $family_id): array {
+        if (empty($family_id)) {
+            return ['number' => '', 'letter' => ''];
+        }
+        
+        if (preg_match('/^(\d+)([A-Z])$/', trim($family_id), $matches)) {
+            return ['number' => $matches[1], 'letter' => $matches[2]];
+        }
+        
+        return ['number' => '', 'letter' => ''];
+    }
+    
+    /**
+     * Get all family members by family number
+     */
+    public static function get_family_members(string $family_number): array {
+        if (empty($family_number)) {
+            return [];
+        }
+        
+        $query_args = [
+            'post_type' => 'child',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [
+                [
+                    'key' => '_child_family_number',
+                    'value' => $family_number,
+                    'compare' => '='
+                ]
+            ],
+            'meta_key' => '_child_family_id',
+            'orderby' => 'meta_value',
+            'order' => 'ASC'
+        ];
+        
+        return get_posts($query_args);
+    }
+    
+    /**
+     * Get family completion status
+     */
+    public static function get_family_sponsorship_status(string $family_number): array {
+        $family_members = self::get_family_members($family_number);
+        
+        if (empty($family_members)) {
+            return ['total' => 0, 'sponsored' => 0, 'percentage' => 0];
+        }
+        
+        $sponsored_count = 0;
+        foreach ($family_members as $child) {
+            if (get_post_meta($child->ID, '_child_sponsored', true) === '1') {
+                $sponsored_count++;
+            }
+        }
+        
+        return [
+            'total' => count($family_members),
+            'sponsored' => $sponsored_count,
+            'percentage' => count($family_members) > 0 ? 
+                round(($sponsored_count / count($family_members)) * 100, 1) : 0
+        ];
+    }
+    
+    /**
+     * Search with family context
+     */
+    public static function search_families_and_children(string $search_term, array $options = []): array {
+        $results = ['families' => [], 'individual_children' => []];
+        
+        if (empty($search_term)) {
+            return $results;
+        }
+        
+        // Check if search term looks like a family ID (e.g., "123" or "123A")
+        if (preg_match('/^\d+[A-Z]?$/', trim($search_term))) {
+            $parsed = self::parse_family_id($search_term);
+            
+            if (!empty($parsed['number'])) {
+                // Search for family members
+                $family_members = self::get_family_members($parsed['number']);
+                
+                if (!empty($family_members)) {
+                    $family_details = [];
+                    foreach ($family_members as $child) {
+                        $details = self::get_child_details($child);
+                        if ($details) {
+                            $family_details[] = $details;
+                        }
+                    }
+                    
+                    if (!empty($family_details)) {
+                        $family_status = self::get_family_sponsorship_status($parsed['number']);
+                        $results['families'][] = [
+                            'family_number' => $parsed['number'],
+                            'family_name' => self::get_family_name($parsed['number']),
+                            'members' => $family_details,
+                            'status' => $family_status
+                        ];
+                    }
+                }
+            }
+        }
+        
+        // Regular search in names and meta fields
+        $query = new CFK_ChildQuery(
+            per_page: $options['per_page'] ?? 12,
+            search_term: $search_term
+        );
+        
+        $children = self::search_children($search_term, $query);
+        foreach ($children as $child) {
+            $details = self::get_child_details($child);
+            if ($details) {
+                $results['individual_children'][] = $details;
+            }
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Get family name from family number
+     */
+    public static function get_family_name(string $family_number): string {
+        if (empty($family_number)) {
+            return '';
+        }
+        
+        $family_members = self::get_family_members($family_number);
+        if (!empty($family_members)) {
+            $family_name = get_post_meta($family_members[0]->ID, '_child_family_name', true);
+            return $family_name ?: "Family {$family_number}";
+        }
+        
+        return "Family {$family_number}";
+    }
+    
+    /**
+     * Update child with family information
+     */
+    public static function update_child_family_info(int $post_id, string $family_id): bool {
+        $parsed = self::parse_family_id($family_id);
+        
+        if (empty($parsed['number']) || empty($parsed['letter'])) {
+            return false;
+        }
+        
+        update_post_meta($post_id, '_child_family_id', $family_id);
+        update_post_meta($post_id, '_child_family_number', $parsed['number']);
+        update_post_meta($post_id, '_child_family_letter', $parsed['letter']);
+        
+        // Set family name if not already set
+        $existing_family_name = get_post_meta($post_id, '_child_family_name', true);
+        if (empty($existing_family_name)) {
+            update_post_meta($post_id, '_child_family_name', "Family {$parsed['number']}");
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get family statistics
+     */
+    public static function get_family_statistics(): array {
+        global $wpdb;
+        
+        // Get family completion rates
+        $family_stats = $wpdb->get_results("
+            SELECT 
+                pm_family_number.meta_value as family_number,
+                COUNT(*) as total_members,
+                COUNT(pm_sponsored.meta_value) as sponsored_members
+            FROM {$wpdb->posts} p
+            LEFT JOIN {$wpdb->postmeta} pm_family_number 
+                ON p.ID = pm_family_number.post_id 
+                AND pm_family_number.meta_key = '_child_family_number'
+            LEFT JOIN {$wpdb->postmeta} pm_sponsored 
+                ON p.ID = pm_sponsored.post_id 
+                AND pm_sponsored.meta_key = '_child_sponsored'
+                AND pm_sponsored.meta_value = '1'
+            WHERE p.post_type = 'child' 
+                AND p.post_status = 'publish'
+                AND pm_family_number.meta_value != ''
+            GROUP BY pm_family_number.meta_value
+        ");
+        
+        $complete_families = 0;
+        $partial_families = 0;
+        $unsponsored_families = 0;
+        $total_families = count($family_stats);
+        
+        foreach ($family_stats as $family) {
+            if ($family->sponsored_members == $family->total_members) {
+                $complete_families++;
+            } elseif ($family->sponsored_members > 0) {
+                $partial_families++;
+            } else {
+                $unsponsored_families++;
+            }
+        }
+        
+        return [
+            'total_families' => $total_families,
+            'complete_families' => $complete_families,
+            'partial_families' => $partial_families,
+            'unsponsored_families' => $unsponsored_families,
+            'completion_percentage' => $total_families > 0 ? 
+                round(($complete_families / $total_families) * 100, 1) : 0
         ];
     }
 }

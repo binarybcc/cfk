@@ -35,7 +35,7 @@ class Christmas_For_Kids {
      * @since 1.0.0
      * @var string
      */
-    private const DB_VERSION = '1.1.0';
+    private const DB_VERSION = '1.2.0';
     
     /**
      * Plugin components container
@@ -153,6 +153,18 @@ class Christmas_For_Kids {
             $csv_importer->init();
             $this->components['csv_importer'] = $csv_importer;
             
+            // Initialize Sponsorship Manager
+            require_once CFK_PLUGIN_PATH . 'includes/class-cfk-sponsorship-manager.php';
+            $sponsorship_manager = new CFK_Sponsorship_Manager($child_manager);
+            $sponsorship_manager->init();
+            $this->components['sponsorship_manager'] = $sponsorship_manager;
+            
+            // Initialize Email Manager
+            require_once CFK_PLUGIN_PATH . 'includes/class-cfk-email-manager.php';
+            $email_manager = new CFK_Email_Manager($child_manager);
+            $email_manager->init();
+            $this->components['email_manager'] = $email_manager;
+            
             // Initialize Public Frontend (only on frontend)
             if (!is_admin()) {
                 require_once CFK_PLUGIN_PATH . 'public/class-cfk-public.php';
@@ -188,6 +200,8 @@ class Christmas_For_Kids {
         $class_files = [
             'includes/class-cfk-child-manager.php',
             'includes/class-cfk-csv-importer.php',
+            'includes/class-cfk-sponsorship-manager.php',
+            'includes/class-cfk-email-manager.php',
         ];
         
         // Add frontend files for non-admin requests
@@ -268,7 +282,7 @@ class Christmas_For_Kids {
     }
     
     /**
-     * Admin page callback placeholder
+     * Enhanced admin page callback with family analytics
      * 
      * @since 1.0.0
      * @return void
@@ -277,19 +291,37 @@ class Christmas_For_Kids {
         $child_count = wp_count_posts(CFK_Child_Manager::get_post_type())->publish;
         $available_children = count($this->components['child_manager']->get_available_children());
         
+        // Get family analytics
+        $family_analytics = $this->get_family_analytics();
+        
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__('Christmas for Kids - Sponsorship System', CFK_TEXT_DOMAIN) . '</h1>';
         
-        echo '<div class="cfk-dashboard-stats" style="display: flex; gap: 20px; margin: 20px 0;">';
+        echo '<div class="cfk-dashboard-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0;">';
         
-        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; min-width: 200px;">';
+        // Individual children stats
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
         echo '<h3 style="margin-top: 0;">' . esc_html__('Total Children', CFK_TEXT_DOMAIN) . '</h3>';
         echo '<div style="font-size: 32px; font-weight: bold; color: #0073aa;">' . esc_html($child_count) . '</div>';
         echo '</div>';
         
-        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; min-width: 200px;">';
-        echo '<h3 style="margin-top: 0;">' . esc_html__('Available for Sponsorship', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
+        echo '<h3 style="margin-top: 0;">' . esc_html__('Available Children', CFK_TEXT_DOMAIN) . '</h3>';
         echo '<div style="font-size: 32px; font-weight: bold; color: #00a32a;">' . esc_html($available_children) . '</div>';
+        echo '</div>';
+        
+        // Family analytics stats (NEW)
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
+        echo '<h3 style="margin-top: 0;">' . esc_html__('Total Families', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div style="font-size: 32px; font-weight: bold; color: #7c3aed;">' . esc_html($family_analytics['total_families']) . '</div>';
+        echo '</div>';
+        
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
+        echo '<h3 style="margin-top: 0;">' . esc_html__('Completed Families', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div style="font-size: 32px; font-weight: bold; color: #059669;">' . esc_html($family_analytics['completed_families']) . '</div>';
+        echo '<small style="color: #666;">' . 
+             sprintf('%.1f%% completion rate', $family_analytics['completion_rate']) . 
+             '</small>';
         echo '</div>';
         
         echo '</div>';
@@ -303,13 +335,170 @@ class Christmas_For_Kids {
         echo '</p>';
         echo '</div>';
         
+        // Family insights section (NEW)
+        if (!empty($family_analytics['family_insights'])) {
+            echo '<div class="cfk-family-insights" style="margin: 30px 0;">';
+            echo '<h2>' . esc_html__('Family Insights', CFK_TEXT_DOMAIN) . '</h2>';
+            echo '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">';
+            
+            // Top families section
+            echo '<div class="cfk-insight-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
+            echo '<h3>' . esc_html__('Families Needing Attention', CFK_TEXT_DOMAIN) . '</h3>';
+            
+            if (!empty($family_analytics['incomplete_families'])) {
+                echo '<ul style="margin: 0; padding-left: 20px;">';
+                foreach (array_slice($family_analytics['incomplete_families'], 0, 5) as $family) {
+                    echo '<li>' . sprintf(
+                        esc_html__('Family %s: %d of %d children sponsored', CFK_TEXT_DOMAIN),
+                        esc_html($family['family_number']),
+                        $family['sponsored_count'],
+                        $family['total_children']
+                    );
+                    
+                    if (!empty($family['family_name'])) {
+                        echo ' <small>(' . esc_html($family['family_name']) . ')</small>';
+                    }
+                    
+                    echo '</li>';
+                }
+                echo '</ul>';
+            } else {
+                echo '<p>' . esc_html__('All families are complete!', CFK_TEXT_DOMAIN) . '</p>';
+            }
+            echo '</div>';
+            
+            // Recent sponsorships section
+            echo '<div class="cfk-insight-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px;">';
+            echo '<h3>' . esc_html__('Recent Family Progress', CFK_TEXT_DOMAIN) . '</h3>';
+            echo '<p>' . sprintf(
+                esc_html__('%d families have children available for sponsorship.', CFK_TEXT_DOMAIN),
+                $family_analytics['families_with_available']
+            ) . '</p>';
+            echo '<p>' . sprintf(
+                esc_html__('Average family size: %.1f children', CFK_TEXT_DOMAIN),
+                $family_analytics['avg_family_size']
+            ) . '</p>';
+            echo '</div>';
+            
+            echo '</div>';
+            echo '</div>';
+        }
+        
         echo '<div class="cfk-dashboard-info">';
         echo '<h2>' . esc_html__('System Information', CFK_TEXT_DOMAIN) . '</h2>';
         echo '<p><strong>' . esc_html__('Plugin Version:', CFK_TEXT_DOMAIN) . '</strong> ' . esc_html($this->version) . '</p>';
         echo '<p><strong>' . esc_html__('Database Version:', CFK_TEXT_DOMAIN) . '</strong> ' . esc_html(get_option('cfk_db_version', '1.0.0')) . '</p>';
+        echo '<p><strong>' . esc_html__('Family Support:', CFK_TEXT_DOMAIN) . '</strong> ' . esc_html__('Active', CFK_TEXT_DOMAIN) . '</p>';
         echo '</div>';
         
         echo '</div>';
+    }
+    
+    /**
+     * Get comprehensive family analytics for the dashboard
+     * 
+     * @since 1.2.0
+     * @return array<string, mixed> Family analytics data
+     */
+    private function get_family_analytics(): array {
+        global $wpdb;
+        
+        $child_manager = $this->components['child_manager'];
+        
+        // Get all children with family data
+        $children_query = new WP_Query([
+            'post_type' => CFK_Child_Manager::get_post_type(),
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'meta_query' => [
+                [
+                    'key' => 'cfk_child_family_number',
+                    'compare' => 'EXISTS'
+                ]
+            ]
+        ]);
+        
+        $families = [];
+        $total_children_in_families = 0;
+        
+        if ($children_query->have_posts()) {
+            foreach ($children_query->posts as $child) {
+                $family_number = get_post_meta($child->ID, 'cfk_child_family_number', true);
+                $family_name = get_post_meta($child->ID, 'cfk_child_family_name', true);
+                
+                if (empty($family_number)) {
+                    continue;
+                }
+                
+                if (!isset($families[$family_number])) {
+                    $families[$family_number] = [
+                        'family_number' => $family_number,
+                        'family_name' => $family_name,
+                        'children' => [],
+                        'total_children' => 0,
+                        'sponsored_count' => 0,
+                        'available_count' => 0
+                    ];
+                }
+                
+                $is_sponsored = $child_manager->is_child_sponsored($child->ID);
+                
+                $families[$family_number]['children'][] = $child->ID;
+                $families[$family_number]['total_children']++;
+                
+                if ($is_sponsored) {
+                    $families[$family_number]['sponsored_count']++;
+                } else {
+                    $families[$family_number]['available_count']++;
+                }
+                
+                $total_children_in_families++;
+            }
+        }
+        
+        wp_reset_postdata();
+        
+        // Calculate analytics
+        $total_families = count($families);
+        $completed_families = 0;
+        $families_with_available = 0;
+        $incomplete_families = [];
+        $family_sizes = [];
+        
+        foreach ($families as $family) {
+            $family_sizes[] = $family['total_children'];
+            
+            if ($family['sponsored_count'] >= $family['total_children']) {
+                $completed_families++;
+            } else {
+                $incomplete_families[] = $family;
+            }
+            
+            if ($family['available_count'] > 0) {
+                $families_with_available++;
+            }
+        }
+        
+        // Sort incomplete families by completion percentage (ascending)
+        usort($incomplete_families, function($a, $b) {
+            $a_percent = $a['total_children'] > 0 ? ($a['sponsored_count'] / $a['total_children']) : 0;
+            $b_percent = $b['total_children'] > 0 ? ($b['sponsored_count'] / $b['total_children']) : 0;
+            return $a_percent <=> $b_percent;
+        });
+        
+        $completion_rate = $total_families > 0 ? ($completed_families / $total_families) * 100 : 0;
+        $avg_family_size = !empty($family_sizes) ? array_sum($family_sizes) / count($family_sizes) : 0;
+        
+        return [
+            'total_families' => $total_families,
+            'completed_families' => $completed_families,
+            'completion_rate' => $completion_rate,
+            'families_with_available' => $families_with_available,
+            'incomplete_families' => $incomplete_families,
+            'avg_family_size' => $avg_family_size,
+            'total_children_in_families' => $total_children_in_families,
+            'family_insights' => !empty($families) // Flag for showing insights section
+        ];
     }
     
     /**
@@ -536,35 +725,49 @@ class Christmas_For_Kids {
         
         $charset_collate = $wpdb->get_charset_collate();
         
-        // Create sponsorships table
+        // Create sponsorships table with family support
         $sponsorships_table = $wpdb->prefix . 'cfk_sponsorships';
         $sponsorships_sql = "CREATE TABLE $sponsorships_table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             child_id bigint(20) unsigned NOT NULL,
+            family_id varchar(10) DEFAULT NULL,
+            family_number varchar(5) DEFAULT NULL,
             sponsor_name varchar(255) NOT NULL,
             sponsor_email varchar(255) NOT NULL,
             sponsor_phone varchar(20) DEFAULT NULL,
-            status enum('selected','confirmed','cancelled') NOT NULL DEFAULT 'selected',
+            sponsor_address text DEFAULT NULL,
+            sponsorship_type enum('individual','family','siblings') NOT NULL DEFAULT 'individual',
+            additional_children text DEFAULT NULL,
+            status enum('selected','confirmed','cancelled','expired') NOT NULL DEFAULT 'selected',
             selection_token varchar(32) NOT NULL,
+            expires_at datetime DEFAULT NULL,
+            confirmed_at datetime DEFAULT NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             KEY idx_child_id (child_id),
+            KEY idx_family_id (family_id),
+            KEY idx_family_number (family_number),
             KEY idx_status (status),
             KEY idx_token (selection_token),
+            KEY idx_expires (expires_at),
             KEY idx_created (created_at)
         ) $charset_collate;";
         
-        // Create email logs table
+        // Create email logs table with family support
         $email_logs_table = $wpdb->prefix . 'cfk_email_logs';
         $email_logs_sql = "CREATE TABLE $email_logs_table (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             recipient_email varchar(255) NOT NULL,
+            recipient_name varchar(255) DEFAULT NULL,
             subject varchar(500) NOT NULL,
-            email_type enum('selection_confirmation','sponsor_confirmation','admin_notification','cancellation') NOT NULL,
+            email_type enum('selection_confirmation','sponsor_confirmation','admin_notification','cancellation','family_update','sibling_notification') NOT NULL,
             status enum('pending','sent','failed') NOT NULL DEFAULT 'pending',
             child_id bigint(20) unsigned DEFAULT NULL,
+            family_id varchar(10) DEFAULT NULL,
+            family_number varchar(5) DEFAULT NULL,
             sponsorship_id bigint(20) unsigned DEFAULT NULL,
+            template_data text DEFAULT NULL,
             error_message text DEFAULT NULL,
             sent_at datetime DEFAULT NULL,
             created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -573,6 +776,8 @@ class Christmas_For_Kids {
             KEY idx_status (status),
             KEY idx_type (email_type),
             KEY idx_child (child_id),
+            KEY idx_family_id (family_id),
+            KEY idx_family_number (family_number),
             KEY idx_sponsorship (sponsorship_id)
         ) $charset_collate;";
         

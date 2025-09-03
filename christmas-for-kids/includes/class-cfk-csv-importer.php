@@ -22,21 +22,21 @@ class CFK_CSV_Importer {
     private const BATCH_SIZE = 50;
     
     /**
-     * Required CSV columns
+     * Required CSV columns (updated for family support)
      * 
      * @since 1.0.0
      * @var array<string>
      */
-    private const REQUIRED_COLUMNS = ['name', 'age', 'gender'];
+    private const REQUIRED_COLUMNS = ['name', 'age', 'gender', 'family_id'];
     
     /**
-     * Optional CSV columns
+     * Optional CSV columns (updated for family support)
      * 
      * @since 1.0.0
      * @var array<string>
      */
     private const OPTIONAL_COLUMNS = [
-        'shirt_size', 'pants_size', 'shoe_size', 'coat_size',
+        'family_name', 'shirt_size', 'pants_size', 'shoe_size', 'coat_size',
         'interests', 'family_situation', 'special_needs'
     ];
     
@@ -348,6 +348,14 @@ class CFK_CSV_Importer {
             }
         }
         
+        // Validate family ID format (NEW)
+        if (isset($row_data['family_id'])) {
+            $family_id = trim($row_data['family_id']);
+            if (!empty($family_id) && !CFK_Child_Manager::validate_family_id($family_id)) {
+                $errors[] = "Row {$row_number}: Invalid family ID format '{$family_id}' (use format: 123A)";
+            }
+        }
+        
         return $errors;
     }
     
@@ -561,10 +569,15 @@ class CFK_CSV_Importer {
         $meta_mapping = [
             'age' => 'cfk_child_age',
             'gender' => 'cfk_child_gender',
+            // Family relationship fields (NEW)
+            'family_id' => 'cfk_child_family_id',
+            'family_name' => 'cfk_child_family_name',
+            // Clothing sizes
             'shirt_size' => 'cfk_child_shirt_size',
             'pants_size' => 'cfk_child_pants_size',
             'shoe_size' => 'cfk_child_shoe_size',
             'coat_size' => 'cfk_child_coat_size',
+            // Other fields
             'interests' => 'cfk_child_interests',
             'family_situation' => 'cfk_child_family_situation',
             'special_needs' => 'cfk_child_special_needs',
@@ -577,6 +590,19 @@ class CFK_CSV_Importer {
                     : $row_data[$csv_field];
                 
                 update_post_meta($post_id, $meta_key, sanitize_text_field($value));
+            }
+        }
+        
+        // Handle family ID parsing and set derived fields (NEW)
+        if (!empty($row_data['family_id'])) {
+            $family_components = CFK_Child_Manager::parse_family_id($row_data['family_id']);
+            
+            if (!empty($family_components['family_number'])) {
+                update_post_meta($post_id, 'cfk_child_family_number', $family_components['family_number']);
+            }
+            
+            if (!empty($family_components['child_letter'])) {
+                update_post_meta($post_id, 'cfk_child_child_letter', $family_components['child_letter']);
             }
         }
     }

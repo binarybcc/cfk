@@ -354,15 +354,26 @@ class CFK_Sponsorship_Manager {
         
         $table_name = $wpdb->prefix . 'cfk_sponsorships';
         
+        // Get child post to extract family information
+        $child_post = CFK_Children_Manager::get_child_by_id($child_id);
+        $family_id = $child_post ? get_post_meta($child_post->ID, '_child_family_id', true) : '';
+        $family_number = $child_post ? get_post_meta($child_post->ID, '_child_family_number', true) : '';
+        $child_letter = $child_post ? get_post_meta($child_post->ID, '_child_family_letter', true) : '';
+        $family_name = $child_post ? get_post_meta($child_post->ID, '_child_family_name', true) : '';
+        
         $result = $wpdb->insert(
             $table_name,
             [
                 'session_id' => $session_id,
                 'child_id' => $child_id,
+                'family_id' => $family_id,
+                'family_number' => $family_number,
+                'child_letter' => $child_letter,
+                'family_name' => $family_name,
                 'status' => CFK_Status::SELECTED->value,
                 'selected_time' => current_time('mysql')
             ],
-            ['%s', '%s', '%s', '%s']
+            ['%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s']
         );
         
         return $result !== false;

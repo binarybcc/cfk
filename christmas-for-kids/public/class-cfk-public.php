@@ -115,7 +115,7 @@ class CFK_Public {
     }
     
     /**
-     * Render the children shortcode
+     * Render the children shortcode with family-aware functionality
      * 
      * @since 1.0.0
      * @param array $atts Shortcode attributes
@@ -123,7 +123,7 @@ class CFK_Public {
      * @return string HTML output
      */
     public function render_children_shortcode(array $atts = [], string $content = ''): string {
-        // Parse shortcode attributes with defaults
+        // Parse shortcode attributes with defaults including family features
         $atts = shortcode_atts([
             'columns' => 3,
             'per_page' => 12,
@@ -133,7 +133,13 @@ class CFK_Public {
             'age_min' => 0,
             'age_max' => 18,
             'gender' => '', // empty means all genders
-            'class' => 'cfk-children-grid'
+            'class' => 'cfk-children-grid',
+            // NEW: Family-aware features
+            'family_grouping' => 'false',
+            'show_siblings' => 'true',
+            'family_view' => 'individual', // individual|grouped|both
+            'family_search' => 'true',
+            'show_family_stats' => 'true'
         ], $atts, 'cfk_children');
         
         // Sanitize attributes
@@ -147,6 +153,14 @@ class CFK_Public {
         $gender = sanitize_text_field($atts['gender']);
         $css_class = sanitize_html_class($atts['class']);
         
+        // Sanitize family-aware attributes
+        $family_grouping = filter_var($atts['family_grouping'], FILTER_VALIDATE_BOOLEAN);
+        $show_siblings = filter_var($atts['show_siblings'], FILTER_VALIDATE_BOOLEAN);
+        $family_view = in_array($atts['family_view'], ['individual', 'grouped', 'both']) 
+            ? $atts['family_view'] : 'individual';
+        $family_search = filter_var($atts['family_search'], FILTER_VALIDATE_BOOLEAN);
+        $show_family_stats = filter_var($atts['show_family_stats'], FILTER_VALIDATE_BOOLEAN);
+        
         // Ensure valid columns (1-6)
         $columns = max(1, min(6, $columns));
         
@@ -157,42 +171,78 @@ class CFK_Public {
         $paged = get_query_var('paged') ? get_query_var('paged') : 1;
         
         try {
-            // Get available children
-            $children_query = $this->get_children_query([
+            // Get available children with family-aware parameters
+            $query_args = [
                 'posts_per_page' => $per_page,
                 'paged' => $paged,
                 'order' => $order,
                 'age_min' => $age_min,
                 'age_max' => $age_max,
-                'gender' => $gender
-            ]);
+                'gender' => $gender,
+                'family_grouping' => $family_grouping,
+                'family_view' => $family_view,
+                'show_siblings' => $show_siblings
+            ];
+            
+            // Handle family search if provided
+            $family_search_term = sanitize_text_field($_GET['cfk_family_search'] ?? '');
+            if (!empty($family_search_term) && $family_search) {
+                $query_args['family_search'] = $family_search_term;
+            }
+            
+            $children_data = $this->get_children_with_family_context($query_args);
             
             ob_start();
             
-            echo '<div class="cfk-children-wrapper ' . esc_attr($css_class) . '">';
+            echo '<div class="cfk-children-wrapper ' . esc_attr($css_class) . '" data-family-view="' . esc_attr($family_view) . '">';
             
-            // Render filters if enabled
-            if ($show_filters || $show_search) {
-                $this->render_children_filters($show_search, $show_filters);
+            // Render filters if enabled (now with family search support)
+            if ($show_filters || $show_search || $family_search) {
+                $this->render_enhanced_filters([
+                    'show_search' => $show_search,
+                    'show_filters' => $show_filters,
+                    'family_search' => $family_search,
+                    'family_view' => $family_view,
+                    'show_family_stats' => $show_family_stats
+                ]);
             }
             
-            // Render children grid
-            if ($children_query->have_posts()) {
-                echo '<div class="cfk-children-grid" data-columns="' . esc_attr($columns) . '">';
+            // Render children grid with family context
+            if (!empty($children_data['children'])) {
                 
-                while ($children_query->have_posts()) {
-                    $children_query->the_post();
-                    $this->render_child_card(get_the_ID());
+                // Show family statistics if enabled
+                if ($show_family_stats && !empty($children_data['family_stats'])) {
+                    $this->render_family_statistics($children_data['family_stats']);
                 }
                 
-                echo '</div>';
+                if ($family_grouping && $family_view !== 'individual') {
+                    // Render family-grouped view
+                    $this->render_family_groups($children_data, $columns, $show_siblings);
+                } else {
+                    // Render individual children with family context
+                    echo '<div class="cfk-children-grid" data-columns="' . esc_attr($columns) . '">';
+                    
+                    foreach ($children_data['children'] as $child_data) {
+                        $this->render_family_aware_child_card($child_data, $show_siblings);
+                    }
+                    
+                    echo '</div>';
+                }
                 
                 // Render pagination
-                $this->render_pagination($children_query, $paged);
+                if (!empty($children_data['pagination'])) {
+                    $this->render_family_aware_pagination($children_data['pagination'], $paged);
+                }
                 
             } else {
                 echo '<div class="cfk-no-children">';
                 echo '<p>' . esc_html__('No children are currently available for sponsorship.', CFK_TEXT_DOMAIN) . '</p>';
+                if (!empty($family_search_term)) {
+                    echo '<p>' . sprintf(
+                        esc_html__('No results found for family search: "%s"', CFK_TEXT_DOMAIN),
+                        esc_html($family_search_term)
+                    ) . '</p>';
+                }
                 echo '</div>';
             }
             
@@ -532,5 +582,462 @@ class CFK_Public {
                 'message' => __('An error occurred while processing your request. Please try again.', CFK_TEXT_DOMAIN)
             ]);
         }
+    }
+    
+    /**
+     * Get children data with family context
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $args Query arguments
+     * @return array<string, mixed> Children data with family context
+     */
+    private function get_children_with_family_context(array $args): array {
+        $child_manager = $this->plugin->get_component('child_manager');
+        
+        // Handle family search
+        if (!empty($args['family_search'])) {
+            $children_posts = $child_manager->search_children_by_family(
+                $args['family_search'], 
+                $args['posts_per_page']
+            );
+        } else {
+            // Standard query with family awareness
+            $query_args = [
+                'post_type' => CFK_Child_Manager::get_post_type(),
+                'post_status' => 'publish',
+                'posts_per_page' => $args['posts_per_page'],
+                'paged' => $args['paged'],
+                'orderby' => $args['order'] === 'random' ? 'rand' : 'title',
+                'order' => $args['order'] === 'random' ? '' : 'ASC'
+            ];
+            
+            // Add age and gender filters
+            if (!empty($args['age_min']) || !empty($args['age_max'])) {
+                $query_args['meta_query'][] = [
+                    'key' => 'cfk_child_age',
+                    'value' => [$args['age_min'], $args['age_max']],
+                    'compare' => 'BETWEEN',
+                    'type' => 'NUMERIC'
+                ];
+            }
+            
+            if (!empty($args['gender'])) {
+                $query_args['meta_query'][] = [
+                    'key' => 'cfk_child_gender',
+                    'value' => $args['gender'],
+                    'compare' => '='
+                ];
+            }
+            
+            $query = new WP_Query($query_args);
+            $children_posts = $query->posts;
+        }
+        
+        // Process children with family context
+        $children_data = [];
+        $family_stats = [];
+        
+        foreach ($children_posts as $child) {
+            $family_id = get_post_meta($child->ID, 'cfk_child_family_id', true);
+            $family_number = get_post_meta($child->ID, 'cfk_child_family_number', true);
+            
+            $child_data = [
+                'post' => $child,
+                'family_id' => $family_id,
+                'family_number' => $family_number,
+                'family_name' => get_post_meta($child->ID, 'cfk_child_family_name', true),
+                'age' => get_post_meta($child->ID, 'cfk_child_age', true),
+                'gender' => get_post_meta($child->ID, 'cfk_child_gender', true),
+                'interests' => get_post_meta($child->ID, 'cfk_child_interests', true),
+                'is_sponsored' => $child_manager->is_child_sponsored($child->ID)
+            ];
+            
+            // Get siblings if enabled
+            if ($args['show_siblings'] && !empty($family_number)) {
+                $siblings = $child_manager->get_family_siblings($family_number);
+                $child_data['siblings'] = array_filter($siblings, function($sibling) use ($child) {
+                    return $sibling->ID !== $child->ID;
+                });
+                
+                // Cache family stats
+                if (!isset($family_stats[$family_number])) {
+                    $family_stats[$family_number] = $child_manager->get_family_stats($family_number);
+                }
+            }
+            
+            $children_data[] = $child_data;
+        }
+        
+        return [
+            'children' => $children_data,
+            'family_stats' => $family_stats,
+            'pagination' => [
+                'total' => count($children_posts),
+                'per_page' => $args['posts_per_page'],
+                'current_page' => $args['paged']
+            ]
+        ];
+    }
+    
+    /**
+     * Render enhanced filters with family search support
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $filter_options Filter options
+     * @return void
+     */
+    private function render_enhanced_filters(array $filter_options): void {
+        echo '<div class="cfk-filters-wrapper">';
+        
+        echo '<form class="cfk-filters-form" method="get">';
+        
+        // Regular search
+        if ($filter_options['show_search']) {
+            echo '<div class="cfk-search-field">';
+            echo '<label for="cfk_search">' . esc_html__('Search Children', CFK_TEXT_DOMAIN) . '</label>';
+            echo '<input type="text" id="cfk_search" name="cfk_search" placeholder="' . 
+                esc_attr__('Search by name, interests...', CFK_TEXT_DOMAIN) . '" value="' . 
+                esc_attr($_GET['cfk_search'] ?? '') . '">';
+            echo '</div>';
+        }
+        
+        // Family search
+        if ($filter_options['family_search']) {
+            echo '<div class="cfk-family-search-field">';
+            echo '<label for="cfk_family_search">' . esc_html__('Family Search', CFK_TEXT_DOMAIN) . '</label>';
+            echo '<input type="text" id="cfk_family_search" name="cfk_family_search" placeholder="' . 
+                esc_attr__('Family ID (e.g., 123A) or family name', CFK_TEXT_DOMAIN) . '" value="' . 
+                esc_attr($_GET['cfk_family_search'] ?? '') . '">';
+            echo '</div>';
+        }
+        
+        // Regular filters
+        if ($filter_options['show_filters']) {
+            echo '<div class="cfk-filters-grid">';
+            
+            // Age filter
+            echo '<div class="cfk-filter-field">';
+            echo '<label for="cfk_age_min">' . esc_html__('Age Range', CFK_TEXT_DOMAIN) . '</label>';
+            echo '<select id="cfk_age_min" name="cfk_age_min">';
+            echo '<option value="">' . esc_html__('Any Age', CFK_TEXT_DOMAIN) . '</option>';
+            for ($age = 0; $age <= 18; $age++) {
+                $selected = selected($_GET['cfk_age_min'] ?? '', $age, false);
+                echo "<option value='{$age}' {$selected}>{$age}+</option>";
+            }
+            echo '</select>';
+            echo '</div>';
+            
+            // Gender filter
+            echo '<div class="cfk-filter-field">';
+            echo '<label for="cfk_gender">' . esc_html__('Gender', CFK_TEXT_DOMAIN) . '</label>';
+            echo '<select id="cfk_gender" name="cfk_gender">';
+            echo '<option value="">' . esc_html__('Any Gender', CFK_TEXT_DOMAIN) . '</option>';
+            echo '<option value="M"' . selected($_GET['cfk_gender'] ?? '', 'M', false) . '>' . 
+                esc_html__('Male', CFK_TEXT_DOMAIN) . '</option>';
+            echo '<option value="F"' . selected($_GET['cfk_gender'] ?? '', 'F', false) . '>' . 
+                esc_html__('Female', CFK_TEXT_DOMAIN) . '</option>';
+            echo '</select>';
+            echo '</div>';
+            
+            echo '</div>';
+        }
+        
+        // View toggles for family display
+        if ($filter_options['family_view'] === 'both') {
+            echo '<div class="cfk-view-toggles">';
+            echo '<label>' . esc_html__('Display Mode:', CFK_TEXT_DOMAIN) . '</label>';
+            echo '<button type="button" class="cfk-view-toggle" data-view="individual">' . 
+                esc_html__('Individual Children', CFK_TEXT_DOMAIN) . '</button>';
+            echo '<button type="button" class="cfk-view-toggle" data-view="grouped">' . 
+                esc_html__('Family Groups', CFK_TEXT_DOMAIN) . '</button>';
+            echo '</div>';
+        }
+        
+        echo '<div class="cfk-filter-actions">';
+        echo '<button type="submit" class="cfk-filter-submit">' . esc_html__('Apply Filters', CFK_TEXT_DOMAIN) . '</button>';
+        echo '<button type="button" class="cfk-filter-reset">' . esc_html__('Reset', CFK_TEXT_DOMAIN) . '</button>';
+        echo '</div>';
+        
+        echo '</form>';
+        echo '</div>';
+    }
+    
+    /**
+     * Render family statistics
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $family_stats Family statistics
+     * @return void
+     */
+    private function render_family_statistics(array $family_stats): void {
+        if (empty($family_stats)) {
+            return;
+        }
+        
+        echo '<div class="cfk-family-stats">';
+        echo '<h3>' . esc_html__('Family Statistics', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div class="cfk-stats-grid">';
+        
+        $total_families = count($family_stats);
+        $total_children = array_sum(array_column($family_stats, 'total_children'));
+        $sponsored_children = array_sum(array_column($family_stats, 'sponsored_count'));
+        
+        echo '<div class="cfk-stat">';
+        echo '<span class="cfk-stat-number">' . esc_html($total_families) . '</span>';
+        echo '<span class="cfk-stat-label">' . esc_html__('Families', CFK_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        echo '<div class="cfk-stat">';
+        echo '<span class="cfk-stat-number">' . esc_html($total_children) . '</span>';
+        echo '<span class="cfk-stat-label">' . esc_html__('Children', CFK_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        echo '<div class="cfk-stat">';
+        echo '<span class="cfk-stat-number">' . esc_html($sponsored_children) . '</span>';
+        echo '<span class="cfk-stat-label">' . esc_html__('Sponsored', CFK_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        echo '<div class="cfk-stat">';
+        echo '<span class="cfk-stat-number">' . esc_html($total_children - $sponsored_children) . '</span>';
+        echo '<span class="cfk-stat-label">' . esc_html__('Available', CFK_TEXT_DOMAIN) . '</span>';
+        echo '</div>';
+        
+        echo '</div>';
+        echo '</div>';
+    }
+    
+    /**
+     * Render family-aware child card with sibling information
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $child_data Child data with family context
+     * @param bool $show_siblings Whether to show sibling information
+     * @return void
+     */
+    private function render_family_aware_child_card(array $child_data, bool $show_siblings = true): void {
+        $child = $child_data['post'];
+        $child_id = $child->ID;
+        
+        echo '<div class="cfk-child-card" data-child-id="' . esc_attr($child_id) . '" 
+                  data-family-id="' . esc_attr($child_data['family_id']) . '">';
+        
+        // Child photo
+        if (has_post_thumbnail($child_id)) {
+            echo '<div class="cfk-child-photo">';
+            echo get_the_post_thumbnail($child_id, 'medium', [
+                'alt' => sprintf(__('%s - Child Photo', CFK_TEXT_DOMAIN), $child->post_title),
+                'loading' => 'lazy'
+            ]);
+            echo '</div>';
+        } else {
+            echo '<div class="cfk-child-photo cfk-no-photo">';
+            echo '<div class="cfk-photo-placeholder">';
+            echo '<span>' . esc_html__('No Photo', CFK_TEXT_DOMAIN) . '</span>';
+            echo '</div>';
+            echo '</div>';
+        }
+        
+        // Child information
+        echo '<div class="cfk-child-info">';
+        echo '<h3 class="cfk-child-name">' . esc_html($child->post_title) . '</h3>';
+        
+        // Family ID badge
+        if (!empty($child_data['family_id'])) {
+            echo '<div class="cfk-family-badge">';
+            echo '<span class="cfk-family-id">ID: ' . esc_html($child_data['family_id']) . '</span>';
+            if (!empty($child_data['family_name'])) {
+                echo '<span class="cfk-family-name">' . esc_html($child_data['family_name']) . '</span>';
+            }
+            echo '</div>';
+        }
+        
+        // Basic info
+        echo '<div class="cfk-child-details">';
+        echo '<span class="cfk-child-age">' . sprintf(__('%d years old', CFK_TEXT_DOMAIN), $child_data['age']) . '</span>';
+        
+        if (!empty($child_data['gender'])) {
+            $gender_label = $child_data['gender'] === 'M' ? __('Male', CFK_TEXT_DOMAIN) : __('Female', CFK_TEXT_DOMAIN);
+            echo '<span class="cfk-child-gender">' . esc_html($gender_label) . '</span>';
+        }
+        echo '</div>';
+        
+        // Interests
+        if (!empty($child_data['interests'])) {
+            echo '<div class="cfk-child-interests">';
+            echo '<strong>' . esc_html__('Interests:', CFK_TEXT_DOMAIN) . '</strong> ';
+            echo esc_html($child_data['interests']);
+            echo '</div>';
+        }
+        
+        // Sibling information
+        if ($show_siblings && !empty($child_data['siblings'])) {
+            echo '<div class="cfk-siblings-info">';
+            echo '<strong>' . esc_html__('Siblings:', CFK_TEXT_DOMAIN) . '</strong>';
+            echo '<ul class="cfk-siblings-list">';
+            
+            foreach ($child_data['siblings'] as $sibling) {
+                $sibling_age = get_post_meta($sibling->ID, 'cfk_child_age', true);
+                $sibling_family_id = get_post_meta($sibling->ID, 'cfk_child_family_id', true);
+                $is_sponsored = $this->plugin->get_component('child_manager')->is_child_sponsored($sibling->ID);
+                
+                $status_class = $is_sponsored ? 'sponsored' : 'available';
+                
+                echo '<li class="cfk-sibling ' . esc_attr($status_class) . '">';
+                echo esc_html($sibling->post_title) . ' (' . esc_html($sibling_age) . ', ' . 
+                     esc_html($sibling_family_id) . ')';
+                if ($is_sponsored) {
+                    echo ' <span class="cfk-sponsored-badge">' . esc_html__('Sponsored', CFK_TEXT_DOMAIN) . '</span>';
+                }
+                echo '</li>';
+            }
+            
+            echo '</ul>';
+            echo '</div>';
+        }
+        
+        echo '</div>'; // .cfk-child-info
+        
+        // Action buttons
+        echo '<div class="cfk-child-actions">';
+        
+        if ($child_data['is_sponsored']) {
+            echo '<div class="cfk-sponsored-notice">';
+            echo '<span>' . esc_html__('Already Sponsored', CFK_TEXT_DOMAIN) . '</span>';
+            echo '</div>';
+        } else {
+            echo '<button type="button" class="cfk-sponsor-btn" data-child-id="' . esc_attr($child_id) . '">';
+            echo esc_html__('Sponsor This Child', CFK_TEXT_DOMAIN);
+            echo '</button>';
+            
+            // Show family sponsorship option if applicable
+            if (!empty($child_data['siblings'])) {
+                $available_siblings = array_filter($child_data['siblings'], function($sibling) {
+                    return !$this->plugin->get_component('child_manager')->is_child_sponsored($sibling->ID);
+                });
+                
+                if (!empty($available_siblings)) {
+                    echo '<button type="button" class="cfk-family-sponsor-btn" data-family-number="' . 
+                         esc_attr($child_data['family_number']) . '">';
+                    echo esc_html__('Sponsor Family', CFK_TEXT_DOMAIN);
+                    echo '</button>';
+                }
+            }
+        }
+        
+        echo '</div>'; // .cfk-child-actions
+        echo '</div>'; // .cfk-child-card
+    }
+    
+    /**
+     * Render family groups view
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $children_data Children data with family context
+     * @param int $columns Number of columns
+     * @param bool $show_siblings Whether to show sibling details
+     * @return void
+     */
+    private function render_family_groups(array $children_data, int $columns, bool $show_siblings): void {
+        // Group children by family
+        $families = [];
+        foreach ($children_data['children'] as $child_data) {
+            $family_number = $child_data['family_number'];
+            if (empty($family_number)) {
+                $family_number = 'no_family';
+            }
+            
+            if (!isset($families[$family_number])) {
+                $families[$family_number] = [
+                    'family_number' => $family_number,
+                    'family_name' => $child_data['family_name'],
+                    'children' => []
+                ];
+            }
+            
+            $families[$family_number]['children'][] = $child_data;
+        }
+        
+        echo '<div class="cfk-family-groups" data-columns="' . esc_attr($columns) . '">';
+        
+        foreach ($families as $family) {
+            echo '<div class="cfk-family-group" data-family-number="' . esc_attr($family['family_number']) . '">';
+            
+            // Family header
+            echo '<div class="cfk-family-header">';
+            echo '<h3 class="cfk-family-title">';
+            if ($family['family_number'] !== 'no_family') {
+                echo esc_html__('Family', CFK_TEXT_DOMAIN) . ' ' . esc_html($family['family_number']);
+                if (!empty($family['family_name'])) {
+                    echo ' - ' . esc_html($family['family_name']);
+                }
+            } else {
+                echo esc_html__('Individual Children', CFK_TEXT_DOMAIN);
+            }
+            echo '</h3>';
+            
+            // Family stats
+            $total_children = count($family['children']);
+            $sponsored_count = count(array_filter($family['children'], function($child) {
+                return $child['is_sponsored'];
+            }));
+            
+            echo '<div class="cfk-family-stats-inline">';
+            echo esc_html($total_children) . ' ' . _n('child', 'children', $total_children, CFK_TEXT_DOMAIN);
+            if ($sponsored_count > 0) {
+                echo ' (' . esc_html($sponsored_count) . ' ' . esc_html__('sponsored', CFK_TEXT_DOMAIN) . ')';
+            }
+            echo '</div>';
+            echo '</div>';
+            
+            // Family children
+            echo '<div class="cfk-family-children-grid">';
+            foreach ($family['children'] as $child_data) {
+                $this->render_family_aware_child_card($child_data, false); // No siblings in family view
+            }
+            echo '</div>';
+            
+            echo '</div>'; // .cfk-family-group
+        }
+        
+        echo '</div>'; // .cfk-family-groups
+    }
+    
+    /**
+     * Render family-aware pagination
+     * 
+     * @since 1.2.0
+     * @param array<string, mixed> $pagination Pagination data
+     * @param int $current_page Current page
+     * @return void
+     */
+    private function render_family_aware_pagination(array $pagination, int $current_page): void {
+        $total_pages = ceil($pagination['total'] / $pagination['per_page']);
+        
+        if ($total_pages <= 1) {
+            return;
+        }
+        
+        echo '<div class="cfk-pagination">';
+        
+        if ($current_page > 1) {
+            echo '<a href="' . esc_url(add_query_arg('paged', $current_page - 1)) . '" class="cfk-prev-page">';
+            echo esc_html__('Previous', CFK_TEXT_DOMAIN);
+            echo '</a>';
+        }
+        
+        for ($i = 1; $i <= $total_pages; $i++) {
+            $class = $i === $current_page ? 'cfk-page-current' : 'cfk-page';
+            echo '<a href="' . esc_url(add_query_arg('paged', $i)) . '" class="' . esc_attr($class) . '">';
+            echo esc_html($i);
+            echo '</a>';
+        }
+        
+        if ($current_page < $total_pages) {
+            echo '<a href="' . esc_url(add_query_arg('paged', $current_page + 1)) . '" class="cfk-next-page">';
+            echo esc_html__('Next', CFK_TEXT_DOMAIN);
+            echo '</a>';
+        }
+        
+        echo '</div>';
     }
 }

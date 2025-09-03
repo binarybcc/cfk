@@ -282,13 +282,14 @@ class ChristmasForKidsPlugin {
             'cfk_select_child' => 'handle_ajax_select_child',
             'cfk_confirm_sponsorship' => 'handle_ajax_confirm_sponsorship', 
             'cfk_import_csv' => 'handle_ajax_import_csv',
-            'cfk_cancel_sponsorship' => 'handle_ajax_cancel_sponsorship'
+            'cfk_cancel_sponsorship' => 'handle_ajax_cancel_sponsorship',
+            'cfk_family_search' => 'handle_ajax_family_search'
         ];
         
         foreach ($ajax_handlers as $action => $method) {
             add_action("wp_ajax_$action", [$this, $method]);
-            // Only allow public access for select and confirm actions
-            if (in_array($action, ['cfk_select_child', 'cfk_confirm_sponsorship'], true)) {
+            // Allow public access for select, confirm and family search actions
+            if (in_array($action, ['cfk_select_child', 'cfk_confirm_sponsorship', 'cfk_family_search'], true)) {
                 add_action("wp_ajax_nopriv_$action", [$this, $method]);
             }
         }
@@ -390,6 +391,140 @@ class ChristmasForKidsPlugin {
             error_log('CFK AJAX Error (cancel_sponsorship): ' . $e->getMessage());
             wp_send_json_error('An error occurred while processing your request');
         }
+    }
+    
+    public function handle_ajax_family_search(): void {
+        try {
+            check_ajax_referer('cfk_nonce', 'nonce');
+            
+            if (!$this->is_initialized) {
+                wp_send_json_error('Plugin not properly initialized');
+                return;
+            }
+            
+            $search_term = sanitize_text_field($_POST['search_term'] ?? '');
+            $show_families = !empty($_POST['show_families']);
+            $show_individual = !empty($_POST['show_individual']);
+            
+            if (empty($search_term)) {
+                wp_send_json_error(__('Search term is required', 'cfk-sponsorship'));
+                return;
+            }
+            
+            // Perform family search
+            $results = CFK_Children_Manager::search_families_and_children($search_term, [
+                'per_page' => 20
+            ]);
+            
+            $html = $this->render_family_search_results($results, $show_families, $show_individual);
+            
+            wp_send_json_success([
+                'html' => $html,
+                'found_families' => count($results['families']),
+                'found_children' => count($results['individual_children'])
+            ]);
+            
+        } catch (Throwable $e) {
+            error_log('CFK AJAX Error (family_search): ' . $e->getMessage());
+            wp_send_json_error('An error occurred while searching');
+        }
+    }
+    
+    private function render_family_search_results($results, $show_families, $show_individual): string {
+        ob_start();
+        
+        $families = $results['families'] ?? [];
+        $individual_children = $results['individual_children'] ?? [];
+        
+        if (empty($families) && empty($individual_children)) {
+            echo '<p class="cfk-no-results">' . __('No families or children found matching your search.', 'cfk-sponsorship') . '</p>';
+            return ob_get_clean();
+        }
+        
+        // Display families
+        if ($show_families && !empty($families)) {
+            echo '<div class="cfk-search-section">';
+            echo '<h3>' . __('Families Found', 'cfk-sponsorship') . '</h3>';
+            
+            foreach ($families as $family) {
+                $status_class = match($family['status']['sponsored']) {
+                    $family['status']['total'] => 'complete',
+                    0 => 'available',
+                    default => 'partial'
+                };
+                
+                $status_text = match($family['status']['sponsored']) {
+                    $family['status']['total'] => __('Complete', 'cfk-sponsorship'),
+                    0 => __('Available', 'cfk-sponsorship'),
+                    default => sprintf(__('%d of %d sponsored', 'cfk-sponsorship'), 
+                        $family['status']['sponsored'], $family['status']['total'])
+                };
+                
+                echo '<div class="cfk-family-group">';
+                echo '<div class="cfk-family-header">';
+                echo '<div class="cfk-family-title">' . esc_html($family['family_name']) . '</div>';
+                echo '<div class="cfk-family-status ' . esc_attr($status_class) . '">' . esc_html($status_text) . '</div>';
+                echo '</div>';
+                
+                echo '<div class="cfk-family-members">';
+                foreach ($family['members'] as $child) {
+                    $this->render_family_member_card($child);
+                }
+                echo '</div>';
+                echo '</div>';
+            }
+            echo '</div>';
+        }
+        
+        // Display individual children
+        if ($show_individual && !empty($individual_children)) {
+            echo '<div class="cfk-search-section">';
+            echo '<h3>' . __('Individual Children Found', 'cfk-sponsorship') . '</h3>';
+            echo '<div class="cfk-individual-results">';
+            
+            foreach ($individual_children as $child) {
+                $this->render_individual_child_card($child);
+            }
+            
+            echo '</div>';
+            echo '</div>';
+        }
+        
+        return ob_get_clean();
+    }
+    
+    private function render_family_member_card($child): void {
+        $sponsored_class = $child->sponsored ? 'sponsored' : '';
+        ?>
+        <div class="cfk-family-member <?php echo esc_attr($sponsored_class); ?>">
+            <?php if ($child->sponsored): ?>
+            <div class="cfk-sponsored-badge"><?php _e('Sponsored', 'cfk-sponsorship'); ?></div>
+            <?php endif; ?>
+            
+            <?php if ($child->avatar_url): ?>
+            <img src="<?php echo esc_url($child->avatar_url); ?>" alt="<?php echo esc_attr($child->name); ?>" class="cfk-child-photo">
+            <?php endif; ?>
+            
+            <h4><?php echo esc_html($child->name); ?></h4>
+            <p><strong><?php _e('ID:', 'cfk-sponsorship'); ?></strong> <?php echo esc_html($child->id); ?></p>
+            <p><strong><?php _e('Age:', 'cfk-sponsorship'); ?></strong> <?php echo esc_html($child->age); ?> <?php echo esc_html($child->gender->getIcon()); ?></p>
+            <p><strong><?php _e('Range:', 'cfk-sponsorship'); ?></strong> <?php echo esc_html($child->age_range->value); ?></p>
+            
+            <?php if (!empty($child->gift_requests)): ?>
+            <p><strong><?php _e('Gifts:', 'cfk-sponsorship'); ?></strong> <?php echo esc_html(substr($child->gift_requests, 0, 100)); ?>...</p>
+            <?php endif; ?>
+            
+            <?php if (!$child->sponsored): ?>
+            <button class="cfk-btn cfk-btn-primary cfk-select-child" data-child-id="<?php echo esc_attr($child->id); ?>">
+                <?php _e('Select for Sponsorship', 'cfk-sponsorship'); ?>
+            </button>
+            <?php endif; ?>
+        </div>
+        <?php
+    }
+    
+    private function render_individual_child_card($child): void {
+        $this->render_family_member_card($child);
     }
     
     public function cleanup_abandoned_selections(): void {
@@ -642,6 +777,10 @@ class ChristmasForKidsPlugin {
             `id` mediumint(9) NOT NULL AUTO_INCREMENT,
             `session_id` varchar(100) NOT NULL,
             `child_id` varchar(20) NOT NULL,
+            `family_id` varchar(20) DEFAULT '',
+            `family_number` varchar(10) DEFAULT '',
+            `child_letter` varchar(5) DEFAULT '',
+            `family_name` varchar(255) DEFAULT '',
             `sponsor_name` varchar(100) DEFAULT '',
             `sponsor_email` varchar(100) DEFAULT '',
             `sponsor_phone` varchar(20) DEFAULT '',
@@ -655,6 +794,8 @@ class ChristmasForKidsPlugin {
             PRIMARY KEY (`id`),
             KEY `session_id` (`session_id`),
             KEY `child_id` (`child_id`),
+            KEY `family_id` (`family_id`),
+            KEY `family_number` (`family_number`),
             KEY `status` (`status`),
             KEY `selected_time` (`selected_time`)
         ) {$charset_collate};";

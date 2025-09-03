@@ -54,10 +54,19 @@ class CFK_Email_Manager {
      * Send sponsor confirmation email
      */
     public function send_sponsor_confirmation($session_id, $sponsor_data, $children) {
+        // Get family context for children
+        $family_context = $this->get_family_context_for_children($children);
+        
         $subject = sprintf(__('Thank You for Your %s Sponsorship!', 'cfk-sponsorship'), 
                           ChristmasForKidsPlugin::get_option('cfk_email_from_name', 'Christmas for Kids'));
         
-        $message = $this->get_sponsor_email_template($sponsor_data, $children);
+        // Add family context to subject if sponsoring complete families
+        if (!empty($family_context['complete_families'])) {
+            $family_names = array_column($family_context['complete_families'], 'family_name');
+            $subject .= ' - ' . implode(', ', $family_names);
+        }
+        
+        $message = $this->get_sponsor_email_template($sponsor_data, $children, $family_context);
         
         $headers = array(
             'Content-Type: text/html; charset=UTF-8'

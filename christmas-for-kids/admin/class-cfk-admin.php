@@ -98,6 +98,9 @@ class CFK_Admin {
         // Add child photo
         $new_columns['child_photo'] = __('Photo', CFK_TEXT_DOMAIN);
         
+        // Add family information (NEW)
+        $new_columns['family_info'] = __('Family', CFK_TEXT_DOMAIN);
+        
         // Add child details
         $new_columns['child_age'] = __('Age', CFK_TEXT_DOMAIN);
         $new_columns['child_gender'] = __('Gender', CFK_TEXT_DOMAIN);
@@ -128,6 +131,38 @@ class CFK_Admin {
                 } else {
                     echo '<span style="display: inline-block; width: 50px; height: 50px; background: #f0f0f0; ' .
                          'border-radius: 4px; text-align: center; line-height: 50px; font-size: 20px;">📷</span>';
+                }
+                break;
+                
+            case 'family_info':
+                $family_id = get_post_meta($post_id, 'cfk_child_family_id', true);
+                $family_name = get_post_meta($post_id, 'cfk_child_family_name', true);
+                $family_number = get_post_meta($post_id, 'cfk_child_family_number', true);
+                
+                if (!empty($family_id)) {
+                    echo '<div class="cfk-family-info">';
+                    echo '<strong>' . esc_html($family_id) . '</strong><br>';
+                    
+                    if (!empty($family_name)) {
+                        echo '<small>' . esc_html($family_name) . '</small><br>';
+                    }
+                    
+                    // Show sibling count
+                    if (!empty($family_number)) {
+                        $child_manager = $this->plugin->get_component('child_manager');
+                        $siblings = $child_manager->get_family_siblings($family_number);
+                        $sibling_count = count($siblings) - 1; // Exclude current child
+                        
+                        if ($sibling_count > 0) {
+                            echo '<small style="color: #666;">' . 
+                                sprintf(_n('%d sibling', '%d siblings', $sibling_count, CFK_TEXT_DOMAIN), $sibling_count) . 
+                                '</small>';
+                        }
+                    }
+                    
+                    echo '</div>';
+                } else {
+                    echo '<em style="color: #999;">' . esc_html__('No family', CFK_TEXT_DOMAIN) . '</em>';
                 }
                 break;
                 

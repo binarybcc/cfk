@@ -590,4 +590,266 @@ class CFK_Frontend_Display {
             <?php
         }
     }
+    
+    /**
+     * Family grid shortcode - displays children grouped by families
+     */
+    public function family_grid_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'show_search' => 'yes',
+            'show_individual' => 'yes',
+            'per_page' => 10,
+            'columns' => 2
+        ), $atts);
+        
+        // Check if sponsorships are open
+        if (!ChristmasForKidsPlugin::get_option('cfk_sponsorships_open', false)) {
+            return $this->get_sponsorships_closed_message();
+        }
+        
+        ob_start();
+        ?>
+        <div class="cfk-family-grid" id="cfk-family-grid">
+            <?php if ($atts['show_search'] === 'yes'): ?>
+            <div class="cfk-family-search">
+                <div class="cfk-search-form">
+                    <label for="cfk-family-search-input"><?php _e('Search by Family or Child ID:', 'cfk-sponsorship'); ?></label>
+                    <div class="cfk-search-input-group">
+                        <input type="text" id="cfk-family-search-input" 
+                               placeholder="<?php _e('Enter family ID (123) or child ID (123A)...', 'cfk-sponsorship'); ?>">
+                        <button id="cfk-family-search-btn" class="cfk-btn cfk-btn-primary">
+                            <?php _e('Search', 'cfk-sponsorship'); ?>
+                        </button>
+                    </div>
+                    <div class="cfk-search-options">
+                        <label>
+                            <input type="checkbox" id="cfk-show-families" checked>
+                            <?php _e('Show family groups', 'cfk-sponsorship'); ?>
+                        </label>
+                        <?php if ($atts['show_individual'] === 'yes'): ?>
+                        <label>
+                            <input type="checkbox" id="cfk-show-individual" checked>
+                            <?php _e('Show individual children', 'cfk-sponsorship'); ?>
+                        </label>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <div id="cfk-family-results">
+                <?php echo $this->get_default_family_view($atts); ?>
+            </div>
+        </div>
+        
+        <style>
+        .cfk-family-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .cfk-family-search {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .cfk-search-input-group {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+        }
+        
+        .cfk-search-input-group input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        .cfk-search-options {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .cfk-search-options label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .cfk-family-group {
+            border: 2px solid #e1e1e1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            background: #fff;
+        }
+        
+        .cfk-family-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .cfk-family-title {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .cfk-family-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .cfk-family-status.complete {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .cfk-family-status.partial {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .cfk-family-status.available {
+            background: #cce5ff;
+            color: #004085;
+        }
+        
+        .cfk-family-members {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .cfk-family-member {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            position: relative;
+        }
+        
+        .cfk-family-member.sponsored {
+            opacity: 0.6;
+            background: #f8f9fa;
+        }
+        
+        .cfk-family-member .cfk-sponsored-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+        }
+        </style>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            $('#cfk-family-search-btn').on('click', function() {
+                var searchTerm = $('#cfk-family-search-input').val();
+                var showFamilies = $('#cfk-show-families').is(':checked');
+                var showIndividual = $('#cfk-show-individual').is(':checked');
+                
+                if (searchTerm.trim() === '') {
+                    alert('<?php _e("Please enter a search term", "cfk-sponsorship"); ?>');
+                    return;
+                }
+                
+                cfkPerformFamilySearch(searchTerm, showFamilies, showIndividual);
+            });
+            
+            $('#cfk-family-search-input').on('keypress', function(e) {
+                if (e.which === 13) {
+                    $('#cfk-family-search-btn').click();
+                }
+            });
+        });
+        
+        function cfkPerformFamilySearch(searchTerm, showFamilies, showIndividual) {
+            $.ajax({
+                url: cfk_ajax.ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'cfk_family_search',
+                    nonce: cfk_ajax.nonce,
+                    search_term: searchTerm,
+                    show_families: showFamilies ? 1 : 0,
+                    show_individual: showIndividual ? 1 : 0
+                },
+                beforeSend: function() {
+                    $('#cfk-family-results').html('<p><?php _e("Searching...", "cfk-sponsorship"); ?></p>');
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#cfk-family-results').html(response.data.html);
+                    } else {
+                        $('#cfk-family-results').html('<p class="cfk-error">' + 
+                            (response.data.message || '<?php _e("Search failed", "cfk-sponsorship"); ?>') + '</p>');
+                    }
+                },
+                error: function() {
+                    $('#cfk-family-results').html('<p class="cfk-error"><?php _e("An error occurred", "cfk-sponsorship"); ?></p>');
+                }
+            });
+        }
+        </script>
+        <?php
+        return ob_get_clean();
+    }
+    
+    /**
+     * Get default family view (recent families or all families)
+     */
+    private function get_default_family_view($atts) {
+        // Get recent families or show a sample
+        $family_stats = CFK_Children_Manager::get_family_statistics();
+        
+        if ($family_stats['total_families'] === 0) {
+            return '<p>' . __('No families available for sponsorship at this time.', 'cfk-sponsorship') . '</p>';
+        }
+        
+        return sprintf(
+            '<div class="cfk-family-stats">
+                <h3>%s</h3>
+                <div class="cfk-stats-grid">
+                    <div class="cfk-stat">
+                        <strong>%d</strong><br>%s
+                    </div>
+                    <div class="cfk-stat">
+                        <strong>%d</strong><br>%s
+                    </div>
+                    <div class="cfk-stat">
+                        <strong>%d</strong><br>%s
+                    </div>
+                    <div class="cfk-stat">
+                        <strong>%.1f%%</strong><br>%s
+                    </div>
+                </div>
+                <p>%s</p>
+            </div>',
+            __('Family Sponsorship Overview', 'cfk-sponsorship'),
+            $family_stats['total_families'],
+            __('Total Families', 'cfk-sponsorship'),
+            $family_stats['complete_families'],
+            __('Complete Families', 'cfk-sponsorship'),
+            $family_stats['unsponsored_families'],
+            __('Need Sponsors', 'cfk-sponsorship'),
+            $family_stats['completion_percentage'],
+            __('Completion Rate', 'cfk-sponsorship'),
+            __('Use the search above to find specific families or children by their ID.', 'cfk-sponsorship')
+        );
+    }
 }
