@@ -49,6 +49,13 @@ define('CFK_PLUGIN_FILE', __FILE__);
 define('CFK_PLUGIN_PATH', plugin_dir_path(__FILE__));
 
 /**
+ * Plugin directory path constant (alternative name for compatibility)
+ * 
+ * @since 1.0.0
+ */
+define('CFK_PLUGIN_DIR', plugin_dir_path(__FILE__));
+
+/**
  * Plugin directory URL constant
  * 
  * @since 1.0.0

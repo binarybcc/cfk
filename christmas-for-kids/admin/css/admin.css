@@ -1,0 +1,638 @@
+/**
+ * Christmas for Kids - Admin Styles
+ * 
+ * Styles for the admin interface of the plugin
+ * 
+ * @package ChristmasForKids
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   General Admin Styles
+   ========================================================================== */
+
+.cfk-admin-wrapper {
+    max-width: 100%;
+}
+
+.cfk-admin-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.cfk-admin-header .dashicons {
+    font-size: 32px;
+    color: #d63638;
+    margin-right: 10px;
+}
+
+/* ==========================================================================
+   Dashboard Styles
+   ========================================================================== */
+
+.cfk-dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 20px 0 30px 0;
+}
+
+.cfk-stat-card {
+    background: #ffffff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+}
+
+.cfk-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.cfk-stat-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #646970;
+}
+
+.cfk-stat-number {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 5px;
+}
+
+.cfk-stat-number.available {
+    color: #00a32a;
+}
+
+.cfk-stat-number.selected {
+    color: #ff8c00;
+}
+
+.cfk-stat-number.sponsored {
+    color: #0073aa;
+}
+
+.cfk-stat-number.total {
+    color: #2c3e50;
+}
+
+.cfk-stat-label {
+    font-size: 12px;
+    color: #646970;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* ==========================================================================
+   Child Post Type List Styles
+   ========================================================================== */
+
+.wp-list-table .cfk-gender-male {
+    color: #0073aa;
+    font-weight: 500;
+}
+
+.wp-list-table .cfk-gender-female {
+    color: #d63638;
+    font-weight: 500;
+}
+
+.wp-list-table .column-child_photo {
+    width: 70px;
+    text-align: center;
+}
+
+.wp-list-table .column-child_age {
+    width: 80px;
+}
+
+.wp-list-table .column-child_gender {
+    width: 80px;
+}
+
+.wp-list-table .column-child_availability {
+    width: 120px;
+}
+
+.wp-list-table .column-child_interests {
+    width: 200px;
+}
+
+/* Status badges in list table */
+.wp-list-table .cfk-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.wp-list-table .cfk-status-available {
+    background: #00a32a;
+    color: white;
+}
+
+.wp-list-table .cfk-status-selected {
+    background: #ff8c00;
+    color: white;
+}
+
+.wp-list-table .cfk-status-sponsored {
+    background: #0073aa;
+    color: white;
+}
+
+.wp-list-table .cfk-status-unavailable {
+    background: #d63638;
+    color: white;
+}
+
+/* ==========================================================================
+   Meta Box Styles
+   ========================================================================== */
+
+.cfk-meta-box {
+    background: #fff;
+}
+
+.cfk-meta-box .form-table th {
+    width: 140px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.cfk-meta-box .form-table td {
+    padding: 15px 10px;
+}
+
+.cfk-meta-box .form-table input[type="text"],
+.cfk-meta-box .form-table input[type="number"],
+.cfk-meta-box .form-table input[type="email"],
+.cfk-meta-box .form-table select,
+.cfk-meta-box .form-table textarea {
+    width: 100%;
+    max-width: 400px;
+}
+
+.cfk-meta-box .form-table .description {
+    margin-top: 5px;
+    font-size: 13px;
+    color: #646970;
+    font-style: italic;
+}
+
+/* Required field indicators */
+.cfk-meta-box .required::after {
+    content: " *";
+    color: #d63638;
+    font-weight: bold;
+}
+
+.cfk-meta-box input[required]:invalid,
+.cfk-meta-box select[required]:invalid {
+    border-color: #d63638;
+    box-shadow: 0 0 2px rgba(214, 54, 56, 0.8);
+}
+
+/* ==========================================================================
+   Availability Meta Box
+   ========================================================================== */
+
+.cfk-availability-meta select {
+    width: 100%;
+    margin: 5px 0 15px 0;
+}
+
+.cfk-status-badge {
+    display: block;
+    text-align: center;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin: 10px 0;
+}
+
+.cfk-status-info {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.cfk-status-actions {
+    margin-top: 15px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.cfk-status-actions .button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+.cfk-visibility-info {
+    margin-top: 15px;
+    padding: 10px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+/* ==========================================================================
+   Sponsorship Meta Box
+   ========================================================================== */
+
+.cfk-sponsorship-info {
+    font-size: 14px;
+}
+
+.cfk-sponsorship-record {
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+.cfk-sponsorship-record .cfk-sponsor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.cfk-sponsorship-record .cfk-sponsor-name {
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.cfk-sponsorship-record .cfk-status-badge {
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: white;
+}
+
+.cfk-sponsorship-record .cfk-sponsor-details {
+    font-size: 13px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.cfk-sponsorship-record .cfk-sponsor-details a {
+    color: #0073aa;
+    text-decoration: none;
+}
+
+.cfk-sponsorship-record .cfk-sponsor-details a:hover {
+    text-decoration: underline;
+}
+
+.cfk-sponsorship-record code {
+    font-size: 11px;
+    background: #e9ecef;
+    padding: 2px 4px;
+    border-radius: 2px;
+    font-family: Monaco, Consolas, monospace;
+}
+
+.cfk-sponsorship-stats {
+    margin-top: 20px;
+    padding: 10px;
+    background: #f0f0f1;
+    border-radius: 4px;
+}
+
+.cfk-sponsorship-stats h5 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1d2327;
+}
+
+.cfk-sponsorship-stats .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    font-size: 12px;
+}
+
+.cfk-sponsorship-stats .stat-item {
+    text-align: center;
+}
+
+.cfk-sponsorship-stats .stat-number {
+    display: block;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.cfk-sponsorship-actions {
+    margin-top: 20px;
+    border-top: 1px solid #ddd;
+    padding-top: 15px;
+}
+
+.cfk-sponsorship-actions h5 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cfk-sponsorship-actions .button {
+    margin-right: 5px;
+    margin-bottom: 5px;
+}
+
+/* ==========================================================================
+   CSV Import Styles
+   ========================================================================== */
+
+.cfk-import-wrapper {
+    max-width: 800px;
+}
+
+.cfk-import-section {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.cfk-import-section h3 {
+    margin-top: 0;
+    color: #1d2327;
+}
+
+.cfk-file-upload {
+    border: 2px dashed #c3c4c7;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: border-color 0.3s ease;
+}
+
+.cfk-file-upload:hover,
+.cfk-file-upload.dragover {
+    border-color: #0073aa;
+    background: #f0f6fc;
+}
+
+.cfk-file-upload .upload-icon {
+    font-size: 48px;
+    color: #c3c4c7;
+    margin-bottom: 15px;
+}
+
+.cfk-file-upload input[type="file"] {
+    margin: 15px 0;
+}
+
+.cfk-import-progress {
+    display: none;
+    margin: 20px 0;
+}
+
+.cfk-progress-bar {
+    background: #e5e5e5;
+    border-radius: 4px;
+    height: 20px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.cfk-progress-fill {
+    background: linear-gradient(90deg, #0073aa, #005a87);
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.cfk-import-results {
+    display: none;
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.cfk-import-results.success {
+    background: #d1f2eb;
+    border: 1px solid #00a32a;
+    color: #00a32a;
+}
+
+.cfk-import-results.error {
+    background: #f8d7da;
+    border: 1px solid #d63638;
+    color: #d63638;
+}
+
+.cfk-import-log {
+    max-height: 200px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    font-family: Monaco, Consolas, monospace;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+.cfk-sample-csv {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.cfk-sample-csv table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.cfk-sample-csv th,
+.cfk-sample-csv td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.cfk-sample-csv th {
+    background: #e9ecef;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   Responsive Admin Styles
+   ========================================================================== */
+
+@media screen and (max-width: 782px) {
+    .cfk-dashboard-stats {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .cfk-stat-card {
+        padding: 15px;
+    }
+    
+    .cfk-stat-number {
+        font-size: 28px;
+    }
+    
+    .cfk-meta-box .form-table th,
+    .cfk-meta-box .form-table td {
+        display: block;
+        width: 100%;
+        padding: 10px;
+    }
+    
+    .cfk-meta-box .form-table th {
+        padding-bottom: 5px;
+    }
+    
+    .cfk-status-actions .button {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .cfk-sponsorship-stats .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .cfk-sponsorship-stats .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wp-list-table .column-child_interests {
+        display: none;
+    }
+    
+    .cfk-sponsorship-record .cfk-sponsor-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* ==========================================================================
+   Loading and Animation Styles
+   ========================================================================== */
+
+.cfk-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #646970;
+}
+
+.cfk-loading::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 50%;
+    border-top-color: #0073aa;
+    animation: cfk-spin 1s ease-in-out infinite;
+}
+
+@keyframes cfk-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.cfk-fade-in {
+    animation: cfk-fadeIn 0.3s ease forwards;
+}
+
+@keyframes cfk-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ==========================================================================
+   Notice and Alert Styles
+   ========================================================================== */
+
+.cfk-notice {
+    padding: 12px;
+    border-left: 4px solid #0073aa;
+    background: #f0f6fc;
+    margin: 15px 0;
+}
+
+.cfk-notice.error {
+    border-left-color: #d63638;
+    background: #fcf0f1;
+    color: #d63638;
+}
+
+.cfk-notice.success {
+    border-left-color: #00a32a;
+    background: #edfaef;
+    color: #00a32a;
+}
+
+.cfk-notice.warning {
+    border-left-color: #ff8c00;
+    background: #fff8e5;
+    color: #ff8c00;
+}
+
+/* ==========================================================================
+   Button Enhancements
+   ========================================================================== */
+
+.button.cfk-button-primary {
+    background: linear-gradient(135deg, #d63638 0%, #b91c1c 100%);
+    border-color: #b91c1c;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+.button.cfk-button-primary:hover {
+    background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+    border-color: #991b1b;
+}
+
+.button.cfk-button-secondary {
+    background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+    border-color: #005a87;
+    color: white;
+    text-shadow: none;
+}
+
+.button.cfk-button-secondary:hover {
+    background: linear-gradient(135deg, #005a87 0%, #004a73 100%);
+    border-color: #004a73;
+    color: white;
+}

@@ -1,0 +1,668 @@
+/**
+ * Christmas for Kids - Public Styles
+ * 
+ * Frontend styles for child sponsorship display
+ * Mobile-first responsive design
+ * 
+ * @package ChristmasForKids
+ * @since 1.0.0
+ */
+
+/* ==========================================================================
+   Container and Wrapper Styles
+   ========================================================================== */
+
+.cfk-children-wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Filters and Search */
+.cfk-children-filters {
+    background: #f8f9fa;
+    border: 1px solid #e1e5e9;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    align-items: center;
+}
+
+.cfk-search-container {
+    flex: 1 1 250px;
+    min-width: 200px;
+}
+
+.cfk-search-container input[type="text"] {
+    width: 100%;
+    padding: 10px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+.cfk-search-container input[type="text"]:focus {
+    border-color: #007cba;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.1);
+}
+
+.cfk-filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.cfk-filter-container select {
+    padding: 8px 12px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 14px;
+    background: white;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+}
+
+.cfk-filter-container select:focus {
+    border-color: #007cba;
+    outline: none;
+}
+
+/* ==========================================================================
+   Children Grid Layout
+   ========================================================================== */
+
+.cfk-children-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+/* Responsive grid based on columns attribute */
+.cfk-children-grid[data-columns="2"] {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+.cfk-children-grid[data-columns="3"] {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.cfk-children-grid[data-columns="4"] {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+.cfk-children-grid[data-columns="5"] {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.cfk-children-grid[data-columns="6"] {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* ==========================================================================
+   Child Card Styles
+   ========================================================================== */
+
+.cfk-child-card {
+    background: #ffffff;
+    border: 1px solid #e1e5e9;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.cfk-child-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    border-color: #007cba;
+}
+
+/* Child Photo */
+.cfk-child-photo {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+    background: #f8f9fa;
+}
+
+.cfk-child-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.cfk-child-card:hover .cfk-child-photo img {
+    transform: scale(1.05);
+}
+
+.cfk-child-photo-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #6c757d;
+}
+
+.cfk-photo-icon {
+    font-size: 48px;
+    opacity: 0.5;
+}
+
+/* Child Information */
+.cfk-child-info {
+    padding: 20px;
+    text-align: center;
+}
+
+.cfk-child-name {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0 0 12px 0;
+    color: #2c3e50;
+    line-height: 1.3;
+}
+
+.cfk-child-details {
+    margin-bottom: 20px;
+    color: #5a6c7d;
+    line-height: 1.6;
+}
+
+.cfk-child-age {
+    display: inline-block;
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 10px;
+}
+
+.cfk-child-interests {
+    font-size: 14px;
+    margin-top: 8px;
+}
+
+.cfk-child-interests strong {
+    color: #2c3e50;
+}
+
+/* Child Actions */
+.cfk-child-actions {
+    padding: 0 20px 20px 20px;
+}
+
+.cfk-sponsor-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.cfk-sponsor-btn:hover {
+    background: linear-gradient(135deg, #20c997 0%, #28a745 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.cfk-sponsor-btn:active {
+    transform: translateY(0);
+}
+
+.cfk-sponsor-btn:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ==========================================================================
+   Loading and Error States
+   ========================================================================== */
+
+.cfk-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    font-size: 18px;
+    color: #6c757d;
+}
+
+.cfk-loading::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #e1e5e9;
+    border-radius: 50%;
+    border-top-color: #007cba;
+    animation: cfk-spin 1s ease-in-out infinite;
+    margin-right: 10px;
+}
+
+.cfk-error,
+.cfk-no-children {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.cfk-error {
+    border-color: #dc3545;
+    background: #f8d7da;
+    color: #721c24;
+}
+
+/* ==========================================================================
+   Pagination
+   ========================================================================== */
+
+.cfk-pagination {
+    display: flex;
+    justify-content: center;
+    margin: 40px 0 20px 0;
+}
+
+.cfk-pagination ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 5px;
+}
+
+.cfk-pagination li {
+    margin: 0;
+}
+
+.cfk-pagination a,
+.cfk-pagination span {
+    display: block;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    color: #007cba;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.cfk-pagination a:hover {
+    background: #007cba;
+    color: white;
+    border-color: #007cba;
+}
+
+.cfk-pagination .current span {
+    background: #007cba;
+    color: white;
+    border-color: #007cba;
+}
+
+.cfk-pagination .dots span {
+    color: #6c757d;
+    cursor: default;
+}
+
+/* ==========================================================================
+   Sponsor Modal (for future implementation)
+   ========================================================================== */
+
+.cfk-sponsor-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.cfk-sponsor-modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cfk-sponsor-modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.cfk-modal-header {
+    padding: 30px 30px 0;
+    text-align: center;
+    border-bottom: 1px solid #e1e5e9;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+}
+
+.cfk-modal-header h2 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.5rem;
+}
+
+.cfk-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #6c757d;
+    line-height: 1;
+    padding: 5px;
+}
+
+.cfk-modal-body {
+    padding: 0 30px 30px;
+}
+
+/* ==========================================================================
+   Form Styles (for sponsor form)
+   ========================================================================== */
+
+.cfk-sponsor-form .form-group {
+    margin-bottom: 20px;
+}
+
+.cfk-sponsor-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.cfk-sponsor-form input[type="text"],
+.cfk-sponsor-form input[type="email"],
+.cfk-sponsor-form input[type="tel"],
+.cfk-sponsor-form textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.cfk-sponsor-form input:focus,
+.cfk-sponsor-form textarea:focus {
+    border-color: #007cba;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 124, 186, 0.1);
+}
+
+.cfk-sponsor-form .form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e1e5e9;
+}
+
+.cfk-sponsor-form button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cfk-sponsor-form .btn-cancel {
+    background: #6c757d;
+    color: white;
+}
+
+.cfk-sponsor-form .btn-submit {
+    background: #28a745;
+    color: white;
+}
+
+.cfk-sponsor-form button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes cfk-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes cfk-fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cfk-child-card {
+    animation: cfk-fadeIn 0.5s ease forwards;
+}
+
+/* ==========================================================================
+   Responsive Design
+   ========================================================================== */
+
+/* Tablets */
+@media screen and (max-width: 768px) {
+    .cfk-children-wrapper {
+        padding: 15px;
+    }
+    
+    .cfk-children-filters {
+        padding: 15px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .cfk-search-container {
+        margin-bottom: 10px;
+    }
+    
+    .cfk-filter-container {
+        justify-content: space-between;
+    }
+    
+    .cfk-filter-container select {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .cfk-children-grid[data-columns="2"],
+    .cfk-children-grid[data-columns="3"],
+    .cfk-children-grid[data-columns="4"],
+    .cfk-children-grid[data-columns="5"],
+    .cfk-children-grid[data-columns="6"] {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    
+    .cfk-child-photo {
+        height: 220px;
+    }
+    
+    .cfk-sponsor-modal {
+        padding: 10px;
+    }
+    
+    .cfk-modal-header,
+    .cfk-modal-body {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+}
+
+/* Mobile phones */
+@media screen and (max-width: 480px) {
+    .cfk-children-wrapper {
+        padding: 10px;
+    }
+    
+    .cfk-children-grid {
+        gap: 20px;
+    }
+    
+    .cfk-children-grid[data-columns="2"],
+    .cfk-children-grid[data-columns="3"],
+    .cfk-children-grid[data-columns="4"],
+    .cfk-children-grid[data-columns="5"],
+    .cfk-children-grid[data-columns="6"] {
+        grid-template-columns: 1fr;
+    }
+    
+    .cfk-child-photo {
+        height: 200px;
+    }
+    
+    .cfk-child-info {
+        padding: 15px;
+    }
+    
+    .cfk-child-actions {
+        padding: 0 15px 15px 15px;
+    }
+    
+    .cfk-child-name {
+        font-size: 1.3rem;
+    }
+    
+    .cfk-filter-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .cfk-pagination a,
+    .cfk-pagination span {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
+
+/* ==========================================================================
+   Accessibility
+   ========================================================================== */
+
+/* Focus styles for keyboard navigation */
+.cfk-sponsor-btn:focus,
+.cfk-search-container input:focus,
+.cfk-filter-container select:focus {
+    outline: 2px solid #007cba;
+    outline-offset: 2px;
+}
+
+/* Screen reader only content */
+.cfk-sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .cfk-child-card {
+        border-width: 2px;
+    }
+    
+    .cfk-sponsor-btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .cfk-child-card,
+    .cfk-child-photo img,
+    .cfk-sponsor-btn,
+    .cfk-pagination a,
+    .cfk-pagination span {
+        transition: none;
+    }
+    
+    .cfk-child-card:hover .cfk-child-photo img {
+        transform: none;
+    }
+    
+    .cfk-loading::before {
+        animation: none;
+    }
+}
+
+/* ==========================================================================
+   Print Styles
+   ========================================================================== */
+
+@media print {
+    .cfk-children-filters,
+    .cfk-child-actions,
+    .cfk-pagination {
+        display: none;
+    }
+    
+    .cfk-children-grid {
+        display: block;
+    }
+    
+    .cfk-child-card {
+        page-break-inside: avoid;
+        margin-bottom: 20px;
+        box-shadow: none;
+        border: 1px solid #000;
+    }
+    
+    .cfk-child-photo {
+        height: auto;
+        max-height: 200px;
+    }
+}

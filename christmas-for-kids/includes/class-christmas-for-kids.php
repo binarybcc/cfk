@@ -138,8 +138,36 @@ class Christmas_For_Kids {
      */
     public function init_components(): void {
         try {
-            // Components will be loaded here in future phases
-            // This method is prepared for modular component loading
+            // Load component classes
+            $this->load_component_classes();
+            
+            // Initialize Child Manager
+            require_once CFK_PLUGIN_PATH . 'includes/class-cfk-child-manager.php';
+            $child_manager = new CFK_Child_Manager();
+            $child_manager->init();
+            $this->components['child_manager'] = $child_manager;
+            
+            // Initialize CSV Importer
+            require_once CFK_PLUGIN_PATH . 'includes/class-cfk-csv-importer.php';
+            $csv_importer = new CFK_CSV_Importer();
+            $csv_importer->init();
+            $this->components['csv_importer'] = $csv_importer;
+            
+            // Initialize Public Frontend (only on frontend)
+            if (!is_admin()) {
+                require_once CFK_PLUGIN_PATH . 'public/class-cfk-public.php';
+                $public = new CFK_Public($this);
+                $public->init();
+                $this->components['public'] = $public;
+            }
+            
+            // Initialize Admin functionality (only on admin)
+            if (is_admin()) {
+                require_once CFK_PLUGIN_PATH . 'admin/class-cfk-admin.php';
+                $admin = new CFK_Admin($this);
+                $admin->init();
+                $this->components['admin'] = $admin;
+            }
             
             $this->log_message('All components initialized successfully', 'info');
         } catch (Exception $e) {
@@ -147,6 +175,38 @@ class Christmas_For_Kids {
                 'Failed to initialize components: ' . $e->getMessage(),
                 'error'
             );
+        }
+    }
+    
+    /**
+     * Load component class files
+     * 
+     * @since 1.0.0
+     * @return void
+     */
+    private function load_component_classes(): void {
+        $class_files = [
+            'includes/class-cfk-child-manager.php',
+            'includes/class-cfk-csv-importer.php',
+        ];
+        
+        // Add frontend files for non-admin requests
+        if (!is_admin()) {
+            $class_files[] = 'public/class-cfk-public.php';
+        }
+        
+        // Add admin files for admin requests
+        if (is_admin()) {
+            $class_files[] = 'admin/class-cfk-admin.php';
+        }
+        
+        foreach ($class_files as $file) {
+            $file_path = CFK_PLUGIN_PATH . $file;
+            if (file_exists($file_path)) {
+                require_once $file_path;
+            } else {
+                throw new Exception("Required class file not found: {$file}");
+            }
         }
     }
     
@@ -161,6 +221,7 @@ class Christmas_For_Kids {
             return;
         }
         
+        // Main menu page
         add_menu_page(
             __('Christmas for Kids', CFK_TEXT_DOMAIN),
             __('Christmas for Kids', CFK_TEXT_DOMAIN),
@@ -170,6 +231,40 @@ class Christmas_For_Kids {
             'dashicons-heart',
             30
         );
+        
+        // Add Children submenu (manages the custom post type)
+        add_submenu_page(
+            'christmas-for-kids',
+            __('All Children', CFK_TEXT_DOMAIN),
+            __('All Children', CFK_TEXT_DOMAIN),
+            'manage_options',
+            'edit.php?post_type=' . CFK_Child_Manager::get_post_type()
+        );
+        
+        // Add New Child submenu
+        add_submenu_page(
+            'christmas-for-kids',
+            __('Add New Child', CFK_TEXT_DOMAIN),
+            __('Add New Child', CFK_TEXT_DOMAIN),
+            'manage_options',
+            'post-new.php?post_type=' . CFK_Child_Manager::get_post_type()
+        );
+        
+        // CSV Import submenu
+        add_submenu_page(
+            'christmas-for-kids',
+            __('Import Children', CFK_TEXT_DOMAIN),
+            __('Import Children', CFK_TEXT_DOMAIN),
+            'manage_options',
+            'cfk-import-csv',
+            [$this, 'csv_import_page_callback']
+        );
+        
+        // Hide the default submenu item that WordPress creates
+        global $submenu;
+        if (isset($submenu['christmas-for-kids'])) {
+            unset($submenu['christmas-for-kids'][0]);
+        }
     }
     
     /**
@@ -179,10 +274,56 @@ class Christmas_For_Kids {
      * @return void
      */
     public function admin_page_callback(): void {
+        $child_count = wp_count_posts(CFK_Child_Manager::get_post_type())->publish;
+        $available_children = count($this->components['child_manager']->get_available_children());
+        
         echo '<div class="wrap">';
         echo '<h1>' . esc_html__('Christmas for Kids - Sponsorship System', CFK_TEXT_DOMAIN) . '</h1>';
-        echo '<p>' . esc_html__('Plugin successfully initialized. Administrative interface coming in Phase 2.', CFK_TEXT_DOMAIN) . '</p>';
+        
+        echo '<div class="cfk-dashboard-stats" style="display: flex; gap: 20px; margin: 20px 0;">';
+        
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; min-width: 200px;">';
+        echo '<h3 style="margin-top: 0;">' . esc_html__('Total Children', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div style="font-size: 32px; font-weight: bold; color: #0073aa;">' . esc_html($child_count) . '</div>';
         echo '</div>';
+        
+        echo '<div class="cfk-stat-card" style="background: #fff; border: 1px solid #c3c4c7; border-radius: 4px; padding: 20px; min-width: 200px;">';
+        echo '<h3 style="margin-top: 0;">' . esc_html__('Available for Sponsorship', CFK_TEXT_DOMAIN) . '</h3>';
+        echo '<div style="font-size: 32px; font-weight: bold; color: #00a32a;">' . esc_html($available_children) . '</div>';
+        echo '</div>';
+        
+        echo '</div>';
+        
+        echo '<div class="cfk-dashboard-actions" style="margin: 30px 0;">';
+        echo '<h2>' . esc_html__('Quick Actions', CFK_TEXT_DOMAIN) . '</h2>';
+        echo '<p>';
+        echo '<a href="' . admin_url('post-new.php?post_type=' . CFK_Child_Manager::get_post_type()) . '" class="button button-primary">' . esc_html__('Add New Child', CFK_TEXT_DOMAIN) . '</a> ';
+        echo '<a href="' . admin_url('admin.php?page=cfk-import-csv') . '" class="button">' . esc_html__('Import Children from CSV', CFK_TEXT_DOMAIN) . '</a> ';
+        echo '<a href="' . admin_url('edit.php?post_type=' . CFK_Child_Manager::get_post_type()) . '" class="button">' . esc_html__('View All Children', CFK_TEXT_DOMAIN) . '</a>';
+        echo '</p>';
+        echo '</div>';
+        
+        echo '<div class="cfk-dashboard-info">';
+        echo '<h2>' . esc_html__('System Information', CFK_TEXT_DOMAIN) . '</h2>';
+        echo '<p><strong>' . esc_html__('Plugin Version:', CFK_TEXT_DOMAIN) . '</strong> ' . esc_html($this->version) . '</p>';
+        echo '<p><strong>' . esc_html__('Database Version:', CFK_TEXT_DOMAIN) . '</strong> ' . esc_html(get_option('cfk_db_version', '1.0.0')) . '</p>';
+        echo '</div>';
+        
+        echo '</div>';
+    }
+    
+    /**
+     * CSV import page callback
+     * 
+     * @since 1.0.0
+     * @return void
+     */
+    public function csv_import_page_callback(): void {
+        if (isset($this->components['csv_importer'])) {
+            $this->components['csv_importer']->render_import_page();
+        } else {
+            wp_die(__('CSV Importer component not available.', CFK_TEXT_DOMAIN));
+        }
     }
     
     /**
@@ -193,12 +334,45 @@ class Christmas_For_Kids {
      * @return void
      */
     public function admin_enqueue_scripts(string $hook_suffix): void {
-        // Only load on our admin pages
-        if (strpos($hook_suffix, 'christmas-for-kids') === false) {
+        // Only load on our admin pages or child post type pages
+        if (strpos($hook_suffix, 'christmas-for-kids') === false && 
+            strpos($hook_suffix, 'cfk_child') === false &&
+            !in_array($hook_suffix, [
+                'post.php',
+                'post-new.php',
+                'edit.php'
+            ]) &&
+            (get_current_screen()->post_type ?? '') !== CFK_Child_Manager::get_post_type()) {
             return;
         }
         
-        // Admin scripts and styles will be enqueued here in future phases
+        // Enqueue WordPress media scripts for file uploads
+        if (strpos($hook_suffix, 'cfk-import-csv') !== false) {
+            wp_enqueue_media();
+        }
+        
+        // Common admin styles
+        wp_enqueue_style(
+            'cfk-admin-styles',
+            CFK_PLUGIN_URL . 'admin/css/admin.css',
+            [],
+            $this->version
+        );
+        
+        // Admin AJAX script with nonce
+        wp_enqueue_script(
+            'cfk-admin-scripts',
+            CFK_PLUGIN_URL . 'admin/js/admin.js',
+            ['jquery'],
+            $this->version,
+            true
+        );
+        
+        wp_localize_script('cfk-admin-scripts', 'cfk_ajax', [
+            'ajaxurl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('cfk_ajax_nonce'),
+            'csv_import_nonce' => wp_create_nonce('cfk_csv_import_nonce')
+        ]);
     }
     
     /**
@@ -208,7 +382,8 @@ class Christmas_For_Kids {
      * @return void
      */
     public function public_enqueue_scripts(): void {
-        // Public scripts and styles will be enqueued here in future phases
+        // Let the public component handle its own script enqueuing
+        // This method is kept for compatibility
     }
     
     /**
@@ -223,8 +398,39 @@ class Christmas_For_Kids {
             wp_die('Security check failed');
         }
         
-        // AJAX handlers will be implemented in future phases
-        wp_die('AJAX functionality coming in Phase 2');
+        $action = sanitize_text_field($_POST['cfk_action'] ?? '');
+        
+        switch ($action) {
+            case 'get_dashboard_stats':
+                $this->handle_dashboard_stats();
+                break;
+                
+            default:
+                wp_send_json_error(['message' => 'Invalid action']);
+                break;
+        }
+    }
+    
+    /**
+     * Handle dashboard statistics AJAX request
+     * 
+     * @since 1.0.0
+     * @return void
+     */
+    private function handle_dashboard_stats(): void {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'Insufficient permissions']);
+        }
+        
+        $child_count = wp_count_posts(CFK_Child_Manager::get_post_type())->publish;
+        $available_children = isset($this->components['child_manager']) ? 
+            count($this->components['child_manager']->get_available_children()) : 0;
+        
+        wp_send_json_success([
+            'total_children' => $child_count,
+            'available_children' => $available_children,
+            'sponsored_children' => $child_count - $available_children
+        ]);
     }
     
     /**
@@ -470,5 +676,16 @@ class Christmas_For_Kids {
     public function needs_database_update(): bool {
         $current_version = get_option('cfk_db_version', '0');
         return version_compare($current_version, self::DB_VERSION, '<');
+    }
+    
+    /**
+     * Get a component instance
+     * 
+     * @since 1.0.0
+     * @param string $component_name The component name
+     * @return object|null The component instance or null if not found
+     */
+    public function get_component(string $component_name): ?object {
+        return $this->components[$component_name] ?? null;
     }
 }
