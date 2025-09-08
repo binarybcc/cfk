@@ -27,7 +27,7 @@ class CFK_CSV_Importer {
      * @since 1.0.0
      * @var array<string>
      */
-    private const REQUIRED_COLUMNS = ['name', 'age', 'gender', 'family_id'];
+    private const REQUIRED_COLUMNS = ['name', 'age', 'gender'];
     
     /**
      * Optional CSV columns (updated for family support)
@@ -36,8 +36,8 @@ class CFK_CSV_Importer {
      * @var array<string>
      */
     private const OPTIONAL_COLUMNS = [
-        'family_name', 'shirt_size', 'pants_size', 'shoe_size', 'coat_size',
-        'interests', 'family_situation', 'special_needs'
+        'grade', 'family_name', 'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
+        'interests', 'greatest_need', 'wish_list', 'family_situation', 'special_needs'
     ];
     
     /**
@@ -340,19 +340,16 @@ class CFK_CSV_Importer {
             }
         }
         
-        // Validate name length
+        // Validate name format and extract family ID
         if (isset($row_data['name'])) {
             $name = trim($row_data['name']);
             if (strlen($name) > 255) {
                 $errors[] = "Row {$row_number}: Name too long (max 255 characters)";
             }
-        }
-        
-        // Validate family ID format (NEW)
-        if (isset($row_data['family_id'])) {
-            $family_id = trim($row_data['family_id']);
-            if (!empty($family_id) && !CFK_Child_Manager::validate_family_id($family_id)) {
-                $errors[] = "Row {$row_number}: Invalid family ID format '{$family_id}' (use format: 123A)";
+            
+            // Validate family ID format embedded in name (NEW)
+            if (!empty($name) && !CFK_Child_Manager::validate_family_id($name)) {
+                $errors[] = "Row {$row_number}: Invalid name/family ID format '{$name}' (use format: 123A)";
             }
         }
         
@@ -569,16 +566,19 @@ class CFK_CSV_Importer {
         $meta_mapping = [
             'age' => 'cfk_child_age',
             'gender' => 'cfk_child_gender',
-            // Family relationship fields (NEW)
-            'family_id' => 'cfk_child_family_id',
+            'grade' => 'cfk_child_grade',
+            // Family relationship fields (NEW) - name contains the family ID
+            'name' => 'cfk_child_family_id',
             'family_name' => 'cfk_child_family_name',
             // Clothing sizes
             'shirt_size' => 'cfk_child_shirt_size',
-            'pants_size' => 'cfk_child_pants_size',
+            'pant_size' => 'cfk_child_pants_size',
             'shoe_size' => 'cfk_child_shoe_size',
-            'coat_size' => 'cfk_child_coat_size',
+            'jacket_size' => 'cfk_child_coat_size',
             // Other fields
             'interests' => 'cfk_child_interests',
+            'greatest_need' => 'cfk_child_greatest_need',
+            'wish_list' => 'cfk_child_wish_list',
             'family_situation' => 'cfk_child_family_situation',
             'special_needs' => 'cfk_child_special_needs',
         ];
@@ -594,8 +594,8 @@ class CFK_CSV_Importer {
         }
         
         // Handle family ID parsing and set derived fields (NEW)
-        if (!empty($row_data['family_id'])) {
-            $family_components = CFK_Child_Manager::parse_family_id($row_data['family_id']);
+        if (!empty($row_data['name'])) {
+            $family_components = CFK_Child_Manager::parse_family_id($row_data['name']);
             
             if (!empty($family_components['family_number'])) {
                 update_post_meta($post_id, 'cfk_child_family_number', $family_components['family_number']);
