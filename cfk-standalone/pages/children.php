@@ -33,6 +33,9 @@ $children = getChildren($filters, $currentPage, $limit);
 $totalCount = getChildrenCount($filters);
 $totalPages = ceil($totalCount / $limit);
 
+// Eager load family members to prevent N+1 queries
+$siblingsByFamily = eagerLoadFamilyMembers($children);
+
 // Build query string for pagination
 $queryParams = [];
 if (!empty($filters['search'])) $queryParams['search'] = $filters['search'];
@@ -157,12 +160,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                         <?php endif; ?>
                         
                         <!-- Family Info -->
-                        <?php 
-                        $siblings = getFamilyMembers($child['family_id'], $child['id']);
+                        <?php
+                        // Use pre-loaded siblings (no database query!)
+                        $allFamilyMembers = $siblingsByFamily[$child['family_id']] ?? [];
+                        $siblings = array_filter($allFamilyMembers, fn($s) => $s['id'] != $child['id']);
                         if (!empty($siblings)): ?>
                             <div class="family-info">
                                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
-                                <?php 
+                                <?php
                                 $siblingNames = array_map(fn($s) => $s['name'] . ' (' . $s['display_id'] . ')', $siblings);
                                 echo sanitizeString(implode(', ', $siblingNames));
                                 ?>

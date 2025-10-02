@@ -154,21 +154,55 @@ function getChildById(int $childId): ?array {
 function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
     $sql = "
         SELECT c.*, CONCAT(f.family_number, c.child_letter) as display_id
-        FROM children c 
-        JOIN families f ON c.family_id = f.id 
+        FROM children c
+        JOIN families f ON c.family_id = f.id
         WHERE c.family_id = :family_id
     ";
-    
+
     $params = ['family_id' => $familyId];
-    
+
     if ($excludeChildId) {
         $sql .= " AND c.id != :exclude_id";
         $params['exclude_id'] = $excludeChildId;
     }
-    
+
     $sql .= " ORDER BY c.child_letter";
-    
+
     return Database::fetchAll($sql, $params);
+}
+
+/**
+ * Eager load family members for multiple children (prevents N+1 queries)
+ * Returns array indexed by family_id containing arrays of siblings
+ */
+function eagerLoadFamilyMembers(array $children): array {
+    if (empty($children)) {
+        return [];
+    }
+
+    // Get unique family IDs
+    $familyIds = array_unique(array_column($children, 'family_id'));
+
+    // Fetch all siblings in one query
+    $placeholders = implode(',', array_fill(0, count($familyIds), '?'));
+    $sql = "
+        SELECT c.*, f.family_number,
+               CONCAT(f.family_number, c.child_letter) as display_id
+        FROM children c
+        JOIN families f ON c.family_id = f.id
+        WHERE c.family_id IN ($placeholders)
+        ORDER BY f.family_number, c.child_letter
+    ";
+
+    $allSiblings = Database::fetchAll($sql, $familyIds);
+
+    // Group by family_id
+    $siblingsByFamily = [];
+    foreach ($allSiblings as $sibling) {
+        $siblingsByFamily[$sibling['family_id']][] = $sibling;
+    }
+
+    return $siblingsByFamily;
 }
 
 /**
@@ -315,7 +349,26 @@ function getPhotoUrl(string $filename = null, array $child = null): string {
 /**
  * Security functions
  */
+
+/**
+ * Regenerate session ID periodically (prevents session fixation)
+ */
+function regenerateSessionIfNeeded(): void {
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        // Regenerate every 30 minutes
+        $regenerateInterval = 1800; // 30 minutes
+
+        if (!isset($_SESSION['last_regeneration'])) {
+            $_SESSION['last_regeneration'] = time();
+        } elseif (time() - $_SESSION['last_regeneration'] > $regenerateInterval) {
+            session_regenerate_id(true); // Delete old session
+            $_SESSION['last_regeneration'] = time();
+        }
+    }
+}
+
 function isLoggedIn(): bool {
+    regenerateSessionIfNeeded();
     return isset($_SESSION['cfk_admin_id']) && !empty($_SESSION['cfk_admin_id']);
 }
 

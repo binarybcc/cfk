@@ -17,9 +17,9 @@ class CFK_Email_Manager {
     private static ?PHPMailer\PHPMailer\PHPMailer $mailer = null;
     
     /**
-     * Initialize PHPMailer instance
+     * Initialize PHPMailer instance (public for email queue access)
      */
-    private static function getMailer(): PHPMailer\PHPMailer\PHPMailer {
+    public static function getMailer(): PHPMailer\PHPMailer\PHPMailer {
         if (self::$mailer === null) {
             // Auto-load PHPMailer if available via Composer
             if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
@@ -160,9 +160,9 @@ class CFK_Email_Manager {
     }
     
     /**
-     * Get sponsor confirmation email template
+     * Get sponsor confirmation email template (public for email queue access)
      */
-    private static function getSponsorConfirmationTemplate(array $sponsorship): string {
+    public static function getSponsorConfirmationTemplate(array $sponsorship): string {
         $childDisplayId = $sponsorship['child_display_id'] ?? 'Unknown';
         $childName = $sponsorship['child_name'] ?? 'Child';
         
@@ -217,9 +217,9 @@ class CFK_Email_Manager {
     }
     
     /**
-     * Get admin notification email template
+     * Get admin notification email template (public for email queue access)
      */
-    private static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship): string {
+    public static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship = []): string {
         $content = "<html><body style='font-family: Arial, sans-serif;'>";
         $content .= "<h2>CFK Admin Notification</h2>";
         $content .= "<p><strong>Subject:</strong> $subject</p>";

@@ -100,6 +100,25 @@ if ($appConfig['debug']) {
     ini_set('log_errors', '1');
 }
 
+// Session Security Configuration
+// Must be set before session_start()
+if (PHP_SAPI !== 'cli') {
+    ini_set('session.cookie_httponly', '1');  // Prevent JavaScript access to session cookie
+    ini_set('session.cookie_secure', $isProduction ? '1' : '0');  // HTTPS only in production
+    ini_set('session.cookie_samesite', 'Strict');  // CSRF protection
+    ini_set('session.use_strict_mode', '1');  // Reject uninitialized session IDs
+    ini_set('session.use_only_cookies', '1');  // No URL-based session IDs
+    ini_set('session.sid_length', '48');  // Longer session IDs
+    ini_set('session.sid_bits_per_character', '6');  // More entropy
+    ini_set('session.gc_maxlifetime', '7200');  // 2 hour session lifetime
+    ini_set('session.cookie_lifetime', '0');  // Expire on browser close
+
+    // Regenerate session ID periodically to prevent fixation attacks
+    if (session_status() === PHP_SESSION_NONE) {
+        session_name($appConfig['session_name']);
+    }
+}
+
 // Initialize database
 require_once __DIR__ . '/../src/Config/Database.php';
 require_once __DIR__ . '/../includes/database_wrapper.php';

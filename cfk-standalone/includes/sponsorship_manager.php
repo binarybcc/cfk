@@ -397,30 +397,26 @@ class CFK_Sponsorship_Manager {
     }
     
     /**
-     * Validate sponsor data
+     * Validate sponsor data using centralized validator
      */
     private static function validateSponsorData(array $data): array {
-        $errors = [];
-        
-        // Required fields
-        if (empty(trim($data['name'] ?? ''))) {
-            $errors[] = 'Name is required';
+        // Load validator if not already included
+        if (!class_exists('Validator')) {
+            require_once __DIR__ . '/validator.php';
         }
-        
-        if (empty(trim($data['email'] ?? ''))) {
-            $errors[] = 'Email is required';
-        } elseif (!validateEmail($data['email'])) {
-            $errors[] = 'Valid email address is required';
-        }
-        
-        // Optional fields validation
-        if (!empty($data['gift_preference']) && !in_array($data['gift_preference'], ['shopping', 'gift_card', 'cash_donation'])) {
-            $errors[] = 'Invalid gift preference';
-        }
-        
+
+        $validator = validate($data, [
+            'name' => 'required|min:2|max:100',
+            'email' => 'required|email|max:255',
+            'phone' => 'max:20',
+            'address' => 'max:500',
+            'gift_preference' => 'in:shopping,gift_card,cash_donation',
+            'message' => 'max:1000'
+        ]);
+
         return [
-            'valid' => empty($errors),
-            'errors' => $errors
+            'valid' => $validator->passes(),
+            'errors' => $validator->allErrors()
         ];
     }
     

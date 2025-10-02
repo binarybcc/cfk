@@ -15,6 +15,9 @@ $pageTitle = 'Home';
 // Get some featured children (available children, limit to 6)
 $featuredChildren = getChildren(['status' => 'available'], 1, 6);
 
+// Eager load family members to prevent N+1 queries
+$siblingsByFamily = eagerLoadFamilyMembers($featuredChildren);
+
 // Get count statistics
 $totalAvailable = getChildrenCount(['status' => 'available']);
 $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children WHERE status = 'available'")['total'] ?? 0;
