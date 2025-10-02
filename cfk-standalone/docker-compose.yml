@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  web:
+    image: php:8.2-apache
+    container_name: cfk-web
+    ports:
+      - "8082:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APACHE_DOCUMENT_ROOT=/var/www/html
+    depends_on:
+      - db
+    command: >
+      bash -c "
+        docker-php-ext-install pdo pdo_mysql mysqli &&
+        a2enmod rewrite &&
+        echo 'ServerName localhost' >> /etc/apache2/apache2.conf &&
+        apache2-foreground
+      "
+
+  db:
+    image: mysql:8.0
+    container_name: cfk-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cfk_sponsorship_dev
+      MYSQL_USER: cfk_user
+      MYSQL_PASSWORD: cfk_pass
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: cfk-phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+
+volumes:
+  mysql_data:

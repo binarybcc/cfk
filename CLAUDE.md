@@ -61,3 +61,15 @@ Plugin settings stored in WordPress options table with `cfk_` prefix. Key settin
 - `cfk_main_plugin.php`: Main plugin file and initialization
 - `includes/`: Core functionality classes
 - `admin/`: Administrative interface files
+
+## Development Guidelines
+
+### Claude Code Task Tool Usage
+- Use the Task tool with `general-purpose` agents for complex multi-step operations
+- Batch all related operations in single messages for optimal performance
+- Provide detailed task descriptions for autonomous execution
+
+### File Management Rules
+- Never save working files to the root directory
+- Organize documentation in appropriate subdirectories
+- Use concurrent execution patterns when possible

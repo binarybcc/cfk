@@ -1,0 +1,3 @@
+claude cfk reboot continue command
+
+  "Continue the CFK standalone refactoring from where we left off - check the progress files and resume Phase 4"

@@ -1,0 +1,148 @@
+<?php
+declare(strict_types=1);
+
+/**
+ * Christmas for Kids - Configuration File
+ * Main configuration settings for the standalone PHP application
+ */
+
+// Prevent direct access
+if (!defined('CFK_APP')) {
+    http_response_code(403);
+    die('Direct access not permitted');
+}
+
+// Environment detection
+$isProduction = $_SERVER['HTTP_HOST'] !== 'localhost' && 
+                strpos($_SERVER['HTTP_HOST'], '.local') === false && 
+                strpos($_SERVER['HTTP_HOST'], ':') === false;
+
+// Database Configuration
+$dbConfig = [
+    'host' => $isProduction ? 'localhost' : 'db',
+    'database' => $isProduction ? 'cfk_sponsorship' : 'cfk_sponsorship_dev',
+    'username' => $isProduction ? 'cfk_user' : 'root',
+    'password' => $isProduction ? 'CHANGE_THIS_PASSWORD' : 'root'
+];
+
+// Application Settings
+$appConfig = [
+    'app_name' => 'Christmas for Kids Sponsorship',
+    'app_version' => '1.0.0',
+    'timezone' => 'America/New_York',
+    'debug' => !$isProduction,
+    
+    // Paths
+    'base_url' => $isProduction ? 'https://www.cforkids.org/sponsor/' : 'http://localhost:8082/',
+    'upload_path' => __DIR__ . '/../uploads/',
+    'photo_path' => __DIR__ . '/../uploads/photos/',
+    
+    // Pagination
+    'children_per_page' => 12,
+    'admin_items_per_page' => 25,
+    
+    // Features
+    'enable_registration' => true,
+    'require_admin_approval' => true,
+    'max_pending_hours' => 48,
+    
+    // Email settings (for future use)
+    'admin_email' => 'admin@cforkids.org',
+    'from_email' => 'noreply@cforkids.org',
+    'from_name' => 'Christmas for Kids',
+    
+    // Security
+    'session_name' => 'CFK_SESSION',
+    'csrf_token_name' => 'cfk_csrf_token',
+    'password_min_length' => 8,
+    
+    // Upload limits
+    'max_file_size' => 5 * 1024 * 1024, // 5MB
+    'allowed_photo_types' => ['jpg', 'jpeg', 'png', 'gif'],
+    'photo_max_width' => 800,
+    'photo_max_height' => 600,
+];
+
+// Age categories for filtering
+$ageCategories = [
+    'birth_to_4' => ['label' => 'Birth to 4', 'min' => 0, 'max' => 4],
+    'elementary' => ['label' => 'Elementary (5-10)', 'min' => 5, 'max' => 10],
+    'middle_school' => ['label' => 'Middle School (11-13)', 'min' => 11, 'max' => 13],
+    'high_school' => ['label' => 'High School (14-18)', 'min' => 14, 'max' => 18]
+];
+
+// Status options for children
+$childStatusOptions = [
+    'available' => 'Available for Sponsorship',
+    'pending' => 'Sponsorship Pending',
+    'sponsored' => 'Already Sponsored',
+    'inactive' => 'Not Available'
+];
+
+// Sponsorship status options
+$sponsorshipStatusOptions = [
+    'pending' => 'Pending Confirmation',
+    'confirmed' => 'Confirmed',
+    'completed' => 'Gift Delivered',
+    'cancelled' => 'Cancelled'
+];
+
+// Set timezone
+date_default_timezone_set($appConfig['timezone']);
+
+// Error reporting
+if ($appConfig['debug']) {
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+} else {
+    error_reporting(E_ERROR | E_WARNING | E_PARSE);
+    ini_set('display_errors', '0');
+    ini_set('log_errors', '1');
+}
+
+// Initialize database
+require_once __DIR__ . '/../src/Config/Database.php';
+require_once __DIR__ . '/../includes/database_wrapper.php';
+\CFK\Config\Database::init($dbConfig);
+
+// Helper function to get config values
+function config(string $key, $default = null) {
+    global $appConfig;
+    return $appConfig[$key] ?? $default;
+}
+
+// Helper function to get base URL
+function baseUrl(string $path = ''): string {
+    return rtrim(config('base_url'), '/') . '/' . ltrim($path, '/');
+}
+
+// Helper function to get upload URL
+function uploadUrl(string $path = ''): string {
+    return baseUrl('uploads/' . ltrim($path, '/'));
+}
+
+// CSRF Protection
+function generateCsrfToken(): string {
+    if (!isset($_SESSION[config('csrf_token_name')])) {
+        $_SESSION[config('csrf_token_name')] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION[config('csrf_token_name')];
+}
+
+function verifyCsrfToken(string $token): bool {
+    return isset($_SESSION[config('csrf_token_name')]) 
+        && hash_equals($_SESSION[config('csrf_token_name')], $token);
+}
+
+// Simple sanitization helpers
+function sanitizeString(string $input): string {
+    return trim(htmlspecialchars($input, ENT_QUOTES, 'UTF-8'));
+}
+
+function sanitizeInt(mixed $input): int {
+    return (int) filter_var($input, FILTER_SANITIZE_NUMBER_INT);
+}
+
+function sanitizeEmail(string $input): string {
+    return filter_var(trim($input), FILTER_SANITIZE_EMAIL);
+}
