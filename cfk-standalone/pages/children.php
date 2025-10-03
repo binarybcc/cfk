@@ -24,8 +24,9 @@ if (!empty($_GET['gender'])) {
     $filters['gender'] = sanitizeString($_GET['gender']);
 }
 
-// Pagination
-$currentPage = sanitizeInt($_GET['page'] ?? 1);
+// Pagination (using 'p' parameter to avoid conflict with page routing)
+$currentPage = sanitizeInt($_GET['p'] ?? 1);
+if ($currentPage < 1) $currentPage = 1;
 $limit = config('children_per_page');
 
 // Get children and count

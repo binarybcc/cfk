@@ -102,7 +102,7 @@ if ($appConfig['debug']) {
 
 // Session Security Configuration
 // Must be set before session_start()
-if (PHP_SAPI !== 'cli') {
+if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
     ini_set('session.cookie_httponly', '1');  // Prevent JavaScript access to session cookie
     ini_set('session.cookie_secure', $isProduction ? '1' : '0');  // HTTPS only in production
     ini_set('session.cookie_samesite', 'Strict');  // CSRF protection
@@ -113,10 +113,8 @@ if (PHP_SAPI !== 'cli') {
     ini_set('session.gc_maxlifetime', '7200');  // 2 hour session lifetime
     ini_set('session.cookie_lifetime', '0');  // Expire on browser close
 
-    // Regenerate session ID periodically to prevent fixation attacks
-    if (session_status() === PHP_SESSION_NONE) {
-        session_name($appConfig['session_name']);
-    }
+    // Set session name before starting
+    session_name($appConfig['session_name']);
 }
 
 // Initialize database

@@ -36,8 +36,11 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     
     // Apply filters
     if (!empty($filters['search'])) {
-        $sql .= " AND (c.name LIKE :search OR c.interests LIKE :search OR c.wishes LIKE :search)";
-        $params['search'] = '%' . $filters['search'] . '%';
+        $searchValue = '%' . $filters['search'] . '%';
+        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $params['search1'] = $searchValue;
+        $params['search2'] = $searchValue;
+        $params['search3'] = $searchValue;
     }
     
     if (!empty($filters['age_category'])) {
@@ -72,11 +75,9 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     
     // Order by family, then by child letter
     $sql .= " ORDER BY f.family_number, c.child_letter";
-    $sql .= " LIMIT :limit OFFSET :offset";
-    
-    $params['limit'] = $limit;
-    $params['offset'] = $offset;
-    
+    // Note: Using literal values for LIMIT/OFFSET to avoid PDO binding issues
+    $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
+
     return Database::fetchAll($sql, $params);
 }
 
@@ -95,8 +96,11 @@ function getChildrenCount(array $filters = []): int {
     
     // Apply same filters as getChildren()
     if (!empty($filters['search'])) {
-        $sql .= " AND (c.name LIKE :search OR c.interests LIKE :search OR c.wishes LIKE :search)";
-        $params['search'] = '%' . $filters['search'] . '%';
+        $searchValue = '%' . $filters['search'] . '%';
+        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $params['search1'] = $searchValue;
+        $params['search2'] = $searchValue;
+        $params['search3'] = $searchValue;
     }
     
     if (!empty($filters['age_category'])) {
@@ -183,18 +187,31 @@ function eagerLoadFamilyMembers(array $children): array {
     // Get unique family IDs
     $familyIds = array_unique(array_column($children, 'family_id'));
 
-    // Fetch all siblings in one query
-    $placeholders = implode(',', array_fill(0, count($familyIds), '?'));
+    if (empty($familyIds)) {
+        return [];
+    }
+
+    // Create named parameters for PDO
+    $params = [];
+    $placeholders = [];
+    foreach ($familyIds as $index => $familyId) {
+        $paramName = 'family_id_' . $index;
+        $placeholders[] = ':' . $paramName;
+        $params[$paramName] = $familyId;
+    }
+
+    $placeholderString = implode(',', $placeholders);
+
     $sql = "
         SELECT c.*, f.family_number,
                CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
         JOIN families f ON c.family_id = f.id
-        WHERE c.family_id IN ($placeholders)
+        WHERE c.family_id IN ($placeholderString)
         ORDER BY f.family_number, c.child_letter
     ";
 
-    $allSiblings = Database::fetchAll($sql, $familyIds);
+    $allSiblings = Database::fetchAll($sql, $params);
 
     // Group by family_id
     $siblingsByFamily = [];
@@ -275,43 +292,44 @@ function getAgeCategory(int $age): string {
 
 /**
  * Generate pagination HTML
+ * Note: Uses 'p' parameter for page number to avoid conflict with 'page' routing parameter
  */
 function generatePagination(int $currentPage, int $totalPages, string $baseUrl): string {
     if ($totalPages <= 1) return '';
-    
+
     $html = '<nav class="pagination"><ul>';
-    
+
     // Previous
     if ($currentPage > 1) {
-        $html .= '<li><a href="' . $baseUrl . '?page=' . ($currentPage - 1) . '">&laquo; Previous</a></li>';
+        $html .= '<li><a href="' . $baseUrl . '&p=' . ($currentPage - 1) . '">&laquo; Previous</a></li>';
     }
-    
+
     // Page numbers
     $start = max(1, $currentPage - 2);
     $end = min($totalPages, $currentPage + 2);
-    
+
     if ($start > 1) {
-        $html .= '<li><a href="' . $baseUrl . '?page=1">1</a></li>';
+        $html .= '<li><a href="' . $baseUrl . '&p=1">1</a></li>';
         if ($start > 2) $html .= '<li><span>...</span></li>';
     }
-    
+
     for ($i = $start; $i <= $end; $i++) {
         $class = $i === $currentPage ? ' class="active"' : '';
-        $html .= '<li><a href="' . $baseUrl . '?page=' . $i . '"' . $class . '>' . $i . '</a></li>';
+        $html .= '<li><a href="' . $baseUrl . '&p=' . $i . '"' . $class . '>' . $i . '</a></li>';
     }
-    
+
     if ($end < $totalPages) {
         if ($end < $totalPages - 1) $html .= '<li><span>...</span></li>';
-        $html .= '<li><a href="' . $baseUrl . '?page=' . $totalPages . '">' . $totalPages . '</a></li>';
+        $html .= '<li><a href="' . $baseUrl . '&p=' . $totalPages . '">' . $totalPages . '</a></li>';
     }
-    
+
     // Next
     if ($currentPage < $totalPages) {
-        $html .= '<li><a href="' . $baseUrl . '?page=' . ($currentPage + 1) . '">Next &raquo;</a></li>';
+        $html .= '<li><a href="' . $baseUrl . '&p=' . ($currentPage + 1) . '">Next &raquo;</a></li>';
     }
-    
+
     $html .= '</ul></nav>';
-    
+
     return $html;
 }
 
