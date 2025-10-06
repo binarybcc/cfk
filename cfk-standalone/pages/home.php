@@ -360,10 +360,23 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
     transform: translateY(-3px);
 }
 
-.featured-child-card .child-photo img {
+.featured-child-card .child-photo {
     width: 100%;
     height: 200px;
-    object-fit: cover;
+    background: #f8f9fa;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.featured-child-card .child-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
 }
 
 .featured-child-card .child-info {

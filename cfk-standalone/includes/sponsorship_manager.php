@@ -151,14 +151,25 @@ class CFK_Sponsorship_Manager {
             
             // Send email notifications if email manager is available
             if (class_exists('CFK_Email_Manager')) {
-                // Get full sponsorship data for emails
+                // Get full sponsorship data for emails (includes ALL child details for shopping)
                 $fullSponsorship = Database::fetchRow(
-                    "SELECT s.*, c.name as child_name, 
+                    "SELECT s.*,
+                            c.name as child_name,
+                            c.age as child_age,
+                            c.grade as child_grade,
+                            c.gender as child_gender,
+                            c.shirt_size,
+                            c.pant_size,
+                            c.shoe_size,
+                            c.jacket_size,
+                            c.interests,
+                            c.wishes,
+                            c.special_needs,
                             CONCAT(f.family_number, c.child_letter) as child_display_id
                      FROM sponsorships s
-                     JOIN children c ON s.child_id = c.id 
+                     JOIN children c ON s.child_id = c.id
                      JOIN families f ON c.family_id = f.id
-                     WHERE s.id = ?", 
+                     WHERE s.id = ?",
                     [$sponsorshipId]
                 );
                 

@@ -13,25 +13,47 @@ if (!defined('CFK_APP')) {
 require_once __DIR__ . '/../includes/sponsorship_manager.php';
 require_once __DIR__ . '/../includes/email_manager.php';
 
-// Get child ID
+// Get child ID or family ID
 $childId = sanitizeInt($_GET['child_id'] ?? 0);
-if (!$childId) {
-    setMessage('Please select a child to sponsor.', 'error');
-    header('Location: ' . baseUrl('?page=children'));
-    exit;
+$familyId = sanitizeInt($_GET['family_id'] ?? 0);
+$isFamilySponsorship = ($familyId > 0);
+
+$childrenToSponsor = [];
+
+if ($isFamilySponsorship) {
+    // Family sponsorship - get all available children in family
+    $allFamilyMembers = getFamilyMembers($familyId);
+    $childrenToSponsor = array_filter($allFamilyMembers, fn($c) => $c['status'] === 'available');
+
+    if (empty($childrenToSponsor)) {
+        setMessage('No available children in this family to sponsor.', 'error');
+        header('Location: ' . baseUrl('?page=children'));
+        exit;
+    }
+
+    $child = $childrenToSponsor[0]; // Use first child for display
+    $pageTitle = 'Sponsor Family ' . $child['family_number'];
+} else {
+    // Individual child sponsorship
+    if (!$childId) {
+        setMessage('Please select a child to sponsor.', 'error');
+        header('Location: ' . baseUrl('?page=children'));
+        exit;
+    }
+
+    // Check if child is available
+    $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+    $child = $availability['child'];
+
+    if (!$child) {
+        setMessage('Child not found.', 'error');
+        header('Location: ' . baseUrl('?page=children'));
+        exit;
+    }
+
+    $childrenToSponsor = [$child];
+    $pageTitle = 'Sponsor ' . $child['display_id'];
 }
-
-// Check if child is available
-$availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
-$child = $availability['child'];
-
-if (!$child) {
-    setMessage('Child not found.', 'error');
-    header('Location: ' . baseUrl('?page=children'));
-    exit;
-}
-
-$pageTitle = 'Sponsor ' . $child['display_id'];
 $errors = [];
 $formData = [];
 
@@ -50,44 +72,87 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
             'message' => $_POST['special_message'] ?? ''
         ];
         
-        // Attempt to create sponsorship
-        $result = CFK_Sponsorship_Manager::createSponsorshipRequest($childId, $formData);
-        
-        if ($result['success']) {
-            setMessage($result['message'], 'success');
-            header('Location: ' . baseUrl('?page=children'));
-            exit;
+        // Attempt to create sponsorship(s)
+        if ($isFamilySponsorship) {
+            // Create sponsorships for all children in family
+            $allSuccess = true;
+            $sponsoredChildren = [];
+
+            foreach ($childrenToSponsor as $childToSponsor) {
+                $result = CFK_Sponsorship_Manager::createSponsorshipRequest($childToSponsor['id'], $formData);
+
+                if ($result['success']) {
+                    $sponsoredChildren[] = $childToSponsor['display_id'];
+                } else {
+                    $errors[] = "Error sponsoring {$childToSponsor['display_id']}: {$result['message']}";
+                    $allSuccess = false;
+                }
+            }
+
+            if ($allSuccess) {
+                $childList = implode(', ', $sponsoredChildren);
+                setMessage("Successfully submitted sponsorship for family members: {$childList}!", 'success');
+                header('Location: ' . baseUrl('?page=children'));
+                exit;
+            }
         } else {
-            $errors[] = $result['message'];
-            // Refresh availability status
-            $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+            // Single child sponsorship
+            $result = CFK_Sponsorship_Manager::createSponsorshipRequest($childId, $formData);
+
+            if ($result['success']) {
+                setMessage($result['message'], 'success');
+                header('Location: ' . baseUrl('?page=children'));
+                exit;
+            } else {
+                $errors[] = $result['message'];
+            }
         }
     }
 }
 
-// If child is not available, show message and redirect option
-if (!$availability['available']) {
-    $unavailableReason = $availability['reason'];
+// Check availability
+if ($isFamilySponsorship) {
+    $isAvailable = !empty($childrenToSponsor);
+    $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
+} else {
+    $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+    $isAvailable = $availability['available'];
+    $unavailableReason = $availability['reason'] ?? '';
 }
 
 // Get full child details for display
-$fullChild = getChildById($childId);
-$siblings = getFamilyMembers($fullChild['family_id'], $childId);
+if (!$isFamilySponsorship) {
+    $fullChild = getChildById($childId);
+    $siblings = getFamilyMembers($fullChild['family_id'], $childId);
+} else {
+    $fullChild = $child; // Use first child for display purposes
+    $siblings = [];
+}
 ?>
 
 <div class="sponsor-page">
     <div class="page-header">
-        <h1>Sponsor Child <?php echo sanitizeString($child['display_id']); ?></h1>
+        <?php if ($isFamilySponsorship): ?>
+            <h1>🎁 Sponsor Family <?php echo sanitizeString($child['family_number']); ?></h1>
+            <p class="family-sponsor-subtitle">
+                You're sponsoring <?php echo count($childrenToSponsor); ?> children together!
+            </p>
+        <?php else: ?>
+            <h1>Sponsor Child <?php echo sanitizeString($child['display_id']); ?></h1>
+        <?php endif; ?>
+
         <nav class="breadcrumb">
-            <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a> 
+            <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a>
             <span>&raquo;</span>
-            <a href="<?php echo baseUrl('?page=child&id=' . $childId); ?>">View Profile</a>
-            <span>&raquo;</span>
+            <?php if (!$isFamilySponsorship): ?>
+                <a href="<?php echo baseUrl('?page=child&id=' . $childId); ?>">View Profile</a>
+                <span>&raquo;</span>
+            <?php endif; ?>
             <span>Sponsor</span>
         </nav>
     </div>
 
-    <?php if (!$availability['available']): ?>
+    <?php if (!$isAvailable): ?>
         <!-- Child Not Available -->
         <div class="unavailable-notice">
             <div class="alert alert-warning">
@@ -123,34 +188,56 @@ $siblings = getFamilyMembers($fullChild['family_id'], $childId);
     <?php else: ?>
         <!-- Sponsorship Form -->
         <div class="sponsor-form-container">
-            <!-- Child Summary -->
-            <div class="child-summary">
-                <div class="child-photo">
-                    <img src="<?php echo getPhotoUrl($fullChild['photo_filename'], $fullChild); ?>" 
-                         alt="Avatar for child <?php echo sanitizeString($fullChild['display_id']); ?>">
+            <?php if ($isFamilySponsorship): ?>
+                <!-- Family Children Summary -->
+                <div class="family-children-summary">
+                    <h3>You are sponsoring these family members:</h3>
+                    <div class="family-children-grid">
+                        <?php foreach ($childrenToSponsor as $childToSponsor): ?>
+                            <div class="family-child-card">
+                                <div class="family-child-photo">
+                                    <img src="<?php echo getPhotoUrl($childToSponsor['photo_filename'], $childToSponsor); ?>"
+                                         alt="Avatar for <?php echo sanitizeString($childToSponsor['display_id']); ?>">
+                                </div>
+                                <div class="family-child-info">
+                                    <h4><?php echo sanitizeString($childToSponsor['display_id']); ?></h4>
+                                    <p><?php echo sanitizeString($childToSponsor['name']); ?></p>
+                                    <p><?php echo formatAge($childToSponsor['age']); ?></p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-                <div class="child-info">
-                    <h3>Child <?php echo sanitizeString($fullChild['display_id']); ?></h3>
-                    <p><strong>Age:</strong> <?php echo formatAge($fullChild['age']); ?></p>
-                    <?php if (!empty($fullChild['grade'])): ?>
-                        <p><strong>Grade:</strong> <?php echo sanitizeString($fullChild['grade']); ?></p>
-                    <?php endif; ?>
-                    
-                    <?php if (!empty($fullChild['interests'])): ?>
-                        <div class="summary-section">
-                            <strong>Interests:</strong> 
-                            <p><?php echo sanitizeString($fullChild['interests']); ?></p>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if (!empty($fullChild['wishes'])): ?>
-                        <div class="summary-section">
-                            <strong>Christmas Wishes:</strong>
-                            <p><?php echo sanitizeString($fullChild['wishes']); ?></p>
-                        </div>
-                    <?php endif; ?>
+            <?php else: ?>
+                <!-- Single Child Summary -->
+                <div class="child-summary">
+                    <div class="child-photo">
+                        <img src="<?php echo getPhotoUrl($fullChild['photo_filename'], $fullChild); ?>"
+                             alt="Avatar for child <?php echo sanitizeString($fullChild['display_id']); ?>">
+                    </div>
+                    <div class="child-info">
+                        <h3>Child <?php echo sanitizeString($fullChild['display_id']); ?></h3>
+                        <p><strong>Age:</strong> <?php echo formatAge($fullChild['age']); ?></p>
+                        <?php if (!empty($fullChild['grade'])): ?>
+                            <p><strong>Grade:</strong> <?php echo sanitizeString($fullChild['grade']); ?></p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($fullChild['interests'])): ?>
+                            <div class="summary-section">
+                                <strong>Interests:</strong>
+                                <p><?php echo sanitizeString($fullChild['interests']); ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($fullChild['wishes'])): ?>
+                            <div class="summary-section">
+                                <strong>Christmas Wishes:</strong>
+                                <p><?php echo sanitizeString($fullChild['wishes']); ?></p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
 
             <!-- Sponsorship Form -->
             <form method="POST" action="" class="sponsorship-form" id="sponsorshipForm">
@@ -328,12 +415,24 @@ $siblings = getFamilyMembers($fullChild['family_id'], $childId);
     gap: 2rem;
 }
 
-.child-summary .child-photo img {
+.child-summary .child-photo {
     width: 150px;
     height: 150px;
+    background: #f8f9fa;
     border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid white;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.child-summary .child-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
 }
 
 .child-summary h3 {
@@ -452,6 +551,80 @@ $siblings = getFamilyMembers($fullChild['family_id'], $childId);
         flex-direction: column;
         align-items: center;
     }
+}
+
+/* Family Sponsorship Styles */
+.family-sponsor-subtitle {
+    color: #666;
+    margin-top: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.family-children-summary {
+    padding: 2rem;
+    background: #f8f9fa;
+}
+
+.family-children-summary h3 {
+    color: #2c5530;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.family-children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.family-child-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.family-child-photo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.family-child-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.family-child-info h4 {
+    color: #2c5530;
+    margin-bottom: 0.5rem;
+}
+
+.family-child-info p {
+    margin: 0.25rem 0;
+    color: #666;
+}
+
+/* Success button */
+.btn-success {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+
+.btn-success:hover {
+    background-color: #218838;
 }
 </style>
 

@@ -46,10 +46,19 @@ $appConfig = [
     'require_admin_approval' => true,
     'max_pending_hours' => 48,
     
-    // Email settings (for future use)
+    // Email settings
     'admin_email' => 'admin@cforkids.org',
     'from_email' => 'noreply@cforkids.org',
     'from_name' => 'Christmas for Kids',
+
+    // SMTP Configuration (MailChannels via Nexcess)
+    'email_use_smtp' => $isProduction, // Use SMTP in production, sendmail in dev
+    'smtp_host' => 'relay.mailchannels.net',
+    'smtp_port' => 587,
+    'smtp_auth' => true,
+    'smtp_username' => getenv('SMTP_USERNAME') ?: '', // Set in environment or here
+    'smtp_password' => getenv('SMTP_PASSWORD') ?: '', // Set in environment or here
+    'smtp_encryption' => 'tls', // TLS encryption on port 587
     
     // Security
     'session_name' => 'CFK_SESSION',

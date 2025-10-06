@@ -29,30 +29,52 @@ class CFK_Avatar_Manager {
      */
     public static function getAvatarForChild(array $child): string {
         $category = self::determineAvatarCategory($child['age'], $child['gender']);
-        return self::generateSilhouettedAvatar($category);
+        return self::getAvatarImagePath($category);
     }
     
     /**
      * Determine avatar category based on age and gender
      */
     private static function determineAvatarCategory(int $age, string $gender): string {
-        // Infant (0-2) - gender neutral
-        if ($age <= 2) {
-            return 'infant';
-        }
-        
-        // Toddler (3-5)  
-        if ($age >= 3 && $age <= 5) {
+        // Infant/Toddler (0-4)
+        if ($age <= 4) {
             return $gender === 'M' ? 'male_toddler' : 'female_toddler';
         }
-        
-        // Child (6-10)
-        if ($age >= 6 && $age <= 10) {
-            return $gender === 'M' ? 'male_child' : 'female_child';
+
+        // Elementary (5-10)
+        if ($age >= 5 && $age <= 10) {
+            return $gender === 'M' ? 'male_elementary' : 'female_elementary';
         }
-        
-        // Teen (11-18)
-        return $gender === 'M' ? 'male_teen' : 'female_teen';
+
+        // Middle School (11-13)
+        if ($age >= 11 && $age <= 13) {
+            return $gender === 'M' ? 'male_middle' : 'female_middle';
+        }
+
+        // High School (14+)
+        return $gender === 'M' ? 'male_highschool' : 'female_highschool';
+    }
+
+    /**
+     * Get avatar image path from PNG files
+     */
+    private static function getAvatarImagePath(string $category): string {
+        $basePath = '/assets/images/';
+
+        // Map categories to image files
+        $imageMap = [
+            'male_toddler' => 'b-4boysm.png',           // Boys 0-4
+            'female_toddler' => 'b-4girlsm.png',        // Girls 0-4
+            'male_elementary' => 'elementaryboysm.png', // Boys 5-10
+            'female_elementary' => 'elementarygirlsm.png', // Girls 5-10
+            'male_middle' => 'middleboysm.png',         // Boys 11-13
+            'female_middle' => 'middlegirlsm.png',      // Girls 11-13
+            'male_highschool' => 'hsboysm.png',         // Boys 14+
+            'female_highschool' => 'hsgirlsm.png'       // Girls 14+
+        ];
+
+        // Return the mapped image or default
+        return $basePath . ($imageMap[$category] ?? 'b-4girlsm.png');
     }
     
     /**
@@ -95,7 +117,7 @@ class CFK_Avatar_Manager {
      */
     private static function getInfantSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <!-- Baby silhouette -->
     <g fill="{$color}" transform="translate(150,150)">
@@ -122,7 +144,7 @@ SVG;
      */
     private static function getMaleToddlerSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -149,7 +171,7 @@ SVG;
      */
     private static function getFemaleToddlerSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -178,7 +200,7 @@ SVG;
      */
     private static function getMaleChildSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -205,7 +227,7 @@ SVG;
      */
     private static function getFemaleChildSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -233,7 +255,7 @@ SVG;
      */
     private static function getMaleTeenSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -260,7 +282,7 @@ SVG;
      */
     private static function getFemaleTeenSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <!-- Head -->
@@ -288,7 +310,7 @@ SVG;
      */
     private static function getDefaultSvg(string $color, string $bg): string {
         return <<<SVG
-<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg">
+<svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
     <g fill="{$color}" transform="translate(150,150)">
         <circle cx="0" cy="-40" r="30"/>

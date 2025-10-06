@@ -216,12 +216,24 @@ $isAvailable = $child['status'] === 'available';
                         Sponsor This Child
                     </a>
                     
-                    <?php if (!empty($siblings)): ?>
+                    <?php if (!empty($siblings)):
+                        // Count available siblings
+                        $availableSiblings = array_filter($siblings, fn($s) => $s['status'] === 'available');
+                        $availableCount = count($availableSiblings);
+                    ?>
                         <p class="family-sponsor-note">
-                            <strong>Consider sponsoring siblings together!</strong> 
+                            <strong>Consider sponsoring siblings together!</strong>
                             Keeping families connected during Christmas creates even more joy.
                         </p>
-                        <a href="<?php echo baseUrl('?page=children&family_id=' . $child['family_id']); ?>" 
+
+                        <?php if ($availableCount > 0): ?>
+                            <a href="<?php echo baseUrl('?page=sponsor&family_id=' . $child['family_id']); ?>"
+                               class="btn btn-large btn-success">
+                                🎁 Sponsor Entire Family (<?php echo ($availableCount + 1); ?> children)
+                            </a>
+                        <?php endif; ?>
+
+                        <a href="<?php echo baseUrl('?page=children&family_id=' . $child['family_id']); ?>"
                            class="btn btn-secondary">
                             View All Family Members
                         </a>
@@ -294,11 +306,24 @@ $isAvailable = $child['status'] === 'available';
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
 }
 
-.profile-photo img {
+.profile-photo {
     width: 300px;
     height: 300px;
-    object-fit: cover;
+    background: #f8f9fa;
     border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
 }
 
 .profile-basic-info {
@@ -424,10 +449,23 @@ $isAvailable = $child['status'] === 'available';
     text-align: center;
 }
 
-.sibling-photo img {
+.sibling-photo {
     width: 100%;
     height: 150px;
-    object-fit: cover;
+    background: #f8f9fa;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sibling-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
 }
 
 .sibling-info {

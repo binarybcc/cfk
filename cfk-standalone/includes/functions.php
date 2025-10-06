@@ -360,8 +360,7 @@ function getPhotoUrl(string $filename = null, array $child = null): string {
     }
     
     // Fallback avatar if child data not available
-    require_once __DIR__ . '/avatar_manager.php';
-    return CFK_Avatar_Manager::generateSilhouettedAvatar('default');
+    return '/assets/images/b-4girlsm.png';
 }
 
 /**

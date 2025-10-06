@@ -130,9 +130,8 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             <?php foreach ($children as $child): ?>
                 <div class="child-card">
                     <div class="child-photo">
-                        <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>" 
-                             alt="Avatar for <?php echo sanitizeString($child['name']); ?>"
-                             loading="lazy">
+                        <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>"
+                             alt="Avatar for <?php echo sanitizeString($child['name']); ?>">
                     </div>
                     
                     <div class="child-info">
@@ -289,10 +288,22 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.child-photo img {
+.child-photo {
     width: 100%;
     height: 250px;
-    object-fit: cover;
+    background: #f8f9fa;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.child-photo img {
+    max-width: 75%;
+    max-height: 75%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
     display: block;
 }
 

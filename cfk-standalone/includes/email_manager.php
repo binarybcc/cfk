@@ -163,54 +163,123 @@ class CFK_Email_Manager {
      * Get sponsor confirmation email template (public for email queue access)
      */
     public static function getSponsorConfirmationTemplate(array $sponsorship): string {
-        $childDisplayId = $sponsorship['child_display_id'] ?? 'Unknown';
-        $childName = $sponsorship['child_name'] ?? 'Child';
-        
+        $childDisplayId = sanitizeString($sponsorship['child_display_id'] ?? 'Unknown');
+        $childName = sanitizeString($sponsorship['child_name'] ?? 'Child');
+        $childAge = sanitizeInt($sponsorship['child_age'] ?? 0);
+        $childGrade = sanitizeString($sponsorship['child_grade'] ?? '');
+        $childGender = $sponsorship['child_gender'] === 'M' ? 'Boy' : 'Girl';
+
+        // Clothing sizes
+        $shirtSize = sanitizeString($sponsorship['shirt_size'] ?? 'Not specified');
+        $pantSize = sanitizeString($sponsorship['pant_size'] ?? 'Not specified');
+        $shoeSize = sanitizeString($sponsorship['shoe_size'] ?? 'Not specified');
+        $jacketSize = sanitizeString($sponsorship['jacket_size'] ?? 'Not specified');
+
+        // Personal details
+        $interests = sanitizeString($sponsorship['interests'] ?? 'Not specified');
+        $wishes = sanitizeString($sponsorship['wishes'] ?? 'Not specified');
+        $specialNeeds = sanitizeString($sponsorship['special_needs'] ?? 'None');
+
         return "
         <html>
         <head>
             <style>
                 body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-                .header { background: #2c5530; color: white; padding: 20px; text-align: center; }
-                .content { padding: 20px; }
+                .header { background: #c41e3a; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; max-width: 700px; margin: 0 auto; }
                 .footer { background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; }
-                .highlight { background: #fffacd; padding: 10px; border-left: 4px solid #2c5530; margin: 15px 0; }
+                .child-info { background: #fff; border: 2px solid #2c5530; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .info-section { margin: 15px 0; }
+                .info-label { font-weight: bold; color: #2c5530; display: inline-block; width: 140px; }
+                .info-value { display: inline-block; }
+                .sizes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+                .size-item { background: #f9f9f9; padding: 8px; border-radius: 4px; }
+                .important-box { background: #fffacd; border-left: 4px solid #c41e3a; padding: 15px; margin: 20px 0; }
+                .wishes-box { background: #e8f5e9; border-left: 4px solid #2c5530; padding: 15px; margin: 15px 0; }
+                h3 { color: #2c5530; margin-top: 20px; }
+                .print-note { background: #e3f2fd; padding: 10px; border-radius: 4px; margin: 15px 0; font-size: 14px; }
             </style>
         </head>
         <body>
             <div class='header'>
-                <h1>Christmas for Kids</h1>
+                <h1>🎄 Christmas for Kids 🎄</h1>
                 <h2>Thank You for Your Sponsorship!</h2>
             </div>
-            
+
             <div class='content'>
                 <p>Dear {$sponsorship['sponsor_name']},</p>
-                
-                <p>Thank you so much for choosing to sponsor <strong>Child {$childDisplayId}</strong> through our Christmas for Kids program! Your generosity will help make this Christmas truly special for a child in our community.</p>
-                
-                <div class='highlight'>
-                    <h3>What Happens Next:</h3>
+
+                <p>Thank you for choosing to sponsor <strong>Child {$childDisplayId}</strong>! You're making Christmas magical for a child in our community.</p>
+
+                <div class='important-box'>
+                    <h3>📋 IMPORTANT - Save This Email!</h3>
+                    <p><strong>This email contains all the information you need to shop for your sponsored child.</strong></p>
+                    <p><strong>What to do:</strong></p>
                     <ol>
-                        <li>Our team will review your sponsorship request</li>
-                        <li>You'll receive a confirmation within 24-48 hours</li>
-                        <li>We'll provide gift suggestions and delivery details</li>
-                        <li>You'll have the joy of knowing you've made Christmas magical for a child</li>
+                        <li><strong>Shop for gifts</strong> using the details below</li>
+                        <li><strong>Keep gifts UNWRAPPED</strong> (parents will wrap them)</li>
+                        <li><strong>Deliver to CFK office</strong> by [DATE TBD]</li>
+                        <li><strong>Contact us</strong> if you have questions: " . config('admin_email') . "</li>
                     </ol>
                 </div>
-                
+
+                <div class='child-info'>
+                    <h3>👧 Child Information - {$childDisplayId}</h3>
+
+                    <div class='info-section'>
+                        <div><span class='info-label'>Child ID:</span> <span class='info-value'><strong>{$childDisplayId}</strong></span></div>
+                        <div><span class='info-label'>First Name:</span> <span class='info-value'>{$childName}</span></div>
+                        <div><span class='info-label'>Age:</span> <span class='info-value'>{$childAge} years old</span></div>
+                        <div><span class='info-label'>Grade:</span> <span class='info-value'>{$childGrade}</span></div>
+                        <div><span class='info-label'>Gender:</span> <span class='info-value'>{$childGender}</span></div>
+                    </div>
+
+                    <h3>👕 Clothing Sizes</h3>
+                    <div class='sizes-grid'>
+                        <div class='size-item'><strong>Shirt:</strong> {$shirtSize}</div>
+                        <div class='size-item'><strong>Pants:</strong> {$pantSize}</div>
+                        <div class='size-item'><strong>Shoes:</strong> {$shoeSize}</div>
+                        <div class='size-item'><strong>Jacket:</strong> {$jacketSize}</div>
+                    </div>
+
+                    <div class='info-section'>
+                        <h3>🎨 Interests & Hobbies</h3>
+                        <p style='background: #f9f9f9; padding: 10px; border-radius: 4px;'>{$interests}</p>
+                    </div>
+
+                    <div class='wishes-box'>
+                        <h3>🎁 Christmas Wishes & Gift Ideas</h3>
+                        <p><strong>{$wishes}</strong></p>
+                    </div>
+
+                    " . (!empty($specialNeeds) && $specialNeeds !== 'None' ? "
+                    <div class='info-section'>
+                        <h3>⚠️ Special Notes</h3>
+                        <p style='background: #fff3cd; padding: 10px; border-radius: 4px;'>{$specialNeeds}</p>
+                    </div>
+                    " : "") . "
+                </div>
+
+                <div class='print-note'>
+                    <strong>💡 Tip:</strong> Print this email and take it with you while shopping! It has everything you need.
+                </div>
+
                 " . (!empty($sponsorship['special_message']) ? "
-                <p><strong>Your Message:</strong> <em>{$sponsorship['special_message']}</em></p>
+                <div style='margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;'>
+                    <p><strong>Your Message:</strong> <em>{$sponsorship['special_message']}</em></p>
+                </div>
                 " : "") . "
-                
-                <p>If you have any questions or need to make changes to your sponsorship, please don't hesitate to contact us.</p>
-                
+
+                <p style='margin-top: 20px;'><strong>Questions or need to make changes?</strong> Please contact us - we're here to help!</p>
+
                 <p>With heartfelt gratitude,<br>
-                The Christmas for Kids Team</p>
+                <strong>The Christmas for Kids Team</strong></p>
             </div>
-            
+
             <div class='footer'>
-                <p>Christmas for Kids | Making Christmas Magical for Children in Need</p>
-                <p>If you need assistance, please contact us at " . config('admin_email') . "</p>
+                <p><strong>Christmas for Kids</strong> | Making Christmas Magical for Children in Need</p>
+                <p>📧 " . config('admin_email') . " | 📍 CFK Office - [ADDRESS TBD]</p>
+                <p style='font-size: 11px; color: #666; margin-top: 10px;'>Please keep this email for your records. Gifts should be delivered unwrapped to our office.</p>
             </div>
         </body>
         </html>";
