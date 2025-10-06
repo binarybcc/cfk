@@ -12,7 +12,14 @@ if (!defined('CFK_APP')) {
 }
 
 class Database {
-    
+
+    /**
+     * Get PDO connection (for transaction support)
+     */
+    public static function getConnection(): \PDO {
+        return \CFK\Config\Database::getConnection();
+    }
+
     /**
      * Execute a query and fetch all results
      */

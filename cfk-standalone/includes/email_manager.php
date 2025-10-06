@@ -297,12 +297,15 @@ class CFK_Email_Manager {
         $content .= "</div>";
         
         if (!empty($sponsorship)) {
+            $childId = $sponsorship['child_display_id'] ?? 'Unknown';
+            $requestDate = $sponsorship['request_date'] ?? 'Unknown';
+
             $content .= "<h3>Sponsorship Details:</h3>";
             $content .= "<ul>";
             $content .= "<li><strong>Sponsor:</strong> {$sponsorship['sponsor_name']}</li>";
             $content .= "<li><strong>Email:</strong> {$sponsorship['sponsor_email']}</li>";
-            $content .= "<li><strong>Child:</strong> {$sponsorship['child_display_id'] ?? 'Unknown'}</li>";
-            $content .= "<li><strong>Date:</strong> {$sponsorship['request_date'] ?? 'Unknown'}</li>";
+            $content .= "<li><strong>Child:</strong> {$childId}</li>";
+            $content .= "<li><strong>Date:</strong> {$requestDate}</li>";
             $content .= "</ul>";
         }
         
