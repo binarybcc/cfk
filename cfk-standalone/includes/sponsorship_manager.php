@@ -454,16 +454,303 @@ class CFK_Sponsorship_Manager {
      */
     public static function getChildrenNeedingAttention(): array {
         $cutoffTime = date('Y-m-d H:i:s', strtotime('-' . (self::PENDING_TIMEOUT_HOURS - 6) . ' hours'));
-        
+
         return Database::fetchAll("
             SELECT c.*, f.family_number, f.family_name,
                    CONCAT(f.family_number, c.child_letter) as display_id,
                    s.request_date, s.sponsor_name, s.sponsor_email
-            FROM children c 
+            FROM children c
             JOIN families f ON c.family_id = f.id
             LEFT JOIN sponsorships s ON c.id = s.child_id AND s.status = 'pending'
             WHERE c.status = 'pending' AND s.request_date < ?
             ORDER BY s.request_date ASC
         ", [$cutoffTime]);
+    }
+
+    /**
+     * Get all sponsorships for an email address
+     */
+    public static function getSponsorshipsByEmail(string $email): array {
+        return Database::fetchAll(
+            "SELECT * FROM sponsorships
+             WHERE sponsor_email = ?
+             AND status != 'cancelled'
+             ORDER BY request_date DESC",
+            [$email]
+        );
+    }
+
+    /**
+     * Get sponsorships with full child and family details
+     */
+    public static function getSponsorshipsWithDetails(string $email): array {
+        return Database::fetchAll(
+            "SELECT s.*,
+                    c.id as child_id,
+                    c.name as child_name,
+                    c.age as child_age,
+                    c.grade as child_grade,
+                    c.gender as child_gender,
+                    c.shirt_size,
+                    c.pant_size,
+                    c.shoe_size,
+                    c.jacket_size,
+                    c.interests,
+                    c.wishes,
+                    c.special_needs,
+                    c.photo_filename,
+                    c.status as child_status,
+                    f.id as family_id,
+                    f.family_number,
+                    f.family_name,
+                    CONCAT(f.family_number, c.child_letter) as child_display_id
+             FROM sponsorships s
+             JOIN children c ON s.child_id = c.id
+             JOIN families f ON c.family_id = f.id
+             WHERE s.sponsor_email = ?
+             AND s.status != 'cancelled'
+             ORDER BY f.family_number, c.child_letter",
+            [$email]
+        );
+    }
+
+    /**
+     * Generate portal access token for sponsor email
+     */
+    public static function generatePortalToken(string $email): string {
+        $token = bin2hex(random_bytes(32));
+        $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+
+        // Store token in session (could also use database for production)
+        if (!isset($_SESSION['portal_tokens'])) {
+            $_SESSION['portal_tokens'] = [];
+        }
+
+        $_SESSION['portal_tokens'][$token] = [
+            'email' => $email,
+            'expires_at' => $expiresAt
+        ];
+
+        return $token;
+    }
+
+    /**
+     * Verify portal access token
+     */
+    public static function verifyPortalToken(string $token): array {
+        if (empty($token)) {
+            return [
+                'valid' => false,
+                'message' => 'Access token is required.',
+                'email' => null
+            ];
+        }
+
+        if (!isset($_SESSION['portal_tokens'][$token])) {
+            return [
+                'valid' => false,
+                'message' => 'Invalid or expired access token.',
+                'email' => null
+            ];
+        }
+
+        $tokenData = $_SESSION['portal_tokens'][$token];
+
+        // Check if expired
+        if (strtotime($tokenData['expires_at']) < time()) {
+            unset($_SESSION['portal_tokens'][$token]);
+            return [
+                'valid' => false,
+                'message' => 'Access token has expired. Please request a new access link.',
+                'email' => null
+            ];
+        }
+
+        return [
+            'valid' => true,
+            'message' => 'Token valid',
+            'email' => $tokenData['email']
+        ];
+    }
+
+    /**
+     * Send portal access email to sponsor
+     */
+    public static function sendPortalAccessEmail(string $email): array {
+        try {
+            // Generate token
+            $token = self::generatePortalToken($email);
+
+            // Build access URL
+            $portalUrl = baseUrl('?page=sponsor_portal&token=' . urlencode($token));
+
+            // Get sponsor name from first sponsorship
+            $sponsorships = self::getSponsorshipsByEmail($email);
+            $sponsorName = $sponsorships[0]['sponsor_name'] ?? 'Valued Sponsor';
+
+            // Send email
+            if (class_exists('CFK_Email_Manager')) {
+                $mailer = CFK_Email_Manager::getMailer();
+                $mailer->addAddress($email, $sponsorName);
+                $mailer->Subject = 'Christmas for Kids - Portal Access Link';
+                $mailer->Body = self::getPortalAccessEmailTemplate($sponsorName, $portalUrl);
+
+                $success = $mailer->send();
+
+                if ($success) {
+                    return [
+                        'success' => true,
+                        'message' => 'Access link sent successfully'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Failed to send email. Please try again.'
+                    ];
+                }
+            }
+
+            return [
+                'success' => false,
+                'message' => 'Email service unavailable. Please contact support.'
+            ];
+
+        } catch (Exception $e) {
+            error_log('Failed to send portal access email: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'System error occurred. Please try again.'
+            ];
+        }
+    }
+
+    /**
+     * Get portal access email template
+     */
+    private static function getPortalAccessEmailTemplate(string $sponsorName, string $portalUrl): string {
+        return "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .header { background: #2c5530; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; max-width: 600px; margin: 0 auto; }
+                .button {
+                    display: inline-block;
+                    background: #c41e3a;
+                    color: white;
+                    padding: 15px 30px;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin: 20px 0;
+                    font-weight: bold;
+                }
+                .footer { background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; }
+                .security-note { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+            </style>
+        </head>
+        <body>
+            <div class='header'>
+                <h1>🎄 Christmas for Kids 🎄</h1>
+                <h2>Sponsorship Portal Access</h2>
+            </div>
+
+            <div class='content'>
+                <p>Dear {$sponsorName},</p>
+
+                <p>You requested access to view your Christmas for Kids sponsorships. Click the button below to access your portal:</p>
+
+                <div style='text-align: center;'>
+                    <a href='{$portalUrl}' class='button'>Access Your Portal</a>
+                </div>
+
+                <div class='security-note'>
+                    <p><strong>🔒 Security Notice:</strong></p>
+                    <ul>
+                        <li>This link will expire in <strong>30 minutes</strong></li>
+                        <li>Do not share this link with anyone</li>
+                        <li>If you didn't request this, please ignore this email</li>
+                    </ul>
+                </div>
+
+                <p><strong>In your portal you can:</strong></p>
+                <ul>
+                    <li>View all your sponsored children with complete details</li>
+                    <li>See which children are in the same family</li>
+                    <li>Add more children to your sponsorship</li>
+                    <li>Download shopping lists for gift buying</li>
+                </ul>
+
+                <p>If the button doesn't work, copy and paste this link into your browser:</p>
+                <p style='word-break: break-all; color: #666; font-size: 12px;'>{$portalUrl}</p>
+
+                <p style='margin-top: 20px;'><strong>Questions?</strong> Contact us at " . config('admin_email') . "</p>
+
+                <p>Thank you for making Christmas special for children in need!</p>
+
+                <p>With gratitude,<br>
+                <strong>The Christmas for Kids Team</strong></p>
+            </div>
+
+            <div class='footer'>
+                <p><strong>Christmas for Kids</strong> | Making Christmas Magical for Children in Need</p>
+                <p>📧 " . config('admin_email') . "</p>
+            </div>
+        </body>
+        </html>";
+    }
+
+    /**
+     * Add children to existing sponsorship
+     */
+    public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array {
+        if (empty($childIds)) {
+            return [
+                'success' => false,
+                'message' => 'No children selected'
+            ];
+        }
+
+        try {
+            $addedChildren = [];
+            $errors = [];
+
+            foreach ($childIds as $childId) {
+                $result = self::createSponsorshipRequest((int)$childId, $sponsorData);
+
+                if ($result['success']) {
+                    $addedChildren[] = $result['child']['display_id'];
+                } else {
+                    $errors[] = $result['message'];
+                }
+            }
+
+            if (!empty($addedChildren)) {
+                // Send updated email with ALL children
+                if (class_exists('CFK_Email_Manager')) {
+                    $allSponsorships = self::getSponsorshipsWithDetails($sponsorEmail);
+                    CFK_Email_Manager::sendMultiChildSponsorshipEmail($sponsorEmail, $allSponsorships);
+                }
+
+                return [
+                    'success' => true,
+                    'message' => 'Successfully added ' . count($addedChildren) . ' child(ren) to your sponsorship!',
+                    'added_children' => $addedChildren,
+                    'errors' => $errors
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Failed to add children: ' . implode(', ', $errors)
+                ];
+            }
+
+        } catch (Exception $e) {
+            error_log('Failed to add children to sponsorship: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'System error occurred. Please try again.'
+            ];
+        }
     }
 }

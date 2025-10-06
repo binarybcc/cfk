@@ -337,23 +337,218 @@ class CFK_Email_Manager {
         try {
             $testEmail = config('admin_email');
             $mailer = self::getMailer();
-            
+
             $mailer->addAddress($testEmail);
             $mailer->Subject = 'CFK Email Test - ' . date('Y-m-d H:i:s');
             $mailer->Body = '<h2>Email Test Successful</h2><p>Your email configuration is working correctly!</p>';
-            
+
             $success = $mailer->send();
-            
+
             return [
                 'success' => $success,
                 'message' => $success ? 'Test email sent successfully' : 'Failed to send test email'
             ];
-            
+
         } catch (Exception $e) {
             return [
                 'success' => false,
                 'message' => 'Email test failed: ' . $e->getMessage()
             ];
         }
+    }
+
+    /**
+     * Send multi-child sponsorship email (when sponsor adds more children)
+     */
+    public static function sendMultiChildSponsorshipEmail(string $sponsorEmail, array $sponsorships): bool {
+        if (empty($sponsorships)) {
+            return false;
+        }
+
+        try {
+            $mailer = self::getMailer();
+            $sponsorName = $sponsorships[0]['sponsor_name'];
+
+            $mailer->addAddress($sponsorEmail, $sponsorName);
+            $mailer->Subject = 'Christmas for Kids - Updated Sponsorship Details';
+            $mailer->Body = self::getMultiChildSponsorshipTemplate($sponsorName, $sponsorships);
+
+            $success = $mailer->send();
+
+            // Log the email
+            self::logEmail(
+                $sponsorEmail,
+                'multi_child_update',
+                $success ? 'sent' : 'failed',
+                $sponsorships[0]['id']
+            );
+
+            return $success;
+
+        } catch (Exception $e) {
+            error_log('Failed to send multi-child sponsorship email: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get multi-child sponsorship email template
+     */
+    private static function getMultiChildSponsorshipTemplate(string $sponsorName, array $sponsorships): string {
+        $childCount = count($sponsorships);
+
+        // Group by family
+        $families = [];
+        foreach ($sponsorships as $child) {
+            $familyId = $child['family_id'];
+            if (!isset($families[$familyId])) {
+                $families[$familyId] = [
+                    'family_number' => $child['family_number'],
+                    'family_name' => $child['family_name'],
+                    'children' => []
+                ];
+            }
+            $families[$familyId]['children'][] = $child;
+        }
+
+        $html = "
+        <html>
+        <head>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .header { background: #c41e3a; color: white; padding: 20px; text-align: center; }
+                .content { padding: 20px; max-width: 800px; margin: 0 auto; }
+                .footer { background: #f4f4f4; padding: 15px; text-align: center; font-size: 12px; }
+                .family-section { background: #f8f9fa; border: 2px solid #2c5530; border-radius: 8px; padding: 20px; margin: 20px 0; }
+                .family-header { background: #2c5530; color: white; padding: 10px; margin: -20px -20px 20px -20px; border-radius: 6px 6px 0 0; }
+                .child-card { background: white; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin: 15px 0; }
+                .child-header { border-bottom: 2px solid #2c5530; padding-bottom: 10px; margin-bottom: 10px; }
+                .info-label { font-weight: bold; color: #2c5530; display: inline-block; width: 120px; }
+                .sizes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+                .size-item { background: #f9f9f9; padding: 8px; border-radius: 4px; }
+                .wishes-box { background: #e8f5e9; border-left: 4px solid #2c5530; padding: 15px; margin: 15px 0; }
+                .special-needs-box { background: #fff3cd; border-left: 4px solid #c41e3a; padding: 15px; margin: 15px 0; }
+                .important-box { background: #fffacd; border-left: 4px solid #c41e3a; padding: 15px; margin: 20px 0; }
+                h3 { color: #2c5530; }
+            </style>
+        </head>
+        <body>
+            <div class='header'>
+                <h1>🎄 Christmas for Kids 🎄</h1>
+                <h2>Updated Sponsorship Details</h2>
+            </div>
+
+            <div class='content'>
+                <p>Dear {$sponsorName},</p>
+
+                <p><strong>Thank you for your generosity!</strong> You are now sponsoring <strong>{$childCount}</strong> child" . ($childCount > 1 ? 'ren' : '') . ".</p>
+
+                <div class='important-box'>
+                    <h3>📋 IMPORTANT - Print & Save This Email!</h3>
+                    <p><strong>This email contains ALL the children you're sponsoring with complete shopping details.</strong></p>
+                    <p><strong>What to do:</strong></p>
+                    <ol>
+                        <li><strong>Shop for gifts</strong> using the details below for ALL children</li>
+                        <li><strong>Keep gifts UNWRAPPED</strong> (parents will wrap them)</li>
+                        <li><strong>Deliver to CFK office</strong> by [DATE TBD]</li>
+                        <li><strong>Contact us</strong> with questions: " . config('admin_email') . "</li>
+                    </ol>
+                </div>";
+
+        // Add each family section
+        foreach ($families as $family) {
+            $html .= "
+                <div class='family-section'>
+                    <div class='family-header'>
+                        <h3 style='color: white; margin: 0;'>Family {$family['family_number']}" .
+                        (!empty($family['family_name']) ? " ({$family['family_name']})" : "") .
+                        "</h3>
+                    </div>";
+
+            // Add each child in the family
+            foreach ($family['children'] as $child) {
+                $childDisplayId = sanitizeString($child['child_display_id']);
+                $childName = sanitizeString($child['child_name']);
+                $childAge = sanitizeInt($child['child_age']);
+                $childGrade = sanitizeString($child['child_grade']);
+                $childGender = $child['child_gender'] === 'M' ? 'Boy' : 'Girl';
+
+                $shirtSize = sanitizeString($child['shirt_size'] ?? 'Not specified');
+                $pantSize = sanitizeString($child['pant_size'] ?? 'Not specified');
+                $shoeSize = sanitizeString($child['shoe_size'] ?? 'Not specified');
+                $jacketSize = sanitizeString($child['jacket_size'] ?? 'Not specified');
+
+                $interests = sanitizeString($child['interests'] ?? 'Not specified');
+                $wishes = sanitizeString($child['wishes'] ?? 'Not specified');
+                $specialNeeds = sanitizeString($child['special_needs'] ?? '');
+
+                $html .= "
+                    <div class='child-card'>
+                        <div class='child-header'>
+                            <h3>Child {$childDisplayId} - {$childName}</h3>
+                        </div>
+
+                        <div style='margin: 10px 0;'>
+                            <div><span class='info-label'>Child ID:</span> <strong>{$childDisplayId}</strong></div>
+                            <div><span class='info-label'>First Name:</span> {$childName}</div>
+                            <div><span class='info-label'>Age:</span> {$childAge} years old</div>
+                            <div><span class='info-label'>Grade:</span> {$childGrade}</div>
+                            <div><span class='info-label'>Gender:</span> {$childGender}</div>
+                        </div>
+
+                        <h4 style='color: #2c5530;'>👕 Clothing Sizes</h4>
+                        <div class='sizes-grid'>
+                            <div class='size-item'><strong>Shirt:</strong> {$shirtSize}</div>
+                            <div class='size-item'><strong>Pants:</strong> {$pantSize}</div>
+                            <div class='size-item'><strong>Shoes:</strong> {$shoeSize}</div>
+                            <div class='size-item'><strong>Jacket:</strong> {$jacketSize}</div>
+                        </div>
+
+                        <div style='margin: 15px 0;'>
+                            <h4 style='color: #2c5530;'>🎨 Interests & Hobbies</h4>
+                            <p style='background: #f9f9f9; padding: 10px; border-radius: 4px;'>{$interests}</p>
+                        </div>
+
+                        <div class='wishes-box'>
+                            <h4 style='color: #2c5530; margin-top: 0;'>🎁 Christmas Wishes & Gift Ideas</h4>
+                            <p><strong>{$wishes}</strong></p>
+                        </div>";
+
+                if (!empty($specialNeeds)) {
+                    $html .= "
+                        <div class='special-needs-box'>
+                            <h4 style='color: #c41e3a; margin-top: 0;'>⚠️ Special Notes</h4>
+                            <p>{$specialNeeds}</p>
+                        </div>";
+                }
+
+                $html .= "
+                    </div>";
+            }
+
+            $html .= "
+                </div>";
+        }
+
+        $html .= "
+                <div style='background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <p><strong>💡 Shopping Tip:</strong> Print this email and take it with you! It has complete details for all {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ".</p>
+                </div>
+
+                <p style='margin-top: 20px;'><strong>Questions or need to make changes?</strong> Please contact us - we're here to help!</p>
+
+                <p>With heartfelt gratitude,<br>
+                <strong>The Christmas for Kids Team</strong></p>
+            </div>
+
+            <div class='footer'>
+                <p><strong>Christmas for Kids</strong> | Making Christmas Magical for Children in Need</p>
+                <p>📧 " . config('admin_email') . " | 📍 CFK Office - [ADDRESS TBD]</p>
+                <p style='font-size: 11px; color: #666; margin-top: 10px;'>You are sponsoring {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ". Please deliver unwrapped gifts to our office.</p>
+            </div>
+        </body>
+        </html>";
+
+        return $html;
     }
 }
