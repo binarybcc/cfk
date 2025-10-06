@@ -5,10 +5,11 @@ A dignified, maintainable PHP application for managing child sponsorship program
 ## 🎯 Project Goals
 
 - **Respectful Approach**: Children are individuals seeking support, not products
+- **Gift-Delivery Model**: Sponsors buy and deliver physical gifts, not monetary donations
 - **Non-Coder Maintainable**: Simple PHP with clear documentation
 - **Visitor-Focused UX**: Easy browsing, search, and sponsorship process
+- **Complete Shopping Info**: Sponsors receive detailed email with sizes, wishes, interests
 - **Nexcess Compatible**: Pure PHP without framework conflicts
-- **Zeffy Integration**: Built-in donation system integration
 
 ## 🚀 Quick Start
 
@@ -93,18 +94,29 @@ cfk-standalone/
 
 ## 👥 User Roles & Access
 
-### Public Visitors
-- Browse children profiles
-- Search and filter children
-- Submit sponsorship requests
-- Make donations via Zeffy
+### Public Visitors (Sponsors)
+- Browse children profiles with photos
+- Search and filter children by age, interests, wishes
+- Submit sponsorship requests (individuals or entire families)
+- Receive detailed shopping email with:
+  - Complete child information (name, age, grade, gender)
+  - All clothing sizes (shirt, pants, shoes, jacket)
+  - Interests and hobbies (full text)
+  - Christmas wishlist items (full text)
+  - Special needs or notes
+- Access sponsor portal to view sponsorships and add more children
 
 ### Admin Users
+- Confirm sponsorship requests (triggers automated detailed email to sponsor)
 - Manage children and families
-- Process sponsorship requests
-- Upload photos
-- View reports and statistics
-- Import data via CSV
+- Upload photos and update information
+- View comprehensive reports:
+  - Sponsor directory (who sponsored which children)
+  - Gift delivery tracking
+  - Family sponsorship status
+  - Available children
+- Import/export data via CSV
+- Perform year-end reset with automatic archiving
 
 ## 🔧 Configuration
 
@@ -152,16 +164,24 @@ $dbConfig = [
 
 ### Core Tables
 
-- **families**: Family groupings (175A, 175B, etc.)
-- **children**: Individual child profiles
-- **sponsorships**: Sponsorship requests and tracking  
+- **families**: Family groupings (family_number: 175, 176, etc.)
+- **children**: Individual child profiles with complete information
+  - Demographics (name, age, grade, gender)
+  - Clothing sizes (shirt, pants, shoes, jacket)
+  - Interests, hobbies, Christmas wishes
+  - Special needs
+- **sponsorships**: Sponsorship requests and tracking
+  - Status: pending, confirmed, completed, cancelled
+  - Sponsor contact information
+  - Gift preferences
+- **email_log**: All automated email communications logged
 - **admin_users**: Admin access management
-- **settings**: Configuration options
 
 ### Key Relationships
 
 - Children belong to families (siblings grouped together)
-- Sponsorships link children to sponsors
+- Sponsorships link children to sponsors (one sponsor per child)
+- Email log tracks all sponsor communications
 - All data maintains referential integrity
 
 ## 🎨 Customization
@@ -177,13 +197,25 @@ $dbConfig = [
 - Footer: `includes/footer.php`
 - Admin header: `admin/includes/admin_header.php`
 
-### Zeffy Integration
-Donation buttons are integrated throughout the site using:
-```html
-<button zeffy-form-link="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true">
-    Donate Now
-</button>
-```
+### Sponsorship Workflow
+
+**How It Works**:
+1. Visitor browses available children on public site
+2. Sponsor selects child (or entire family) and submits request form
+3. Admin confirms sponsorship request in admin panel
+4. System automatically sends detailed email to sponsor with:
+   - All child information needed for shopping
+   - Clothing sizes in easy-to-read format
+   - Interests and Christmas wishes
+   - Delivery instructions
+5. Sponsor purchases gifts and delivers unwrapped to CFK
+6. Admin marks sponsorship complete when gifts delivered
+
+**Sponsor Portal**:
+- Sponsors can access portal with email address
+- View all their current sponsorships
+- Add more children to existing sponsorship
+- Receive updated comprehensive email with all children
 
 ## 🔍 Search & Filtering
 
@@ -202,15 +234,26 @@ Donation buttons are integrated throughout the site using:
 ## 📈 Monitoring & Maintenance
 
 ### Regular Tasks
-1. **Weekly**: Review pending sponsorships
-2. **Monthly**: Export data backups
-3. **Seasonal**: Update child photos and information
-4. **Annual**: Archive completed sponsorships
+1. **Daily** (during season): Review and confirm pending sponsorships
+2. **Weekly**: Export data backups, generate reports
+3. **Monthly**: Update child photos, verify information accuracy
+4. **End of Season**: Mark all sponsorships complete
+5. **Annual**: Perform year-end reset with automatic archiving
 
 ### Logs & Monitoring
+- All automated emails logged (email_log table)
 - Failed login attempts logged
 - Database errors logged to PHP error log
 - Admin actions tracked
+- Sponsorship status changes recorded
+
+### Reports Available
+- Dashboard statistics (real-time overview)
+- Sponsor directory (all sponsors and their children)
+- Child-sponsor lookup (find who sponsored specific child)
+- Family sponsorship report (family-level status)
+- Gift delivery tracking (confirmed sponsorships awaiting delivery)
+- Available children (filterable by age, gender, family)
 
 ## 🆘 Troubleshooting
 
@@ -250,25 +293,49 @@ Donation buttons are integrated throughout the site using:
 5. **Monitor failed login attempts**
 6. **Restrict admin panel IP access if possible**
 
+## 📚 Documentation
+
+### For Administrators
+- **ADMIN-GUIDE.md**: Complete admin workflow, email system, reports, year-end reset
+- **CSV-IMPORT-GUIDE.md**: Format and process for importing child data
+- **EMAIL-DEPLOYMENT-GUIDE.md**: Email configuration and troubleshooting
+
+### For Sponsors
+- **SPONSOR-WORKFLOW.md**: Complete sponsor experience from selection to delivery
+- **Public Site**: Browse and select children, access sponsor portal
+
+### For Developers
+- **README.md**: This file - installation, configuration, architecture
+- **IMPLEMENTATION-PLAN.md**: Original development planning
+- Code follows modern PHP 8.2+ standards
+- Uses PDO for database operations with prepared statements
+- Comprehensive error handling and logging
+- Fully commented codebase
+
 ## 📞 Getting Help
 
 ### For Non-Technical Users
-- Focus on the admin dashboard
-- Use the "Quick Actions" for common tasks
-- CSV import for bulk child additions
+- Review **ADMIN-GUIDE.md** for complete admin workflows
+- Use the admin dashboard for daily operations
+- CSV import for bulk child additions (see CSV-IMPORT-GUIDE.md)
 - Contact your developer for configuration changes
 
+### For Sponsors
+- Review **SPONSOR-WORKFLOW.md** for complete process
+- Use "My Sponsorships" portal to view your sponsorships
+- Contact CFK administration for questions
+
 ### For Developers
-- Code follows modern PHP 8.2+ standards
-- Uses PDO for database operations
-- Comprehensive error handling
-- Fully commented codebase
+- Check PHP error log for server issues
+- Review database error messages in admin panel
+- All code documented with inline comments
+- Database schema in database/schema.sql
 
 ---
 
-**Version**: 1.0.0  
-**Last Updated**: 2025  
-**Minimum PHP Version**: 8.2  
+**Version**: 1.0.3
+**Last Updated**: October 2025
+**Minimum PHP Version**: 8.2
 **License**: Custom - For Christmas for Kids use only
 
 *Built with dignity, respect, and the goal of making every child's Christmas magical.* 🎄
