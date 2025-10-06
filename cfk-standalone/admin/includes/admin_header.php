@@ -26,6 +26,7 @@
                     <li><a href="manage_families.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_families.php' ? 'class="active"' : ''; ?>>Families</a></li>
                     <li><a href="manage_sponsorships.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
                     <li><a href="reports.php" <?php echo basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
+                    <li><a href="year_end_reset.php" <?php echo basename($_SERVER['PHP_SELF']) === 'year_end_reset.php' ? 'class="active"' : ''; ?> style="color: #dc3545;">Year-End Reset</a></li>
                 </ul>
             </nav>
             
