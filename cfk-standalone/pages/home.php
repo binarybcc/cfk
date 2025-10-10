@@ -181,14 +181,11 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
                 ); ?>
                 <?php echo renderButton(
                     'Make a General Donation',
-                    null,
+                    baseUrl('?page=donate'),
                     'outline',
                     [
                         'size' => 'large',
-                        'id' => 'final-donate-btn',
-                        'attributes' => [
-                            'zeffy-form-link' => 'https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true'
-                        ]
+                        'id' => 'final-donate-btn'
                     ]
                 ); ?>
             </div>

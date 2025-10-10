@@ -651,7 +651,7 @@ class CFK_Sponsorship_Manager {
         </head>
         <body>
             <div class='header'>
-                <h1>🎄 Christmas for Kids 🎄</h1>
+                <img src='" . baseUrl('assets/images/cfk-horizontal.png') . "' alt='Christmas for Kids' style='max-width: 400px; height: auto; margin: 0 auto 15px; display: block;'>
                 <h2>Sponsorship Portal Access</h2>
             </div>
 

@@ -118,6 +118,55 @@ class CFK_CSV_Handler {
         $handler = new self();
         return $handler->importChildren($csvPath, $options);
     }
+
+    /**
+     * Parse CSV and return children data without importing
+     * Used for preview/analysis
+     */
+    public function parseCSVForPreview(string $csvPath): array {
+        $this->resetCounters();
+        $children = [];
+
+        if (!file_exists($csvPath) || !is_readable($csvPath)) {
+            return ['success' => false, 'error' => 'CSV file not found or not readable'];
+        }
+
+        $handle = fopen($csvPath, 'r');
+        if (!$handle) {
+            return ['success' => false, 'error' => 'Could not open CSV file'];
+        }
+
+        // Read and validate header
+        $headers = fgetcsv($handle);
+        if (!$this->validateHeaders($headers)) {
+            fclose($handle);
+            return ['success' => false, 'errors' => $this->errors];
+        }
+
+        $rowNumber = 1;
+
+        while (($data = fgetcsv($handle)) !== false) {
+            $rowNumber++;
+
+            if (empty(array_filter($data))) {
+                continue; // Skip empty rows
+            }
+
+            $row = $this->parseRow($headers, $data, $rowNumber);
+            if ($row) {
+                $children[] = $row;
+            }
+        }
+
+        fclose($handle);
+
+        return [
+            'success' => empty($this->errors),
+            'children' => $children,
+            'errors' => $this->errors,
+            'warnings' => $this->warnings
+        ];
+    }
     
     /**
      * Export children to CSV format

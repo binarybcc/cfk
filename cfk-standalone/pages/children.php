@@ -203,14 +203,11 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         <div class="cta-buttons">
             <?php echo renderButton(
                 'Make a General Donation',
-                null,
+                baseUrl('?page=donate'),
                 'success',
                 [
                     'size' => 'large',
-                    'id' => 'cta-donate-btn',
-                    'attributes' => [
-                        'zeffy-form-link' => 'https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true'
-                    ]
+                    'id' => 'cta-donate-btn'
                 ]
             ); ?>
         </div>

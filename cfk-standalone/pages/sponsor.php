@@ -176,10 +176,9 @@ if (!$isFamilySponsorship) {
                                 View This Child's Family
                             </a>
                         <?php endif; ?>
-                        <button id="unavailable-donate-btn" class="btn btn-success" 
-                                zeffy-form-link="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true">
+                        <a href="<?php echo baseUrl('?page=donate'); ?>" class="btn btn-success">
                             Make a General Donation
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

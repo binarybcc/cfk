@@ -18,7 +18,7 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Get requested page
 $page = $_GET['page'] ?? 'home';
-$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal'];
+$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply'];
 
 // Redirect search to children page with search parameter (before headers are sent)
 if ($page === 'search') {
@@ -64,6 +64,9 @@ switch ($page) {
         break;
     case 'sponsor_portal':
         include __DIR__ . '/pages/sponsor_portal.php';
+        break;
+    case 'how_to_apply':
+        include __DIR__ . '/pages/how_to_apply.php';
         break;
     default:
         include __DIR__ . '/pages/children.php';

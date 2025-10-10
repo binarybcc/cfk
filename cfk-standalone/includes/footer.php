@@ -4,8 +4,12 @@
     <footer class="main-footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-section">
-                    <h3><?php echo config('app_name'); ?></h3>
+                <div class="footer-section footer-brand">
+                    <img src="<?php echo baseUrl('assets/images/cfk-horizontal.png'); ?>"
+                         alt="Christmas for Kids"
+                         class="footer-logo"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <h3 style="display:none;"><?php echo config('app_name'); ?></h3>
                     <p>Connecting generous hearts with children in need during the Christmas season.</p>
                     <p>Making the holidays brighter, one child at a time.</p>
                 </div>
@@ -50,5 +54,26 @@
     <script src="<?php echo baseUrl('assets/js/main.js'); ?>"></script>
 
     <!-- Zeffy donation script loaded in header, buttons initialized in main.js -->
+
+    <style>
+        /* Footer Logo Styling */
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .footer-logo {
+            height: 60px;
+            width: auto;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-logo {
+                height: 50px;
+            }
+        }
+    </style>
 </body>
 </html>

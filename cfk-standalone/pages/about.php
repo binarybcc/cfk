@@ -137,10 +137,9 @@ $pageTitle = 'About Us';
                 <div class="involvement-option">
                     <h3>Make a Donation</h3>
                     <p>Can't sponsor a specific child but want to help? General donations help us support families and maintain the program.</p>
-                    <button id="about-donate-btn" class="btn btn-success" 
-                            zeffy-form-link="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true">
+                    <a href="<?php echo baseUrl('?page=donate'); ?>" class="btn btn-success">
                         Donate Now
-                    </button>
+                    </a>
                 </div>
                 <div class="involvement-option">
                     <h3>Spread the Word</h3>

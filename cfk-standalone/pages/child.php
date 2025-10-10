@@ -261,10 +261,9 @@ $isAvailable = $child['status'] === 'available';
                 <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-secondary">
                     Browse Other Children
                 </a>
-                <button id="general-donate-btn" class="btn btn-success" 
-                        zeffy-form-link="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true">
+                <a href="<?php echo baseUrl('?page=donate'); ?>" class="btn btn-success">
                     Make a General Donation
-                </button>
+                </a>
             </div>
         </div>
     </div>
