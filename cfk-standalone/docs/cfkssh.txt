@@ -1,0 +1,6 @@
+host:d646a74eb9.nxcli.io
+port:22
+user:a4409d26_1
+pass:PiggedCoifSourerFating
+
+command:ssh a4409d26_1@d646a74eb9.nxcli.io2
