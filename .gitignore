@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Metrics and temporary files
+.claude-flow/metrics/
+.swarm/memory.db
+
+# Backups
+*.backup
+
+# Local environment files
+cfkssh.txt
