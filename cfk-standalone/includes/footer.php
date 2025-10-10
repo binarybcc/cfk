@@ -26,7 +26,9 @@
                     
                     <!-- Zeffy Donation Button Integration -->
                     <div class="donation-section">
-                        <button id="zeffy-donate-btn" class="donate-btn">Donate Now</button>
+                        <a href="<?php echo baseUrl('?page=donate'); ?>" class="btn btn-success donate-btn">
+                            Donate Now
+                        </a>
                     </div>
                 </div>
                 
@@ -46,17 +48,7 @@
 
     <!-- JavaScript -->
     <script src="<?php echo baseUrl('assets/js/main.js'); ?>"></script>
-    
-    <!-- Zeffy Integration Script -->
-    <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
-    <script>
-        // Initialize Zeffy donation button
-        document.addEventListener('DOMContentLoaded', function() {
-            const donateBtn = document.getElementById('zeffy-donate-btn');
-            if (donateBtn) {
-                donateBtn.setAttribute('zeffy-form-link', 'https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true');
-            }
-        });
-    </script>
+
+    <!-- Zeffy donation script loaded in header, buttons initialized in main.js -->
 </body>
 </html>

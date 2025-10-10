@@ -59,8 +59,6 @@ class CFK_Avatar_Manager {
      * Get avatar image path from PNG files
      */
     private static function getAvatarImagePath(string $category): string {
-        $basePath = '/assets/images/';
-
         // Map categories to image files
         $imageMap = [
             'male_toddler' => 'b-4boysm.png',           // Boys 0-4
@@ -73,8 +71,11 @@ class CFK_Avatar_Manager {
             'female_highschool' => 'hsgirlsm.png'       // Girls 14+
         ];
 
-        // Return the mapped image or default
-        return $basePath . ($imageMap[$category] ?? 'b-4girlsm.png');
+        // Get the image filename
+        $filename = $imageMap[$category] ?? 'b-4girlsm.png';
+
+        // Return full URL using baseUrl helper
+        return baseUrl('assets/images/' . $filename);
     }
     
     /**

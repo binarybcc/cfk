@@ -4,36 +4,15 @@
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Zeffy donation buttons
-    initializeZeffyButtons();
-    
     // Setup search functionality
     setupSearch();
-    
+
     // Setup form enhancements
     setupForms();
-    
+
     // Setup image lazy loading
     setupLazyLoading();
 });
-
-/**
- * Initialize Zeffy donation buttons
- */
-function initializeZeffyButtons() {
-    const zeffyButtons = document.querySelectorAll('[zeffy-form-link]');
-    zeffyButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const link = this.getAttribute('zeffy-form-link');
-            if (link && typeof window.zeffyOpen === 'function') {
-                window.zeffyOpen(link);
-            } else {
-                // Fallback: open in new window
-                window.open(link, '_blank', 'width=600,height=700');
-            }
-        });
-    });
-}
 
 /**
  * Setup search functionality
@@ -282,14 +261,126 @@ errorStyles.textContent = `
         border-color: #dc3545 !important;
         box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
     }
-    
+
     img.loaded {
         opacity: 1;
         transition: opacity 0.3s ease;
     }
-    
+
     img[loading="lazy"] {
         opacity: 0;
     }
 `;
 document.head.appendChild(errorStyles);
+
+/**
+ * ============================================================================
+ * PAGE-SPECIFIC FUNCTIONS (Extracted from inline scripts)
+ * ============================================================================
+ */
+
+/**
+ * Social Sharing Functions (from about.php)
+ */
+function shareOnFacebook() {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent('Help local children have a magical Christmas through Christmas for Kids sponsorship program!');
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');
+}
+
+function shareByEmail() {
+    const subject = encodeURIComponent('Christmas for Kids - Help Local Children');
+    const body = encodeURIComponent(`Hi!
+
+I wanted to share this wonderful program with you: Christmas for Kids helps connect community members with local children who need Christmas sponsorship.
+
+Every child deserves to experience the magic of Christmas morning, and you can help make that happen.
+
+Check it out: ${window.location.href}
+
+Thanks for caring about our community!`);
+
+    window.open(`mailto:?subject=${subject}&body=${body}`);
+}
+
+/**
+ * Sponsorship Form Validation (from sponsor.php)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const sponsorshipForm = document.getElementById('sponsorshipForm');
+    if (sponsorshipForm) {
+        sponsorshipForm.addEventListener('submit', function(e) {
+            const name = document.getElementById('sponsor_name').value.trim();
+            const email = document.getElementById('sponsor_email').value.trim();
+
+            if (!name) {
+                alert('Please enter your name.');
+                document.getElementById('sponsor_name').focus();
+                e.preventDefault();
+                return;
+            }
+
+            if (!email) {
+                alert('Please enter your email address.');
+                document.getElementById('sponsor_email').focus();
+                e.preventDefault();
+                return;
+            }
+
+            // Confirm submission - get child ID from hidden input or data attribute
+            const childIdElement = sponsorshipForm.querySelector('[data-child-id]');
+            const childId = childIdElement ? childIdElement.dataset.childId : '';
+            if (childId && !confirm(`Are you sure you want to sponsor Child ${childId}? This will reserve the child for your sponsorship.`)) {
+                e.preventDefault();
+            }
+        });
+    }
+});
+
+/**
+ * Sponsor Lookup Form Validation (from sponsor_lookup.php)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const lookupForm = document.getElementById('lookupForm');
+    if (lookupForm) {
+        lookupForm.addEventListener('submit', function(e) {
+            const email = document.getElementById('sponsor_email').value.trim();
+
+            if (!email) {
+                alert('Please enter your email address.');
+                e.preventDefault();
+                return;
+            }
+
+            // Basic email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address.');
+                e.preventDefault();
+                return;
+            }
+        });
+    }
+});
+
+/**
+ * Add Children Form Validation (from sponsor_portal.php)
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    const addChildrenForm = document.getElementById('addChildrenForm');
+    if (addChildrenForm) {
+        addChildrenForm.addEventListener('submit', function(e) {
+            const checkboxes = addChildrenForm.querySelectorAll('input[name="child_ids[]"]:checked');
+
+            if (checkboxes.length === 0) {
+                alert('Please select at least one child to add.');
+                e.preventDefault();
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to add ${checkboxes.length} child(ren) to your sponsorship?`)) {
+                e.preventDefault();
+            }
+        });
+    }
+});
