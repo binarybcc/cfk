@@ -12,30 +12,49 @@ if (!defined('CFK_APP')) {
 
 $pageTitle = 'Children Needing Sponsorship';
 
-// Get filters from URL
-$filters = [];
-if (!empty($_GET['search'])) {
-    $filters['search'] = sanitizeString($_GET['search']);
-}
-if (!empty($_GET['age_category'])) {
-    $filters['age_category'] = sanitizeString($_GET['age_category']);
-}
-if (!empty($_GET['gender'])) {
-    $filters['gender'] = sanitizeString($_GET['gender']);
-}
+// Check if viewing a specific family
+$viewingFamily = !empty($_GET['family_id']);
+$familyId = $viewingFamily ? sanitizeInt($_GET['family_id']) : null;
 
-// Pagination (using 'p' parameter to avoid conflict with page routing)
-$currentPage = sanitizeInt($_GET['p'] ?? 1);
-if ($currentPage < 1) $currentPage = 1;
-$limit = config('children_per_page');
+if ($viewingFamily) {
+    // Family view mode - show only this family, no pagination
+    $filters = ['family_id' => $familyId];
+    $children = getChildren($filters, 1, 999); // Get all family members
+    $totalCount = count($children);
+    $totalPages = 1;
+    $currentPage = 1;
 
-// Get children and count
-$children = getChildren($filters, $currentPage, $limit);
-$totalCount = getChildrenCount($filters);
-$totalPages = ceil($totalCount / $limit);
+    // Get family info for display
+    $familyInfo = !empty($children) ? getFamilyById($familyId) : null;
 
-// Eager load family members to prevent N+1 queries
-$siblingsByFamily = eagerLoadFamilyMembers($children);
+    // No need for eager loading since we're showing one family
+    $siblingsByFamily = [$familyId => $children];
+} else {
+    // Normal browsing mode with filters
+    $filters = [];
+    if (!empty($_GET['search'])) {
+        $filters['search'] = sanitizeString($_GET['search']);
+    }
+    if (!empty($_GET['age_category'])) {
+        $filters['age_category'] = sanitizeString($_GET['age_category']);
+    }
+    if (!empty($_GET['gender'])) {
+        $filters['gender'] = sanitizeString($_GET['gender']);
+    }
+
+    // Pagination (using 'p' parameter to avoid conflict with page routing)
+    $currentPage = sanitizeInt($_GET['p'] ?? 1);
+    if ($currentPage < 1) $currentPage = 1;
+    $limit = config('children_per_page');
+
+    // Get children and count
+    $children = getChildren($filters, $currentPage, $limit);
+    $totalCount = getChildrenCount($filters);
+    $totalPages = ceil($totalCount / $limit);
+
+    // Eager load family members to prevent N+1 queries
+    $siblingsByFamily = eagerLoadFamilyMembers($children);
+}
 
 // Build query string for pagination
 $queryParams = [];
@@ -47,14 +66,28 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 ?>
 
 <div class="children-page">
-    <div class="page-header">
-        <h1>Children Needing Christmas Sponsorship</h1>
-        <p class="page-description">
-            Each child represents a family in our community who could use extra support this Christmas season. 
-            Browse the children below and select someone to sponsor.
-史</p>
-        
-        <?php if ($totalCount > 0): ?>
+    <?php
+    // Page header component
+    if ($viewingFamily && $familyInfo) {
+        $title = 'Family ' . sanitizeString($familyInfo['family_number']) . ' - ' . sanitizeString($familyInfo['family_name']);
+        $description = 'All children in this family who need Christmas sponsorship.';
+
+        // Add back button as additional content
+        ob_start();
+        ?>
+        <div class="family-view-actions">
+            <?php echo renderButton('← Back to All Children', baseUrl('?page=children'), 'secondary'); ?>
+        </div>
+        <?php
+        $additionalContent = ob_get_clean();
+    } else {
+        $title = 'Children Needing Christmas Sponsorship';
+        $description = 'Each child represents a family in our community who could use extra support this Christmas season. Browse the children below and select someone to sponsor.';
+
+        // Add results summary as additional content
+        ob_start();
+        if ($totalCount > 0):
+        ?>
             <div class="results-summary">
                 <p>Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
                 <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
@@ -62,10 +95,16 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                 <?php endif; ?>
                 </p>
             </div>
-        <?php endif; ?>
-    </div>
+        <?php
+        endif;
+        $additionalContent = ob_get_clean();
+    }
 
-    <!-- Filters Section -->
+    require_once __DIR__ . '/../includes/components/page_header.php';
+    ?>
+
+    <!-- Filters Section (hidden in family view mode) -->
+    <?php if (!$viewingFamily): ?>
     <div class="filters-section">
         <form method="GET" action="<?php echo baseUrl(); ?>" class="filters-form">
             <input type="hidden" name="page" value="children">
@@ -104,11 +143,12 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             </div>
             
             <div class="filter-actions">
-                <button type="submit" class="btn btn-primary">Filter</button>
-                <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-secondary">Clear</a>
+                <?php echo renderButton('Filter', null, 'primary', ['submit' => true]); ?>
+                <?php echo renderButton('Clear', baseUrl('?page=children'), 'secondary'); ?>
             </div>
         </form>
     </div>
+    <?php endif; ?>
 
     <!-- Children Grid -->
     <?php if (empty($children)): ?>
@@ -122,78 +162,34 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                 <?php endif; ?>
             </p>
             <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-primary">View All Children</a>
+                <?php echo renderButton('View All Children', baseUrl('?page=children'), 'primary'); ?>
             <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="children-grid">
-            <?php foreach ($children as $child): ?>
-                <div class="child-card">
-                    <div class="child-photo">
-                        <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>"
-                             alt="Avatar for <?php echo sanitizeString($child['name']); ?>">
-                    </div>
-                    
-                    <div class="child-info">
-                        <h3 class="child-name"><?php echo sanitizeString($child['name']); ?></h3>
-                        <p class="child-id">ID: <?php echo sanitizeString($child['display_id']); ?></p>
-                        <p class="child-age"><?php echo formatAge($child['age']); ?></p>
-                        
-                        <?php if (!empty($child['grade'])): ?>
-                            <p class="child-grade">Grade: <?php echo sanitizeString($child['grade']); ?></p>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($child['interests'])): ?>
-                            <div class="child-interests">
-                                <strong>Likes:</strong> 
-                                <?php echo sanitizeString(substr($child['interests'], 0, 100)); ?>
-                                <?php if (strlen($child['interests']) > 100): ?>...<?php endif; ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($child['wishes'])): ?>
-                            <div class="child-wishes">
-                                <strong>Wishes for:</strong> 
-                                <?php echo sanitizeString(substr($child['wishes'], 0, 100)); ?>
-                                <?php if (strlen($child['wishes']) > 100): ?>...<?php endif; ?>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <!-- Family Info -->
-                        <?php
-                        // Use pre-loaded siblings (no database query!)
-                        $allFamilyMembers = $siblingsByFamily[$child['family_id']] ?? [];
-                        $siblings = array_filter($allFamilyMembers, fn($s) => $s['id'] != $child['id']);
-                        if (!empty($siblings)): ?>
-                            <div class="family-info">
-                                <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
-                                <?php
-                                $siblingNames = array_map(fn($s) => $s['name'] . ' (' . $s['display_id'] . ')', $siblings);
-                                echo sanitizeString(implode(', ', $siblingNames));
-                                ?>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <div class="child-actions">
-                        <a href="<?php echo baseUrl('?page=child&id=' . $child['id']); ?>" 
-                           class="btn btn-primary">
-                            Learn More & Sponsor
-                        </a>
-                        
-                        <?php if (!empty($siblings)): ?>
-                            <a href="<?php echo baseUrl('?page=children&family_id=' . $child['family_id']); ?>" 
-                               class="btn btn-secondary btn-small">
-                                View Family
-                            </a>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endforeach; ?>
+            <?php foreach ($children as $child):
+                // Get pre-loaded siblings (no database query!)
+                $allFamilyMembers = $siblingsByFamily[$child['family_id']] ?? [];
+                $siblings = array_filter($allFamilyMembers, fn($s) => $s['id'] != $child['id']);
+
+                // Set options for the child card component
+                $options = [
+                    'show_wishes' => true,
+                    'show_interests' => true,
+                    'show_id' => true,
+                    'show_siblings' => !$viewingFamily, // Hide siblings info when viewing family
+                    'siblings' => $siblings,
+                    'card_class' => 'child-card',
+                    'button_text' => 'Learn More & Sponsor',
+                    'show_actions' => true,
+                    'show_family_button' => !$viewingFamily // Hide "View Family" button in family view
+                ];
+                include __DIR__ . '/../includes/components/child_card.php';
+            endforeach; ?>
         </div>
 
-        <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
+        <!-- Pagination (hidden in family view mode) -->
+        <?php if (!$viewingFamily && $totalPages > 1): ?>
             <div class="pagination-wrapper">
                 <?php echo generatePagination($currentPage, $totalPages, $baseUrl); ?>
             </div>
@@ -205,271 +201,19 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         <h2>Ready to Make a Difference?</h2>
         <p>Every child deserves to experience the joy of Christmas. Your sponsorship can make that possible.</p>
         <div class="cta-buttons">
-            <button id="cta-donate-btn" class="btn btn-large btn-success" zeffy-form-link="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true">
-                Make a General Donation
-            </button>
+            <?php echo renderButton(
+                'Make a General Donation',
+                null,
+                'success',
+                [
+                    'size' => 'large',
+                    'id' => 'cta-donate-btn',
+                    'attributes' => [
+                        'zeffy-form-link' => 'https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids?modal=true'
+                    ]
+                ]
+            ); ?>
         </div>
     </div>
 </div>
 
-<style>
-.children-page { margin-bottom: 2rem; }
-
-.page-header {
-    text-align: center;
-    margin-bottom: 2rem;
-    padding: 2rem 0;
-    background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
-    color: white;
-    border-radius: 8px;
-}
-
-.page-header h1 { margin-bottom: 1rem; font-size: 2.5rem; }
-.page-description { font-size: 1.1rem; max-width: 800px; margin: 0 auto; }
-.results-summary { margin-top: 1rem; opacity: 0.9; }
-
-.filters-section {
-    background: #f8f9fa;
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin-bottom: 2rem;
-}
-
-.filters-form {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: end;
-}
-
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    min-width: 150px;
-}
-
-.filter-group label {
-    font-weight: bold;
-    margin-bottom: 0.5rem;
-    color: #333;
-}
-
-.filter-group input, .filter-group select {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.filter-actions {
-    display: flex;
-    gap: 0.5rem;
-    align-items: end;
-}
-
-.children-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
-    margin-bottom: 3rem;
-}
-
-.child-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    overflow: hidden;
-    transition: transform 0.2s, box-shadow 0.2s;
-    border: 1px solid #e1e5e9;
-}
-
-.child-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
-
-.child-photo {
-    width: 100%;
-    height: 250px;
-    background: #f8f9fa;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.child-photo img {
-    max-width: 75%;
-    max-height: 75%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    display: block;
-}
-
-.child-info {
-    padding: 1.5rem;
-}
-
-.child-name {
-    font-size: 1.4rem;
-    font-weight: bold;
-    color: #2c5530;
-    margin-bottom: 0.5rem;
-}
-
-.child-id {
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 0.5rem;
-    font-weight: bold;
-}
-
-.child-age, .child-grade {
-    color: #555;
-    margin-bottom: 0.5rem;
-}
-
-.child-interests, .child-wishes {
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-.child-interests strong, .child-wishes strong {
-    color: #2c5530;
-}
-
-.family-info {
-    background: #f1f8f3;
-    padding: 0.75rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    margin-top: 1rem;
-}
-
-.child-actions {
-    padding: 1rem 1.5rem;
-    background: #f8f9fa;
-    display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: inline-block;
-    text-align: center;
-}
-
-.btn-primary {
-    background: #2c5530;
-    color: white;
-}
-
-.btn-primary:hover {
-    background: #1e3a21;
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: #6c757d;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #545862;
-}
-
-.btn-small {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.btn-large {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-}
-
-.btn-success {
-    background: #28a745;
-    color: white;
-}
-
-.btn-success:hover {
-    background: #218838;
-    transform: translateY(-1px);
-}
-
-.no-results {
-    text-align: center;
-    padding: 3rem 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.cta-section {
-    background: linear-gradient(135deg, #4a7c59 0%, #2c5530 100%);
-    color: white;
-    padding: 3rem 2rem;
-    border-radius: 12px;
-    text-align: center;
-    margin-top: 3rem;
-}
-
-.cta-section h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-}
-
-.pagination-wrapper {
-    display: flex;
-    justify-content: center;
-    margin: 2rem 0;
-}
-
-.pagination ul {
-    display: flex;
-    list-style: none;
-    padding: 0;
-    gap: 0.5rem;
-}
-
-.pagination a, .pagination span {
-    padding: 0.5rem 1rem;
-    text-decoration: none;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    color: #2c5530;
-}
-
-.pagination a:hover, .pagination .active {
-    background: #2c5530;
-    color: white;
-}
-
-@media (max-width: 768px) {
-    .children-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .filters-form {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .filter-actions {
-        justify-content: center;
-        margin-top: 1rem;
-    }
-    
-    .page-header h1 {
-        font-size: 2rem;
-    }
-}
-</style>

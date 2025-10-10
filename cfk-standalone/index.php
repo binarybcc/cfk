@@ -18,7 +18,18 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Get requested page
 $page = $_GET['page'] ?? 'home';
-$validPages = ['home', 'children', 'child', 'sponsor', 'search', 'about', 'sponsor_lookup', 'sponsor_portal'];
+$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal'];
+
+// Redirect search to children page with search parameter (before headers are sent)
+if ($page === 'search') {
+    $searchQuery = sanitizeString($_GET['q'] ?? $_GET['search'] ?? '');
+    if (!empty($searchQuery)) {
+        header('Location: ' . baseUrl('?page=children&search=' . urlencode($searchQuery)));
+    } else {
+        header('Location: ' . baseUrl('?page=children'));
+    }
+    exit;
+}
 
 // Default to children listing if page is invalid
 if (!in_array($page, $validPages)) {
@@ -42,11 +53,11 @@ switch ($page) {
     case 'sponsor':
         include __DIR__ . '/pages/sponsor.php';
         break;
-    case 'search':
-        include __DIR__ . '/pages/search.php';
-        break;
     case 'about':
         include __DIR__ . '/pages/about.php';
+        break;
+    case 'donate':
+        include __DIR__ . '/pages/donate.php';
         break;
     case 'sponsor_lookup':
         include __DIR__ . '/pages/sponsor_lookup.php';

@@ -176,6 +176,14 @@ function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
 }
 
 /**
+ * Get family information by family ID
+ */
+function getFamilyById(int $familyId): ?array {
+    $sql = "SELECT * FROM families WHERE id = :family_id";
+    return Database::fetch($sql, ['family_id' => $familyId]);
+}
+
+/**
  * Eager load family members for multiple children (prevents N+1 queries)
  * Returns array indexed by family_id containing arrays of siblings
  */
@@ -358,9 +366,9 @@ function getPhotoUrl(string $filename = null, array $child = null): string {
         require_once __DIR__ . '/avatar_manager.php';
         return CFK_Avatar_Manager::getAvatarForChild($child);
     }
-    
+
     // Fallback avatar if child data not available
-    return '/assets/images/b-4girlsm.png';
+    return baseUrl('assets/images/b-4girlsm.png');
 }
 
 /**
@@ -411,4 +419,145 @@ function validateRequired(array $data, array $requiredFields): array {
         }
     }
     return $errors;
+}
+
+/**
+ * UI Helper Functions
+ */
+
+/**
+ * Render standardized button HTML with accessibility and consistency
+ *
+ * This function generates consistent button HTML across the application,
+ * supporting both link buttons (<a>) and form buttons (<button>).
+ *
+ * @param string $text Button text (will be sanitized)
+ * @param string|null $url URL for link buttons (null for form buttons)
+ * @param string $type Button type: 'primary', 'secondary', 'success', 'danger', 'outline', 'info', 'warning'
+ * @param array $options Additional options:
+ *   - 'size': 'large', 'small', or default (string)
+ *   - 'id': Element ID (string)
+ *   - 'class': Additional CSS classes (string)
+ *   - 'attributes': Array of additional HTML attributes (array)
+ *   - 'onclick': JavaScript onclick handler (string)
+ *   - 'block': Make button full-width (bool)
+ *   - 'submit': For button elements, type="submit" instead of type="button" (bool)
+ *   - 'target': For links, target attribute like '_blank' (string)
+ *
+ * @return string HTML button/link element
+ *
+ * @example
+ * // Primary link button
+ * echo renderButton('View Profile', '?page=child&id=5', 'primary');
+ *
+ * @example
+ * // Large success button with custom class
+ * echo renderButton('Submit Form', null, 'success', [
+ *     'size' => 'large',
+ *     'submit' => true,
+ *     'id' => 'submitBtn'
+ * ]);
+ *
+ * @example
+ * // Button with Zeffy donation modal
+ * echo renderButton('Donate Now', null, 'success', [
+ *     'attributes' => [
+ *         'zeffy-form-link' => 'https://www.zeffy.com/embed/donation-form/...'
+ *     ]
+ * ]);
+ */
+function renderButton(string $text, ?string $url = null, string $type = 'primary', array $options = []): string {
+    // Sanitize text
+    $text = sanitizeString($text);
+
+    // Build CSS classes
+    $classes = ['btn'];
+
+    // Add type class
+    $validTypes = ['primary', 'secondary', 'success', 'danger', 'outline', 'info', 'warning'];
+    if (in_array($type, $validTypes)) {
+        $classes[] = 'btn-' . $type;
+    } else {
+        $classes[] = 'btn-primary'; // Default fallback
+    }
+
+    // Add size class
+    if (!empty($options['size'])) {
+        $validSizes = ['small', 'large'];
+        if (in_array($options['size'], $validSizes)) {
+            $classes[] = 'btn-' . $options['size'];
+        }
+    }
+
+    // Add block class
+    if (!empty($options['block'])) {
+        $classes[] = 'btn-block';
+    }
+
+    // Add custom classes
+    if (!empty($options['class'])) {
+        $classes[] = sanitizeString($options['class']);
+    }
+
+    $classString = implode(' ', $classes);
+
+    // Build attributes array
+    $attrs = [];
+
+    // Add ID if provided
+    if (!empty($options['id'])) {
+        $attrs['id'] = sanitizeString($options['id']);
+    }
+
+    // Add onclick if provided
+    if (!empty($options['onclick'])) {
+        $attrs['onclick'] = sanitizeString($options['onclick']);
+    }
+
+    // Add custom attributes
+    if (!empty($options['attributes']) && is_array($options['attributes'])) {
+        foreach ($options['attributes'] as $key => $value) {
+            // Allow data-* and zeffy-* attributes without sanitization
+            if (str_starts_with($key, 'data-') || str_starts_with($key, 'zeffy-')) {
+                $attrs[$key] = $value;
+            } else {
+                $attrs[sanitizeString($key)] = sanitizeString($value);
+            }
+        }
+    }
+
+    // Build attribute string
+    $attrString = '';
+    foreach ($attrs as $key => $value) {
+        $attrString .= ' ' . $key . '="' . htmlspecialchars($value, ENT_QUOTES, 'UTF-8') . '"';
+    }
+
+    // Render link or button
+    if ($url !== null) {
+        // Render as <a> tag
+        $target = '';
+        if (!empty($options['target'])) {
+            $target = ' target="' . sanitizeString($options['target']) . '"';
+        }
+
+        return sprintf(
+            '<a href="%s" class="%s"%s%s>%s</a>',
+            htmlspecialchars($url, ENT_QUOTES, 'UTF-8'),
+            $classString,
+            $attrString,
+            $target,
+            $text
+        );
+    } else {
+        // Render as <button> tag
+        $buttonType = !empty($options['submit']) ? 'submit' : 'button';
+
+        return sprintf(
+            '<button type="%s" class="%s"%s>%s</button>',
+            $buttonType,
+            $classString,
+            $attrString,
+            $text
+        );
+    }
 }
