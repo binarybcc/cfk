@@ -1010,32 +1010,126 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                         <strong>💡 How it works:</strong> Upload your CSV file and the system will automatically analyze what will change. You'll see a preview before anything is imported, and can confirm or cancel.
                     </div>
 
-                    <form method="POST" enctype="multipart/form-data" id="importForm" class="import-form">
-                        <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                        <input type="hidden" name="action" value="preview_import">
+                    <!-- Alpine.js Live Validation Wrapper -->
+                    <div x-data="{
+                        file: null,
+                        fileName: '',
+                        fileSize: 0,
+                        errors: [],
+                        warnings: [],
 
-                        <div class="form-group">
-                            <label for="csv_file">Select CSV File</label>
-                            <div class="file-input-wrapper">
-                                <div class="file-input" id="fileInput">
-                                    <input type="file"
-                                           id="csv_file"
-                                           name="csv_file"
-                                           accept=".csv,.txt"
-                                           required>
-                                    <div class="file-input-label">
-                                        📁 Click to select CSV file or drag and drop
+                        handleFileSelect(event) {
+                            this.file = event.target.files[0];
+                            this.fileName = this.file ? this.file.name : '';
+                            this.fileSize = this.file ? this.file.size : 0;
+                            this.validate();
+                        },
+
+                        validate() {
+                            this.errors = [];
+                            this.warnings = [];
+
+                            if (!this.file) {
+                                this.errors.push('Please select a file to upload');
+                                return false;
+                            }
+
+                            // File extension check
+                            const ext = this.fileName.toLowerCase().split('.').pop();
+                            if (ext !== 'csv' && ext !== 'txt') {
+                                this.errors.push('File must be a CSV file (.csv extension)');
+                            }
+
+                            // File size check (5MB limit)
+                            if (this.fileSize > 5 * 1024 * 1024) {
+                                this.errors.push('File size exceeds 5MB limit');
+                            }
+
+                            // Warning for large files (1MB+)
+                            if (this.fileSize > 1 * 1024 * 1024) {
+                                this.warnings.push('Large file detected - import may take several minutes');
+                            }
+
+                            return this.errors.length === 0;
+                        },
+
+                        formatFileSize(bytes) {
+                            if (bytes === 0) return '0 Bytes';
+                            const k = 1024;
+                            const sizes = ['Bytes', 'KB', 'MB'];
+                            const i = Math.floor(Math.log(bytes) / Math.log(k));
+                            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                        }
+                    }">
+                        <form method="POST"
+                              enctype="multipart/form-data"
+                              id="importForm"
+                              class="import-form"
+                              @submit="if (!validate()) { $event.preventDefault(); }">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="action" value="preview_import">
+
+                            <div class="form-group">
+                                <label for="csv_file">Select CSV File</label>
+                                <div class="file-input-wrapper">
+                                    <div class="file-input" id="fileInput">
+                                        <input type="file"
+                                               id="csv_file"
+                                               name="csv_file"
+                                               accept=".csv,.txt"
+                                               required
+                                               @change="handleFileSelect($event)">
+                                        <div class="file-input-label">
+                                            📁 Click to select CSV file or drag and drop
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <div style="text-align: center; margin-top: 2rem;">
-                            <button type="submit" class="btn btn-primary" id="importBtn">
-                                🔍 Upload & Preview
-                            </button>
-                        </div>
-                    </form>
+                                <!-- Live File Info Display -->
+                                <div x-show="file" x-transition class="file-info-display" style="margin-top: 1rem;">
+                                    <div class="alert alert-info">
+                                        <p style="margin: 0;">
+                                            <strong>Selected File:</strong> <span x-text="fileName"></span><br>
+                                            <strong>Size:</strong> <span x-text="formatFileSize(fileSize)"></span>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <!-- Live Error Messages -->
+                                <div x-show="errors.length > 0" x-transition class="alert alert-danger" style="margin-top: 1rem;">
+                                    <strong>⚠️ Cannot Upload:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                        <template x-for="error in errors" :key="error">
+                                            <li x-text="error" style="margin-bottom: 0.25rem;"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+
+                                <!-- Live Warning Messages -->
+                                <div x-show="warnings.length > 0 && errors.length === 0"
+                                     x-transition
+                                     class="alert alert-warning"
+                                     style="margin-top: 1rem;">
+                                    <strong>⚡ Notice:</strong>
+                                    <ul style="margin: 0.5rem 0 0 1.5rem; padding: 0;">
+                                        <template x-for="warning in warnings" :key="warning">
+                                            <li x-text="warning" style="margin-bottom: 0.25rem;"></li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 2rem;">
+                                <button type="submit"
+                                        class="btn btn-primary"
+                                        id="importBtn"
+                                        :disabled="errors.length > 0 || !file"
+                                        :style="{ opacity: (errors.length > 0 || !file) ? '0.5' : '1', cursor: (errors.length > 0 || !file) ? 'not-allowed' : 'pointer' }">
+                                    🔍 Upload & Preview
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

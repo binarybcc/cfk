@@ -103,97 +103,162 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     require_once __DIR__ . '/../includes/components/page_header.php';
     ?>
 
-    <!-- Filters Section (hidden in family view mode) -->
+    <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
     <?php if (!$viewingFamily): ?>
-    <div class="filters-section">
-        <form method="GET" action="<?php echo baseUrl(); ?>" class="filters-form">
-            <input type="hidden" name="page" value="children">
-            
+    <div class="filters-section" x-data="{
+        search: '',
+        genderFilter: '',
+        ageMin: 0,
+        ageMax: 18,
+        allChildren: <?php echo json_encode($children); ?>,
+
+        get filteredChildren() {
+            return this.allChildren.filter(child => {
+                // Search filter (searches family code, interests, wishes)
+                const searchLower = this.search.toLowerCase();
+                const matchesSearch = !this.search ||
+                    (child.family_code && child.family_code.toLowerCase().includes(searchLower)) ||
+                    (child.interests && child.interests.toLowerCase().includes(searchLower)) ||
+                    (child.wishes && child.wishes.toLowerCase().includes(searchLower)) ||
+                    child.age.toString().includes(searchLower);
+
+                // Gender filter
+                const matchesGender = !this.genderFilter || child.gender === this.genderFilter;
+
+                // Age range filter
+                const matchesAge = child.age >= this.ageMin && child.age <= this.ageMax;
+
+                return matchesSearch && matchesGender && matchesAge;
+            });
+        }
+    }">
+        <div class="filters-form">
             <div class="filter-group">
-                <label for="search">Search:</label>
-                <input type="text" 
-                       id="search" 
-                       name="search" 
-                       value="<?php echo $filters['search'] ?? ''; ?>"
-                       placeholder="Name, interests, or wishes">
+                <label for="search">🔍 Search:</label>
+                <input type="text"
+                       id="search"
+                       x-model="search"
+                       placeholder="Family code, interests, wishes, age...">
+                <small style="display: block; color: #666; margin-top: 5px;">
+                    Try: "123A", "bike", "doll", "boy 6", etc.
+                </small>
             </div>
-            
+
             <div class="filter-group">
-                <label for="age_category">Age Group:</label>
-                <select id="age_category" name="age_category">
-                    <option value="">All Ages</option>
-                    <?php 
-                    global $ageCategories;
-                    foreach ($ageCategories as $key => $category): ?>
-                        <option value="<?php echo $key; ?>" 
-                                <?php echo ($filters['age_category'] ?? '') === $key ? 'selected' : ''; ?>>
-                            <?php echo $category['label']; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="gender">Gender:</label>
-                <select id="gender" name="gender">
+                <label for="gender">👦👧 Gender:</label>
+                <select id="gender" x-model="genderFilter">
                     <option value="">Both</option>
-                    <option value="M" <?php echo ($filters['gender'] ?? '') === 'M' ? 'selected' : ''; ?>>Boys</option>
-                    <option value="F" <?php echo ($filters['gender'] ?? '') === 'F' ? 'selected' : ''; ?>>Girls</option>
+                    <option value="M">Boys</option>
+                    <option value="F">Girls</option>
                 </select>
             </div>
-            
+
+            <div class="filter-group">
+                <label for="age_min">🎂 Age Range:</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="number"
+                           id="age_min"
+                           x-model.number="ageMin"
+                           min="0"
+                           max="18"
+                           style="width: 70px;">
+                    <span>to</span>
+                    <input type="number"
+                           id="age_max"
+                           x-model.number="ageMax"
+                           min="0"
+                           max="18"
+                           style="width: 70px;">
+                </div>
+            </div>
+
             <div class="filter-actions">
-                <?php echo renderButton('Filter', null, 'primary', ['submit' => true]); ?>
-                <?php echo renderButton('Clear', baseUrl('?page=children'), 'secondary'); ?>
+                <button @click="search = ''; genderFilter = ''; ageMin = 0; ageMax = 18;" class="btn btn-secondary">
+                    Clear Filters
+                </button>
             </div>
-        </form>
-    </div>
-    <?php endif; ?>
+        </div>
 
-    <!-- Children Grid -->
-    <?php if (empty($children)): ?>
-        <div class="no-results">
-            <h3>No Children Found</h3>
-            <p>
-                <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                    No children match your current filters. Try adjusting your search criteria.
-                <?php else: ?>
-                    There are no children currently available for sponsorship.
-                <?php endif; ?>
+        <!-- Results Counter -->
+        <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0; font-weight: 600; color: #2c5530;">
+                Showing <span x-text="filteredChildren.length"></span> of <span x-text="allChildren.length"></span> children
+                <span x-show="search || genderFilter || ageMin > 0 || ageMax < 18" style="color: #666; font-weight: normal;">
+                    (filtered)
+                </span>
             </p>
-            <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                <?php echo renderButton('View All Children', baseUrl('?page=children'), 'primary'); ?>
-            <?php endif; ?>
         </div>
-    <?php else: ?>
+
+        <!-- Children Grid with Alpine.js Instant Filtering -->
         <div class="children-grid">
-            <?php foreach ($children as $child):
-                // Get pre-loaded siblings (no database query!)
-                $allFamilyMembers = $siblingsByFamily[$child['family_id']] ?? [];
-                $siblings = array_filter($allFamilyMembers, fn($s) => $s['id'] != $child['id']);
-
-                // Set options for the child card component
-                $options = [
-                    'show_wishes' => true,
-                    'show_interests' => true,
-                    'show_id' => true,
-                    'show_siblings' => !$viewingFamily, // Hide siblings info when viewing family
-                    'siblings' => $siblings,
-                    'card_class' => 'child-card',
-                    'button_text' => 'Learn More & Sponsor',
-                    'show_actions' => true,
-                    'show_family_button' => !$viewingFamily // Hide "View Family" button in family view
-                ];
-                include __DIR__ . '/../includes/components/child_card.php';
-            endforeach; ?>
-        </div>
-
-        <!-- Pagination (hidden in family view mode) -->
-        <?php if (!$viewingFamily && $totalPages > 1): ?>
-            <div class="pagination-wrapper">
-                <?php echo generatePagination($currentPage, $totalPages, $baseUrl); ?>
+            <!-- No Results Message -->
+            <div x-show="filteredChildren.length === 0" x-transition class="no-results">
+                <h3>No Children Found</h3>
+                <p>No children match your current filters. Try adjusting your search criteria.</p>
             </div>
-        <?php endif; ?>
+
+            <!-- Filtered Children Cards -->
+            <template x-for="child in filteredChildren" :key="child.id">
+                <div class="child-card" x-transition>
+                    <!-- Child Photo -->
+                    <div class="child-photo">
+                        <img :src="child.photo_url || '<?php echo baseUrl('assets/images/placeholder-child.jpg'); ?>'"
+                             :alt="'Child ' + child.family_code"
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
+                    </div>
+
+                    <!-- Child Info -->
+                    <div style="padding: 20px;">
+                        <h3 style="margin: 0 0 10px 0; color: #2c5530;">
+                            Family Code: <span x-text="child.family_code"></span>
+                        </h3>
+
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
+                            <div>
+                                <strong>Age:</strong> <span x-text="child.age"></span>
+                            </div>
+                            <div>
+                                <strong>Gender:</strong> <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
+                            </div>
+                            <div x-show="child.grade">
+                                <strong>Grade:</strong> <span x-text="child.grade || 'N/A'"></span>
+                            </div>
+                            <div x-show="child.shirt_size">
+                                <strong>Shirt:</strong> <span x-text="child.shirt_size || 'N/A'"></span>
+                            </div>
+                        </div>
+
+                        <div x-show="child.interests" style="margin-bottom: 15px;">
+                            <strong style="color: #2c5530;">Interests:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.interests"></p>
+                        </div>
+
+                        <div x-show="child.wishes" style="margin-bottom: 15px;">
+                            <strong style="color: #c41e3a;">Wishes:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.wishes"></p>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div style="margin-bottom: 15px;">
+                            <span :class="child.status === 'sponsored' ? 'badge badge-success' : 'badge badge-warning'"
+                                  x-text="child.status === 'sponsored' ? 'Sponsored' : 'Available'"
+                                  style="padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: 600; text-transform: uppercase;">
+                            </span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div style="text-align: center;">
+                            <a :href="'<?php echo baseUrl(); ?>?page=child&id=' + child.id"
+                               class="btn btn-primary"
+                               style="display: inline-block; padding: 10px 20px; text-decoration: none;">
+                                Learn More & Sponsor
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
     <?php endif; ?>
 
     <!-- Call to Action -->

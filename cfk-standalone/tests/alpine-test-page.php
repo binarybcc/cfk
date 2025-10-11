@@ -7,6 +7,9 @@
  * the interactive features coming to CFK admin interface.
  */
 
+// Define CFK_APP constant to allow config file access
+define('CFK_APP', true);
+
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
@@ -366,35 +369,36 @@ $pageTitle = 'Alpine.js Test Suite - v1.4';
             <div class="test-card" x-data="{
                 search: '',
                 children: [
-                    { name: 'Emily Johnson', age: 7, gender: 'F' },
-                    { name: 'Michael Chen', age: 5, gender: 'M' },
-                    { name: 'Sofia Rodriguez', age: 9, gender: 'F' },
-                    { name: 'James Williams', age: 6, gender: 'M' },
-                    { name: 'Olivia Davis', age: 8, gender: 'F' }
+                    { code: '123A', age: 7, gender: 'F', status: 'available' },
+                    { code: '456B', age: 5, gender: 'M', status: 'sponsored' },
+                    { code: '789C', age: 9, gender: 'F', status: 'available' },
+                    { code: '234D', age: 6, gender: 'M', status: 'available' },
+                    { code: '567E', age: 8, gender: 'F', status: 'sponsored' }
                 ],
                 get filteredChildren() {
                     return this.children.filter(child =>
-                        child.name.toLowerCase().includes(this.search.toLowerCase())
+                        child.code.toLowerCase().includes(this.search.toLowerCase())
                     );
                 }
             }">
                 <h2>🔍 Test 2: Instant Search</h2>
-                <p>Real-time filtering without page reloads.</p>
+                <p>Real-time filtering by family code (privacy protected).</p>
 
                 <input
                     type="text"
                     x-model="search"
-                    placeholder="Search children by name..."
+                    placeholder="Search by family code (e.g., 123A)..."
                 >
 
                 <p style="color: #667eea; font-weight: 600; margin-bottom: 15px;">
                     Showing <span x-text="filteredChildren.length"></span> of <span x-text="children.length"></span> children
                 </p>
 
-                <template x-for="child in filteredChildren" :key="child.name">
+                <template x-for="child in filteredChildren" :key="child.code">
                     <div style="padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 10px;" x-transition>
-                        <strong x-text="child.name"></strong>
-                        <span style="color: #64748b;"> - Age <span x-text="child.age"></span></span>
+                        <strong x-text="'Family Code: ' + child.code"></strong>
+                        <span style="color: #64748b;"> - Age <span x-text="child.age"></span> (<span x-text="child.gender"></span>)</span>
+                        <span :class="child.status === 'sponsored' ? 'badge badge-success' : 'badge badge-warning'" x-text="child.status"></span>
                     </div>
                 </template>
 

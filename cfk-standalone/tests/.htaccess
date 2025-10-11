@@ -1,0 +1,15 @@
+# Allow access to test pages in development
+# Override parent .htaccess blocking /tests/ directory
+
+# Allow access to PHP test files
+<FilesMatch "\.php$">
+    Require all granted
+</FilesMatch>
+
+# Allow directory listing for test navigation
+Options +Indexes
+
+# Still deny access to sensitive test files
+<FilesMatch "\.(log|conf|sql|bak)$">
+    Require all denied
+</FilesMatch>
