@@ -110,14 +110,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         genderFilter: '',
         ageMin: 0,
         ageMax: 18,
-        allChildren: <?php echo json_encode($children); ?>,
+        allChildren: <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>,
 
         get filteredChildren() {
             return this.allChildren.filter(child => {
-                // Search filter (searches family code, interests, wishes)
+                // Search filter (searches display_id, interests, wishes)
                 const searchLower = this.search.toLowerCase();
                 const matchesSearch = !this.search ||
-                    (child.family_code && child.family_code.toLowerCase().includes(searchLower)) ||
+                    (child.display_id && child.display_id.toLowerCase().includes(searchLower)) ||
                     (child.interests && child.interests.toLowerCase().includes(searchLower)) ||
                     (child.wishes && child.wishes.toLowerCase().includes(searchLower)) ||
                     child.age.toString().includes(searchLower);
@@ -203,14 +203,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                     <!-- Child Photo -->
                     <div class="child-photo">
                         <img :src="child.photo_url || '<?php echo baseUrl('assets/images/placeholder-child.jpg'); ?>'"
-                             :alt="'Child ' + child.family_code"
+                             :alt="'Child ' + child.display_id"
                              style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
                     </div>
 
                     <!-- Child Info -->
                     <div style="padding: 20px;">
                         <h3 style="margin: 0 0 10px 0; color: #2c5530;">
-                            Family Code: <span x-text="child.family_code"></span>
+                            Family Code: <span x-text="child.display_id"></span>
                         </h3>
 
                         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
