@@ -44,11 +44,11 @@ $showFamilyButton = $options['show_family_button'] ?? false;
 <div class="<?php echo sanitizeString($cardClass); ?>">
     <div class="child-photo">
         <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>"
-             alt="Avatar for <?php echo sanitizeString($child['name']); ?>">
+             alt="Avatar for Family <?php echo sanitizeString($child['display_id']); ?>">
     </div>
 
     <div class="child-info">
-        <h3 class="child-name"><?php echo sanitizeString($child['name']); ?></h3>
+        <h3 class="child-name">Family Code: <?php echo sanitizeString($child['display_id']); ?></h3>
 
         <?php if ($showId && !empty($child['display_id'])): ?>
             <p class="child-id">ID: <?php echo sanitizeString($child['display_id']); ?></p>
@@ -86,10 +86,10 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             <div class="family-info">
                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
                 <?php
-                $siblingNames = array_map(function($s) {
-                    return sanitizeString($s['name']) . ' (' . sanitizeString($s['display_id']) . ')';
+                $siblingCodes = array_map(function($s) {
+                    return sanitizeString($s['display_id']);
                 }, $siblings);
-                echo implode(', ', $siblingNames);
+                echo implode(', ', $siblingCodes);
                 ?>
             </div>
         <?php endif; ?>
