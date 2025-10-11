@@ -452,9 +452,9 @@ class CFK_CSV_Handler {
      */
     private function getChildrenForExport(array $filters): array {
         $sql = "
-            SELECT c.*, f.family_number, f.family_name, f.notes as family_notes
-            FROM children c 
-            JOIN families f ON c.family_id = f.id 
+            SELECT c.*, f.family_number, f.notes as family_notes
+            FROM children c
+            JOIN families f ON c.family_id = f.id
             WHERE 1=1
         ";
         

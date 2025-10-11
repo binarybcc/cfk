@@ -21,7 +21,7 @@ $filters = ['search' => 'pants'];
 
 // Debug: Build the query manually to see what's happening
 $sql = "
-    SELECT c.*, f.family_number, f.family_name,
+    SELECT c.*, f.family_number,
            CONCAT(f.family_number, c.child_letter) as display_id
     FROM children c
     JOIN families f ON c.family_id = f.id

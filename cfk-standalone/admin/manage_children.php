@@ -120,7 +120,7 @@ $offset = ($page - 1) * $perPage;
 
 // Get children data
 $children = Database::fetchAll("
-    SELECT c.*, f.family_number, f.family_name,
+    SELECT c.*, f.family_number,
            CONCAT(f.family_number, c.child_letter) as display_id,
            (SELECT COUNT(*) FROM sponsorships s WHERE s.child_id = c.id AND s.status IN ('pending', 'confirmed')) as sponsorship_count
     FROM children c
@@ -131,7 +131,7 @@ $children = Database::fetchAll("
 ", $params);
 
 // Get families for dropdowns
-$families = Database::fetchAll("SELECT id, family_number, family_name FROM families ORDER BY family_number ASC");
+$families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY family_number ASC");
 
 // Functions for CRUD operations
 function addChild($data): array {

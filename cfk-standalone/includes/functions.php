@@ -25,10 +25,10 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     
     // Base query
     $sql = "
-        SELECT c.*, f.family_number, f.family_name,
+        SELECT c.*, f.family_number,
                CONCAT(f.family_number, c.child_letter) as display_id
-        FROM children c 
-        JOIN families f ON c.family_id = f.id 
+        FROM children c
+        JOIN families f ON c.family_id = f.id
         WHERE 1=1
     ";
     
@@ -142,13 +142,13 @@ function getChildrenCount(array $filters = []): int {
  */
 function getChildById(int $childId): ?array {
     $sql = "
-        SELECT c.*, f.family_number, f.family_name, f.notes as family_notes,
+        SELECT c.*, f.family_number, f.notes as family_notes,
                CONCAT(f.family_number, c.child_letter) as display_id
-        FROM children c 
-        JOIN families f ON c.family_id = f.id 
+        FROM children c
+        JOIN families f ON c.family_id = f.id
         WHERE c.id = :id
     ";
-    
+
     return Database::fetchRow($sql, ['id' => $childId]);
 }
 
@@ -157,7 +157,7 @@ function getChildById(int $childId): ?array {
  */
 function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
     $sql = "
-        SELECT c.*, CONCAT(f.family_number, c.child_letter) as display_id
+        SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
         JOIN families f ON c.family_id = f.id
         WHERE c.family_id = :family_id
