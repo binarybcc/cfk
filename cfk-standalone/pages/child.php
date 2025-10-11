@@ -25,7 +25,7 @@ if (!$child) {
     exit;
 }
 
-$pageTitle = $child['name'] . ' - Child Profile';
+$pageTitle = 'Family ' . $child['display_id'] . ' - Child Profile';
 
 // Get siblings
 $siblings = getFamilyMembers($child['family_id'], $child['id']);
@@ -37,21 +37,21 @@ $isAvailable = $child['status'] === 'available';
 <div class="child-profile-page">
     <!-- Breadcrumb -->
     <nav class="breadcrumb">
-        <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a> 
-        <span>&raquo;</span> 
-        <span><?php echo sanitizeString($child['name']); ?></span>
+        <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a>
+        <span>&raquo;</span>
+        <span>Family <?php echo sanitizeString($child['display_id']); ?></span>
     </nav>
 
     <div class="child-profile">
         <div class="profile-header">
             <div class="profile-photo">
-                <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>" 
-                     alt="Avatar for <?php echo sanitizeString($child['name']); ?>">
+                <img src="<?php echo getPhotoUrl($child['photo_filename'], $child); ?>"
+                     alt="Avatar for Family <?php echo sanitizeString($child['display_id']); ?>">
             </div>
-            
+
             <div class="profile-basic-info">
-                <h1><?php echo sanitizeString($child['name']); ?></h1>
-                <p class="child-id">Child ID: <?php echo sanitizeString($child['display_id']); ?></p>
+                <h1>Family Code: <?php echo sanitizeString($child['display_id']); ?></h1>
+                <p class="child-id">ID: <?php echo sanitizeString($child['display_id']); ?></p>
                 
                 <div class="basic-details">
                     <div class="detail-item">
