@@ -199,7 +199,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                 <div class="child-card" x-transition>
                     <!-- Child Photo -->
                     <div class="child-photo">
-                        <img :src="child.photo_url || '<?php echo baseUrl('assets/images/placeholder-child.jpg'); ?>'"
+                        <img :src="child.photo_filename ? '<?php echo baseUrl('uploads/photos/'); ?>' + child.photo_filename : '<?php echo baseUrl('assets/images/placeholder-child.jpg'); ?>'"
                              :alt="'Child ' + child.display_id"
                              style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
                     </div>
