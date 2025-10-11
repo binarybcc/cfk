@@ -105,29 +105,26 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
     <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
     <?php if (!$viewingFamily): ?>
+    <script>
+    // Define children data for Alpine.js
+    window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+    </script>
     <div class="filters-section" x-data="{
         search: '',
         genderFilter: '',
         ageMin: 0,
         ageMax: 18,
-        allChildren: <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>,
-
+        allChildren: window.childrenData || [],
         get filteredChildren() {
             return this.allChildren.filter(child => {
-                // Search filter (searches display_id, interests, wishes)
                 const searchLower = this.search.toLowerCase();
                 const matchesSearch = !this.search ||
                     (child.display_id && child.display_id.toLowerCase().includes(searchLower)) ||
                     (child.interests && child.interests.toLowerCase().includes(searchLower)) ||
                     (child.wishes && child.wishes.toLowerCase().includes(searchLower)) ||
                     child.age.toString().includes(searchLower);
-
-                // Gender filter
                 const matchesGender = !this.genderFilter || child.gender === this.genderFilter;
-
-                // Age range filter
                 const matchesAge = child.age >= this.ageMin && child.age <= this.ageMax;
-
                 return matchesSearch && matchesGender && matchesAge;
             });
         }
