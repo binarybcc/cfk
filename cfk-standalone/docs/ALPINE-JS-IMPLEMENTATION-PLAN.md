@@ -1,10 +1,12 @@
 # Alpine.js Progressive Enhancement - Implementation Plan
 
 **Project:** Christmas for Kids Sponsorship System
-**Feature Branch:** `feature/alpine-js-progressive-enhancement`
-**Target Version:** v2.0
+**Feature Branch:** `v1.4-alpine-js-enhancement`
+**Target Version:** v1.4 (standalone feature release)
 **Start Date:** 2025-10-10
 **Estimated Duration:** 3-4 weeks
+
+**Note:** This is v1.4, a focused Alpine.js enhancement release separate from the broader v2.0 roadmap.
 
 ---
 
