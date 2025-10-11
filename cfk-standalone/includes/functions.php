@@ -157,7 +157,7 @@ function getChildById(int $childId): ?array {
  */
 function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
     $sql = "
-        SELECT c.*, CONCAT(f.family_number, c.child_letter) as display_id
+        SELECT c.*, f.family_number, f.family_name, CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
         JOIN families f ON c.family_id = f.id
         WHERE c.family_id = :family_id
