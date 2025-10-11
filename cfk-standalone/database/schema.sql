@@ -9,7 +9,6 @@
 CREATE TABLE families (
     id INT PRIMARY KEY AUTO_INCREMENT,
     family_number VARCHAR(10) NOT NULL UNIQUE, -- e.g., "175", "176"
-    family_name VARCHAR(100) NOT NULL,
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
@@ -122,10 +121,10 @@ INSERT INTO admin_users (username, password_hash, email, full_name, role) VALUES
 ('admin', '$2y$12$LQv3c1yDelLkmXedgy.SCOQ6g.8k.XkNzWYNm3A6VgQwlz4KdI6G.', 'admin@cforkids.org', 'Site Administrator', 'admin');
 
 -- Sample data for testing (can be removed in production)
-INSERT INTO families (family_number, family_name, notes) VALUES
-('175', 'Johnson Family', 'Three siblings, very close-knit family'),
-('176', 'Smith Family', 'Twin brothers, love sports'),
-('177', 'Davis Family', 'Single mother household, very appreciative');
+INSERT INTO families (family_number, notes) VALUES
+('175', 'Three siblings, very close-knit family'),
+('176', 'Twin brothers, love sports'),
+('177', 'Single mother household, very appreciative');
 
 INSERT INTO children (family_id, child_letter, age, grade, gender, shirt_size, interests, wishes, status) VALUES
 (1, 'A', 8, '3rd', 'F', 'M', 'Art, reading, unicorns', 'Art supplies and books', 'available'),

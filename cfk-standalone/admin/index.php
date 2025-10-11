@@ -46,10 +46,10 @@ $recentSponsorships = Database::fetchAll("
 
 // Get children needing attention (pending too long, etc.)
 $childrenNeedingAttention = Database::fetchAll("
-    SELECT c.*, f.family_number, f.family_name,
+    SELECT c.*, f.family_number,
            CONCAT(f.family_number, c.child_letter) as display_id,
            s.request_date
-    FROM children c 
+    FROM children c
     JOIN families f ON c.family_id = f.id
     LEFT JOIN sponsorships s ON c.id = s.child_id AND s.status = 'pending'
     WHERE c.status = 'pending' AND s.request_date < DATE_SUB(NOW(), INTERVAL 48 HOUR)

@@ -43,7 +43,6 @@ foreach ($sponsorships as $sponsorship) {
     if (!isset($families[$familyId])) {
         $families[$familyId] = [
             'family_number' => $sponsorship['family_number'],
-            'family_name' => $sponsorship['family_name'],
             'children' => []
         ];
     }
@@ -121,9 +120,6 @@ if ($_POST && isset($_POST['add_children'])) {
                 <div class="family-section">
                     <div class="family-header">
                         <h3>Family <?php echo sanitizeString($family['family_number']); ?></h3>
-                        <?php if (!empty($family['family_name'])): ?>
-                            <span class="family-name">(<?php echo sanitizeString($family['family_name']); ?>)</span>
-                        <?php endif; ?>
                     </div>
 
                     <div class="children-grid">

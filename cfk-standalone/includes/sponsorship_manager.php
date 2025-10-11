@@ -456,7 +456,7 @@ class CFK_Sponsorship_Manager {
         $cutoffTime = date('Y-m-d H:i:s', strtotime('-' . (self::PENDING_TIMEOUT_HOURS - 6) . ' hours'));
 
         return Database::fetchAll("
-            SELECT c.*, f.family_number, f.family_name,
+            SELECT c.*, f.family_number,
                    CONCAT(f.family_number, c.child_letter) as display_id,
                    s.request_date, s.sponsor_name, s.sponsor_email
             FROM children c

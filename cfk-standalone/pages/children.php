@@ -69,7 +69,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     <?php
     // Page header component
     if ($viewingFamily && $familyInfo) {
-        $title = 'Family ' . sanitizeString($familyInfo['family_number']) . ' - ' . sanitizeString($familyInfo['family_name']);
+        $title = 'Family ' . sanitizeString($familyInfo['family_number']);
         $description = 'All children in this family who need Christmas sponsorship.';
 
         // Add back button as additional content
