@@ -213,9 +213,9 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             <!-- Filtered Children Cards -->
             <template x-for="child in filteredChildren" :key="child.id">
                 <div class="child-card" x-transition>
-                    <!-- Child Photo -->
+                    <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
                     <div class="child-photo">
-                        <img :src="child.photo_filename ? '<?php echo baseUrl('uploads/photos/'); ?>' + child.photo_filename : window.getPlaceholderImage(child.age, child.gender)"
+                        <img :src="window.getPlaceholderImage(child.age, child.gender)"
                              :alt="'Child ' + child.display_id"
                              style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
                     </div>
