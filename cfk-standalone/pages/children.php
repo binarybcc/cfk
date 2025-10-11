@@ -134,9 +134,9 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     }">
         <div class="filters-form">
             <div class="filter-group">
-                <label for="search">🔍 Search:</label>
+                <label for="child-search-input">🔍 Search:</label>
                 <input type="text"
-                       id="search"
+                       id="child-search-input"
                        x-model="search"
                        placeholder="Family code, interests, wishes, age...">
                 <small style="display: block; color: #666; margin-top: 5px;">
@@ -145,8 +145,8 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             </div>
 
             <div class="filter-group">
-                <label for="gender">👦👧 Gender:</label>
-                <select id="gender" x-model="genderFilter">
+                <label for="child-gender-filter">👦👧 Gender:</label>
+                <select id="child-gender-filter" x-model="genderFilter">
                     <option value="">Both</option>
                     <option value="M">Boys</option>
                     <option value="F">Girls</option>
@@ -154,17 +154,17 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             </div>
 
             <div class="filter-group">
-                <label for="age_min">🎂 Age Range:</label>
+                <label for="child-age-min">🎂 Age Range:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="number"
-                           id="age_min"
+                           id="child-age-min"
                            x-model.number="ageMin"
                            min="0"
                            max="18"
                            style="width: 70px;">
                     <span>to</span>
                     <input type="number"
-                           id="age_max"
+                           id="child-age-max"
                            x-model.number="ageMax"
                            min="0"
                            max="18"
