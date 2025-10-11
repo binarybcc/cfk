@@ -20,9 +20,8 @@ CREATE TABLE children (
     id INT PRIMARY KEY AUTO_INCREMENT,
     family_id INT NOT NULL,
     child_letter VARCHAR(1) DEFAULT '', -- A, B, C for siblings (175A, 175B, 175C)
-    
+
     -- Basic Information
-    name VARCHAR(100) NOT NULL,
     age INT NOT NULL,
     grade VARCHAR(20), -- "Pre-K", "K", "1st", "2nd", etc.
     gender ENUM('M', 'F') NOT NULL,
@@ -128,10 +127,10 @@ INSERT INTO families (family_number, family_name, notes) VALUES
 ('176', 'Smith Family', 'Twin brothers, love sports'),
 ('177', 'Davis Family', 'Single mother household, very appreciative');
 
-INSERT INTO children (family_id, child_letter, name, age, grade, gender, shirt_size, interests, wishes, status) VALUES
-(1, 'A', 'Emma Johnson', 8, '3rd', 'F', 'M', 'Art, reading, unicorns', 'Art supplies and books', 'available'),
-(1, 'B', 'Noah Johnson', 6, '1st', 'M', 'S', 'Legos, dinosaurs', 'Dinosaur toys and building sets', 'available'),
-(1, 'C', 'Lily Johnson', 4, 'Pre-K', 'F', 'XS', 'Dolls, singing', 'Baby doll and music toys', 'available'),
-(2, 'A', 'Marcus Smith', 12, '7th', 'M', 'L', 'Basketball, video games', 'Basketball gear and games', 'available'),
-(2, 'B', 'Jordan Smith', 12, '7th', 'M', 'L', 'Soccer, art', 'Soccer equipment and art supplies', 'available'),
-(3, 'A', 'Isabella Davis', 10, '5th', 'F', 'M', 'Dance, music', 'Dance clothes and music items', 'available');
+INSERT INTO children (family_id, child_letter, age, grade, gender, shirt_size, interests, wishes, status) VALUES
+(1, 'A', 8, '3rd', 'F', 'M', 'Art, reading, unicorns', 'Art supplies and books', 'available'),
+(1, 'B', 6, '1st', 'M', 'S', 'Legos, dinosaurs', 'Dinosaur toys and building sets', 'available'),
+(1, 'C', 4, 'Pre-K', 'F', 'XS', 'Dolls, singing', 'Baby doll and music toys', 'available'),
+(2, 'A', 12, '7th', 'M', 'L', 'Basketball, video games', 'Basketball gear and games', 'available'),
+(2, 'B', 12, '7th', 'M', 'L', 'Soccer, art', 'Soccer equipment and art supplies', 'available'),
+(3, 'A', 10, '5th', 'F', 'M', 'Dance, music', 'Dance clothes and music items', 'available');
