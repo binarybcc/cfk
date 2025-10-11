@@ -108,6 +108,22 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     <script>
     // Define children data for Alpine.js
     window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+
+    // Helper function for age/gender-appropriate placeholder images
+    window.getPlaceholderImage = function(age, gender) {
+        const baseUrl = '<?php echo baseUrl('assets/images/'); ?>';
+
+        // Age categories
+        if (age <= 5) {
+            return baseUrl + (gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
+        } else if (age <= 11) {
+            return baseUrl + (gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
+        } else if (age <= 14) {
+            return baseUrl + (gender === 'M' ? 'middleboysm.png' : 'middlegirlsm.png');
+        } else {
+            return baseUrl + (gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
+        }
+    };
     </script>
     <div class="filters-section" x-data="{
         search: '',
@@ -199,7 +215,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                 <div class="child-card" x-transition>
                     <!-- Child Photo -->
                     <div class="child-photo">
-                        <img :src="child.photo_filename ? '<?php echo baseUrl('uploads/photos/'); ?>' + child.photo_filename : '<?php echo baseUrl('assets/images/placeholder-child.jpg'); ?>'"
+                        <img :src="child.photo_filename ? '<?php echo baseUrl('uploads/photos/'); ?>' + child.photo_filename : window.getPlaceholderImage(child.age, child.gender)"
                              :alt="'Child ' + child.display_id"
                              style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px 8px 0 0;">
                     </div>
