@@ -147,7 +147,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     }">
         <div class="filters-form">
             <div class="filter-group">
-                <label for="child-search-input">🔍 Search:</label>
+                <label for="child-search-input">Search:</label>
                 <input type="text"
                        id="child-search-input"
                        x-model="search"
@@ -158,7 +158,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             </div>
 
             <div class="filter-group">
-                <label for="child-gender-filter">👦👧 Gender:</label>
+                <label for="child-gender-filter">Gender:</label>
                 <select id="child-gender-filter" x-model="genderFilter">
                     <option value="">Both</option>
                     <option value="M">Boys</option>
@@ -167,7 +167,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             </div>
 
             <div class="filter-group">
-                <label for="child-age-min">🎂 Age Range:</label>
+                <label for="child-age-min">Age Range:</label>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <input type="number"
                            id="child-age-min"
