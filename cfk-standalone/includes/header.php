@@ -84,12 +84,12 @@
             <!-- Search Bar -->
             <div class="header-search">
                 <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form">
-                    <input type="hidden" name="page" value="search">
+                    <input type="hidden" name="page" value="children">
                     <div class="search-group">
-                        <input type="text" 
-                               name="q" 
-                               value="<?php echo isset($_GET['q']) ? sanitizeString($_GET['q']) : ''; ?>"
-                               placeholder="Search by name, interests, or wishes..." 
+                        <input type="text"
+                               name="search"
+                               value="<?php echo isset($_GET['search']) ? sanitizeString($_GET['search']) : ''; ?>"
+                               placeholder="Search children by family code, interests, wishes..."
                                class="search-input">
                         <button type="submit" class="search-btn">Search</button>
                     </div>
