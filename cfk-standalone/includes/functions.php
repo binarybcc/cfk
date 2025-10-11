@@ -211,7 +211,7 @@ function eagerLoadFamilyMembers(array $children): array {
     $placeholderString = implode(',', $placeholders);
 
     $sql = "
-        SELECT c.*, f.family_number,
+        SELECT c.*, f.family_number, f.family_name,
                CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
         JOIN families f ON c.family_id = f.id
