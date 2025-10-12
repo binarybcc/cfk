@@ -140,12 +140,15 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         return window.siblingsByFamily[familyId] || [];
     };
 
-    // Placeholder for cart/selections functionality (to be fully implemented)
+    // Selections System v1.5 - Real implementation
     window.addToSelections = function(child) {
-        // TODO: Build full "My Selections" cart system
-        // For now, show confirmation
-        alert(`Added ${child.display_id} to your Sponsorship List!\n\n(Full cart system coming soon)`);
-        console.log('Child added to selections:', child);
+        if (SelectionsManager.addChild(child)) {
+            // Successfully added
+            showNotification(`Added ${child.display_id} to your selections!`, 'success');
+        } else {
+            // Already in selections
+            showNotification(`${child.display_id} is already in your selections.`, 'info');
+        }
     };
 
     // Add entire family to selections
@@ -154,14 +157,45 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         const availableMembers = familyMembers.filter(m => m.status === 'available');
 
         if (availableMembers.length === 0) {
-            alert('No family members are currently available for sponsorship.');
+            showNotification('No family members are currently available for sponsorship.', 'warning');
             return;
         }
 
-        // TODO: Build full cart system - for now show confirmation
-        const names = availableMembers.map(m => m.display_id).join(', ');
-        alert(`Added ${availableMembers.length} family members to your Sponsorship List:\n${names}\n\n(Full cart system coming soon)`);
-        console.log('Family members added:', availableMembers);
+        const addedCount = SelectionsManager.addMultiple(availableMembers);
+        if (addedCount > 0) {
+            const names = availableMembers.map(m => m.display_id).slice(0, 3).join(', ');
+            const more = availableMembers.length > 3 ? ` and ${availableMembers.length - 3} more` : '';
+            showNotification(`Added ${addedCount} family member${addedCount > 1 ? 's' : ''}: ${names}${more}`, 'success');
+        } else {
+            showNotification('All family members are already in your selections.', 'info');
+        }
+    };
+
+    // Simple notification system
+    window.showNotification = function(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${type === 'success' ? '#2c5530' : type === 'warning' ? '#f39c12' : '#3498db'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
     };
     </script>
     <div class="filters-section" x-data="{

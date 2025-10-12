@@ -18,6 +18,9 @@
     <!-- Alpine.js v1.4 - Progressive Enhancement -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
+    <!-- Selections System v1.5 -->
+    <script src="<?php echo baseUrl('assets/js/selections.js'); ?>"></script>
+
     <style>
         /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
         [x-cloak] {
@@ -89,6 +92,28 @@
                 display: block;
             }
         }
+
+        /* Selections Badge */
+        .selections-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #c41e3a;
+            color: white;
+            border-radius: 12px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 6px;
+            line-height: 1;
+        }
+
+        .selections-link a {
+            display: flex;
+            align-items: center;
+        }
     </style>
     
     <!-- Zeffy donation integration -->
@@ -125,6 +150,12 @@
                         <li><a href="<?php echo baseUrl('?page=home'); ?>" <?php echo ($page ?? '') === 'home' ? 'class="active"' : ''; ?>>Home</a></li>
                         <li><a href="<?php echo baseUrl('?page=children'); ?>" <?php echo ($page ?? '') === 'children' ? 'class="active"' : ''; ?>>Children</a></li>
                         <li><a href="<?php echo baseUrl('?page=how_to_apply'); ?>" <?php echo ($page ?? '') === 'how_to_apply' ? 'class="active"' : ''; ?>>How to Apply</a></li>
+                        <li class="selections-link">
+                            <a href="<?php echo baseUrl('?page=selections'); ?>" <?php echo ($page ?? '') === 'selections' ? 'class="active"' : ''; ?>>
+                                My Selections
+                                <span id="selections-badge" class="selections-badge">0</span>
+                            </a>
+                        </li>
                         <li><a href="<?php echo baseUrl('?page=sponsor_lookup'); ?>" <?php echo in_array($page ?? '', ['sponsor_lookup', 'sponsor_portal']) ? 'class="active"' : ''; ?>>My Sponsorships</a></li>
                         <li><a href="<?php echo baseUrl('?page=about'); ?>" <?php echo ($page ?? '') === 'about' ? 'class="active"' : ''; ?>>About</a></li>
                         <li class="donate-link"><a href="<?php echo baseUrl('?page=donate'); ?>" class="donate-btn">Donate</a></li>
