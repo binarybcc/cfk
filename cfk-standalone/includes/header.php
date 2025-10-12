@@ -19,6 +19,11 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
 
     <style>
+        /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
+        [x-cloak] {
+            display: none !important;
+        }
+
         /* Logo Styling */
         .logo-link {
             display: block;

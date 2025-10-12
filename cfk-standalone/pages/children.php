@@ -304,15 +304,10 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
                     <!-- Family Modal -->
                     <div x-show="showFamilyModal"
-                         x-transition:enter="transition ease-out duration-300"
-                         x-transition:enter-start="opacity-0"
-                         x-transition:enter-end="opacity-100"
-                         x-transition:leave="transition ease-in duration-200"
-                         x-transition:leave-start="opacity-100"
-                         x-transition:leave-end="opacity-0"
+                         x-cloak
+                         x-transition.opacity.duration.300ms
                          class="family-modal-overlay"
-                         @click="showFamilyModal = false"
-                         style="display: none;">
+                         @click="showFamilyModal = false">
                         <div class="family-modal-content" @click.stop>
                             <div class="family-modal-header">
                                 <h3>Family <span x-text="child.display_id.replace(/[A-Z]$/, '')"></span></h3>
