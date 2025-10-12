@@ -1462,6 +1462,179 @@ textarea:focus {
     font-weight: 600;
 }
 
+/* Child Action Section - Blue Border Area */
+.child-action-section {
+    border: 2px solid var(--color-info);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    background: var(--color-white);
+    margin: var(--spacing-md) var(--spacing-lg) var(--spacing-lg);
+}
+
+.sibling-info {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+}
+
+.sibling-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.sibling-text strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-base);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.btn-view-family {
+    background: var(--color-secondary) !important;
+    color: var(--color-white) !important;
+    border: 2px solid var(--color-secondary) !important;
+}
+
+.btn-view-family:hover:not(:disabled) {
+    background: var(--color-secondary-dark) !important;
+}
+
+.btn-view-family:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-sponsor {
+    background: var(--color-primary) !important;
+    color: var(--color-white) !important;
+    font-weight: 700 !important;
+    border: 2px solid var(--color-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-sponsor:hover {
+    background: var(--color-primary-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(44, 85, 48, 0.3);
+}
+
+/* Family Modal */
+.family-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.family-modal-content {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.family-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--color-border-lighter);
+    background: var(--color-bg-secondary);
+}
+
+.family-modal-header h3 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: var(--font-size-xl);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--color-danger);
+    color: var(--color-white);
+}
+
+.family-modal-body {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.family-member-card {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-primary);
+    transition: all var(--transition-fast);
+}
+
+.family-member-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.family-member-img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    padding: var(--spacing-xs);
+}
+
+.family-member-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.family-member-status {
+    margin-top: var(--spacing-xs);
+}
+
+.family-member-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
 /* Legacy vertical card styles (for backward compatibility) */
 .child-photo {
     width: 100%;
@@ -3464,6 +3637,41 @@ tr:hover {
 
     .child-meta-item {
         font-size: var(--font-size-xs);
+    }
+
+    /* === Action Section Mobile === */
+    .child-action-section {
+        margin: var(--spacing-sm) var(--spacing-md) var(--spacing-md);
+        padding: var(--spacing-sm);
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    /* === Family Modal Mobile === */
+    .family-modal-overlay {
+        padding: var(--spacing-sm);
+    }
+
+    .family-modal-content {
+        max-height: 90vh;
+    }
+
+    .family-member-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .family-member-img {
+        width: 80px;
+        height: 80px;
     }
 
     /* === Search Input === */

@@ -109,6 +109,9 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     // Define children data for Alpine.js
     window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 
+    // Define siblings data for Alpine.js
+    window.siblingsByFamily = <?php echo json_encode($siblingsByFamily, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+
     // Helper function for age/gender-appropriate placeholder images
     window.getPlaceholderImage = function(age, gender) {
         const baseUrl = '<?php echo baseUrl('assets/images/'); ?>';
@@ -123,6 +126,26 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         } else {
             return baseUrl + (gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
         }
+    };
+
+    // Helper function to get sibling count
+    window.getSiblingCount = function(familyId) {
+        const siblings = window.siblingsByFamily[familyId] || [];
+        // Count available siblings (excluding current child)
+        return siblings.filter(s => s.status === 'available').length - 1;
+    };
+
+    // Helper function to get all family members
+    window.getFamilyMembers = function(familyId) {
+        return window.siblingsByFamily[familyId] || [];
+    };
+
+    // Placeholder for cart/selections functionality (to be fully implemented)
+    window.addToSelections = function(child) {
+        // TODO: Build full "My Selections" cart system
+        // For now, show confirmation
+        alert(`Added ${child.display_id} to your Sponsorship List!\n\n(Full cart system coming soon)`);
+        console.log('Child added to selections:', child);
     };
     </script>
     <div class="filters-section" x-data="{
@@ -212,7 +235,13 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
             <!-- Filtered Children Cards -->
             <template x-for="child in filteredChildren" :key="child.id">
-                <div class="child-card child-card-v2" x-transition>
+                <div class="child-card child-card-v2"
+                     x-data="{
+                         showFamilyModal: false,
+                         siblingCount: window.getSiblingCount(child.family_id),
+                         familyMembers: window.getFamilyMembers(child.family_id)
+                     }"
+                     x-transition>
                     <!-- Top Section: Image + Metadata Side by Side -->
                     <div class="child-top-section">
                         <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
@@ -238,7 +267,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                         </div>
                     </div>
 
-                    <!-- Bottom Section: Details below -->
+                    <!-- Middle Section: Details -->
                     <div class="child-info">
                         <!-- Interests & Wishes -->
                         <div x-show="child.interests" style="margin-bottom: 15px;">
@@ -250,22 +279,67 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                             <strong style="color: #c41e3a;">Wishes:</strong>
                             <p style="margin: 5px 0 0 0; color: #666;" x-text="child.wishes"></p>
                         </div>
+                    </div>
 
-                        <!-- Status Badge -->
-                        <div style="margin-bottom: 15px;">
-                            <span :class="child.status === 'sponsored' ? 'badge badge-success' : 'badge badge-warning'"
-                                  x-text="child.status === 'sponsored' ? 'Sponsored' : 'Available'"
-                                  style="padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: 600; text-transform: uppercase;">
-                            </span>
+                    <!-- Bottom Section: Sibling Info + Actions (Blue Border Area) -->
+                    <div class="child-action-section">
+                        <!-- Sibling Count -->
+                        <div class="sibling-info">
+                            <span class="sibling-text">Number of Siblings available: <strong x-text="siblingCount"></strong></span>
                         </div>
 
-                        <!-- Actions -->
-                        <div style="text-align: center;">
-                            <a :href="'<?php echo baseUrl(); ?>?page=child&id=' + child.id"
-                               class="btn btn-primary"
-                               style="display: inline-block; padding: 10px 20px; text-decoration: none;">
-                                Learn More & Sponsor
-                            </a>
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <button @click="showFamilyModal = true"
+                                    class="btn btn-secondary btn-view-family"
+                                    :disabled="siblingCount === 0">
+                                View Family
+                            </button>
+                            <button @click="addToSelections(child)"
+                                    class="btn btn-primary btn-sponsor">
+                                SPONSOR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Family Modal -->
+                    <div x-show="showFamilyModal"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0"
+                         x-transition:enter-end="opacity-100"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100"
+                         x-transition:leave-end="opacity-0"
+                         class="family-modal-overlay"
+                         @click="showFamilyModal = false"
+                         style="display: none;">
+                        <div class="family-modal-content" @click.stop>
+                            <div class="family-modal-header">
+                                <h3>Family <span x-text="child.display_id.replace(/[A-Z]$/, '')"></span></h3>
+                                <button @click="showFamilyModal = false" class="modal-close">&times;</button>
+                            </div>
+                            <div class="family-modal-body">
+                                <template x-for="member in familyMembers" :key="member.id">
+                                    <div class="family-member-card">
+                                        <img :src="window.getPlaceholderImage(member.age, member.gender)"
+                                             :alt="'Child ' + member.display_id"
+                                             class="family-member-img">
+                                        <div class="family-member-info">
+                                            <div><strong x-text="member.display_id"></strong></div>
+                                            <div>Age: <span x-text="member.age"></span></div>
+                                            <div>Gender: <span x-text="member.gender === 'M' ? 'Boy' : 'Girl'"></span></div>
+                                            <div class="family-member-status">
+                                                <span :class="member.status === 'available' ? 'badge badge-success' : 'badge badge-secondary'"
+                                                      x-text="member.status === 'available' ? 'Available' : 'Sponsored'"></span>
+                                            </div>
+                                        </div>
+                                        <div class="family-member-actions">
+                                            <a :href="'<?php echo baseUrl(); ?>?page=child&id=' + member.id"
+                                               class="btn btn-sm btn-primary">View</a>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
