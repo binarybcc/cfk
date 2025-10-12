@@ -212,16 +212,16 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
             <!-- Filtered Children Cards -->
             <template x-for="child in filteredChildren" :key="child.id">
-                <div class="child-card child-card-horizontal" x-transition>
-                    <!-- Child Avatar (Age/Gender-Appropriate Generic Image) - Left Side -->
-                    <div class="child-photo-left">
-                        <img :src="window.getPlaceholderImage(child.age, child.gender)"
-                             :alt="'Child ' + child.display_id">
-                    </div>
+                <div class="child-card child-card-v2" x-transition>
+                    <!-- Top Section: Image + Metadata Side by Side -->
+                    <div class="child-top-section">
+                        <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
+                        <div class="child-photo-compact">
+                            <img :src="window.getPlaceholderImage(child.age, child.gender)"
+                                 :alt="'Child ' + child.display_id">
+                        </div>
 
-                    <!-- Child Info - Right Side -->
-                    <div class="child-info-right">
-                        <!-- Top Section: Metadata beside image -->
+                        <!-- Metadata beside image -->
                         <div class="child-header-meta">
                             <div class="child-meta-item">
                                 <strong>Family Code:</strong> <span x-text="child.display_id"></span>
@@ -236,28 +236,34 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                                 <strong>Grade:</strong> <span x-text="child.grade || 'N/A'"></span>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Bottom Section: Details below -->
+                    <div class="child-info">
                         <!-- Interests & Wishes -->
-                        <div class="child-details-section">
-                            <div x-show="child.interests" class="detail-block">
-                                <strong style="color: #2c5530;">Interests:</strong>
-                                <p x-text="child.interests"></p>
-                            </div>
-
-                            <div x-show="child.wishes" class="detail-block">
-                                <strong style="color: #c41e3a;">Wishes:</strong>
-                                <p x-text="child.wishes"></p>
-                            </div>
+                        <div x-show="child.interests" style="margin-bottom: 15px;">
+                            <strong style="color: #2c5530;">Interests:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.interests"></p>
                         </div>
 
-                        <!-- Bottom Section: Status & Actions -->
-                        <div class="child-footer">
+                        <div x-show="child.wishes" style="margin-bottom: 15px;">
+                            <strong style="color: #c41e3a;">Wishes:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.wishes"></p>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div style="margin-bottom: 15px;">
                             <span :class="child.status === 'sponsored' ? 'badge badge-success' : 'badge badge-warning'"
                                   x-text="child.status === 'sponsored' ? 'Sponsored' : 'Available'"
-                                  class="status-badge">
+                                  style="padding: 5px 15px; border-radius: 20px; font-size: 0.9em; font-weight: 600; text-transform: uppercase;">
                             </span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div style="text-align: center;">
                             <a :href="'<?php echo baseUrl(); ?>?page=child&id=' + child.id"
-                               class="btn btn-primary btn-sm">
+                               class="btn btn-primary"
+                               style="display: inline-block; padding: 10px 20px; text-decoration: none;">
                                 Learn More & Sponsor
                             </a>
                         </div>
