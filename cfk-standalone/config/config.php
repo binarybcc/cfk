@@ -20,9 +20,9 @@ $isProduction = ($_SERVER['HTTP_HOST'] ?? 'localhost') !== 'localhost' &&
 // Database Configuration
 $dbConfig = [
     'host' => $isProduction ? 'localhost' : 'db',
-    'database' => $isProduction ? 'cfk_sponsorship' : 'cfk_sponsorship_dev',
-    'username' => $isProduction ? 'cfk_user' : 'root',
-    'password' => $isProduction ? 'CHANGE_THIS_PASSWORD' : 'root'
+    'database' => $isProduction ? 'a4409d26_509946' : 'cfk_sponsorship_dev',
+    'username' => $isProduction ? 'a4409d26_509946' : 'root',
+    'password' => $isProduction ? 'Fests42Cue50Fennel56Auk46' : 'root'
 ];
 
 // Application Settings
