@@ -20,20 +20,22 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
 <div class="home-page">
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <h1>Make Christmas Magical for a Child in Need</h1>
-            <p class="hero-subtitle">
-                Every child deserves to experience the wonder and joy of Christmas morning. 
-                Your generosity can make that dream come true for local families facing difficult times.
-            </p>
-            <div class="hero-stats">
-                <div class="stat">
-                    <strong><?php echo $totalAvailable; ?></strong>
-                    <span>Children Need Sponsors</span>
-                </div>
-                <div class="stat">
-                    <strong><?php echo $totalFamilies; ?></strong>
-                    <span>Families Seeking Help</span>
+        <div class="hero-inner">
+            <div class="hero-content">
+                <h1>Make Christmas Magical for a Child in Need</h1>
+                <p class="hero-subtitle">
+                    Every child deserves to experience the wonder and joy of Christmas morning.
+                    Your generosity can make that dream come true for local families facing difficult times.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <strong><?php echo $totalAvailable; ?></strong>
+                        <span>Children Need Sponsors</span>
+                    </div>
+                    <div class="stat">
+                        <strong><?php echo $totalFamilies; ?></strong>
+                        <span>Families Seeking Help</span>
+                    </div>
                 </div>
             </div>
             <div class="hero-actions">
@@ -50,11 +52,6 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
                     ['size' => 'large']
                 ); ?>
             </div>
-        </div>
-        <div class="hero-image">
-            <img src="<?php echo baseUrl('assets/images/christmas-hero.jpg'); ?>" 
-                 alt="Children celebrating Christmas" 
-                 onerror="this.style.display='none'">
         </div>
     </section>
 </div>
