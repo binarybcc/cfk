@@ -26,7 +26,7 @@
         }
 
         .logo-image {
-            height: 80px;
+            height: 70px;
             width: auto;
             max-width: 100%;
             display: block;
@@ -43,9 +43,45 @@
             text-decoration: none;
         }
 
+        /* Mobile Logo - More compact */
         @media (max-width: 768px) {
             .logo-image {
-                height: 60px;
+                height: 45px;
+            }
+
+            .tagline {
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* Hamburger Menu Button */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: 2px solid #2c5530;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: #f8f9fa;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #2c5530;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 968px) {
+            .mobile-menu-toggle {
+                display: block;
             }
         }
     </style>
@@ -54,7 +90,8 @@
     <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
 </head>
 <body>
-    <header class="main-header">
+    <header class="main-header" x-data="{ mobileMenuOpen: false, isDesktop: window.innerWidth > 968 }"
+            x-init="window.addEventListener('resize', () => { isDesktop = window.innerWidth > 968 })">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
@@ -67,8 +104,18 @@
                     </a>
                     <p class="tagline">Bringing Christmas joy to local children in need</p>
                 </div>
-                
-                <nav class="main-nav">
+
+                <!-- Mobile Menu Toggle Button -->
+                <button class="mobile-menu-toggle"
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        :aria-expanded="mobileMenuOpen"
+                        aria-label="Toggle navigation menu">
+                    <span :style="mobileMenuOpen ? 'transform: rotate(45deg) translateY(8px)' : ''"></span>
+                    <span :style="mobileMenuOpen ? 'opacity: 0' : ''"></span>
+                    <span :style="mobileMenuOpen ? 'transform: rotate(-45deg) translateY(-8px)' : ''"></span>
+                </button>
+
+                <nav class="main-nav" :class="{ 'mobile-nav-open': mobileMenuOpen }">
                     <ul>
                         <li><a href="<?php echo baseUrl('?page=home'); ?>" <?php echo ($page ?? '') === 'home' ? 'class="active"' : ''; ?>>Home</a></li>
                         <li><a href="<?php echo baseUrl('?page=children'); ?>" <?php echo ($page ?? '') === 'children' ? 'class="active"' : ''; ?>>Children</a></li>
@@ -80,16 +127,16 @@
                     </ul>
                 </nav>
             </div>
-            
-            <!-- Search Bar -->
-            <div class="header-search">
+
+            <!-- Search Bar - Always visible on desktop, toggle with menu on mobile -->
+            <div class="header-search" :class="{ 'search-visible': isDesktop || mobileMenuOpen }">
                 <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form">
                     <input type="hidden" name="page" value="children">
                     <div class="search-group">
                         <input type="text"
                                name="search"
                                value="<?php echo isset($_GET['search']) ? sanitizeString($_GET['search']) : ''; ?>"
-                               placeholder="Search children by family code, interests, wishes..."
+                               placeholder="Search children..."
                                class="search-input">
                         <button type="submit" class="search-btn">Search</button>
                     </div>
