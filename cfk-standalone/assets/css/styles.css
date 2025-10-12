@@ -251,8 +251,11 @@ a:focus {
    ---------------------------------------- */
 
 .btn {
-    display: inline-block;
+    display: inline-flex;          /* Better alignment */
+    align-items: center;
+    justify-content: center;
     padding: 0.75rem 1.5rem;
+    min-height: 44px;              /* Minimum touch target */
     border: none;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -445,6 +448,7 @@ button:focus-visible {
 .form-textarea {
     width: 100%;
     padding: 0.75rem;
+    min-height: 44px;              /* Minimum touch target */
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-size-base);
@@ -3164,6 +3168,201 @@ tr:hover {
 
     .zeffy-embed-container iframe {
         height: 700px;
+    }
+}
+
+/* ========================================
+   MOBILE-FIRST CRITICAL OPTIMIZATIONS
+   Touch targets, spacing, and UX improvements
+   for 70% smartphone users
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* === CRITICAL: Touch Target Sizes === */
+    .btn {
+        min-height: 48px;           /* 2025 standard for mobile */
+        padding: 14px 24px;
+    }
+
+    .btn-primary {
+        min-height: 56px;           /* Larger for important CTAs */
+        font-size: 18px;
+    }
+
+    /* === CRITICAL: Form Inputs (Prevent iOS Zoom) === */
+    .form-input,
+    .form-select,
+    .form-textarea,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    textarea,
+    select {
+        min-height: 48px;
+        padding: 14px 16px;
+        font-size: 16px;            /* CRITICAL: Prevents iOS auto-zoom */
+        border-radius: 8px;
+    }
+
+    /* === CRITICAL: Button Spacing (Prevent Fat Finger Errors) === */
+    .filter-actions button,
+    .filter-actions .btn {
+        margin: 8px 4px;            /* Minimum 8px spacing */
+    }
+
+    .child-card-actions .btn {
+        margin-bottom: 12px;
+        width: 100%;
+    }
+
+    /* === Navigation Touch Targets === */
+    .main-nav a {
+        min-height: 48px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+    }
+
+    .main-nav li {
+        margin: 4px 0;              /* Space out nav items */
+    }
+
+    /* === Sticky CTAs (Thumb-Friendly Zone) === */
+    .sponsor-action-sticky {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 16px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .sponsor-action-sticky .btn-primary {
+        width: 100%;
+        min-height: 56px;
+        font-size: 18px;
+    }
+
+    /* === Child Profile Mobile Optimization === */
+    .child-profile-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 16px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        margin: 0 -16px;            /* Full width on mobile */
+    }
+
+    .child-profile-actions .btn {
+        width: 100%;
+        min-height: 56px;
+    }
+
+    /* === Typography (Readability) === */
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .child-card p,
+    .child-card-description {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    /* === Filters Mobile Optimization === */
+    .filters-section {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 50;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 12px;
+    }
+
+    .filter-group label {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .filter-group {
+        margin-bottom: 16px;
+    }
+
+    /* === FAQ Accordion Touch Targets === */
+    .faq-question,
+    [x-on\:click] button {
+        min-height: 56px;
+        padding: 16px 20px;
+        font-size: 18px;
+    }
+
+    .faq-answer {
+        padding: 16px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    /* === Card Spacing === */
+    .children-grid {
+        gap: 20px;
+    }
+
+    .child-card {
+        margin-bottom: 20px;
+    }
+
+    /* === Search Input === */
+    .search-input,
+    input[type="search"] {
+        min-height: 48px;
+        font-size: 16px;           /* Prevent zoom */
+        padding: 12px 16px;
+    }
+
+    /* === Improved Tap Targets for Links === */
+    a:not(.btn) {
+        min-height: 32px;
+        display: inline-block;
+        padding: 4px 0;
+    }
+
+    /* === Table Touch Optimization === */
+    .table th,
+    .table td {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+
+    /* === Sponsor Portal Mobile === */
+    .sponsor-portal .btn {
+        width: 100%;
+        min-height: 48px;
+        margin-bottom: 12px;
+    }
+}
+
+/* === Additional Small Phone Optimization === */
+@media (max-width: 480px) {
+    .btn-primary {
+        font-size: 16px;           /* Slightly smaller on very small screens */
+        min-height: 52px;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filter-actions button,
+    .filter-actions .btn {
+        width: 100%;
+        margin: 6px 0;
     }
 }
 
