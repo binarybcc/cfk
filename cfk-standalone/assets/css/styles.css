@@ -1629,6 +1629,119 @@ textarea:focus {
     gap: var(--spacing-xs);
 }
 
+/* Enhanced Family Modal Styles */
+.family-modal-actions {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-lighter);
+    text-align: center;
+}
+
+.btn-add-family {
+    width: 100%;
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    padding: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.family-member-card-detailed {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    transition: all var(--transition-fast);
+}
+
+.family-member-card-detailed:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.family-member-header {
+    margin-bottom: var(--spacing-sm);
+}
+
+.family-member-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.family-member-title strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+.family-member-basic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.info-item {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.info-item strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.family-member-details {
+    margin: var(--spacing-md) 0;
+}
+
+.detail-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-label {
+    display: block;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-text {
+    margin: 0;
+    padding: var(--spacing-sm);
+    background: var(--color-bg-primary);
+    border-left: 3px solid var(--color-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.family-member-card-detailed .family-member-actions {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-lighter);
+    flex-direction: row;
+    gap: var(--spacing-sm);
+}
+
+.family-member-card-detailed .family-member-actions .btn {
+    flex: 1;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
 /* Legacy vertical card styles (for backward compatibility) */
 .child-photo {
     width: 100%;
@@ -3665,6 +3778,63 @@ tr:hover {
 
     .family-member-info {
         text-align: center;
+    }
+
+    /* === Enhanced Family Modal Mobile === */
+    .family-modal-overlay {
+        padding: var(--spacing-sm);
+    }
+
+    .family-modal-content {
+        max-height: 90vh;
+    }
+
+    .family-modal-actions {
+        padding: var(--spacing-md);
+    }
+
+    .btn-add-family {
+        font-size: 16px;
+        padding: var(--spacing-md);
+        min-height: 56px;
+    }
+
+    .family-member-card-detailed {
+        padding: var(--spacing-md);
+    }
+
+    .family-member-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .family-member-basic-info {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .family-member-card-detailed .family-member-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .family-member-card-detailed .family-member-actions .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .detail-section {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .detail-label {
+        font-size: 14px;
+    }
+
+    .detail-text {
+        font-size: 14px;
+        padding: var(--spacing-xs);
     }
 
     /* === Search Input === */
