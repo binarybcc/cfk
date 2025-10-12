@@ -13,9 +13,9 @@ if (!defined('CFK_APP')) {
 }
 
 // Environment detection
-$isProduction = $_SERVER['HTTP_HOST'] !== 'localhost' && 
-                strpos($_SERVER['HTTP_HOST'], '.local') === false && 
-                strpos($_SERVER['HTTP_HOST'], ':') === false;
+$isProduction = ($_SERVER['HTTP_HOST'] ?? 'localhost') !== 'localhost' &&
+                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', '.local') === false &&
+                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', ':') === false;
 
 // Database Configuration
 $dbConfig = [
@@ -33,7 +33,7 @@ $appConfig = [
     'debug' => !$isProduction,
     
     // Paths
-    'base_url' => $isProduction ? 'https://www.cforkids.org/sponsor/' : 'http://localhost:8082/',
+    'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',
     'upload_path' => __DIR__ . '/../uploads/',
     'photo_path' => __DIR__ . '/../uploads/photos/',
     

@@ -88,13 +88,17 @@ CREATE TABLE admin_users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     username VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL, -- bcrypt hash
+    reset_token VARCHAR(255) DEFAULT NULL,
+    reset_token_expiry DATETIME DEFAULT NULL,
     email VARCHAR(255) NOT NULL,
     full_name VARCHAR(100),
     role ENUM('admin', 'editor') DEFAULT 'editor',
     last_login TIMESTAMP NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    
-    INDEX idx_username (username)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+    INDEX idx_username (username),
+    INDEX idx_reset_token (reset_token)
 );
 
 -- Settings table - configuration options

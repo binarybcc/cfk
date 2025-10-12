@@ -72,28 +72,37 @@ class Database {
      */
     public static function update(string $table, array $data, array $where): int {
         $pdo = \CFK\Config\Database::getConnection();
-        
+
         $setClause = [];
         foreach ($data as $column => $value) {
             $setClause[] = "{$column} = :{$column}";
         }
-        
+
         $whereClause = [];
         foreach ($where as $column => $value) {
             $whereClause[] = "{$column} = :where_{$column}";
         }
-        
+
         $sql = "UPDATE {$table} SET " . implode(', ', $setClause) . " WHERE " . implode(' AND ', $whereClause);
-        
-        // Merge data and where params, prefixing where params
-        $params = $data;
-        foreach ($where as $column => $value) {
-            $params["where_{$column}"] = $value;
-        }
-        
+
         $stmt = $pdo->prepare($sql);
-        $stmt->execute($params);
-        
+
+        // Bind data parameters with proper NULL handling
+        foreach ($data as $column => $value) {
+            if ($value === null) {
+                $stmt->bindValue(":{$column}", null, \PDO::PARAM_NULL);
+            } else {
+                $stmt->bindValue(":{$column}", $value);
+            }
+        }
+
+        // Bind where parameters
+        foreach ($where as $column => $value) {
+            $stmt->bindValue(":where_{$column}", $value);
+        }
+
+        $stmt->execute();
+
         return $stmt->rowCount();
     }
     

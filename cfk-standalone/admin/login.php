@@ -272,6 +272,8 @@ if ($_POST && isset($_POST['login'])) {
         </form>
 
         <div class="login-footer">
+            <a href="forgot_password.php">Forgot Password?</a>
+            <span style="margin: 0 1rem; color: #ddd;">|</span>
             <a href="<?php echo baseUrl(); ?>">← Back to Public Site</a>
         </div>
         
