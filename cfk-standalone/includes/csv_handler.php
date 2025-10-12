@@ -15,23 +15,21 @@ if (!defined('CFK_APP')) {
 class CFK_CSV_Handler {
     
     const REQUIRED_COLUMNS = [
-        'name', 'age', 'gender'
+        'age', 'gender'
     ];
-    
+
     const ALL_COLUMNS = [
-        'name', 'age', 'gender', 'grade', 'family_name',
+        'age', 'gender', 'grade',
         'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
         'interests', 'greatest_need', 'wish_list', 'special_needs', 'family_situation'
     ];
     
     const MAX_LENGTHS = [
-        'name' => 50,
         'interests' => 500,
         'greatest_need' => 200,
         'wish_list' => 500,
         'special_needs' => 200,
         'family_situation' => 300,
-        'family_name' => 100,
         'shirt_size' => 10,
         'pant_size' => 10,
         'shoe_size' => 10,
@@ -421,7 +419,7 @@ class CFK_CSV_Handler {
         try {
             return Database::insert('children', $childData);
         } catch (Exception $e) {
-            $this->errors[] = "Failed to create child {$row['name']}: " . $e->getMessage();
+            $this->errors[] = "Failed to create child (family {$familyNumber}{$childLetter}): " . $e->getMessage();
             return null;
         }
     }
@@ -490,13 +488,12 @@ class CFK_CSV_Handler {
         $wishParts = explode('. Wish List: ', $wishes);
         $greatestNeed = $wishParts[0] ?? '';
         $wishList = $wishParts[1] ?? '';
-        
+
         return [
-            $child['name'],
+            $child['display_id'] ?? $child['family_number'] . $child['child_letter'],
             $child['age'],
             $child['gender'],
             $child['family_number'],
-            $child['family_name'],
             $child['grade'] ?? '',
             $child['shirt_size'] ?? '',
             $child['pant_size'] ?? '',

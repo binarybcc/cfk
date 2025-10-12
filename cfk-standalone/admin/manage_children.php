@@ -874,10 +874,10 @@ function validateChildData($data): array {
                         <div class="child-body">
                             <div class="child-info">
                                 <div class="info-item">
-                                    <div class="info-label">Name</div>
-                                    <div class="info-value"><?php echo sanitizeString($child['name']); ?></div>
+                                    <div class="info-label">Family Code</div>
+                                    <div class="info-value"><?php echo sanitizeString($child['display_id']); ?></div>
                                 </div>
-                                
+
                                 <div class="info-item">
                                     <div class="info-label">Age</div>
                                     <div class="info-value"><?php echo $child['age']; ?> years</div>

@@ -304,19 +304,18 @@ class AdminController
             // Validate and normalize data
             $child = [
                 'family_id' => trim($row['family_id'] ?? ''),
-                'name' => trim($row['name'] ?? ''),
+                'child_letter' => trim($row['child_letter'] ?? ''),
                 'age' => (int) ($row['age'] ?? 0),
                 'gender' => strtolower(trim($row['gender'] ?? '')),
                 'grade' => trim($row['grade'] ?? ''),
-                'interests' => trim($row['interests'] ?? ''),
-                'avatar' => $this->generateAvatar($row['name'] ?? '', $row['gender'] ?? '')
+                'interests' => trim($row['interests'] ?? '')
             ];
-            
+
             // Validate required fields
-            if (empty($child['family_id']) || empty($child['name']) || $child['age'] <= 0) {
+            if (empty($child['family_id']) || $child['age'] <= 0) {
                 continue; // Skip invalid rows
             }
-            
+
             // Normalize gender
             if (!in_array($child['gender'], ['male', 'female'])) {
                 $child['gender'] = 'male'; // Default

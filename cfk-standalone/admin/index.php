@@ -145,8 +145,7 @@ include __DIR__ . '/includes/admin_header.php';
             <?php foreach ($childrenNeedingAttention as $child): ?>
                 <div class="attention-item">
                     <div class="attention-info">
-                        <strong><?php echo sanitizeString($child['name']); ?></strong>
-                        (ID: <?php echo sanitizeString($child['display_id']); ?>)
+                        <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
                         <span class="attention-date">
                             Pending since <?php echo date('M j, Y', strtotime($child['request_date'])); ?>
                         </span>

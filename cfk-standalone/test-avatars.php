@@ -52,19 +52,19 @@ require_once __DIR__ . '/includes/avatar_manager.php';
             <?php
             // Test children with different ages and genders
             $testChildren = [
-                ['name' => 'Baby Emma', 'age' => 1, 'gender' => 'F'],
-                ['name' => 'Toddler Jake', 'age' => 3, 'gender' => 'M'],
-                ['name' => 'Toddler Mia', 'age' => 4, 'gender' => 'F'],
-                ['name' => 'Child Marcus', 'age' => 7, 'gender' => 'M'],
-                ['name' => 'Child Sofia', 'age' => 9, 'gender' => 'F'],
-                ['name' => 'Teen Alex', 'age' => 13, 'gender' => 'M'],
-                ['name' => 'Teen Isabella', 'age' => 16, 'gender' => 'F'],
+                ['display_id' => '101A', 'age' => 1, 'gender' => 'F'],
+                ['display_id' => '102A', 'age' => 3, 'gender' => 'M'],
+                ['display_id' => '102B', 'age' => 4, 'gender' => 'F'],
+                ['display_id' => '103A', 'age' => 7, 'gender' => 'M'],
+                ['display_id' => '104A', 'age' => 9, 'gender' => 'F'],
+                ['display_id' => '105A', 'age' => 13, 'gender' => 'M'],
+                ['display_id' => '106A', 'age' => 16, 'gender' => 'F'],
             ];
             
             foreach ($testChildren as $child): ?>
                 <div class="avatar-item">
-                    <img src="<?php echo getPhotoUrl(null, $child); ?>" alt="Avatar for <?php echo $child['name']; ?>">
-                    <h3><?php echo $child['name']; ?></h3>
+                    <img src="<?php echo getPhotoUrl(null, $child); ?>" alt="Avatar for <?php echo $child['display_id']; ?>">
+                    <h3>Family Code: <?php echo $child['display_id']; ?></h3>
                     <p><strong>Age:</strong> <?php echo $child['age']; ?> years</p>
                     <p><strong>Gender:</strong> <?php echo $child['gender'] === 'M' ? 'Male' : 'Female'; ?></p>
                 </div>

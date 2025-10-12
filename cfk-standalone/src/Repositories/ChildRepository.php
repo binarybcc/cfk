@@ -213,23 +213,22 @@ class ChildRepository implements ChildRepositoryInterface
     public function batchInsert(array $children): bool
     {
         $stmt = $this->db->prepare('
-            INSERT INTO children 
-            (family_id, name, age, gender, grade, interests, avatar, status, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            INSERT INTO children
+            (family_id, child_letter, age, gender, grade, interests, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
         ');
 
         Database::beginTransaction();
-        
+
         try {
             foreach ($children as $child) {
                 $stmt->execute([
                     $child['family_id'],
-                    $child['name'],
+                    $child['child_letter'] ?? '',
                     $child['age'],
                     $child['gender'],
                     $child['grade'],
                     $child['interests'] ?? '',
-                    $child['avatar'],
                     'available'
                 ]);
             }

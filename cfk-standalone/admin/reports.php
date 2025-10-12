@@ -416,7 +416,6 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php foreach ($availableChildren as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
-                            <td><?php echo sanitizeString($child['name']); ?></td>
                             <td><?php echo $child['age']; ?></td>
                             <td><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
                             <td><?php echo sanitizeString($child['grade'] ?? '-'); ?></td>
