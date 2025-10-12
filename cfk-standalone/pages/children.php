@@ -185,15 +185,17 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         }
     }">
         <div class="filters-form">
-            <div class="filter-group">
+            <div class="filter-group filter-group-search">
                 <label for="child-search-input">Search:</label>
-                <input type="text"
-                       id="child-search-input"
-                       x-model="search"
-                       placeholder="Family code, interests, wishes, age...">
-                <small style="display: block; color: #666; margin-top: 5px;">
-                    Try: "123A", "bike", "doll", "boy 6", etc.
-                </small>
+                <div class="search-input-wrapper">
+                    <input type="text"
+                           id="child-search-input"
+                           x-model="search"
+                           placeholder="Family code, interests, wishes, age...">
+                    <small class="search-help-text">
+                        Try: "123A", "bike", "doll", "boy 6", etc.
+                    </small>
+                </div>
             </div>
 
             <div class="filter-group">

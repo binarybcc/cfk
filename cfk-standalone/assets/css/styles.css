@@ -1373,6 +1373,26 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
 }
 
+.search-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.search-help-text {
+    display: block;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    margin: 0;
+    padding-left: 2px;
+}
+
+.filter-group-search {
+    align-self: flex-start;
+}
+
 .filter-actions {
     display: flex;
     gap: var(--spacing-sm);
