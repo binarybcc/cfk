@@ -321,13 +321,11 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                             <div class="family-modal-body">
                                 <template x-for="member in familyMembers" :key="member.id">
                                     <div class="family-member-card">
-                                        <img :src="window.getPlaceholderImage(member.age, member.gender)"
-                                             :alt="'Child ' + member.display_id"
-                                             class="family-member-img">
                                         <div class="family-member-info">
                                             <div><strong x-text="member.display_id"></strong></div>
                                             <div>Age: <span x-text="member.age"></span></div>
                                             <div>Gender: <span x-text="member.gender === 'M' ? 'Boy' : 'Girl'"></span></div>
+                                            <div x-show="member.grade">Grade: <span x-text="member.grade"></span></div>
                                             <div class="family-member-status">
                                                 <span :class="member.status === 'available' ? 'badge badge-success' : 'badge badge-secondary'"
                                                       x-text="member.status === 'available' ? 'Available' : 'Sponsored'"></span>

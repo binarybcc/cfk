@@ -1595,6 +1595,7 @@ textarea:focus {
 .family-member-card {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--spacing-md);
     padding: var(--spacing-md);
     border: 1px solid var(--color-border-lighter);
@@ -1608,21 +1609,17 @@ textarea:focus {
     transform: translateY(-2px);
 }
 
-.family-member-img {
-    width: 60px;
-    height: 60px;
-    object-fit: contain;
-    border-radius: var(--radius-md);
-    background: var(--color-white);
-    padding: var(--spacing-xs);
-}
-
 .family-member-info {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
     font-size: var(--font-size-sm);
+}
+
+.family-member-info strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-base);
 }
 
 .family-member-status {
@@ -3667,11 +3664,11 @@ tr:hover {
     .family-member-card {
         flex-direction: column;
         text-align: center;
+        align-items: center;
     }
 
-    .family-member-img {
-        width: 80px;
-        height: 80px;
+    .family-member-info {
+        text-align: center;
     }
 
     /* === Search Input === */
