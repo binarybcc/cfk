@@ -111,17 +111,38 @@ class Database {
      */
     public static function delete(string $table, array $where): int {
         $pdo = \CFK\Config\Database::getConnection();
-        
+
         $whereClause = [];
         foreach ($where as $column => $value) {
             $whereClause[] = "{$column} = :{$column}";
         }
-        
+
         $sql = "DELETE FROM {$table} WHERE " . implode(' AND ', $whereClause);
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute($where);
-        
+
         return $stmt->rowCount();
+    }
+
+    /**
+     * Begin database transaction
+     */
+    public static function beginTransaction(): void {
+        \CFK\Config\Database::beginTransaction();
+    }
+
+    /**
+     * Commit database transaction
+     */
+    public static function commit(): void {
+        \CFK\Config\Database::commit();
+    }
+
+    /**
+     * Rollback database transaction
+     */
+    public static function rollback(): void {
+        \CFK\Config\Database::rollback();
     }
 }
