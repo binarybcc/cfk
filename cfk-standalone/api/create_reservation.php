@@ -2,9 +2,9 @@
 declare(strict_types=1);
 
 /**
- * Create Reservation API Endpoint
- * Converts localStorage selections into database reservation
- * v1.5 - Reservation System
+ * Create Sponsorship API Endpoint
+ * Converts localStorage selections into immediate sponsorship confirmation
+ * v1.5 - Instant Confirmation System
  */
 
 // Define constant before loading config
@@ -56,48 +56,83 @@ try {
     // Sanitize children IDs
     $childrenIds = array_map('intval', $data['children_ids']);
 
-    // Create reservation (48 hour expiration by default)
-    $result = createReservation($sponsorData, $childrenIds, 48);
+    // Check if children are available
+    $unavailableChildren = checkChildrenAvailability($childrenIds);
+    if (!empty($unavailableChildren)) {
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Some children are no longer available: ' . implode(', ', $unavailableChildren)
+        ]);
+        exit;
+    }
 
-    if ($result['success']) {
-        http_response_code(201); // Created
+    // Create immediate sponsorships (no delay!)
+    Database::beginTransaction();
 
-        // Try to send email, but don't fail if it doesn't work
-        $emailResult = ['success' => false, 'message' => 'Email not sent'];
-        try {
-            // Get full reservation details for email
-            $reservation = getReservation($result['token']);
+    $sponsorshipIds = [];
+    try {
+        foreach ($childrenIds as $childId) {
+            // Mark child as sponsored
+            Database::update('children', ['status' => 'sponsored'], ['id' => $childId]);
 
-            // Send confirmation email to sponsor
-            $emailResult = sendReservationConfirmationEmail($reservation);
+            // Create sponsorship record
+            $sponsorshipId = Database::insert('sponsorships', [
+                'child_id' => $childId,
+                'sponsor_name' => $sponsorData['name'],
+                'sponsor_email' => $sponsorData['email'],
+                'sponsor_phone' => $sponsorData['phone'],
+                'sponsor_address' => $sponsorData['address'],
+                'sponsored_date' => gmdate('Y-m-d H:i:s'),
+                'status' => 'active',
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+            ]);
 
-            // Send notification to admin
-            sendAdminReservationNotification($reservation);
-        } catch (Throwable $emailException) {
-            error_log('Email sending failed: ' . $emailException->getMessage());
-            // Continue anyway - email failure shouldn't prevent reservation
+            $sponsorshipIds[] = $sponsorshipId;
         }
 
-        // Log successful reservation
-        error_log(sprintf(
-            'Reservation created: Token=%s, Sponsor=%s, Children=%d, Email=%s',
-            $result['token'],
-            $sponsorData['email'],
-            count($childrenIds),
-            $emailResult['success'] ? 'sent' : 'failed'
-        ));
+        Database::commit();
+
+        // Try to send email, but don't fail if it doesn't work
+        $emailResult = ['success' => false];
+        try {
+            // Get children details for email
+            $children = [];
+            foreach ($childrenIds as $childId) {
+                $child = getChildById($childId);
+                if ($child) {
+                    $children[] = $child;
+                }
+            }
+
+            // TODO: Send confirmation email with children details
+            // For now, just log it
+            error_log(sprintf(
+                'Sponsorship confirmed: Email=%s, Children=%d',
+                $sponsorData['email'],
+                count($childrenIds)
+            ));
+        } catch (Throwable $emailException) {
+            error_log('Email sending failed: ' . $emailException->getMessage());
+        }
 
         echo json_encode([
             'success' => true,
-            'message' => 'Reservation created successfully!',
-            'token' => $result['token'],
-            'reservation_id' => $result['reservation_id'],
-            'expires_at' => $result['expires_at'],
+            'message' => 'Sponsorship confirmed! Thank you!',
+            'sponsorship_ids' => $sponsorshipIds,
+            'sponsor_email' => $sponsorData['email'],
+            'children_count' => count($childrenIds),
             'email_sent' => $emailResult['success']
         ]);
-    } else {
-        http_response_code(400); // Bad Request
-        echo json_encode($result);
+
+    } catch (Throwable $e) {
+        try {
+            Database::rollback();
+        } catch (Throwable $rollbackException) {
+            // Ignore rollback errors
+        }
+        throw $e; // Re-throw to be caught by outer catch
     }
 
 } catch (Exception $e) {
