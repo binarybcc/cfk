@@ -375,9 +375,11 @@ function checkChildrenAvailability(array $childrenIds): array {
     $placeholders = implode(',', array_fill(0, count($childrenIds), '?'));
 
     $unavailable = Database::fetchAll(
-        "SELECT display_id FROM children
-         WHERE id IN ($placeholders)
-         AND status != 'available'",
+        "SELECT CONCAT(f.family_number, c.child_letter) as display_id
+         FROM children c
+         JOIN families f ON c.family_id = f.id
+         WHERE c.id IN ($placeholders)
+         AND c.status != 'available'",
         $childrenIds
     );
 
