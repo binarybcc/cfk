@@ -14,6 +14,7 @@ define('CFK_APP', true);
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/reservation_functions.php';
+require_once __DIR__ . '/../includes/reservation_emails.php';
 
 // Set JSON response headers
 header('Content-Type: application/json');
@@ -61,12 +62,22 @@ try {
     if ($result['success']) {
         http_response_code(201); // Created
 
+        // Get full reservation details for email
+        $reservation = getReservation($result['token']);
+
+        // Send confirmation email to sponsor
+        $emailResult = sendReservationConfirmationEmail($reservation);
+
+        // Send notification to admin
+        sendAdminReservationNotification($reservation);
+
         // Log successful reservation
         error_log(sprintf(
-            'Reservation created: Token=%s, Sponsor=%s, Children=%d',
+            'Reservation created: Token=%s, Sponsor=%s, Children=%d, Email=%s',
             $result['token'],
             $sponsorData['email'],
-            count($childrenIds)
+            count($childrenIds),
+            $emailResult['success'] ? 'sent' : 'failed'
         ));
 
         echo json_encode([
@@ -74,7 +85,8 @@ try {
             'message' => 'Reservation created successfully!',
             'token' => $result['token'],
             'reservation_id' => $result['reservation_id'],
-            'expires_at' => $result['expires_at']
+            'expires_at' => $result['expires_at'],
+            'email_sent' => $emailResult['success']
         ]);
     } else {
         http_response_code(400); // Bad Request
