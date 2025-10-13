@@ -62,14 +62,21 @@ try {
     if ($result['success']) {
         http_response_code(201); // Created
 
-        // Get full reservation details for email
-        $reservation = getReservation($result['token']);
+        // Try to send email, but don't fail if it doesn't work
+        $emailResult = ['success' => false, 'message' => 'Email not sent'];
+        try {
+            // Get full reservation details for email
+            $reservation = getReservation($result['token']);
 
-        // Send confirmation email to sponsor
-        $emailResult = sendReservationConfirmationEmail($reservation);
+            // Send confirmation email to sponsor
+            $emailResult = sendReservationConfirmationEmail($reservation);
 
-        // Send notification to admin
-        sendAdminReservationNotification($reservation);
+            // Send notification to admin
+            sendAdminReservationNotification($reservation);
+        } catch (Exception $emailException) {
+            error_log('Email sending failed: ' . $emailException->getMessage());
+            // Continue anyway - email failure shouldn't prevent reservation
+        }
 
         // Log successful reservation
         error_log(sprintf(
