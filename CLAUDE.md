@@ -244,6 +244,52 @@ Recent work:
 - Sponsorship confirmation workflow
 - Email system documentation
 
+## Documentation Location
+
+**All project documentation is located in `cfk-standalone/docs/`**
+
+### Documentation Structure (Organized by Category)
+
+```
+cfk-standalone/docs/
+├── README.md              # Main documentation index
+├── features/              # Feature implementation docs (7 files)
+│   ├── zeffy-donation-modal.md
+│   ├── donation-page.md
+│   └── ...
+├── components/            # Component documentation (7 files)
+│   ├── button-system.md
+│   ├── email-system.md
+│   └── ...
+├── guides/                # User guides (6 files)
+│   ├── admin-guide.md
+│   ├── csv-import-guide.md
+│   └── ...
+├── technical/             # Technical specifications (5 files)
+│   ├── alpine-js-patterns.md
+│   ├── php-82-compliance.md
+│   └── ...
+├── audits/                # Audit reports (6 files)
+├── deployment/            # Deployment guides (5 files)
+├── releases/              # Release notes (6 files)
+└── archive/               # Historical docs (1 file)
+```
+
+### Quick Access
+
+- **For feature implementation details**: `cfk-standalone/docs/features/`
+- **For component API reference**: `cfk-standalone/docs/components/`
+- **For user guides**: `cfk-standalone/docs/guides/`
+- **For technical specs**: `cfk-standalone/docs/technical/`
+- **For deployment**: `cfk-standalone/docs/deployment/`
+
+### When to Reference Documentation
+
+1. **Understanding a feature**: Check `features/` directory
+2. **Using a component**: Check `components/` directory
+3. **Deploying changes**: Check `deployment/` directory
+4. **Learning the architecture**: Check `technical/` directory
+
 ## Development Guidelines
 
 ### Working with This Codebase
@@ -253,6 +299,7 @@ Recent work:
 3. **Database**: Use PDO, not wpdb
 4. **Sessions**: PHP sessions, not WordPress user system
 5. **Email**: PHPMailer with custom wrapper, not wp_mail()
+6. **Documentation**: All docs organized in `cfk-standalone/docs/` by category
 
 ### Claude Code Task Tool Usage
 
@@ -263,6 +310,6 @@ Recent work:
 ### File Management Rules
 
 - Never save working files to the root directory
-- Organize documentation in appropriate subdirectories
+- Organize documentation in appropriate subdirectories (`cfk-standalone/docs/`)
 - Use concurrent execution patterns when possible
 - All development happens in `cfk-standalone/` directory
