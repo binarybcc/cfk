@@ -204,8 +204,12 @@ function reservationReviewApp() {
                     // Clear sponsor data from sessionStorage
                     sessionStorage.removeItem('cfk_sponsor_form');
 
-                    // Store reservation token in sessionStorage for success page
-                    sessionStorage.setItem('cfk_reservation_token', result.token);
+                    // Store confirmation data for success page
+                    const confirmationData = {
+                        sponsor_email: result.sponsor_email,
+                        children_count: result.children_count
+                    };
+                    sessionStorage.setItem('cfk_sponsorship_confirmation', JSON.stringify(confirmationData));
 
                     // Redirect to success page
                     window.location.href = '<?php echo baseUrl('?page=reservation_success'); ?>';

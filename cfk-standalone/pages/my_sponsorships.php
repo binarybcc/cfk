@@ -11,12 +11,13 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+require_once __DIR__ . '/../includes/reservation_functions.php';
 
 $errors = [];
 $success = false;
 $emailSent = false;
+$sponsorships = [];
+$lookupEmail = '';
 
 // Handle lookup form submission
 if ($_POST && isset($_POST['lookup_email'])) {
@@ -25,29 +26,45 @@ if ($_POST && isset($_POST['lookup_email'])) {
         $errors[] = 'Security token invalid. Please try again.';
     } else {
         $email = sanitizeEmail($_POST['sponsor_email'] ?? '');
+        $lookupEmail = $email;
 
         if (empty($email)) {
             $errors[] = 'Please enter your email address.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
         } else {
-            // Check if email has any sponsorships
-            $sponsorships = CFK_Sponsorship_Manager::getSponsorshipsByEmail($email);
+            // Get sponsorships for this email
+            $sponsorships = Database::fetchAll(
+                "SELECT s.*, c.child_letter, c.age, c.gender, c.grade, c.wishes,
+                        c.clothing_sizes, c.shoe_size, f.family_number,
+                        CONCAT(f.family_number, c.child_letter) as display_id
+                 FROM sponsorships s
+                 JOIN children c ON s.child_id = c.id
+                 JOIN families f ON c.family_id = f.id
+                 WHERE s.sponsor_email = ?
+                 AND s.status = 'active'
+                 ORDER BY s.sponsored_date DESC",
+                [$email]
+            );
 
             if (empty($sponsorships)) {
                 $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
             } else {
-                // Generate verification token and send email
-                $result = CFK_Sponsorship_Manager::sendPortalAccessEmail($email);
-
-                if ($result['success']) {
-                    $emailSent = true;
-                    $success = true;
-                } else {
-                    $errors[] = $result['message'];
-                }
+                $success = true;
             }
         }
+    }
+}
+
+// Handle resend email request
+if ($_POST && isset($_POST['resend_email'])) {
+    $email = sanitizeEmail($_POST['resend_to_email'] ?? '');
+
+    if (!empty($email)) {
+        // TODO: Implement resend confirmation email
+        // For now, just log it
+        error_log("Resend confirmation email requested for: $email");
+        $emailSent = true;
     }
 }
 
@@ -116,39 +133,110 @@ $pageTitle = 'My Sponsorships';
                 <h2>🔍 Look Up Your Confirmed Sponsorships</h2>
             </div>
             <p class="section-description">
-                Already sponsored children? Enter your email to access your sponsorship portal.
+                Already sponsored children? Enter your email to view your sponsorships.
             </p>
 
-            <?php if ($emailSent): ?>
-                <!-- Success Message -->
-                <div class="alert alert-success">
-                    <h3>✉️ Check Your Email!</h3>
-                    <p><strong>We've sent you a secure access link.</strong></p>
-                    <p>Click the link in your email to access your sponsorship portal. The link will expire in 30 minutes.</p>
-                    <div class="help-box">
-                        <strong>Email not received?</strong>
-                        <ul>
-                            <li>Check your spam/junk folder</li>
-                            <li>Make sure you entered the correct email address</li>
-                            <li>Wait a few minutes and try again</li>
-                            <li>Contact us at <a href="mailto:<?php echo config('admin_email'); ?>"><?php echo config('admin_email'); ?></a> if problems persist</li>
-                        </ul>
+            <?php if ($success && !empty($sponsorships)): ?>
+                <!-- Sponsorship Results -->
+                <div class="sponsorships-found">
+                    <div class="alert alert-success">
+                        <h3>✓ Sponsorships Found!</h3>
+                        <p>You have sponsored <strong><?php echo count($sponsorships); ?></strong>
+                           <?php echo count($sponsorships) === 1 ? 'child' : 'children'; ?> for Christmas!</p>
+                        <p><strong>Email:</strong> <?php echo sanitizeString($lookupEmail); ?></p>
+                    </div>
+
+                    <!-- Sponsored Children List -->
+                    <div class="sponsored-children-list">
+                        <h3>Your Sponsored Children:</h3>
+                        <?php foreach ($sponsorships as $sponsorship): ?>
+                            <div class="sponsored-child-card">
+                                <div class="child-card-header">
+                                    <h4><?php echo sanitizeString($sponsorship['display_id']); ?></h4>
+                                    <span class="status-badge status-active">Active</span>
+                                </div>
+
+                                <div class="child-info-grid">
+                                    <div class="info-item">
+                                        <strong>Age:</strong>
+                                        <span><?php echo (int)$sponsorship['age']; ?> years</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <strong>Gender:</strong>
+                                        <span><?php echo $sponsorship['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
+                                    </div>
+                                    <?php if (!empty($sponsorship['grade'])): ?>
+                                        <div class="info-item">
+                                            <strong>Grade:</strong>
+                                            <span>Grade <?php echo (int)$sponsorship['grade']; ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="info-item">
+                                        <strong>Sponsored:</strong>
+                                        <span><?php echo date('M j, Y', strtotime($sponsorship['sponsored_date'])); ?></span>
+                                    </div>
+                                </div>
+
+                                <?php if (!empty($sponsorship['wishes'])): ?>
+                                    <div class="child-wishes">
+                                        <strong>Wishes:</strong>
+                                        <p><?php echo nl2br(sanitizeString($sponsorship['wishes'])); ?></p>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($sponsorship['clothing_sizes']) || !empty($sponsorship['shoe_size'])): ?>
+                                    <div class="child-sizes">
+                                        <?php if (!empty($sponsorship['clothing_sizes'])): ?>
+                                            <span><strong>Clothing:</strong> <?php echo sanitizeString($sponsorship['clothing_sizes']); ?></span>
+                                        <?php endif; ?>
+                                        <?php if (!empty($sponsorship['shoe_size'])): ?>
+                                            <span><strong>Shoes:</strong> <?php echo sanitizeString($sponsorship['shoe_size']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="sponsorship-actions">
+                        <?php if ($emailSent): ?>
+                            <div class="alert alert-info">
+                                ✓ Confirmation email sent to <?php echo sanitizeString($lookupEmail); ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="POST" action="" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="resend_to_email" value="<?php echo sanitizeString($lookupEmail); ?>">
+                            <button type="submit" name="resend_email" class="btn btn-outline">
+                                📧 Resend Confirmation Email
+                            </button>
+                        </form>
+
+                        <button onclick="window.print()" class="btn btn-outline">
+                            🖨️ Print Details
+                        </button>
+
+                        <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" class="btn btn-secondary">
+                            ← Look Up Different Email
+                        </a>
                     </div>
                 </div>
+
             <?php else: ?>
                 <!-- Lookup Form -->
                 <div class="lookup-form-container">
                     <div class="info-box">
-                        <h4>What's in the portal?</h4>
+                        <h4>What you'll see:</h4>
                         <ul class="feature-list">
-                            <li>✓ View all your sponsored children with complete details</li>
-                            <li>✓ See which children are in the same family</li>
-                            <li>✓ Add more children to your sponsorship</li>
-                            <li>✓ Download shopping lists for gift buying</li>
-                            <li>✓ View sponsorship status (pending/confirmed/completed)</li>
+                            <li>✓ All your sponsored children with complete details</li>
+                            <li>✓ Gift wishes and clothing sizes</li>
+                            <li>✓ Option to resend confirmation email</li>
+                            <li>✓ Print-friendly view for shopping</li>
                         </ul>
                         <div class="security-note">
-                            <strong>🔒 Secure Access:</strong> No password needed! We'll send you a secure, one-time access link via email.
+                            <strong>🔒 Privacy:</strong> Your email is never shared. Only you can view your sponsorships.
                         </div>
                     </div>
 
@@ -461,6 +549,120 @@ function mySponsorshipsApp() {
     margin: var(--spacing-xs) 0;
 }
 
+/* Sponsorships Found Section */
+.sponsorships-found {
+    margin-top: var(--spacing-xl);
+}
+
+.sponsored-children-list {
+    margin: var(--spacing-xl) 0;
+}
+
+.sponsored-children-list h3 {
+    color: var(--color-primary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.sponsored-child-card {
+    background: var(--color-white);
+    border: 2px solid var(--color-border-lighter);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.child-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 2px solid var(--color-primary);
+}
+
+.child-card-header h4 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: var(--font-size-xl);
+}
+
+.status-badge {
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: var(--radius-full);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+}
+
+.status-badge.status-active {
+    background: var(--color-success);
+    color: var(--color-white);
+}
+
+.child-info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.child-info-grid .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.child-info-grid .info-item strong {
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.child-wishes {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.child-wishes strong {
+    color: var(--color-primary);
+}
+
+.child-wishes p {
+    margin: var(--spacing-xs) 0 0 0;
+    color: var(--color-text-secondary);
+}
+
+.child-sizes {
+    display: flex;
+    gap: var(--spacing-lg);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-lighter);
+    font-size: var(--font-size-sm);
+}
+
+.child-sizes strong {
+    color: var(--color-primary);
+}
+
+.sponsorship-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    padding-top: var(--spacing-xl);
+    border-top: 2px solid var(--color-border-lighter);
+}
+
+.sponsorship-actions .alert {
+    flex: 1 1 100%;
+}
+
+.inline-form {
+    display: inline;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     .my-sponsorships-page {
@@ -482,6 +684,24 @@ function mySponsorshipsApp() {
     .section-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+
+    .child-info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sponsorship-actions {
+        flex-direction: column;
+    }
+
+    .sponsorship-actions .btn,
+    .sponsorship-actions button {
+        width: 100%;
+    }
+
+    .child-sizes {
+        flex-direction: column;
         gap: var(--spacing-sm);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 /**
- * Reservation Success Page
- * Shows reservation token and next steps after successful reservation
- * v1.5 - Reservation System
+ * Sponsorship Success Page
+ * Shows confirmation after immediate sponsorship
+ * v1.5 - Instant Confirmation System
  */
 
 // Prevent direct access
@@ -11,227 +11,97 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-$pageTitle = 'Reservation Confirmed!';
+$pageTitle = 'Sponsorship Confirmed!';
 ?>
 
-<div class="reservation-success-page" x-data="reservationSuccessApp()">
-    <!-- Loading State -->
-    <template x-if="!loaded">
-        <div class="loading-state">
-            <p>Loading your reservation details...</p>
-        </div>
-    </template>
-
+<div class="reservation-success-page" x-data="sponsorshipSuccessApp()">
     <!-- Success Content -->
-    <template x-if="loaded && reservation">
-        <div class="success-container">
-            <!-- Success Header -->
-            <div class="success-header">
-                <div class="success-icon">✓</div>
-                <h1>Reservation Confirmed!</h1>
-                <p class="success-subtitle">
-                    Thank you for sponsoring <strong x-text="reservation.total_children"></strong>
-                    <span x-text="reservation.total_children === 1 ? 'child' : 'children'"></span> this Christmas!
-                </p>
-            </div>
-
-            <!-- Reservation Token Card -->
-            <div class="token-card">
-                <h2>Your Reservation Token</h2>
-                <div class="token-display">
-                    <code x-text="reservationToken"></code>
-                    <button @click="copyToken()" class="btn-copy" title="Copy to clipboard">
-                        <span x-text="copied ? '✓ Copied!' : '📋 Copy'"></span>
-                    </button>
-                </div>
-                <p class="token-help">
-                    Save this token! You'll need it to track your reservation or make changes.
-                </p>
-            </div>
-
-            <!-- Reservation Details -->
-            <div class="details-card">
-                <h2>Reservation Details</h2>
-
-                <div class="detail-section">
-                    <h3>Sponsor Information</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Name:</strong>
-                            <span x-text="reservation.sponsor_name"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Email:</strong>
-                            <span x-text="reservation.sponsor_email"></span>
-                        </div>
-                        <div class="info-item" x-show="reservation.sponsor_phone">
-                            <strong>Phone:</strong>
-                            <span x-text="reservation.sponsor_phone"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h3>Important Dates</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <strong>Created:</strong>
-                            <span x-text="formatDate(reservation.created_at)"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Expires:</strong>
-                            <span x-text="formatDate(reservation.expires_at)"></span>
-                        </div>
-                        <div class="info-item">
-                            <strong>Time Remaining:</strong>
-                            <span x-text="getTimeRemaining(reservation.expires_at)"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="detail-section">
-                    <h3>Selected Children (<span x-text="reservation.children?.length || 0"></span>)</h3>
-                    <div class="children-list">
-                        <template x-for="child in reservation.children" :key="child.id">
-                            <div class="child-item">
-                                <div class="child-header">
-                                    <strong x-text="child.display_id"></strong>
-                                    <span class="child-meta">
-                                        <span x-text="child.age"></span> years,
-                                        <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
-                                    </span>
-                                </div>
-                                <div class="child-details">
-                                    <p x-show="child.wishes"><strong>Wishes:</strong> <span x-text="child.wishes"></span></p>
-                                    <p x-show="child.clothing_sizes"><strong>Clothing:</strong> <span x-text="child.clothing_sizes"></span></p>
-                                    <p x-show="child.shoe_size"><strong>Shoes:</strong> <span x-text="child.shoe_size"></span></p>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Next Steps Card -->
-            <div class="next-steps-card">
-                <h2>📋 What Happens Next?</h2>
-                <ol class="steps-list">
-                    <li>
-                        <strong>Check Your Email</strong>
-                        <p>We've sent a detailed confirmation email to <strong x-text="reservation.sponsor_email"></strong> with all child information.</p>
-                    </li>
-                    <li>
-                        <strong>Shop for Gifts</strong>
-                        <p>You have 48 hours to purchase gifts based on each child's wishes and sizes listed above.</p>
-                    </li>
-                    <li>
-                        <strong>Deliver or Ship Gifts</strong>
-                        <p>Follow the instructions in your confirmation email for gift delivery.</p>
-                    </li>
-                    <li>
-                        <strong>Make a Difference</strong>
-                        <p>Your generosity will bring joy to <span x-text="reservation.total_children"></span>
-                        <span x-text="reservation.total_children === 1 ? 'child' : 'children'"></span> this Christmas!</p>
-                    </li>
-                </ol>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="success-actions">
-                <a href="<?php echo baseUrl('?page=home'); ?>" class="btn btn-primary">
-                    ← Return Home
-                </a>
-                <button @click="printPage()" class="btn btn-outline">
-                    🖨️ Print Details
-                </button>
-            </div>
+    <div class="success-container">
+        <!-- Success Header -->
+        <div class="success-header">
+            <div class="success-icon">✓</div>
+            <h1>Sponsorship Confirmed!</h1>
+            <p class="success-subtitle">
+                Thank you for sponsoring <strong x-text="childrenCount"></strong>
+                <span x-text="childrenCount === 1 ? 'child' : 'children'"></span> this Christmas!
+            </p>
         </div>
-    </template>
 
-    <!-- Error State -->
-    <template x-if="loaded && !reservation">
-        <div class="error-state">
-            <h2>Reservation Not Found</h2>
-            <p>We couldn't find your reservation details. Please check your email for confirmation.</p>
-            <a href="<?php echo baseUrl('?page=home'); ?>" class="btn btn-primary">Return Home</a>
+        <!-- Email Confirmation Card -->
+        <div class="token-card">
+            <h2>📧 Confirmation Email</h2>
+            <p class="email-info">
+                We've sent (or will send) confirmation details to:
+                <strong x-text="sponsorEmail"></strong>
+            </p>
+            <p class="token-help">
+                Need to review your sponsorships later? Visit the
+                <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>">My Sponsorships</a>
+                page and enter your email address.
+            </p>
         </div>
-    </template>
+
+        <!-- Next Steps Card -->
+        <div class="next-steps-card">
+            <h2>📋 What Happens Next?</h2>
+            <ol class="steps-list">
+                <li>
+                    <strong>Check Your Email</strong>
+                    <p>We've sent (or will send) a detailed confirmation email to <strong x-text="sponsorEmail"></strong> with all child information.</p>
+                </li>
+                <li>
+                    <strong>Shop for Gifts</strong>
+                    <p>Purchase gifts based on each child's wishes and sizes. Details are in your confirmation email.</p>
+                </li>
+                <li>
+                    <strong>Deliver or Ship Gifts</strong>
+                    <p>Follow the instructions in your confirmation email for gift delivery.</p>
+                </li>
+                <li>
+                    <strong>Make a Difference</strong>
+                    <p>Your generosity will bring joy to <span x-text="childrenCount"></span>
+                    <span x-text="childrenCount === 1 ? 'child' : 'children'"></span> this Christmas!</p>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="success-actions">
+            <a href="<?php echo baseUrl('?page=home'); ?>" class="btn btn-primary">
+                ← Return Home
+            </a>
+            <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" class="btn btn-outline">
+                View My Sponsorships
+            </a>
+        </div>
+    </div>
 </div>
 
 <script>
-function reservationSuccessApp() {
+function sponsorshipSuccessApp() {
     return {
-        reservationToken: '',
-        reservation: null,
+        sponsorEmail: '',
+        childrenCount: 0,
         loaded: false,
-        copied: false,
 
-        async init() {
-            // Get token from sessionStorage
-            this.reservationToken = sessionStorage.getItem('cfk_reservation_token');
+        init() {
+            // Get confirmation data from sessionStorage
+            const confirmationData = sessionStorage.getItem('cfk_sponsorship_confirmation');
 
-            if (!this.reservationToken) {
-                this.loaded = true;
-                return;
-            }
+            if (confirmationData) {
+                try {
+                    const data = JSON.parse(confirmationData);
+                    this.sponsorEmail = data.sponsor_email || '';
+                    this.childrenCount = data.children_count || 0;
 
-            // Fetch reservation details
-            await this.loadReservation();
-
-            // Clear token from sessionStorage
-            sessionStorage.removeItem('cfk_reservation_token');
-        },
-
-        async loadReservation() {
-            try {
-                const response = await fetch(`<?php echo baseUrl('api/get_reservation.php'); ?>?token=${this.reservationToken}`);
-                const result = await response.json();
-
-                if (result.success) {
-                    this.reservation = result.reservation;
+                    // Clear confirmation data from sessionStorage
+                    sessionStorage.removeItem('cfk_sponsorship_confirmation');
+                } catch (error) {
+                    console.error('Failed to parse confirmation data:', error);
                 }
-            } catch (error) {
-                console.error('Failed to load reservation:', error);
-            } finally {
-                this.loaded = true;
             }
-        },
 
-        copyToken() {
-            navigator.clipboard.writeText(this.reservationToken).then(() => {
-                this.copied = true;
-                setTimeout(() => {
-                    this.copied = false;
-                }, 2000);
-            });
-        },
-
-        formatDate(dateString) {
-            return new Date(dateString).toLocaleString('en-US', {
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-        },
-
-        getTimeRemaining(expiresAt) {
-            const now = new Date();
-            const expires = new Date(expiresAt);
-            const diff = expires - now;
-
-            if (diff <= 0) return 'Expired';
-
-            const hours = Math.floor(diff / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-
-            return `${hours} hours, ${minutes} minutes`;
-        },
-
-        printPage() {
-            window.print();
+            this.loaded = true;
         }
     }
 }
