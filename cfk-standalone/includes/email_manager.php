@@ -580,6 +580,9 @@ class CFK_Email_Manager {
 
             $mailer = self::getMailer();
 
+            // Clear any previous recipients
+            $mailer->clearAddresses();
+
             // Use first sponsorship's name for greeting
             $sponsorName = $sponsorships[0]['sponsor_name'];
             $mailer->addAddress($email, $sponsorName);
@@ -590,6 +593,9 @@ class CFK_Email_Manager {
             $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
 
             $mailer->Body = self::getAccessLinkTemplate($email, $sponsorName, $accessUrl, count($sponsorships));
+
+            // Generate plain text version
+            $mailer->AltBody = strip_tags($mailer->Body);
 
             $success = $mailer->send();
 
