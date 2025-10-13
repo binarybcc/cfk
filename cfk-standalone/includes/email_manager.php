@@ -19,7 +19,7 @@ class CFK_Email_Manager {
     /**
      * Initialize PHPMailer instance (public for email queue access)
      */
-    public static function getMailer(): PHPMailer\PHPMailer\PHPMailer {
+    public static function getMailer(): object {
         if (self::$mailer === null) {
             // Auto-load PHPMailer if available via Composer
             if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
@@ -63,13 +63,18 @@ class CFK_Email_Manager {
         return new class {
             public $Subject = '';
             public $Body = '';
+            public $AltBody = '';
             private $to = [];
             private $from = ['email' => '', 'name' => ''];
-            
+
             public function addAddress(string $email, string $name = ''): void {
                 $this->to[] = ['email' => $email, 'name' => $name];
             }
-            
+
+            public function clearAddresses(): void {
+                $this->to = [];
+            }
+
             public function setFrom(string $email, string $name = ''): void {
                 $this->from = ['email' => $email, 'name' => $name];
             }
