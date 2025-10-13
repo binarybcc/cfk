@@ -554,4 +554,178 @@ class CFK_Email_Manager {
 
         return $html;
     }
+
+    /**
+     * Send access link email to sponsor
+     * Allows sponsor to view their sponsorships via secure link
+     */
+    public static function sendAccessLink(string $email): bool {
+        try {
+            // Get sponsorships for this email
+            $sponsorships = Database::fetchAll(
+                "SELECT s.*, c.child_letter, f.family_number,
+                        CONCAT(f.family_number, c.child_letter) as display_id
+                 FROM sponsorships s
+                 JOIN children c ON s.child_id = c.id
+                 JOIN families f ON c.family_id = f.id
+                 WHERE s.sponsor_email = ?
+                 AND s.status = 'confirmed'
+                 ORDER BY s.confirmation_date DESC",
+                [$email]
+            );
+
+            if (empty($sponsorships)) {
+                return false; // No sponsorships found
+            }
+
+            $mailer = self::getMailer();
+
+            // Use first sponsorship's name for greeting
+            $sponsorName = $sponsorships[0]['sponsor_name'];
+            $mailer->addAddress($email, $sponsorName);
+            $mailer->Subject = 'Christmas for Kids - Access Your Sponsorships';
+
+            // Generate secure access token
+            $token = self::generateAccessToken($email);
+            $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
+
+            $mailer->Body = self::getAccessLinkTemplate($email, $sponsorName, $accessUrl, count($sponsorships));
+
+            $success = $mailer->send();
+
+            // Log the email
+            self::logEmail(
+                $email,
+                'access_link',
+                $success ? 'sent' : 'failed',
+                $sponsorships[0]['id']
+            );
+
+            return $success;
+
+        } catch (Exception $e) {
+            error_log('Failed to send access link email: ' . $e->getMessage());
+            self::logEmail(
+                $email ?? 'unknown',
+                'access_link',
+                'failed',
+                0,
+                $e->getMessage()
+            );
+            return false;
+        }
+    }
+
+    /**
+     * Generate secure access token for sponsor
+     */
+    private static function generateAccessToken(string $email): string {
+        // Create a token that expires in 24 hours
+        $data = [
+            'email' => $email,
+            'expires' => time() + (24 * 60 * 60)
+        ];
+
+        $json = json_encode($data);
+        $signature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+        return base64_encode($json . '|' . $signature);
+    }
+
+    /**
+     * Verify access token
+     */
+    public static function verifyAccessToken(string $token): ?string {
+        try {
+            $decoded = base64_decode($token);
+            list($json, $signature) = explode('|', $decoded, 2);
+
+            $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+            if (!hash_equals($expectedSignature, $signature)) {
+                return null; // Invalid signature
+            }
+
+            $data = json_decode($json, true);
+
+            if ($data['expires'] < time()) {
+                return null; // Token expired
+            }
+
+            return $data['email'];
+
+        } catch (Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get access link email template
+     */
+    private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string {
+        $html = "
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset='UTF-8'>
+            <style>
+                body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+                .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+                .header { background: linear-gradient(135deg, #2c5530 0%, #4a7c4e 100%); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+                .content { background: #f9f9f9; padding: 30px 20px; }
+                .button { display: inline-block; background: #2c5530; color: white !important; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; }
+                .button:hover { background: #1e3d21; }
+                .footer { background: #333; color: #999; padding: 20px; text-align: center; font-size: 12px; border-radius: 0 0 8px 8px; }
+                .info-box { background: #fff; border-left: 4px solid #2c5530; padding: 15px; margin: 15px 0; border-radius: 4px; }
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <div class='header'>
+                    <h1 style='margin: 0;'>🎄 Christmas for Kids</h1>
+                    <p style='margin: 10px 0 0 0; font-size: 18px;'>Access Your Sponsorships</p>
+                </div>
+
+                <div class='content'>
+                    <p>Hi " . sanitizeString($name) . ",</p>
+
+                    <p>Thank you for being part of Christmas for Kids! You requested access to view your confirmed sponsorships.</p>
+
+                    <div class='info-box'>
+                        <strong>📧 Email:</strong> " . sanitizeString($email) . "<br>
+                        <strong>🎁 Sponsorships:</strong> $childCount " . ($childCount === 1 ? 'child' : 'children') . "
+                    </div>
+
+                    <p style='text-align: center;'>
+                        <a href='$accessUrl' class='button'>View My Sponsorships</a>
+                    </p>
+
+                    <p><strong>What you'll find:</strong></p>
+                    <ul>
+                        <li>Complete details for each child you're sponsoring</li>
+                        <li>Gift wishes and clothing sizes</li>
+                        <li>Confirmation dates and child information</li>
+                        <li>Print-friendly format for shopping</li>
+                    </ul>
+
+                    <p style='background: #fff3cd; border-left: 4px solid #f5b800; padding: 10px; border-radius: 4px;'>
+                        <strong>🔒 Security:</strong> This link will expire in 24 hours. If you didn't request this, please ignore this email.
+                    </p>
+
+                    <p><strong>Need help?</strong> Contact us at " . config('admin_email') . "</p>
+
+                    <p>With gratitude,<br>
+                    <strong>The Christmas for Kids Team</strong></p>
+                </div>
+
+                <div class='footer'>
+                    <p><strong>Christmas for Kids</strong> | Making Christmas Magical for Children in Need</p>
+                    <p>📧 " . config('admin_email') . "</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+
+        return $html;
+    }
 }

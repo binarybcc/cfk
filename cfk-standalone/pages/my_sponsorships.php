@@ -12,6 +12,7 @@ if (!defined('CFK_APP')) {
 }
 
 require_once __DIR__ . '/../includes/reservation_functions.php';
+require_once __DIR__ . '/../includes/email_manager.php';
 
 $errors = [];
 $success = false;
@@ -19,7 +20,38 @@ $emailSent = false;
 $sponsorships = [];
 $lookupEmail = '';
 
-// Handle lookup form submission
+// Check for token-based access
+$token = $_GET['token'] ?? '';
+if (!empty($token)) {
+    $verifiedEmail = CFK_Email_Manager::verifyAccessToken($token);
+
+    if ($verifiedEmail) {
+        // Valid token - load sponsorships
+        $sponsorships = Database::fetchAll(
+            "SELECT s.*, c.child_letter, c.age, c.gender, c.grade, c.wishes,
+                    c.clothing_sizes, c.shoe_size, f.family_number,
+                    CONCAT(f.family_number, c.child_letter) as display_id
+             FROM sponsorships s
+             JOIN children c ON s.child_id = c.id
+             JOIN families f ON c.family_id = f.id
+             WHERE s.sponsor_email = ?
+             AND s.status = 'confirmed'
+             ORDER BY s.confirmation_date DESC",
+            [$verifiedEmail]
+        );
+
+        if (!empty($sponsorships)) {
+            $success = true;
+            $lookupEmail = $verifiedEmail;
+        } else {
+            $errors[] = 'No sponsorships found for this access link.';
+        }
+    } else {
+        $errors[] = 'This access link has expired or is invalid. Please request a new one below.';
+    }
+}
+
+// Handle email access link request
 if ($_POST && isset($_POST['lookup_email'])) {
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -33,24 +65,14 @@ if ($_POST && isset($_POST['lookup_email'])) {
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
         } else {
-            // Get sponsorships for this email
-            $sponsorships = Database::fetchAll(
-                "SELECT s.*, c.child_letter, c.age, c.gender, c.grade, c.wishes,
-                        c.clothing_sizes, c.shoe_size, f.family_number,
-                        CONCAT(f.family_number, c.child_letter) as display_id
-                 FROM sponsorships s
-                 JOIN children c ON s.child_id = c.id
-                 JOIN families f ON c.family_id = f.id
-                 WHERE s.sponsor_email = ?
-                 AND s.status = 'confirmed'
-                 ORDER BY s.confirmation_date DESC",
-                [$email]
-            );
+            // Send access link email
+            $emailSentSuccess = CFK_Email_Manager::sendAccessLink($email);
 
-            if (empty($sponsorships)) {
-                $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
-            } else {
+            if ($emailSentSuccess) {
+                $emailSent = true;
                 $success = true;
+            } else {
+                $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
             }
         }
     }
@@ -61,10 +83,10 @@ if ($_POST && isset($_POST['resend_email'])) {
     $email = sanitizeEmail($_POST['resend_to_email'] ?? '');
 
     if (!empty($email)) {
-        // TODO: Implement resend confirmation email
-        // For now, just log it
-        error_log("Resend confirmation email requested for: $email");
-        $emailSent = true;
+        $emailSentSuccess = CFK_Email_Manager::sendAccessLink($email);
+        if ($emailSentSuccess) {
+            $emailSent = true;
+        }
     }
 }
 
@@ -136,7 +158,29 @@ $pageTitle = 'My Sponsorships';
                 Already sponsored children? Enter your email to view your sponsorships.
             </p>
 
-            <?php if ($success && !empty($sponsorships)): ?>
+            <?php if ($emailSent && empty($sponsorships)): ?>
+                <!-- Email Sent Confirmation -->
+                <div class="email-sent-confirmation">
+                    <div class="alert alert-success">
+                        <h3>✓ Access Link Sent!</h3>
+                        <p>We've sent a secure access link to <strong><?php echo sanitizeString($lookupEmail); ?></strong></p>
+                        <p>Check your email and click the link to view your sponsorships.</p>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>What to do next:</h4>
+                        <ul class="feature-list">
+                            <li>Check your email inbox (and spam folder)</li>
+                            <li>Click the "View My Sponsorships" button in the email</li>
+                            <li>The link will expire in 24 hours for security</li>
+                        </ul>
+                        <div class="security-note">
+                            <strong>Didn't receive it?</strong> Check your spam folder or <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>">try again</a> with the correct email address.
+                        </div>
+                    </div>
+                </div>
+
+            <?php elseif ($success && !empty($sponsorships)): ?>
                 <!-- Sponsorship Results -->
                 <div class="sponsorships-found">
                     <div class="alert alert-success">
