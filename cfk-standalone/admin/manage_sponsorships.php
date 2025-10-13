@@ -96,10 +96,10 @@ $orderBy = match($sortBy) {
 
 // Get sponsorships
 $sponsorships = Database::fetchAll("
-    SELECT s.*, 
+    SELECT s.*,
            c.id as child_id, c.name as child_name, c.age, c.grade, c.gender, c.status as child_status,
            CONCAT(f.family_number, c.child_letter) as child_display_id,
-           f.family_name
+           f.family_number
     FROM sponsorships s
     JOIN children c ON s.child_id = c.id
     JOIN families f ON c.family_id = f.id
@@ -539,7 +539,7 @@ $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention
                 <div class="stat-label">Pending Requests</div>
             </div>
             <div class="stat-card">
-                <span class="stat-number"><?php echo $stats['sponsorships']['sponsored'] ?? 0; ?></span>
+                <span class="stat-number"><?php echo $stats['sponsorships']['confirmed'] ?? 0; ?></span>
                 <div class="stat-label">Confirmed Sponsorships</div>
             </div>
             <div class="stat-card">
