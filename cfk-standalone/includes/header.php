@@ -157,7 +157,6 @@
                             </a>
                         </li>
                         <li><a href="<?php echo baseUrl('?page=about'); ?>" <?php echo ($page ?? '') === 'about' ? 'class="active"' : ''; ?>>About</a></li>
-                        <li class="donate-link"><a href="<?php echo baseUrl('?page=donate'); ?>" class="donate-btn">Donate</a></li>
                         <li class="admin-link"><a href="<?php echo baseUrl('admin/'); ?>">Admin</a></li>
                     </ul>
                 </nav>

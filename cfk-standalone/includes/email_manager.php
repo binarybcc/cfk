@@ -28,7 +28,9 @@ class CFK_Email_Manager {
             
             // Fallback: Use basic PHP mail() function
             if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
-                return self::getFallbackMailer();
+                $fallback = self::getFallbackMailer();
+                $fallback->setFrom(config('from_email'), config('from_name'));
+                return $fallback;
             }
             
             self::$mailer = new PHPMailer\PHPMailer\PHPMailer(true);

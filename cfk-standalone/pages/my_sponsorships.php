@@ -12,7 +12,7 @@ if (!defined('CFK_APP')) {
 }
 
 require_once __DIR__ . '/../includes/reservation_functions.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+require_once __DIR__ . '/../includes/reservation_emails.php';
 
 $errors = [];
 $success = false;
@@ -20,10 +20,16 @@ $emailSent = false;
 $sponsorships = [];
 $lookupEmail = '';
 
+// Debug logging
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    error_log("MY_SPONSORSHIPS: POST request received");
+    error_log("MY_SPONSORSHIPS: POST keys: " . implode(', ', array_keys($_POST)));
+}
+
 // Check for token-based access
 $token = $_GET['token'] ?? '';
 if (!empty($token)) {
-    $verifiedEmail = CFK_Email_Manager::verifyAccessToken($token);
+    $verifiedEmail = verifyAccessToken($token);
 
     if ($verifiedEmail) {
         // Valid token - load sponsorships
@@ -53,26 +59,38 @@ if (!empty($token)) {
 
 // Handle email access link request
 if ($_POST && isset($_POST['lookup_email'])) {
+    error_log("MY_SPONSORSHIPS: Form submitted, lookup_email detected");
+    error_log("MY_SPONSORSHIPS: POST data: " . print_r($_POST, true));
+
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        error_log("MY_SPONSORSHIPS: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
+        error_log("MY_SPONSORSHIPS: CSRF token verified successfully");
         $email = sanitizeEmail($_POST['sponsor_email'] ?? '');
         $lookupEmail = $email;
+        error_log("MY_SPONSORSHIPS: Email to send to: " . $email);
 
         if (empty($email)) {
+            error_log("MY_SPONSORSHIPS: Email is empty");
             $errors[] = 'Please enter your email address.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            error_log("MY_SPONSORSHIPS: Email validation failed");
             $errors[] = 'Please enter a valid email address.';
         } else {
-            // Send access link email
-            $emailSentSuccess = CFK_Email_Manager::sendAccessLink($email);
+            error_log("MY_SPONSORSHIPS: Calling sendAccessLinkEmail()");
+            // Send access link email using the same system as reservation emails
+            $result = sendAccessLinkEmail($email);
+            error_log("MY_SPONSORSHIPS: sendAccessLinkEmail returned: " . print_r($result, true));
 
-            if ($emailSentSuccess) {
+            if ($result['success']) {
+                error_log("MY_SPONSORSHIPS: Email sent successfully");
                 $emailSent = true;
                 $success = true;
             } else {
-                $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
+                error_log("MY_SPONSORSHIPS: Email send failed: " . $result['message']);
+                $errors[] = $result['message'];
             }
         }
     }
@@ -83,8 +101,8 @@ if ($_POST && isset($_POST['resend_email'])) {
     $email = sanitizeEmail($_POST['resend_to_email'] ?? '');
 
     if (!empty($email)) {
-        $emailSentSuccess = CFK_Email_Manager::sendAccessLink($email);
-        if ($emailSentSuccess) {
+        $result = sendAccessLinkEmail($email);
+        if ($result['success']) {
             $emailSent = true;
         }
     }
@@ -286,6 +304,7 @@ $pageTitle = 'My Sponsorships';
 
                     <form method="POST" action="" class="lookup-form">
                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                        <input type="hidden" name="lookup_email" value="1">
 
                         <?php if (!empty($errors)): ?>
                             <div class="alert alert-error">
@@ -310,7 +329,7 @@ $pageTitle = 'My Sponsorships';
                             <div class="form-help">Enter the email address you used when sponsoring</div>
                         </div>
 
-                        <button type="submit" name="lookup_email" class="btn btn-large btn-primary">
+                        <button type="submit" class="btn btn-large btn-primary">
                             Send Access Link
                         </button>
                     </form>

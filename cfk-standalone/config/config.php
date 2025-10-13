@@ -47,7 +47,7 @@ $appConfig = [
     'max_pending_hours' => 48,
     
     // Email settings
-    'admin_email' => 'admin@cforkids.org',
+    'admin_email' => 'christmasforkids@upstatetoday.com',
     'from_email' => 'noreply@cforkids.org',
     'from_name' => 'Christmas for Kids',
 

@@ -359,10 +359,15 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
  * @return array ['success' => bool, 'message' => string]
  */
 function sendAccessLinkEmail(string $email): array {
+    error_log("ACCESS LINK: Function called for email: " . $email);
     try {
-        // Get sponsorships for this email
+        // Get sponsorships for this email with full child details
+        error_log("ACCESS LINK: Fetching sponsorships from database");
         $sponsorships = Database::fetchAll(
-            "SELECT s.*, c.child_letter, f.family_number,
+            "SELECT s.*,
+                    c.child_letter, c.age, c.gender, c.wishes, c.interests,
+                    c.shirt_size, c.pant_size, c.shoe_size,
+                    f.family_number,
                     CONCAT(f.family_number, c.child_letter) as display_id
              FROM sponsorships s
              JOIN children c ON s.child_id = c.id
@@ -373,33 +378,44 @@ function sendAccessLinkEmail(string $email): array {
             [$email]
         );
 
+        error_log("ACCESS LINK: Found " . count($sponsorships) . " sponsorships");
+
         if (empty($sponsorships)) {
+            error_log("ACCESS LINK: No sponsorships found");
             return [
                 'success' => false,
                 'message' => 'No confirmed sponsorships found for this email address'
             ];
         }
 
+        error_log("ACCESS LINK: Getting mailer");
         $mailer = CFK_Email_Manager::getMailer();
 
         // Clear any previous recipients
+        error_log("ACCESS LINK: Clearing addresses");
         $mailer->clearAddresses();
 
         // Set recipient
         $sponsorName = $sponsorships[0]['sponsor_name'];
+        error_log("ACCESS LINK: Adding recipient: $email ($sponsorName)");
         $mailer->addAddress($email, $sponsorName);
 
         // Set subject
         $mailer->Subject = 'Christmas for Kids - Access Your Sponsorships';
+        error_log("ACCESS LINK: Subject set");
 
         // Generate HTML email body
+        error_log("ACCESS LINK: Generating HTML body");
         $mailer->Body = generateAccessLinkHTML($email, $sponsorName, $sponsorships);
 
         // Generate plain text version
+        error_log("ACCESS LINK: Generating text body");
         $mailer->AltBody = generateAccessLinkText($email, $sponsorName, $sponsorships);
 
         // Send email
+        error_log("ACCESS LINK: Attempting to send email");
         if ($mailer->send()) {
+            error_log("ACCESS LINK: Email sent successfully");
             // Log email
             logReservationEmail(
                 $sponsorships[0]['id'],
@@ -486,8 +502,6 @@ function verifyAccessToken(string $token): ?string {
  */
 function generateAccessLinkHTML(string $email, string $name, array $sponsorships): string {
     $childCount = count($sponsorships);
-    $token = generateAccessToken($email);
-    $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
 
     $html = '
 <!DOCTYPE html>
@@ -495,7 +509,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Your Sponsorships</title>
+    <title>Your Sponsorships</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
     <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
@@ -507,7 +521,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                     <tr>
                         <td style="background: linear-gradient(135deg, #2c5530 0%, #3a6f3f 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎄 Christmas for Kids</h1>
-                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">Access Your Sponsorships</p>
+                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">Your Sponsorships</p>
                         </td>
                     </tr>
 
@@ -516,41 +530,51 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                         <td style="padding: 40px 30px;">
                             <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ' . htmlspecialchars($name) . ',</p>
 
-                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for being part of Christmas for Kids! You requested access to view your confirmed sponsorships.</p>
+                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for sponsoring ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . ' this Christmas! Below are the complete details for your sponsorships:</p>';
 
-                            <table width="100%" cellpadding="15" style="background-color: #f8f9fa; border-radius: 6px; margin: 20px 0;">
+    // Loop through each sponsorship and display details
+    foreach ($sponsorships as $index => $child) {
+        $childNum = $index + 1;
+        $html .= '
+                            <!-- Child ' . $childNum . ' -->
+                            <table width="100%" cellpadding="20" style="background-color: #f8f9fa; border-radius: 8px; margin: 20px 0; border: 2px solid #2c5530;">
                                 <tr>
                                     <td>
-                                        <p style="margin: 0; color: #2c5530;"><strong>📧 Email:</strong> ' . htmlspecialchars($email) . '</p>
-                                        <p style="margin: 10px 0 0 0; color: #2c5530;"><strong>🎁 Sponsorships:</strong> ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . '</p>
+                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars($child['display_id']) . '</h2>
+
+                                        <p style="margin: 8px 0; color: #333;"><strong>Age:</strong> ' . (int)$child['age'] . '</p>
+                                        <p style="margin: 8px 0; color: #333;"><strong>Gender:</strong> ' . ($child['gender'] === 'M' ? 'Male' : 'Female') . '</p>';
+
+        if (!empty($child['wishes'])) {
+            $html .= '
+                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">🎁 Gift Wishes:</p>
+                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['wishes']) . '</p>';
+        }
+
+        if (!empty($child['interests'])) {
+            $html .= '
+                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Interests:</p>
+                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['interests']) . '</p>';
+        }
+
+        $html .= '
+                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">👕 Clothing Sizes:</p>
+                                        <p style="margin: 5px 0; color: #333;">Shirt: ' . htmlspecialchars($child['shirt_size'] ?? 'Not specified') . '</p>
+                                        <p style="margin: 5px 0; color: #333;">Pants: ' . htmlspecialchars($child['pant_size'] ?? 'Not specified') . '</p>
+                                        <p style="margin: 5px 0; color: #333;">Shoes: ' . htmlspecialchars($child['shoe_size'] ?? 'Not specified') . '</p>
                                     </td>
                                 </tr>
-                            </table>
+                            </table>';
+    }
 
-                            <!-- CTA Button -->
-                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
-                                <tr>
-                                    <td align="center">
-                                        <a href="' . $accessUrl . '" style="display: inline-block; background-color: #2c5530; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">View My Sponsorships</a>
-                                    </td>
-                                </tr>
-                            </table>
+    $html .= '
 
-                            <p style="font-size: 16px; color: #333; margin: 20px 0;"><strong>What you\'ll find:</strong></p>
-                            <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0;">
-                                <li>Complete details for each child you\'re sponsoring</li>
-                                <li>Gift wishes and clothing sizes</li>
-                                <li>Confirmation dates and child information</li>
-                                <li>Print-friendly format for shopping</li>
+                            <p style="font-size: 16px; color: #333; margin: 30px 0 10px 0;"><strong>📋 Shopping Tips:</strong></p>
+                            <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0; padding-left: 20px;">
+                                <li>You can print this email to take shopping with you</li>
+                                <li>Gift wishes are suggestions - feel free to get creative!</li>
+                                <li>Please have gifts delivered or drop them off by the deadline</li>
                             </ul>
-
-                            <table width="100%" cellpadding="15" style="background-color: #fff3cd; border-left: 4px solid #f5b800; border-radius: 4px; margin: 20px 0;">
-                                <tr>
-                                    <td>
-                                        <p style="margin: 0; color: #856404; font-size: 14px;"><strong>🔒 Security:</strong> This link will expire in 24 hours. If you didn\'t request this, please ignore this email.</p>
-                                    </td>
-                                </tr>
-                            </table>
 
                             <p style="font-size: 16px; color: #333; margin: 20px 0 0 0;"><strong>Need help?</strong> Contact us at ' . config('admin_email') . '</p>
                         </td>
@@ -584,22 +608,41 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
  */
 function generateAccessLinkText(string $email, string $name, array $sponsorships): string {
     $childCount = count($sponsorships);
-    $token = generateAccessToken($email);
-    $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
 
-    $text = "CHRISTMAS FOR KIDS - ACCESS YOUR SPONSORSHIPS\n\n";
+    $text = "CHRISTMAS FOR KIDS - YOUR SPONSORSHIPS\n";
+    $text .= "==========================================\n\n";
     $text .= "Hi $name,\n\n";
-    $text .= "Thank you for being part of Christmas for Kids! You requested access to view your confirmed sponsorships.\n\n";
-    $text .= "Email: $email\n";
-    $text .= "Sponsorships: $childCount " . ($childCount === 1 ? 'child' : 'children') . "\n\n";
-    $text .= "VIEW YOUR SPONSORSHIPS:\n";
-    $text .= "$accessUrl\n\n";
-    $text .= "WHAT YOU'LL FIND:\n";
-    $text .= "- Complete details for each child you're sponsoring\n";
-    $text .= "- Gift wishes and clothing sizes\n";
-    $text .= "- Confirmation dates and child information\n";
-    $text .= "- Print-friendly format for shopping\n\n";
-    $text .= "SECURITY: This link will expire in 24 hours. If you didn't request this, please ignore this email.\n\n";
+    $text .= "Thank you for sponsoring $childCount " . ($childCount === 1 ? 'child' : 'children') . " this Christmas! Below are the complete details for your sponsorships:\n\n";
+
+    foreach ($sponsorships as $index => $child) {
+        $childNum = $index + 1;
+        $text .= "==========================================\n";
+        $text .= "CHILD #" . $child['display_id'] . "\n";
+        $text .= "==========================================\n\n";
+        $text .= "Age: " . $child['age'] . "\n";
+        $text .= "Gender: " . ($child['gender'] === 'M' ? 'Male' : 'Female') . "\n\n";
+
+        if (!empty($child['wishes'])) {
+            $text .= "GIFT WISHES:\n";
+            $text .= $child['wishes'] . "\n\n";
+        }
+
+        if (!empty($child['interests'])) {
+            $text .= "INTERESTS:\n";
+            $text .= $child['interests'] . "\n\n";
+        }
+
+        $text .= "CLOTHING SIZES:\n";
+        $text .= "  Shirt: " . ($child['shirt_size'] ?? 'Not specified') . "\n";
+        $text .= "  Pants: " . ($child['pant_size'] ?? 'Not specified') . "\n";
+        $text .= "  Shoes: " . ($child['shoe_size'] ?? 'Not specified') . "\n\n";
+    }
+
+    $text .= "==========================================\n\n";
+    $text .= "SHOPPING TIPS:\n";
+    $text .= "- You can print this email to take shopping with you\n";
+    $text .= "- Gift wishes are suggestions - feel free to get creative!\n";
+    $text .= "- Please have gifts delivered or drop them off by the deadline\n\n";
     $text .= "Need help? Contact us at " . config('admin_email') . "\n\n";
     $text .= "Christmas for Kids\n";
     $text .= "Bringing Christmas joy to local children in need\n";
