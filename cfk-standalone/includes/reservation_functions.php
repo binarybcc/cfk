@@ -106,7 +106,12 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
         ];
 
     } catch (Exception $e) {
-        Database::rollback();
+        // Only rollback if transaction was started
+        try {
+            Database::rollback();
+        } catch (Exception $rollbackException) {
+            // Transaction might not have been started yet, ignore
+        }
         error_log('Reservation creation error: ' . $e->getMessage());
         return [
             'success' => false,
@@ -210,7 +215,11 @@ function confirmReservation(string $token): array {
         ];
 
     } catch (Exception $e) {
-        Database::rollback();
+        try {
+            Database::rollback();
+        } catch (Exception $rollbackException) {
+            // Transaction might not have been started yet, ignore
+        }
         error_log('Reservation confirmation error: ' . $e->getMessage());
         return [
             'success' => false,
@@ -276,7 +285,11 @@ function cancelReservation(string $token): array {
         ];
 
     } catch (Exception $e) {
-        Database::rollback();
+        try {
+            Database::rollback();
+        } catch (Exception $rollbackException) {
+            // Transaction might not have been started yet, ignore
+        }
         error_log('Reservation cancellation error: ' . $e->getMessage());
         return [
             'success' => false,
@@ -342,7 +355,11 @@ function cleanupExpiredReservations(): array {
         ];
 
     } catch (Exception $e) {
-        Database::rollback();
+        try {
+            Database::rollback();
+        } catch (Exception $rollbackException) {
+            // Transaction might not have been started yet, ignore
+        }
         error_log('Cleanup expired reservations error: ' . $e->getMessage());
         return ['expired_count' => 0, 'freed_children' => 0];
     }
