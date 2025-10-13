@@ -114,7 +114,7 @@ $pageTitle = 'Confirm Your Sponsorship';
                             rows="3"
                             placeholder="Street address, City, State, ZIP"
                             class="form-textarea"></textarea>
-                        <small class="form-help">Optional - for sending thank you notes</small>
+                        <small class="form-help">Optional</small>
                     </div>
 
                     <!-- Terms Acknowledgment -->

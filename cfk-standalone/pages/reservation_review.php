@@ -32,6 +32,26 @@ $pageTitle = 'Review Your Sponsorship';
     <!-- Review Content -->
     <template x-if="dataLoaded">
         <div class="review-container">
+            <!-- Sticky Action Bar at Top -->
+            <div class="sticky-action-bar">
+                <div class="action-bar-content">
+                    <div class="summary-info">
+                        <strong class="summary-count">
+                            <span x-text="selections.length"></span>
+                            <span x-text="selections.length === 1 ? 'Child' : 'Children'"></span> Selected
+                        </strong>
+                        <p class="summary-instruction">👇 Review details below, then confirm your reservation</p>
+                    </div>
+                    <button
+                        @click="confirmReservation()"
+                        class="btn btn-success btn-large btn-prominent"
+                        :disabled="isSubmitting">
+                        <span x-show="!isSubmitting">✓ Confirm Reservation</span>
+                        <span x-show="isSubmitting">Creating Reservation...</span>
+                    </button>
+                </div>
+            </div>
+
             <!-- Children Summary -->
             <div class="review-section">
                 <h2>Selected Children (<span x-text="selections.length"></span>)</h2>
@@ -224,6 +244,76 @@ function reservationReviewApp() {
     margin-top: var(--spacing-xl);
 }
 
+/* Sticky Action Bar */
+.sticky-action-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: linear-gradient(135deg, #2c5f2d 0%, #3a7d3b 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: var(--spacing-xl);
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.action-bar-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    gap: var(--spacing-xl);
+}
+
+.summary-info {
+    flex: 1;
+}
+
+.summary-count {
+    color: white;
+    font-size: var(--font-size-2xl);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+}
+
+.summary-instruction {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: var(--font-size-md);
+    margin: 0;
+}
+
+.btn-prominent {
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-md) var(--spacing-2xl);
+    background: white;
+    color: var(--color-primary);
+    font-weight: 700;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    min-width: 250px;
+    white-space: nowrap;
+}
+
+.btn-prominent:hover:not(:disabled) {
+    background: #f8f8f8;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.btn-prominent:disabled {
+    background: #e0e0e0;
+    color: #999;
+}
+
 .review-section {
     background: var(--color-white);
     border: 2px solid var(--color-border-lighter);
@@ -344,6 +434,26 @@ function reservationReviewApp() {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    .action-bar-content {
+        flex-direction: column;
+        padding: var(--spacing-md);
+        gap: var(--spacing-md);
+        text-align: center;
+    }
+
+    .summary-count {
+        font-size: var(--font-size-xl);
+    }
+
+    .summary-instruction {
+        font-size: var(--font-size-sm);
+    }
+
+    .btn-prominent {
+        width: 100%;
+        min-width: auto;
+    }
+
     .children-review-grid {
         grid-template-columns: 1fr;
     }
