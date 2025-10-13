@@ -42,8 +42,8 @@ if ($_POST && isset($_POST['lookup_email'])) {
                  JOIN children c ON s.child_id = c.id
                  JOIN families f ON c.family_id = f.id
                  WHERE s.sponsor_email = ?
-                 AND s.status = 'active'
-                 ORDER BY s.sponsored_date DESC",
+                 AND s.status = 'confirmed'
+                 ORDER BY s.confirmation_date DESC",
                 [$email]
             );
 
@@ -153,7 +153,7 @@ $pageTitle = 'My Sponsorships';
                             <div class="sponsored-child-card">
                                 <div class="child-card-header">
                                     <h4><?php echo sanitizeString($sponsorship['display_id']); ?></h4>
-                                    <span class="status-badge status-active">Active</span>
+                                    <span class="status-badge status-confirmed">Confirmed</span>
                                 </div>
 
                                 <div class="child-info-grid">
@@ -172,8 +172,8 @@ $pageTitle = 'My Sponsorships';
                                         </div>
                                     <?php endif; ?>
                                     <div class="info-item">
-                                        <strong>Sponsored:</strong>
-                                        <span><?php echo date('M j, Y', strtotime($sponsorship['sponsored_date'])); ?></span>
+                                        <strong>Confirmed:</strong>
+                                        <span><?php echo date('M j, Y', strtotime($sponsorship['confirmation_date'])); ?></span>
                                     </div>
                                 </div>
 
@@ -593,7 +593,7 @@ function mySponsorshipsApp() {
     font-weight: 700;
 }
 
-.status-badge.status-active {
+.status-badge.status-confirmed {
     background: var(--color-success);
     color: var(--color-white);
 }

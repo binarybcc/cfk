@@ -83,10 +83,8 @@ try {
                 'sponsor_email' => $sponsorData['email'],
                 'sponsor_phone' => $sponsorData['phone'],
                 'sponsor_address' => $sponsorData['address'],
-                'sponsored_date' => gmdate('Y-m-d H:i:s'),
-                'status' => 'active',
-                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+                'confirmation_date' => gmdate('Y-m-d H:i:s'),
+                'status' => 'confirmed'
             ]);
 
             $sponsorshipIds[] = $sponsorshipId;
