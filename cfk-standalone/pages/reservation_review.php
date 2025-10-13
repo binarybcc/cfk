@@ -158,10 +158,8 @@ function reservationReviewApp() {
 
             // Validate we have data
             if (this.selections.length === 0 || !this.sponsorData.name) {
-                window.showNotification('Missing required information', 'warning');
-                setTimeout(() => {
-                    window.location.href = '<?php echo baseUrl('?page=confirm_sponsorship'); ?>';
-                }, 1500);
+                alert('Missing required information. Redirecting to form...');
+                window.location.href = '<?php echo baseUrl('?page=confirm_sponsorship'); ?>';
                 return;
             }
 
@@ -189,7 +187,7 @@ function reservationReviewApp() {
                 };
 
                 // Call API to create reservation
-                const response = await fetch('<?php echo baseUrl('api/create_reservation.php'); ?>', {
+                const response = await fetch('api/create_reservation.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -212,13 +210,13 @@ function reservationReviewApp() {
                     // Redirect to success page
                     window.location.href = '<?php echo baseUrl('?page=reservation_success'); ?>';
                 } else {
-                    window.showNotification(result.message || 'Failed to create reservation', 'error');
+                    alert('Error: ' + (result.message || 'Failed to create reservation'));
                     this.isSubmitting = false;
                 }
 
             } catch (error) {
                 console.error('Reservation error:', error);
-                window.showNotification('An error occurred. Please try again.', 'error');
+                alert('An error occurred while creating your reservation. Please try again.');
                 this.isSubmitting = false;
             }
         }
