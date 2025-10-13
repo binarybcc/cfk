@@ -92,24 +92,70 @@ try {
 
         Database::commit();
 
-        // Try to send email, but don't fail if it doesn't work
+        // Try to send confirmation email, but don't fail if it doesn't work
         $emailResult = ['success' => false];
         try {
             // Get children details for email
             $children = [];
             foreach ($childrenIds as $childId) {
-                $child = getChildById($childId);
+                $child = Database::fetchRow(
+                    "SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
+                     FROM children c
+                     JOIN families f ON c.family_id = f.id
+                     WHERE c.id = ?",
+                    [$childId]
+                );
                 if ($child) {
                     $children[] = $child;
                 }
             }
 
-            // TODO: Send confirmation email with children details
-            // For now, just log it
+            // Send simple email using PHP mail()
+            $to = $sponsorData['email'];
+            $subject = 'Christmas for Kids - Sponsorship Confirmed!';
+
+            // Build email body
+            $body = "Dear {$sponsorData['name']},\n\n";
+            $body .= "Thank you for sponsoring " . count($children) . " " . (count($children) === 1 ? 'child' : 'children') . " this Christmas!\n\n";
+            $body .= "Your Sponsored Children:\n\n";
+
+            foreach ($children as $child) {
+                $body .= "Child ID: {$child['display_id']}\n";
+                $body .= "Age: {$child['age']} years\n";
+                $body .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n";
+                if (!empty($child['grade'])) {
+                    $body .= "Grade: {$child['grade']}\n";
+                }
+                if (!empty($child['wishes'])) {
+                    $body .= "Wishes: {$child['wishes']}\n";
+                }
+                if (!empty($child['clothing_sizes'])) {
+                    $body .= "Clothing Sizes: {$child['clothing_sizes']}\n";
+                }
+                if (!empty($child['shoe_size'])) {
+                    $body .= "Shoe Size: {$child['shoe_size']}\n";
+                }
+                $body .= "\n";
+            }
+
+            $body .= "You can view your sponsorships anytime at:\n";
+            $body .= "https://cforkids.org/?page=my_sponsorships\n\n";
+            $body .= "Just enter your email address to see all your sponsored children.\n\n";
+            $body .= "Thank you for making a difference this Christmas!\n\n";
+            $body .= "- Christmas for Kids Team";
+
+            $headers = "From: Christmas for Kids <noreply@cforkids.org>\r\n";
+            $headers .= "Reply-To: info@cforkids.org\r\n";
+            $headers .= "X-Mailer: PHP/" . phpversion();
+
+            $emailSent = mail($to, $subject, $body, $headers);
+            $emailResult['success'] = $emailSent;
+
             error_log(sprintf(
-                'Sponsorship confirmed: Email=%s, Children=%d',
+                'Sponsorship confirmed: Email=%s, Children=%d, EmailSent=%s',
                 $sponsorData['email'],
-                count($childrenIds)
+                count($childrenIds),
+                $emailSent ? 'yes' : 'no'
             ));
         } catch (Throwable $emailException) {
             error_log('Email sending failed: ' . $emailException->getMessage());
