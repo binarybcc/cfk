@@ -561,3 +561,34 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
         );
     }
 }
+
+/**
+ * Format a datetime string for display
+ */
+function formatDateTime(?string $datetime): string {
+    if (empty($datetime)) {
+        return "";
+    }
+    try {
+        $dt = new DateTime($datetime);
+        return $dt->format("M j, Y g:i A");
+    } catch (Exception $e) {
+        return $datetime;
+    }
+}
+
+/**
+ * Format a date string for display
+ */
+function formatDate(?string $date): string {
+    if (empty($date)) {
+        return "";
+    }
+    try {
+        $dt = new DateTime($date);
+        return $dt->format("M j, Y");
+    } catch (Exception $e) {
+        return $date;
+    }
+}
+

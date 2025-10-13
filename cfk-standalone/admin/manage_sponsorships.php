@@ -687,7 +687,7 @@ $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention
                                             </form>
                                         <?php endif; ?>
                                         
-                                        <?php if ($sponsorship['status'] === 'sponsored'): ?>
+                                        <?php if ($sponsorship['status'] === 'confirmed'): ?>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                 <input type="hidden" name="action" value="complete">
@@ -695,8 +695,8 @@ $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention
                                                 <button type="submit" class="btn btn-primary btn-small">Mark Complete</button>
                                             </form>
                                         <?php endif; ?>
-                                        
-                                        <?php if (in_array($sponsorship['status'], ['pending', 'sponsored'])): ?>
+
+                                        <?php if (in_array($sponsorship['status'], ['pending', 'confirmed'])): ?>
                                             <button onclick="showCancelModal(<?php echo $sponsorship['id']; ?>, '<?php echo sanitizeString($sponsorship['child_display_id']); ?>', '<?php echo sanitizeString($sponsorship['sponsor_name']); ?>')" 
                                                     class="btn btn-danger btn-small">Cancel</button>
                                         <?php endif; ?>
