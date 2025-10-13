@@ -18,7 +18,7 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Get requested page
 $page = $_GET['page'] ?? 'home';
-$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply', 'selections', 'confirm_sponsorship', 'reservation_review', 'reservation_success'];
+$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply', 'my_sponsorships', 'selections', 'confirm_sponsorship', 'reservation_review', 'reservation_success'];
 
 // Redirect search to children page with search parameter (before headers are sent)
 if ($page === 'search') {
@@ -68,9 +68,13 @@ switch ($page) {
     case 'how_to_apply':
         include __DIR__ . '/pages/how_to_apply.php';
         break;
-    case 'selections':
-        include __DIR__ . '/pages/selections.php';
+    case 'my_sponsorships':
+        include __DIR__ . '/pages/my_sponsorships.php';
         break;
+    case 'selections':
+        // Redirect old selections page to new unified page
+        header('Location: ' . baseUrl('?page=my_sponsorships'));
+        exit;
     case 'confirm_sponsorship':
         include __DIR__ . '/pages/confirm_sponsorship.php';
         break;

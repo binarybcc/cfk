@@ -151,12 +151,11 @@
                         <li><a href="<?php echo baseUrl('?page=children'); ?>" <?php echo ($page ?? '') === 'children' ? 'class="active"' : ''; ?>>Children</a></li>
                         <li><a href="<?php echo baseUrl('?page=how_to_apply'); ?>" <?php echo ($page ?? '') === 'how_to_apply' ? 'class="active"' : ''; ?>>How to Apply</a></li>
                         <li class="selections-link">
-                            <a href="<?php echo baseUrl('?page=selections'); ?>" <?php echo ($page ?? '') === 'selections' ? 'class="active"' : ''; ?>>
-                                My Selections
+                            <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" <?php echo in_array($page ?? '', ['my_sponsorships', 'selections', 'sponsor_lookup', 'sponsor_portal']) ? 'class="active"' : ''; ?>>
+                                My Sponsorships
                                 <span id="selections-badge" class="selections-badge">0</span>
                             </a>
                         </li>
-                        <li><a href="<?php echo baseUrl('?page=sponsor_lookup'); ?>" <?php echo in_array($page ?? '', ['sponsor_lookup', 'sponsor_portal']) ? 'class="active"' : ''; ?>>My Sponsorships</a></li>
                         <li><a href="<?php echo baseUrl('?page=about'); ?>" <?php echo ($page ?? '') === 'about' ? 'class="active"' : ''; ?>>About</a></li>
                         <li class="donate-link"><a href="<?php echo baseUrl('?page=donate'); ?>" class="donate-btn">Donate</a></li>
                         <li class="admin-link"><a href="<?php echo baseUrl('admin/'); ?>">Admin</a></li>
