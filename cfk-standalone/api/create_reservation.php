@@ -73,7 +73,7 @@ try {
 
             // Send notification to admin
             sendAdminReservationNotification($reservation);
-        } catch (Exception $emailException) {
+        } catch (Throwable $emailException) {
             error_log('Email sending failed: ' . $emailException->getMessage());
             // Continue anyway - email failure shouldn't prevent reservation
         }
