@@ -351,3 +351,258 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
         error_log('Failed to log email: ' . $e->getMessage());
     }
 }
+
+/**
+ * Send access link email to sponsor (using same pattern as reservation emails)
+ *
+ * @param string $email Sponsor email address
+ * @return array ['success' => bool, 'message' => string]
+ */
+function sendAccessLinkEmail(string $email): array {
+    try {
+        // Get sponsorships for this email
+        $sponsorships = Database::fetchAll(
+            "SELECT s.*, c.child_letter, f.family_number,
+                    CONCAT(f.family_number, c.child_letter) as display_id
+             FROM sponsorships s
+             JOIN children c ON s.child_id = c.id
+             JOIN families f ON c.family_id = f.id
+             WHERE s.sponsor_email = ?
+             AND s.status = 'confirmed'
+             ORDER BY s.confirmation_date DESC",
+            [$email]
+        );
+
+        if (empty($sponsorships)) {
+            return [
+                'success' => false,
+                'message' => 'No confirmed sponsorships found for this email address'
+            ];
+        }
+
+        $mailer = CFK_Email_Manager::getMailer();
+
+        // Clear any previous recipients
+        $mailer->clearAddresses();
+
+        // Set recipient
+        $sponsorName = $sponsorships[0]['sponsor_name'];
+        $mailer->addAddress($email, $sponsorName);
+
+        // Set subject
+        $mailer->Subject = 'Christmas for Kids - Access Your Sponsorships';
+
+        // Generate HTML email body
+        $mailer->Body = generateAccessLinkHTML($email, $sponsorName, $sponsorships);
+
+        // Generate plain text version
+        $mailer->AltBody = generateAccessLinkText($email, $sponsorName, $sponsorships);
+
+        // Send email
+        if ($mailer->send()) {
+            // Log email
+            logReservationEmail(
+                $sponsorships[0]['id'],
+                $email,
+                'access_link',
+                'sent'
+            );
+
+            return [
+                'success' => true,
+                'message' => 'Access link email sent successfully'
+            ];
+        } else {
+            throw new Exception('Failed to send email');
+        }
+
+    } catch (Exception $e) {
+        error_log('Access link email error: ' . $e->getMessage());
+
+        // Log failed attempt
+        logReservationEmail(
+            0,
+            $email ?? 'unknown',
+            'access_link',
+            'failed',
+            $e->getMessage()
+        );
+
+        return [
+            'success' => false,
+            'message' => 'Failed to send access link email: ' . $e->getMessage()
+        ];
+    }
+}
+
+/**
+ * Generate access token for secure link
+ */
+function generateAccessToken(string $email): string {
+    $data = [
+        'email' => $email,
+        'expires' => time() + (24 * 60 * 60) // 24 hours
+    ];
+
+    $json = json_encode($data);
+    $signature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+    return base64_encode($json . '|' . $signature);
+}
+
+/**
+ * Verify access token
+ */
+function verifyAccessToken(string $token): ?string {
+    try {
+        $decoded = base64_decode($token);
+        if (!str_contains($decoded, '|')) {
+            return null;
+        }
+
+        list($json, $signature) = explode('|', $decoded, 2);
+
+        $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+        if (!hash_equals($expectedSignature, $signature)) {
+            return null;
+        }
+
+        $data = json_decode($json, true);
+
+        if ($data['expires'] < time()) {
+            return null;
+        }
+
+        return $data['email'];
+
+    } catch (Exception $e) {
+        return null;
+    }
+}
+
+/**
+ * Generate HTML email for access link
+ */
+function generateAccessLinkHTML(string $email, string $name, array $sponsorships): string {
+    $childCount = count($sponsorships);
+    $token = generateAccessToken($email);
+    $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
+
+    $html = '
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Your Sponsorships</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2c5530 0%, #3a6f3f 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
+                            <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎄 Christmas for Kids</h1>
+                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">Access Your Sponsorships</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ' . htmlspecialchars($name) . ',</p>
+
+                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for being part of Christmas for Kids! You requested access to view your confirmed sponsorships.</p>
+
+                            <table width="100%" cellpadding="15" style="background-color: #f8f9fa; border-radius: 6px; margin: 20px 0;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0; color: #2c5530;"><strong>📧 Email:</strong> ' . htmlspecialchars($email) . '</p>
+                                        <p style="margin: 10px 0 0 0; color: #2c5530;"><strong>🎁 Sponsorships:</strong> ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . '</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="' . $accessUrl . '" style="display: inline-block; background-color: #2c5530; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">View My Sponsorships</a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 16px; color: #333; margin: 20px 0;"><strong>What you\'ll find:</strong></p>
+                            <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0;">
+                                <li>Complete details for each child you\'re sponsoring</li>
+                                <li>Gift wishes and clothing sizes</li>
+                                <li>Confirmation dates and child information</li>
+                                <li>Print-friendly format for shopping</li>
+                            </ul>
+
+                            <table width="100%" cellpadding="15" style="background-color: #fff3cd; border-left: 4px solid #f5b800; border-radius: 4px; margin: 20px 0;">
+                                <tr>
+                                    <td>
+                                        <p style="margin: 0; color: #856404; font-size: 14px;"><strong>🔒 Security:</strong> This link will expire in 24 hours. If you didn\'t request this, please ignore this email.</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="font-size: 16px; color: #333; margin: 20px 0 0 0;"><strong>Need help?</strong> Contact us at ' . config('admin_email') . '</p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px; background-color: #f8f9fa; border-radius: 0 0 8px 8px; text-align: center;">
+                            <p style="color: #666; margin: 0 0 10px 0; font-size: 14px;">
+                                Questions? Contact us at <a href="mailto:' . config('admin_email') . '" style="color: #2c5530;">' . config('admin_email') . '</a>
+                            </p>
+                            <p style="color: #999; margin: 0; font-size: 12px;">
+                                Christmas for Kids • ' . config('app_version') . '<br/>
+                                Bringing Christmas joy to local children in need
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>';
+
+    return $html;
+}
+
+/**
+ * Generate plain text version of access link email
+ */
+function generateAccessLinkText(string $email, string $name, array $sponsorships): string {
+    $childCount = count($sponsorships);
+    $token = generateAccessToken($email);
+    $accessUrl = baseUrl("?page=my_sponsorships&token=$token");
+
+    $text = "CHRISTMAS FOR KIDS - ACCESS YOUR SPONSORSHIPS\n\n";
+    $text .= "Hi $name,\n\n";
+    $text .= "Thank you for being part of Christmas for Kids! You requested access to view your confirmed sponsorships.\n\n";
+    $text .= "Email: $email\n";
+    $text .= "Sponsorships: $childCount " . ($childCount === 1 ? 'child' : 'children') . "\n\n";
+    $text .= "VIEW YOUR SPONSORSHIPS:\n";
+    $text .= "$accessUrl\n\n";
+    $text .= "WHAT YOU'LL FIND:\n";
+    $text .= "- Complete details for each child you're sponsoring\n";
+    $text .= "- Gift wishes and clothing sizes\n";
+    $text .= "- Confirmation dates and child information\n";
+    $text .= "- Print-friendly format for shopping\n\n";
+    $text .= "SECURITY: This link will expire in 24 hours. If you didn't request this, please ignore this email.\n\n";
+    $text .= "Need help? Contact us at " . config('admin_email') . "\n\n";
+    $text .= "Christmas for Kids\n";
+    $text .= "Bringing Christmas joy to local children in need\n";
+
+    return $text;
+}
