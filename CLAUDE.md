@@ -94,67 +94,165 @@ find_tasks(filter_by="project", filter_value="proj-123")
 
 ## Project Overview
 
-This is a web app called"Christmas for Kids - Sponsorship System" that manages child sponsorship programs for the Christmas for Kids charity. The plugin handles child profiles, CSV imports, sponsorship tracking, and automated email communications.
+⚠️ **CRITICAL: This is a STANDALONE PHP APPLICATION, NOT a WordPress plugin!**
+
+This is a web app called "Christmas for Kids - Sponsorship System" that manages child sponsorship programs for the Christmas for Kids charity. It's a pure PHP 8.2+ application that handles:
+
+- Child profiles with avatar-based privacy system (no real photos)
+- CSV import/export for bulk data management
+- Time-limited reservation system for child selection
+- Automated email notifications for sponsors and admins
+- Complete sponsorship workflow from selection to confirmation
+- Admin dashboard with comprehensive reporting
 
 ## Architecture
 
-The plugin follows a modular component-based architecture with these core components:
+**Location**: All code is in `cfk-standalone/` directory
 
-- **Main Plugin Class** (`ChristmasForKidsPlugin`): Singleton pattern initialization and component orchestration
-- **Children Manager**: Custom post type management for child profiles
-- **CSV Importer**: Bulk import functionality for child data
-- **Sponsorship Manager**: Handles child selection, temporary reservations, and sponsor confirmations
-- **Email Manager**: Automated email notifications for sponsors and admins
-- **Admin Dashboard**: Administrative interface and reporting
-- **Frontend Display**: Public-facing sponsorship interface
+The application follows a modular component-based architecture:
+
+### Core Components
+
+- **Email Manager** (`includes/email_manager.php`): PHPMailer integration with fallback system
+- **Reservation System** (`includes/reservation_functions.php`, `includes/reservation_emails.php`): Time-limited child selection management
+- **Sponsorship Manager** (`includes/sponsorship_manager.php`): Complete sponsorship workflow
+- **CSV Handler** (`includes/csv_handler.php`): Import/export with validation
+- **Avatar Manager** (`includes/avatar_manager.php`): Privacy-focused avatar system (7 categories)
+- **Report Manager** (`includes/report_manager.php`): Admin reporting and analytics
+- **Archive Manager** (`includes/archive_manager.php`): Year-end archiving and reset
+
+### File Structure
+
+```
+cfk-standalone/
+├── index.php              # Main entry point (routing)
+├── config/
+│   ├── config.php         # Database and settings
+│   └── database.php       # PDO connection
+├── includes/              # Core functionality (see above)
+├── pages/                 # Public-facing pages
+│   ├── children.php       # Browse children
+│   ├── child.php          # Individual profile
+│   ├── selections.php     # Shopping cart
+│   ├── reservation_review.php # Confirm reservation
+│   ├── my_sponsorships.php    # Sponsor portal
+│   └── sponsor_portal.php     # Access link entry
+├── admin/                 # Admin interface
+│   ├── index.php          # Dashboard
+│   ├── manage_children.php    # Child management
+│   ├── manage_sponsorships.php # Sponsorship processing
+│   ├── import_csv.php     # Bulk import
+│   └── reports.php        # Analytics
+├── assets/
+│   ├── css/styles.css     # Main styles
+│   └── images/avatars/    # Avatar images
+├── database/
+│   └── schema.sql         # Database structure
+└── cron/
+    └── cleanup_reservations.php # Automated cleanup
+```
 
 ## Key Design Patterns
 
-- **Modern PHP 8.2+ features**: Uses typed enums, readonly classes, match expressions, and constructor property promotion
-- **Readonly DTOs**: Immutable data transfer objects for type safety (e.g., `CFK_ChildDetails`, `CFK_SponsorData`)
-- **Enums for type safety**: Status enums (`CFK_Status`, `CFK_EmailType`, `CFK_DeliveryStatus`) prevent invalid states
-- **Component initialization**: All components are loaded via the main plugin class using dependency injection
-- **Error handling**: Comprehensive error logging and graceful degradation
+- **Modern PHP 8.2+ features**: Typed properties, enums, match expressions, constructor property promotion
+- **Component-based architecture**: Each major feature is a separate component
+- **Session-based cart system**: Sponsors can select multiple children before confirming
+- **Time-limited reservations**: 2-hour window to complete sponsorship
+- **Automated cleanup**: Cron job releases expired reservations
+- **Email queueing**: Reliable delivery with logging
+- **Avatar privacy system**: 7-category age/gender-based avatars (no real photos)
+- **PDO prepared statements**: SQL injection protection
+- **CSRF protection**: Form token validation
+- **Comprehensive error handling**: Graceful degradation with logging
 
 ## Database Schema
 
-Two main tables:
+**Five main tables:**
 
-- `wp_cfk_sponsorships`: Tracks sponsorship selections, confirmations, and cancellations
-- `wp_cfk_email_log`: Logs all email communications for audit trail
+- `families`: Family groupings (family_number: 175, 176, etc.)
+- `children`: Individual child profiles with complete information
+  - Demographics, clothing sizes, interests, wishes, special needs
+  - Avatar category assignment (baby-boy, elementary-girl, etc.)
+- `sponsorships`: Confirmed sponsorships (sponsor info, status tracking)
+- `reservations`: Time-limited child selections (2-hour window)
+- `email_log`: All automated email communications with delivery status
 
 ## Development Workflow
 
-Since this is a WordPress plugin:
+**This is NOT a WordPress plugin. It's a standalone application.**
 
-1. **Testing**: Install in WordPress development environment
-2. **Activation**: Plugin creates database tables and sets default options
-3. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
-4. **Security**: Proper nonce verification and capability checks throughout
+1. **Local Testing**: Use Docker Compose or local PHP 8.2+ server
+   ```bash
+   cd cfk-standalone/
+   docker-compose up
+   # Access: http://localhost:8082
+   ```
 
-## Plugin Entry Points
+2. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
 
-- **Admin Menu**: Located under "Christmas for Kids" in WordPress admin
-- **AJAX Handlers**: Four main endpoints for child selection, confirmation, CSV import, and cancellation
-- **Cron Jobs**: Hourly cleanup of abandoned child selections
-- **Emergency Deactivation**: Available via URL parameter for debugging
+3. **Database Access**: Uses PDO with prepared statements (no WordPress wpdb)
+
+4. **Security**:
+   - Session-based authentication
+   - CSRF token validation
+   - Input sanitization
+   - SQL injection protection via PDO
+
+5. **Configuration**: Settings in `config/config.php` (no WordPress options table)
+
+## Application Entry Points
+
+### Public Pages (via `index.php` routing)
+- `/` - Homepage
+- `/children` - Browse children with search/filter
+- `/child?id=123` - Individual child profile
+- `/selections` - View shopping cart (selected children)
+- `/reservation_review` - Confirm reservation
+- `/my_sponsorships` - Sponsor portal (access via email link)
+
+### Admin Interface
+- `/admin/` - Dashboard with statistics
+- `/admin/manage_children.php` - Add/edit/delete children
+- `/admin/manage_sponsorships.php` - Process sponsorship requests
+- `/admin/import_csv.php` - Bulk import children
+- `/admin/reports.php` - Generate reports
+
+### Automated Tasks
+- Cron job: Hourly cleanup of expired reservations (`cron/cleanup_reservations.php`)
+- Email queue processing (built into email_manager.php)
 
 ## Configuration
 
-Plugin settings stored in WordPress options table with `cfk_` prefix. Key settings include:
+Settings stored in `config/config.php`:
 
-- Selection timeout (default 2 hours)
-- Admin email notifications
-- Email templates and sender information
-- Sponsorship open/closed status
+- Database credentials
+- Email settings (SMTP or PHP mail())
+- Reservation timeout (default 2 hours)
+- Admin email addresses
+- Base URL and paths
+- Avatar system configuration
+- Upload limits
 
-## File Organization
+## Current Active Branch
 
-- `cfk_main_plugin.php`: Main plugin file and initialization
-- `includes/`: Core functionality classes
-- `admin/`: Administrative interface files
+**Branch**: `v1.5-reservation-system`
+**Main branch**: `v1.0.3-rebuild`
+
+Recent work:
+- Email delivery fixes and improvements
+- Secure access link system for sponsor portal
+- Sponsorship confirmation workflow
+- Email system documentation
 
 ## Development Guidelines
+
+### Working with This Codebase
+
+1. **Remember**: This is NOT WordPress. No hooks, no shortcodes, no WP functions.
+2. **Testing**: Always test in `cfk-standalone/` directory
+3. **Database**: Use PDO, not wpdb
+4. **Sessions**: PHP sessions, not WordPress user system
+5. **Email**: PHPMailer with custom wrapper, not wp_mail()
 
 ### Claude Code Task Tool Usage
 
@@ -167,3 +265,4 @@ Plugin settings stored in WordPress options table with `cfk_` prefix. Key settin
 - Never save working files to the root directory
 - Organize documentation in appropriate subdirectories
 - Use concurrent execution patterns when possible
+- All development happens in `cfk-standalone/` directory
