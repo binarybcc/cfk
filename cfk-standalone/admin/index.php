@@ -127,7 +127,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <h3><?php echo $stats['total_families']; ?></h3>
                 <p>Families</p>
             </div>
-            <a href="manage_families.php" class="stat-link">Manage</a>
+            <a href="manage_children.php" class="stat-link">Manage</a>
         </div>
     </div>
 
@@ -135,13 +135,13 @@ include __DIR__ . '/includes/admin_header.php';
     <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="action-buttons">
-            <a href="add_child.php" class="btn btn-primary">
+            <a href="manage_children.php?action=add" class="btn btn-primary">
                 <span class="btn-icon">➕</span>
                 Add New Child
             </a>
-            <a href="add_family.php" class="btn btn-secondary">
+            <a href="manage_children.php" class="btn btn-secondary">
                 <span class="btn-icon">🏠</span>
-                Add New Family
+                Manage Children & Families
             </a>
             <a href="import_csv.php" class="btn btn-success">
                 <span class="btn-icon">📊</span>

@@ -23,7 +23,6 @@
                 <ul>
                     <li><a href="index.php" <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'class="active"' : ''; ?>>Dashboard</a></li>
                     <li><a href="manage_children.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_children.php' ? 'class="active"' : ''; ?>>Children</a></li>
-                    <li><a href="manage_families.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_families.php' ? 'class="active"' : ''; ?>>Families</a></li>
                     <li><a href="manage_sponsorships.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
                     <li><a href="reports.php" <?php echo basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
                     <?php if ($_SESSION['cfk_admin_role'] === 'admin'): ?>
