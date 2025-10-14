@@ -15,6 +15,7 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/rate_limiter.php';
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -23,15 +24,26 @@ if (isLoggedIn()) {
 }
 
 $error = '';
+$isLockedOut = false;
+$remainingTime = 0;
 
 // Handle login form submission
 if ($_POST && isset($_POST['login'])) {
     $username = sanitizeString($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     $rememberMe = isset($_POST['remember_me']);
-    
+
+    // Create rate limit identifier (username + IP)
+    $rateLimitId = $username . '_' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown');
+
+    // Check rate limiting FIRST
+    if (!RateLimiter::checkLoginAttempt($rateLimitId)) {
+        $remainingTime = ceil(RateLimiter::getRemainingLockoutTime($rateLimitId) / 60);
+        $error = "Too many failed login attempts. Please try again in $remainingTime minute(s).";
+        $isLockedOut = true;
+    }
     // Validate CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    elseif (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Security token invalid. Please try again.';
     } elseif (empty($username) || empty($password)) {
         $error = 'Username and password are required.';
@@ -41,33 +53,46 @@ if ($_POST && isset($_POST['login'])) {
             "SELECT * FROM admin_users WHERE username = ? AND role IN ('admin', 'editor')",
             [$username]
         );
-        
+
         if ($user && password_verify($password, $user['password_hash'])) {
-            // Login successful
+            // Login successful - clear rate limit
+            RateLimiter::recordSuccessfulAttempt($rateLimitId);
+
             $_SESSION['cfk_admin_id'] = $user['id'];
             $_SESSION['cfk_admin_username'] = $user['username'];
             $_SESSION['cfk_admin_role'] = $user['role'];
-            
+
             // Update last login
-            Database::update('admin_users', 
-                ['last_login' => date('Y-m-d H:i:s')], 
+            Database::update('admin_users',
+                ['last_login' => date('Y-m-d H:i:s')],
                 ['id' => $user['id']]
             );
-            
+
             // Set remember me cookie if requested
             if ($rememberMe) {
                 $token = bin2hex(random_bytes(32));
                 setcookie('cfk_remember_token', $token, time() + (30 * 24 * 60 * 60), '/', '', false, true);
-                // In production, store this token hashed in database for security
+                // TODO: Store this token hashed in database for security
             }
-            
+
             // Redirect to dashboard
             header('Location: index.php');
             exit;
         } else {
-            $error = 'Invalid username or password.';
+            // Login failed - record attempt
+            RateLimiter::recordFailedAttempt($rateLimitId);
+
+            $remainingAttempts = RateLimiter::getRemainingAttempts($rateLimitId);
+            if ($remainingAttempts > 0) {
+                $error = "Invalid username or password. You have $remainingAttempts attempt(s) remaining.";
+            } else {
+                $lockoutMinutes = ceil(RateLimiter::getLockoutTime() / 60);
+                $error = "Too many failed attempts. Account locked for $lockoutMinutes minutes.";
+                $isLockedOut = true;
+            }
+
             // Log failed login attempt
-            error_log("CFK Admin: Failed login attempt for username: $username from IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            error_log("CFK Admin: Failed login attempt for username: $username from IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . " (attempts: " . RateLimiter::getAttemptCount($rateLimitId) . ")");
         }
     }
 }

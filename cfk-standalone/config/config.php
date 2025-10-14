@@ -12,17 +12,28 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
+// Load environment variables from .env file if it exists
+if (file_exists(__DIR__ . '/../.env')) {
+    $envFile = parse_ini_file(__DIR__ . '/../.env');
+    if ($envFile) {
+        foreach ($envFile as $key => $value) {
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+        }
+    }
+}
+
 // Environment detection
 $isProduction = ($_SERVER['HTTP_HOST'] ?? 'localhost') !== 'localhost' &&
                 strpos($_SERVER['HTTP_HOST'] ?? 'localhost', '.local') === false &&
                 strpos($_SERVER['HTTP_HOST'] ?? 'localhost', ':') === false;
 
-// Database Configuration
+// Database Configuration - USE ENVIRONMENT VARIABLES
 $dbConfig = [
-    'host' => $isProduction ? 'localhost' : 'db',
-    'database' => $isProduction ? 'a4409d26_509946' : 'cfk_sponsorship_dev',
-    'username' => $isProduction ? 'a4409d26_509946' : 'root',
-    'password' => $isProduction ? 'Fests42Cue50Fennel56Auk46' : 'root'
+    'host' => getenv('DB_HOST') ?: ($isProduction ? 'localhost' : 'db'),
+    'database' => getenv('DB_NAME') ?: ($isProduction ? 'a4409d26_509946' : 'cfk_sponsorship_dev'),
+    'username' => getenv('DB_USER') ?: ($isProduction ? 'a4409d26_509946' : 'root'),
+    'password' => getenv('DB_PASSWORD') ?: ($isProduction ? '' : 'root')
 ];
 
 // Application Settings

@@ -22,6 +22,24 @@ if (!isLoggedIn()) {
     exit;
 }
 
+// Check if admin needs to change password (default password detection)
+$admin = Database::fetchRow(
+    "SELECT username, created_at, updated_at, last_login FROM admin_users WHERE id = ?",
+    [$_SESSION['cfk_admin_id']]
+);
+
+// Force password change if:
+// 1. Username is 'admin' AND
+// 2. Never logged in before (first login) OR created_at equals updated_at (password never changed)
+if ($admin && $admin['username'] === 'admin') {
+    $isFirstLogin = ($admin['last_login'] === null || $admin['created_at'] === $admin['updated_at']);
+    if ($isFirstLogin) {
+        $_SESSION['force_password_change'] = true;
+        header('Location: change_password.php');
+        exit;
+    }
+}
+
 $pageTitle = 'Admin Dashboard';
 
 // Get dashboard statistics
