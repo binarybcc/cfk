@@ -181,24 +181,92 @@ cfk-standalone/
 
 **This is NOT a WordPress plugin. It's a standalone application.**
 
-1. **Local Testing**: Use Docker Compose or local PHP 8.2+ server
+### Environment Notation System 🏷️
+
+To prevent confusion about which environment we're working in:
+
+- 🏠 **LOCAL** = Your development machine
+- 🐳 **DOCKER** = OrbStack/Docker containers (PHP 8.2)
+- 🌐 **PRODUCTION** = Live cforkids.org server
+
+Always use these markers when working on files or running commands.
+
+### Initial Setup (New Machine)
+
+1. **Clone and Checkout**
    ```bash
-   cd cfk-standalone/
-   docker-compose up
+   🏠 LOCAL:
+   git clone https://github.com/binarybcc/cfk.git
+   cd cfk/cfk-standalone
+   git checkout v1.5-reservation-system
+   ```
+
+2. **Configure Environment Variables (CRITICAL!)**
+   ```bash
+   🏠 LOCAL:
+   cp .env.example .env
+   # Edit .env with your Docker/local settings
+   chmod 600 .env
+
+   # Verify .env is NOT tracked by git
+   git status  # Should not show .env
+   ```
+
+3. **Start Docker Environment**
+   ```bash
+   🐳 DOCKER:
+   docker-compose up -d
    # Access: http://localhost:8082
    ```
 
-2. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
+4. **Run Automated Tests**
+   ```bash
+   🐳 DOCKER:
+   ./tests/security-functional-tests.sh
+   # Should show: 35/36 tests passing
+   ```
 
-3. **Database Access**: Uses PDO with prepared statements (no WordPress wpdb)
+### Daily Development Workflow
 
-4. **Security**:
+1. **Before Starting Work**
+   ```bash
+   🏠 LOCAL:
+   git pull origin v1.5-reservation-system
+   docker-compose ps  # Verify containers running
+   ```
+
+2. **During Development**
+   - Test changes in Docker before deploying
+   - Run functional tests: `./tests/security-functional-tests.sh`
+   - Check logs: `docker-compose logs web`
+
+3. **Before Committing**
+   ```bash
+   🏠 LOCAL:
+   ./tests/security-functional-tests.sh  # All tests must pass
+   git add -A
+   git commit -m "description"
+   git push origin v1.5-reservation-system
+   ```
+
+### Technical Details
+
+1. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
+
+2. **Database Access**: Uses PDO with prepared statements (no WordPress wpdb)
+
+3. **Security**:
+   - Environment variables for all secrets (.env files)
    - Session-based authentication
    - CSRF token validation
    - Input sanitization
    - SQL injection protection via PDO
+   - Rate limiting (5 attempts, 15-min lockout)
 
-5. **Configuration**: Settings in `config/config.php` (no WordPress options table)
+4. **Configuration**:
+   - Environment variables in `.env` files
+   - Application settings in `config/config.php`
+   - No WordPress options table
 
 ## Application Entry Points
 
@@ -223,9 +291,68 @@ cfk-standalone/
 
 ## Configuration
 
-Settings stored in `config/config.php`:
+### ⚠️  CRITICAL: Environment Variables (.env Files)
 
-- Database credentials
+**ALWAYS USE .env FILES FOR SENSITIVE DATA**
+
+This project uses environment variables for all sensitive configuration. **NEVER hardcode credentials in source files.**
+
+**Required Setup (Every Machine):**
+1. Copy `.env.example` to `.env`
+2. Configure your environment-specific values
+3. Set secure permissions: `chmod 600 .env`
+4. Verify `.env` is in `.gitignore` (NEVER commit!)
+
+**Local Development (.env):**
+```ini
+DB_HOST=db                        # Docker: 'db', Local: 'localhost'
+DB_NAME=cfk_sponsorship_dev
+DB_USER=cfk_user
+DB_PASSWORD=cfk_pass              # Local dev password
+
+SMTP_USERNAME=                    # Optional for local
+SMTP_PASSWORD=
+
+APP_DEBUG=true
+BASE_URL=http://localhost:8082
+```
+
+**Production Server (.env):**
+```ini
+DB_HOST=localhost
+DB_NAME=a4409d26_509946
+DB_USER=a4409d26_509946
+DB_PASSWORD=Fests42Cue50Fennel56Auk46
+
+SMTP_USERNAME=your_smtp_user
+SMTP_PASSWORD=your_smtp_pass
+
+APP_DEBUG=false
+BASE_URL=https://cforkids.org
+```
+
+**How It Works:**
+- `config/config.php` loads `.env` file at startup
+- Uses `getenv()` to read environment variables
+- Falls back to safe defaults if not set
+- Production credentials stay on server, never in git
+
+**Security Checklist:**
+- [ ] `.env` file exists with correct values
+- [ ] `.env` has 600 permissions (owner read/write only)
+- [ ] `.env` is listed in `.gitignore`
+- [ ] No hardcoded credentials in `config/config.php`
+- [ ] Production `.env` only exists on production server
+
+**Files That Use Environment Variables:**
+- `config/config.php` - Database connection, SMTP settings
+- All includes that access database
+- Email manager for SMTP credentials
+
+### Application Settings
+
+Additional settings in `config/config.php`:
+
 - Email settings (SMTP or PHP mail())
 - Reservation timeout (default 2 hours)
 - Admin email addresses
@@ -233,16 +360,27 @@ Settings stored in `config/config.php`:
 - Avatar system configuration
 - Upload limits
 
-## Current Active Branch
+## Current Active Branch & Status
 
 **Branch**: `v1.5-reservation-system`
 **Main branch**: `v1.0.3-rebuild`
+**Status**: ✅ STABLE - Ready for use
 
-Recent work:
-- Email delivery fixes and improvements
-- Secure access link system for sponsor portal
-- Sponsorship confirmation workflow
-- Email system documentation
+**For detailed status, see:** `PROJECT-STATUS.md`
+
+### Recent Major Work (Oct 13-14, 2025)
+- ✅ Security audit complete (v1.5.1)
+- ✅ Security fixes deployed (9.5/10 score)
+- ✅ Logout functionality fixed
+- ✅ Functional testing infrastructure (35/36 tests passing)
+- ✅ Environment variable system (.env files)
+- ✅ Comprehensive documentation
+
+### Critical Files to Reference
+- `PROJECT-STATUS.md` - Current project state and next steps
+- `docs/audits/v1.5.1-functional-testing-report.md` - Testing results
+- `docs/audits/v1.5.1-security-audit.md` - Security analysis
+- `tests/security-functional-tests.sh` - Automated testing
 
 ## Documentation Location
 
