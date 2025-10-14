@@ -414,7 +414,6 @@ class CFK_Email_Manager {
             if (!isset($families[$familyId])) {
                 $families[$familyId] = [
                     'family_number' => $child['family_number'],
-                    'family_name' => $child['family_name'],
                     'children' => []
                 ];
             }
@@ -470,9 +469,7 @@ class CFK_Email_Manager {
             $html .= "
                 <div class='family-section'>
                     <div class='family-header'>
-                        <h3 style='color: white; margin: 0;'>Family {$family['family_number']}" .
-                        (!empty($family['family_name']) ? " ({$family['family_name']})" : "") .
-                        "</h3>
+                        <h3 style='color: white; margin: 0;'>Family {$family['family_number']}</h3>
                     </div>";
 
             // Add each child in the family

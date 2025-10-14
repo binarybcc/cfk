@@ -105,7 +105,7 @@ if ($ageFilter !== 'all') {
 }
 
 if (!empty($searchQuery)) {
-    $whereConditions[] = "(c.name LIKE ? OR c.interests LIKE ? OR c.wishes LIKE ? OR f.family_name LIKE ?)";
+    $whereConditions[] = "(CONCAT(f.family_number, c.child_letter) LIKE ? OR c.interests LIKE ? OR c.wishes LIKE ? OR f.family_number LIKE ?)";
     $searchTerm = '%' . $searchQuery . '%';
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
@@ -823,9 +823,9 @@ function validateChildData($data): array {
                 <select id="family" name="family" onchange="document.getElementById('filterForm').submit()">
                     <option value="all" <?php echo $familyFilter === 'all' ? 'selected' : ''; ?>>All Families</option>
                     <?php foreach ($families as $family): ?>
-                        <option value="<?php echo $family['family_number']; ?>" 
+                        <option value="<?php echo $family['family_number']; ?>"
                                 <?php echo $familyFilter === $family['family_number'] ? 'selected' : ''; ?>>
-                            <?php echo $family['family_number']; ?> - <?php echo sanitizeString($family['family_name']); ?>
+                            Family <?php echo $family['family_number']; ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -911,7 +911,7 @@ function validateChildData($data): array {
                                 
                                 <div class="detail-section">
                                     <div class="detail-label">Family</div>
-                                    <div class="detail-value"><?php echo sanitizeString($child['family_name']); ?></div>
+                                    <div class="detail-value">Family <?php echo sanitizeString($child['family_number']); ?></div>
                                 </div>
                                 
                                 <?php if ($child['sponsorship_count'] > 0): ?>
@@ -1030,7 +1030,7 @@ function validateChildData($data): array {
                                 <option value="">Select Family</option>
                                 <?php foreach ($families as $family): ?>
                                     <option value="<?php echo $family['id']; ?>">
-                                        <?php echo $family['family_number']; ?> - <?php echo sanitizeString($family['family_name']); ?>
+                                        Family <?php echo $family['family_number']; ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>

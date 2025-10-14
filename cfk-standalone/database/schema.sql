@@ -39,9 +39,11 @@ CREATE TABLE children (
     
     -- Status and Metadata
     status ENUM('available', 'pending', 'sponsored', 'inactive') DEFAULT 'available',
+    reservation_id INT DEFAULT NULL, -- ID of reservation holding this child
+    reservation_expires_at TIMESTAMP NULL, -- When reservation expires
     photo_filename VARCHAR(255), -- profile photo file
     priority_level ENUM('normal', 'high', 'urgent') DEFAULT 'normal',
-    
+
     -- Timestamps
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -50,7 +52,9 @@ CREATE TABLE children (
     INDEX idx_status (status),
     INDEX idx_age (age),
     INDEX idx_family (family_id),
-    INDEX idx_gender (gender)
+    INDEX idx_gender (gender),
+    INDEX idx_reservation (reservation_id),
+    INDEX idx_reservation_expires (reservation_expires_at)
 );
 
 -- Sponsorships table - track sponsorship requests and confirmations

@@ -301,7 +301,6 @@ class CFK_CSV_Handler {
         $row['grade'] = $row['grade'] ?? '';
         $row['special_needs'] = $row['special_needs'] ?? 'None';
         $row['family_situation'] = $row['family_situation'] ?? '';
-        $row['family_name'] = $row['family_name'] ?? "Family {$row['family_id']}";
         $row['greatest_need'] = $row['greatest_need'] ?? '';
         $row['wish_list'] = $row['wish_list'] ?? '';
         $row['interests'] = $row['interests'] ?? '';
@@ -378,7 +377,6 @@ class CFK_CSV_Handler {
         try {
             $dbFamilyId = Database::insert('families', [
                 'family_number' => (string) $familyId,
-                'family_name' => $row['family_name'],
                 'notes' => $row['family_situation'] ?? ''
             ]);
             

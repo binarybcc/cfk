@@ -29,7 +29,7 @@ class CFK_Report_Manager {
                 s.request_date,
                 s.confirmation_date,
                 c.id as child_id,
-                c.name as child_name,
+                CONCAT(f.family_number, c.child_letter) as child_name,
                 c.age as child_age,
                 c.gender as child_gender,
                 c.shirt_size,
@@ -41,7 +41,6 @@ class CFK_Report_Manager {
                 c.special_needs,
                 f.id as family_id,
                 f.family_number,
-                f.family_name,
                 CONCAT(f.family_number, c.child_letter) as child_display_id
             FROM sponsorships s
             JOIN children c ON s.child_id = c.id
@@ -74,7 +73,7 @@ class CFK_Report_Manager {
             SELECT
                 c.id as child_id,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
-                c.name as child_name,
+                CONCAT(f.family_number, c.child_letter) as child_name,
                 c.age,
                 c.gender,
                 c.status as child_status,
@@ -111,7 +110,6 @@ class CFK_Report_Manager {
             SELECT
                 f.id as family_id,
                 f.family_number,
-                f.family_name,
                 COUNT(c.id) as total_children,
                 SUM(CASE WHEN c.status = 'available' THEN 1 ELSE 0 END) as available_count,
                 SUM(CASE WHEN c.status = 'pending' THEN 1 ELSE 0 END) as pending_count,
@@ -123,7 +121,7 @@ class CFK_Report_Manager {
                 ) as children_details
             FROM families f
             LEFT JOIN children c ON f.id = c.family_id
-            GROUP BY f.id, f.family_number, f.family_name
+            GROUP BY f.id, f.family_number
             ORDER BY f.family_number
         ");
     }
@@ -143,7 +141,7 @@ class CFK_Report_Manager {
                 s.confirmation_date,
                 s.completion_date,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
-                c.name as child_name,
+                CONCAT(f.family_number, c.child_letter) as child_name,
                 c.age,
                 c.gender,
                 DATEDIFF(NOW(), s.confirmation_date) as days_since_confirmed
@@ -173,7 +171,7 @@ class CFK_Report_Manager {
             SELECT
                 c.id,
                 CONCAT(f.family_number, c.child_letter) as display_id,
-                c.name,
+                CONCAT(f.family_number, c.child_letter) as name,
                 c.age,
                 c.gender,
                 c.grade,
@@ -184,7 +182,6 @@ class CFK_Report_Manager {
                 c.interests,
                 c.wishes,
                 f.family_number,
-                f.family_name,
                 (SELECT COUNT(*) FROM children c2 WHERE c2.family_id = f.id) as family_size,
                 (SELECT COUNT(*) FROM children c3 WHERE c3.family_id = f.id AND c3.status = 'available') as available_siblings
             FROM children c
@@ -252,7 +249,7 @@ class CFK_Report_Manager {
                 s.sponsor_name,
                 s.sponsor_email,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
-                c.name as child_name,
+                CONCAT(f.family_number, c.child_letter) as child_name,
                 c.age,
                 c.gender,
                 c.shirt_size,
@@ -272,6 +269,64 @@ class CFK_Report_Manager {
         ", ['email' => $sponsorEmail]);
 
         return $sponsorships;
+    }
+
+    /**
+     * Get complete children and sponsor report
+     * Includes all child information and sponsor details (if sponsored)
+     */
+    public static function getCompleteChildSponsorReport(array $filters = []): array {
+        $sql = "
+            SELECT
+                -- Child Information
+                CONCAT(f.family_number, c.child_letter) as child_id,
+                CONCAT(f.family_number, c.child_letter) as child_name,
+                c.age,
+                c.gender,
+                c.grade,
+                c.school,
+                c.shirt_size,
+                c.pant_size,
+                c.shoe_size,
+                c.jacket_size,
+                c.interests,
+                c.wishes,
+                c.special_needs,
+                c.status as child_status,
+                -- Family Information
+                f.family_number,
+                -- Sponsor Information (null if not sponsored)
+                s.sponsor_name,
+                s.sponsor_email,
+                s.sponsor_phone,
+                s.sponsor_address,
+                s.status as sponsorship_status,
+                s.request_date,
+                s.confirmation_date,
+                s.completion_date,
+                -- Sponsorship Date (prefer confirmation, fallback to request)
+                COALESCE(s.confirmation_date, s.request_date) as sponsorship_date
+            FROM children c
+            JOIN families f ON c.family_id = f.id
+            LEFT JOIN sponsorships s ON c.id = s.child_id AND s.status != 'cancelled'
+            WHERE 1=1
+        ";
+
+        $params = [];
+
+        // Apply filters
+        if (!empty($filters['status'])) {
+            $sql .= " AND c.status = :status";
+            $params['status'] = $filters['status'];
+        }
+
+        if (!empty($filters['sponsored_only'])) {
+            $sql .= " AND s.id IS NOT NULL";
+        }
+
+        $sql .= " ORDER BY f.family_number, c.child_letter";
+
+        return Database::fetchAll($sql, $params);
     }
 
     /**

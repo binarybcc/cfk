@@ -53,7 +53,7 @@ $stats = [
 
 // Get recent activity
 $recentSponsorships = Database::fetchAll("
-    SELECT s.*, c.name as child_name, 
+    SELECT s.*, CONCAT(f.family_number, c.child_letter) as child_name,
            CONCAT(f.family_number, c.child_letter) as child_display_id
     FROM sponsorships s
     JOIN children c ON s.child_id = c.id

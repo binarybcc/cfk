@@ -97,7 +97,7 @@ $orderBy = match($sortBy) {
 // Get sponsorships
 $sponsorships = Database::fetchAll("
     SELECT s.*,
-           c.id as child_id, c.name as child_name, c.age, c.grade, c.gender, c.status as child_status,
+           c.id as child_id, CONCAT(f.family_number, c.child_letter) as child_name, c.age, c.grade, c.gender, c.status as child_status,
            CONCAT(f.family_number, c.child_letter) as child_display_id,
            f.family_number
     FROM sponsorships s

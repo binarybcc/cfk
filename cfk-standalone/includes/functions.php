@@ -37,7 +37,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     // Apply filters
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
-        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
@@ -97,7 +97,7 @@ function getChildrenCount(array $filters = []): int {
     // Apply same filters as getChildren()
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
-        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
@@ -261,7 +261,7 @@ function createSponsorship(int $childId, array $sponsorData): int {
  */
 function getSponsorshipById(int $sponsorshipId): ?array {
     $sql = "
-        SELECT s.*, c.name as child_name, 
+        SELECT s.*, CONCAT(f.family_number, c.child_letter) as child_name,
                CONCAT(f.family_number, c.child_letter) as child_display_id
         FROM sponsorships s
         JOIN children c ON s.child_id = c.id

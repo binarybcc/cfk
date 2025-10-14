@@ -27,10 +27,10 @@ class CFK_Sponsorship_Manager {
      */
     public static function isChildAvailable(int $childId): array {
         $child = Database::fetchRow(
-            "SELECT c.id, c.name, c.status, 
+            "SELECT c.id, CONCAT(f.family_number, c.child_letter) as name, c.status,
                     CONCAT(f.family_number, c.child_letter) as display_id
              FROM children c
-             JOIN families f ON c.family_id = f.id  
+             JOIN families f ON c.family_id = f.id
              WHERE c.id = ?",
             [$childId]
         );
@@ -154,7 +154,7 @@ class CFK_Sponsorship_Manager {
                 // Get full sponsorship data for emails (includes ALL child details for shopping)
                 $fullSponsorship = Database::fetchRow(
                     "SELECT s.*,
-                            c.name as child_name,
+                            CONCAT(f.family_number, c.child_letter) as child_name,
                             c.age as child_age,
                             c.grade as child_grade,
                             c.gender as child_gender,
@@ -487,7 +487,7 @@ class CFK_Sponsorship_Manager {
         return Database::fetchAll(
             "SELECT s.*,
                     c.id as child_id,
-                    c.name as child_name,
+                    CONCAT(f.family_number, c.child_letter) as child_name,
                     c.age as child_age,
                     c.grade as child_grade,
                     c.gender as child_gender,
@@ -502,7 +502,6 @@ class CFK_Sponsorship_Manager {
                     c.status as child_status,
                     f.id as family_id,
                     f.family_number,
-                    f.family_name,
                     CONCAT(f.family_number, c.child_letter) as child_display_id
              FROM sponsorships s
              JOIN children c ON s.child_id = c.id
