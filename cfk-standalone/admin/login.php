@@ -153,7 +153,17 @@ if ($_POST && isset($_POST['login'])) {
             border: 1px solid #f5c6cb;
             font-weight: 500;
         }
-        
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #c3e6cb;
+            font-weight: 500;
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -258,6 +268,16 @@ if ($_POST && isset($_POST['login'])) {
         <?php if ($error): ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php
+        // Display success messages (e.g., after logout)
+        $message = getMessage();
+        if ($message && $message['type'] === 'success'):
+        ?>
+            <div class="success-message">
+                <?php echo htmlspecialchars($message['text']); ?>
             </div>
         <?php endif; ?>
 

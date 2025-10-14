@@ -777,7 +777,7 @@ function validateChildData($data): array {
             <a href="manage_sponsorships.php">Sponsorships</a>
             <a href="import_csv.php">Import CSV</a>
             <a href="../index.php" target="_blank">View Site</a>
-            <a href="login.php?logout=1">Logout</a>
+            <a href="logout.php">Logout</a>
         </nav>
     </header>
 

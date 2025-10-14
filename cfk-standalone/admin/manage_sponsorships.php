@@ -521,7 +521,7 @@ $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention
             <a href="manage_children.php">Manage Children</a>
             <a href="import_csv.php">Import CSV</a>
             <a href="../index.php" target="_blank">View Site</a>
-            <a href="login.php?logout=1">Logout</a>
+            <a href="logout.php">Logout</a>
         </nav>
     </header>
 
