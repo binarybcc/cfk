@@ -127,9 +127,8 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
 }
 
 // Initialize database
-require_once __DIR__ . '/../src/Config/Database.php';
 require_once __DIR__ . '/../includes/database_wrapper.php';
-\CFK\Config\Database::init($dbConfig);
+Database::init($dbConfig);
 
 // Helper function to get config values
 function config(string $key, $default = null) {
