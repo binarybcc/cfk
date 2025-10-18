@@ -34,13 +34,13 @@ if ($exportFormat === 'csv') {
     switch ($reportType) {
         case 'sponsor_directory':
             $data = CFK_Report_Manager::getSponsorDirectoryReport();
-            $headers = ['Sponsor Name', 'Email', 'Phone', 'Child ID', 'Child Name', 'Age', 'Status'];
+            $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
             break;
 
         case 'child_sponsor':
             $data = CFK_Report_Manager::getChildSponsorLookup();
-            $headers = ['Child ID', 'Child Name', 'Age', 'Gender', 'Sponsor Name', 'Sponsor Email', 'Status'];
+            $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
             break;
 
@@ -52,7 +52,7 @@ if ($exportFormat === 'csv') {
 
         case 'available_children':
             $data = CFK_Report_Manager::getAvailableChildrenReport();
-            $headers = ['Child ID', 'Name', 'Age', 'Gender', 'Family', 'Family Size', 'Available Siblings'];
+            $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
             break;
 
