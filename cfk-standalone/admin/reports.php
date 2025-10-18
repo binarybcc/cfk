@@ -46,14 +46,8 @@ if ($exportFormat === 'csv') {
 
         case 'family_report':
             $data = CFK_Report_Manager::getFamilySponsorshipReport();
-            $headers = ['Family Number', 'Family Name', 'Total Children', 'Available', 'Pending', 'Sponsored'];
+            $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
-            break;
-
-        case 'delivery_tracking':
-            $data = CFK_Report_Manager::getGiftDeliveryReport();
-            $headers = ['Sponsor Name', 'Email', 'Phone', 'Child ID', 'Child Name', 'Status', 'Days Since Confirmed'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'delivery-tracking-' . date('Y-m-d') . '.csv');
             break;
 
         case 'available_children':
@@ -99,9 +93,6 @@ include __DIR__ . '/includes/admin_header.php';
         </a>
         <a href="?type=family_report" class="report-nav-item <?php echo $reportType === 'family_report' ? 'active' : ''; ?>">
             👨‍👩‍👧‍👦 Family Report
-        </a>
-        <a href="?type=delivery_tracking" class="report-nav-item <?php echo $reportType === 'delivery_tracking' ? 'active' : ''; ?>">
-            🎁 Gift Delivery Tracking
         </a>
         <a href="?type=available_children" class="report-nav-item <?php echo $reportType === 'available_children' ? 'active' : ''; ?>">
             ⭐ Available Children
@@ -162,7 +153,6 @@ include __DIR__ . '/includes/admin_header.php';
                     <h3>Quick Actions</h3>
                     <a href="?type=complete_export&export=csv" class="btn btn-primary">📋 Export Complete Database</a>
                     <a href="?type=sponsor_directory&export=csv" class="btn btn-primary">Export All Sponsors</a>
-                    <a href="?type=delivery_tracking&export=csv" class="btn btn-primary">Export Delivery List</a>
                     <a href="?type=available_children&export=csv" class="btn btn-primary">Export Available Children</a>
                 </div>
             </div>
@@ -345,46 +335,6 @@ include __DIR__ . '/includes/admin_header.php';
                 </tbody>
             </table>
 
-        <?php elseif ($reportType === 'delivery_tracking'): ?>
-            <?php $deliveries = CFK_Report_Manager::getGiftDeliveryReport(); ?>
-
-            <div class="report-header">
-                <h2>Gift Delivery Tracking</h2>
-                <a href="?type=delivery_tracking&export=csv" class="btn btn-primary">Export to CSV</a>
-            </div>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Sponsor</th>
-                        <th>Contact</th>
-                        <th>Child ID</th>
-                        <th>Child Name</th>
-                        <th>Status</th>
-                        <th>Confirmed Date</th>
-                        <th>Days Waiting</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($deliveries as $delivery): ?>
-                        <tr>
-                            <td><?php echo sanitizeString($delivery['sponsor_name']); ?></td>
-                            <td>
-                                <a href="mailto:<?php echo $delivery['sponsor_email']; ?>"><?php echo $delivery['sponsor_email']; ?></a><br>
-                                <?php if ($delivery['sponsor_phone']): ?>
-                                    <?php echo sanitizeString($delivery['sponsor_phone']); ?>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo sanitizeString($delivery['child_display_id']); ?></td>
-                            <td><?php echo sanitizeString($delivery['child_name']); ?></td>
-                            <td><span class="status-badge status-<?php echo $delivery['status']; ?>"><?php echo ucfirst($delivery['status']); ?></span></td>
-                            <td><?php echo $delivery['confirmation_date'] ? date('M j, Y', strtotime($delivery['confirmation_date'])) : '-'; ?></td>
-                            <td><?php echo $delivery['days_since_confirmed'] ?? 0; ?> days</td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
         <?php elseif ($reportType === 'available_children'): ?>
             <?php
             $filters = [
@@ -431,6 +381,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php foreach ($availableChildren as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
+                            <td><?php echo sanitizeString($child['name']); ?></td>
                             <td><?php echo $child['age']; ?></td>
                             <td><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
                             <td><?php echo sanitizeString($child['grade'] ?? '-'); ?></td>

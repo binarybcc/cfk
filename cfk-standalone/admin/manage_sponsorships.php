@@ -111,428 +111,214 @@ $sponsorships = Database::fetchAll("
 $stats = CFK_Sponsorship_Manager::getStats();
 $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention();
 
+include __DIR__ . '/includes/admin_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle; ?> - Christmas for Kids</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
+<!-- Page-specific styles -->
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
 
-        .header {
-            background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
 
-        .header h1 {
-            font-size: 1.8rem;
-        }
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c5530;
+    display: block;
+}
 
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-        }
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
 
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
+.filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
 
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
-        }
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+}
 
-        .alert {
-            padding: 1rem;
-            margin-bottom: 2rem;
-            border-radius: 6px;
-            font-weight: 500;
-        }
+.filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
 
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
+.attention-section {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
 
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+.attention-section h3 {
+    color: #856404;
+    margin-bottom: 1rem;
+}
 
-        .alert-warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeaa7;
-        }
+.attention-list {
+    display: grid;
+    gap: 1rem;
+}
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
+.attention-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 
-        .stat-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+.sponsorships-table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
 
-        .stat-number {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #2c5530;
-            display: block;
-        }
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-        .stat-label {
-            color: #666;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
+.table th,
+.table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
 
-        .filters {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
+.table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
 
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
+.table tr:hover {
+    background: #f8f9fa;
+}
 
-        .filter-group label {
-            font-weight: 500;
-            color: #333;
-        }
+.child-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
 
-        .filter-group select {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
+.child-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #2c5530;
+}
 
-        .attention-section {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
+.child-details {
+    flex: 1;
+}
 
-        .attention-section h3 {
-            color: #856404;
-            margin-bottom: 1rem;
-        }
+.child-id {
+    font-weight: bold;
+    color: #2c5530;
+}
 
-        .attention-list {
-            display: grid;
-            gap: 1rem;
-        }
+.child-meta {
+    font-size: 0.9rem;
+    color: #666;
+}
 
-        .attention-item {
-            background: white;
-            padding: 1rem;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
 
-        .sponsorships-table {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+.modal-content {
+    background: white;
+    margin: 10% auto;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+.modal-header {
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
 
-        .table th,
-        .table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
+.close {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+}
 
-        .table th {
-            background: #f8f9fa;
-            font-weight: 600;
-            color: #333;
-        }
+.close:hover {
+    color: #333;
+}
 
-        .table tr:hover {
-            background: #f8f9fa;
-        }
+@media (max-width: 768px) {
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: inline-block;
-        }
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
 
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
+    .table {
+        font-size: 0.9rem;
+    }
+}
+</style>
 
-        .status-sponsored {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-completed {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-cancelled {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: background 0.2s;
-        }
-
-        .btn-primary {
-            background: #2c5530;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1e3a21;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-small {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .child-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .child-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #2c5530;
-        }
-
-        .child-details {
-            flex: 1;
-        }
-
-        .child-id {
-            font-weight: bold;
-            color: #2c5530;
-        }
-
-        .child-meta {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 10% auto;
-            padding: 2rem;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            position: relative;
-        }
-
-        .modal-header {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eee;
-        }
-
-        .close {
-            position: absolute;
-            right: 1rem;
-            top: 1rem;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #999;
-        }
-
-        .close:hover {
-            color: #333;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-        }
-
-        .form-group textarea {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .filters {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            }
-            
-            .table {
-                font-size: 0.9rem;
-            }
-            
-            .actions {
-                flex-direction: column;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>Manage Sponsorships</h1>
-        <nav class="nav-links">
-            <a href="index.php">Dashboard</a>
-            <a href="manage_children.php">Manage Children</a>
-            <a href="import_csv.php">Import CSV</a>
-            <a href="../index.php" target="_blank">View Site</a>
-            <a href="logout.php">Logout</a>
-        </nav>
-    </header>
-
-    <div class="container">
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?>">
-                <?php echo sanitizeString($message); ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Statistics -->
+<!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['sponsorships']['pending'] ?? 0; ?></span>
@@ -807,5 +593,5 @@ $childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention
             }, 60000); // Refresh every minute
         }
     </script>
-</body>
-</html>
+
+<?php include __DIR__ . '/includes/admin_footer.php'; ?>

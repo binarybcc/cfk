@@ -309,486 +309,253 @@ function validateChildData($data): array {
         'errors' => $errors
     ];
 }
+
+include __DIR__ . '/includes/admin_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle; ?> - Christmas for Kids Admin</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-
-        .header {
-            background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h1 {
-            font-size: 1.8rem;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-links a {
-            color: white;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            transition: background 0.2s;
-        }
-
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.2);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .alert {
-            padding: 1rem;
-            margin-bottom: 2rem;
-            border-radius: 6px;
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .alert-error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .top-actions {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            gap: 2rem;
-        }
-
-        .filters {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .filter-group label {
-            font-weight: 500;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .children-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .child-card {
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        .child-header {
-            background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
-            color: white;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .child-id {
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        .child-body {
-            padding: 1rem;
-        }
-
-        .child-info {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .info-label {
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 0.2rem;
-        }
-
-        .info-value {
-            font-weight: 500;
-        }
-
-        .child-details {
-            margin: 1rem 0;
-        }
-
-        .detail-section {
-            margin-bottom: 0.75rem;
-        }
-
-        .detail-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 0.2rem;
-        }
-
-        .detail-value {
-            font-size: 0.9rem;
-            line-height: 1.4;
-        }
-
-        .child-actions {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: flex-end;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-
-        .status-badge {
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            display: inline-block;
-        }
-
-        .status-available {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-sponsored {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-inactive {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            text-decoration: none;
-            display: inline-block;
-            text-align: center;
-            transition: background 0.2s;
-        }
-
-        .btn-primary {
-            background: #2c5530;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #1e3a21;
-        }
-
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background: #545b62;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-small {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-        }
-
-        .btn-large {
-            padding: 0.75rem 1.5rem;
-            font-size: 1rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 0;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 700px;
-            max-height: 80vh;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .modal-header {
-            background: #2c5530;
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-body {
-            padding: 2rem;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .close {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white;
-            background: none;
-            border: none;
-        }
-
-        .close:hover {
-            opacity: 0.7;
-        }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .form-group {
-            margin-bottom: 1rem;
-        }
-
-        .form-group-full {
-            grid-column: span 2;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
-            margin-top: 2rem;
-        }
-
-        .pagination a,
-        .pagination span {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            text-decoration: none;
-            color: #333;
-        }
-
-        .pagination a:hover {
-            background: #f8f9fa;
-        }
-
-        .pagination .current {
-            background: #2c5530;
-            color: white;
-            border-color: #2c5530;
-        }
-
-        .stats-summary {
-            background: white;
-            padding: 1rem;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            text-align: center;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #666;
-        }
-
-        .empty-state h3 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            .header {
-                padding: 1rem;
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .top-actions {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            
-            .filters {
-                grid-template-columns: 1fr;
-            }
-            
-            .children-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .form-group-full {
-                grid-column: span 1;
-            }
-            
-            .child-info {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header class="header">
-        <h1>Manage Children</h1>
-        <nav class="nav-links">
-            <a href="index.php">Dashboard</a>
-            <a href="manage_sponsorships.php">Sponsorships</a>
-            <a href="import_csv.php">Import CSV</a>
-            <a href="../index.php" target="_blank">View Site</a>
-            <a href="logout.php">Logout</a>
-        </nav>
-    </header>
-
-    <div class="container">
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?>">
-                <?php echo sanitizeString($message); ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Summary Stats -->
+
+<!-- Page-specific styles -->
+<style>
+.filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.child-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.child-header {
+    background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.child-id {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.child-body {
+    padding: 1rem;
+}
+
+.child-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.2rem;
+}
+
+.info-value {
+    font-weight: 500;
+}
+
+.child-details {
+    margin: 1rem 0;
+}
+
+.detail-section {
+    margin-bottom: 0.75rem;
+}
+
+.detail-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.2rem;
+}
+
+.detail-value {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.child-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 80vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.modal-header {
+    background: #2c5530;
+    color: white;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-body {
+    padding: 2rem;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.close {
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: white;
+    background: none;
+    border: none;
+}
+
+.close:hover {
+    opacity: 0.7;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group-full {
+    grid-column: span 2;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.stats-summary {
+    background: white;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.empty-state h3 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .children-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group-full {
+        grid-column: span 1;
+    }
+
+    .child-info {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<!-- Summary Stats -->
         <div class="stats-summary">
             <strong>Total Children: <?php echo $totalCount; ?></strong>
             <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)): ?>
@@ -1155,5 +922,5 @@ function validateChildData($data): array {
             return true;
         });
     </script>
-</body>
-</html>
+
+<?php include __DIR__ . '/includes/admin_footer.php'; ?>

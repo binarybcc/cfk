@@ -325,14 +325,11 @@ $stats = [
 // Get backup information
 $backupStats = CFK_Backup_Manager::getBackupStats();
 
+include __DIR__ . '/includes/admin_header.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $pageTitle; ?> - Christmas for Kids Admin</title>
-    <style>
+
+<!-- Page-specific styles -->
+<style>
         * {
             margin: 0;
             padding: 0;
@@ -814,27 +811,8 @@ $backupStats = CFK_Backup_Manager::getBackupStats();
             }
         }
     </style>
-</head>
-<body>
-    <header class="header">
-        <h1>Import Children from CSV</h1>
-        <nav class="nav-links">
-            <a href="index.php">Dashboard</a>
-            <a href="manage_children.php">Manage Children</a>
-            <a href="manage_sponsorships.php">Sponsorships</a>
-            <a href="../index.php" target="_blank">View Site</a>
-            <a href="logout.php">Logout</a>
-        </nav>
-    </header>
 
-    <div class="container">
-        <?php if ($message): ?>
-            <div class="alert alert-<?php echo $messageType; ?>">
-                <?php echo sanitizeString($message); ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Current Statistics -->
+<!-- Current Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['total_children']; ?></span>
@@ -1390,5 +1368,5 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
         `;
         document.head.appendChild(style);
     </script>
-</body>
-</html>
+
+<?php include __DIR__ . '/includes/admin_footer.php'; ?>

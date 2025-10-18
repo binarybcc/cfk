@@ -46,11 +46,18 @@
 
     <main class="admin-content">
         <?php
-        // Display messages
-        $message = getMessage();
-        if ($message): ?>
-            <div class="alert alert-<?php echo $message['type']; ?>">
-                <?php echo sanitizeString($message['text']); ?>
+        // Display messages - support both session-based and direct variable approaches
+        $displayMessage = getMessage(); // Check session first
+        if (!$displayMessage && isset($message) && !empty($message)) {
+            // Fallback to direct variables (for pages not using session-based messaging)
+            $displayMessage = [
+                'text' => $message,
+                'type' => $messageType ?? 'success'
+            ];
+        }
+        if ($displayMessage): ?>
+            <div class="alert alert-<?php echo $displayMessage['type']; ?>">
+                <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
         <?php endif; ?>
 
