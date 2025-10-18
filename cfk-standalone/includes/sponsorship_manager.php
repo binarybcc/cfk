@@ -19,8 +19,8 @@ class CFK_Sponsorship_Manager {
     const STATUS_SPONSORED = 'confirmed';  // Match database enum
     const STATUS_COMPLETED = 'completed';
     const STATUS_INACTIVE = 'inactive';
-    
-    const PENDING_TIMEOUT_HOURS = 48; // Hours before pending expires
+
+    const PENDING_TIMEOUT_HOURS = 2; // Hours before pending expires (shopping cart timeout)
     
     /**
      * Check if a child is available for sponsorship

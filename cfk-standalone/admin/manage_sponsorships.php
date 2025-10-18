@@ -36,14 +36,8 @@ if ($_POST) {
     } else {
         $action = $_POST['action'] ?? '';
         $sponsorshipId = sanitizeInt($_POST['sponsorship_id'] ?? 0);
-        
+
         switch ($action) {
-            case 'confirm':
-                $result = CFK_Sponsorship_Manager::confirmSponsorship($sponsorshipId);
-                $message = $result['message'];
-                $messageType = $result['success'] ? 'success' : 'error';
-                break;
-                
             case 'complete':
                 $result = CFK_Sponsorship_Manager::completeSponsorship($sponsorshipId);
                 $message = $result['message'];
@@ -321,20 +315,20 @@ include __DIR__ . '/includes/admin_header.php';
 <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card">
-                <span class="stat-number"><?php echo $stats['sponsorships']['pending'] ?? 0; ?></span>
-                <div class="stat-label">Pending Requests</div>
-            </div>
-            <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['sponsorships']['confirmed'] ?? 0; ?></span>
-                <div class="stat-label">Confirmed Sponsorships</div>
+                <div class="stat-label">Active Sponsorships</div>
             </div>
             <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['sponsorships']['completed'] ?? 0; ?></span>
-                <div class="stat-label">Completed</div>
+                <div class="stat-label">Gifts Delivered</div>
             </div>
             <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['children']['available'] ?? 0; ?></span>
                 <div class="stat-label">Available Children</div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-number"><?php echo ($stats['sponsorships']['confirmed'] ?? 0) + ($stats['sponsorships']['completed'] ?? 0); ?></span>
+                <div class="stat-label">Total Sponsored</div>
             </div>
         </div>
 
@@ -464,15 +458,6 @@ include __DIR__ . '/includes/admin_header.php';
                                 </td>
                                 <td>
                                     <div class="actions">
-                                        <?php if ($sponsorship['status'] === 'pending'): ?>
-                                            <form method="POST" style="display: inline;">
-                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                                <input type="hidden" name="action" value="confirm">
-                                                <input type="hidden" name="sponsorship_id" value="<?php echo $sponsorship['id']; ?>">
-                                                <button type="submit" class="btn btn-success btn-small">Confirm</button>
-                                            </form>
-                                        <?php endif; ?>
-                                        
                                         <?php if ($sponsorship['status'] === 'confirmed'): ?>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">

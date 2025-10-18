@@ -143,24 +143,18 @@ function generateReservationConfirmationHTML(array $reservation): string {
                         </td>
                     </tr>
 
-                    <!-- Important Dates -->
+                    <!-- Sponsorship Confirmed -->
                     <tr>
                         <td style="padding: 30px;">
-                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">⏰ Important Dates</h2>
-                            <table width="100%" cellpadding="10" style="background-color: #f8f9fa; border-radius: 6px;">
-                                <tr>
-                                    <td style="color: #2c5530; font-weight: bold; padding: 10px 15px;">Created:</td>
-                                    <td style="color: #666; padding: 10px 15px;">' . $createdAt->format('F j, Y g:i A') . '</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #2c5530; font-weight: bold; padding: 10px 15px; border-top: 1px solid #dee2e6;">Expires:</td>
-                                    <td style="color: #c41e3a; font-weight: bold; padding: 10px 15px; border-top: 1px solid #dee2e6;">' . $expiresAt->format('F j, Y g:i A') . '</td>
-                                </tr>
-                                <tr>
-                                    <td style="color: #2c5530; font-weight: bold; padding: 10px 15px; border-top: 1px solid #dee2e6;">Valid For:</td>
-                                    <td style="color: #666; padding: 10px 15px; border-top: 1px solid #dee2e6;">48 hours</td>
-                                </tr>
-                            </table>
+                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">✅ Sponsorship Confirmed</h2>
+                            <div style="background-color: #d4edda; border: 2px solid #28a745; border-radius: 6px; padding: 20px;">
+                                <p style="color: #155724; margin: 0; font-size: 16px; line-height: 1.6;">
+                                    <strong>Your sponsorship is now confirmed!</strong><br/>
+                                    These children are reserved for you. Only Christmas for Kids admin can cancel this sponsorship.<br/>
+                                    <br/>
+                                    <strong>Confirmation Date:</strong> ' . $createdAt->format('F j, Y g:i A') . '
+                                </p>
+                            </div>
                         </td>
                     </tr>
 
@@ -248,10 +242,10 @@ function generateReservationConfirmationHTML(array $reservation): string {
                         <td style="padding: 30px;">
                             <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">📋 What Happens Next?</h2>
                             <ol style="color: #666; line-height: 1.8; padding-left: 20px;">
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Shop for Gifts</strong><br/>You have 48 hours to purchase gifts based on each child\'s wishes and sizes listed above.</li>
+                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Your Sponsorship is Confirmed!</strong><br/>You\'ve successfully sponsored ' . count($children) . ' ' . (count($children) === 1 ? 'child' : 'children') . '. No further approval is needed.</li>
+                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Shop for Gifts</strong><br/>Purchase gifts based on each child\'s wishes and sizes listed above.</li>
                                 <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Wrap the Gifts</strong><br/>Please wrap each child\'s gifts separately and clearly label with their ID.</li>
                                 <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Deliver or Ship</strong><br/>Contact us at <a href="mailto:' . config('admin_email') . '" style="color: #2c5530;">' . config('admin_email') . '</a> for delivery instructions.</li>
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Make a Difference!</strong><br/>Your generosity will bring joy to ' . count($children) . ' ' . (count($children) === 1 ? 'child' : 'children') . ' this Christmas!</li>
                             </ol>
                         </td>
                     </tr>
@@ -288,11 +282,12 @@ function generateReservationConfirmationText(array $reservation): string {
     $text .= "Thank you for sponsoring " . count($children) . " " . (count($children) === 1 ? 'child' : 'children') . " this Christmas!\n\n";
     $text .= "YOUR RESERVATION TOKEN\n";
     $text .= "Token: " . $reservation['reservation_token'] . "\n";
-    $text .= "Save this token! You'll need it to track your reservation.\n\n";
-    $text .= "IMPORTANT DATES\n";
-    $text .= "Created: " . date('F j, Y g:i A', strtotime($reservation['created_at'])) . "\n";
-    $text .= "Expires: " . date('F j, Y g:i A', strtotime($reservation['expires_at'])) . "\n";
-    $text .= "Valid For: 48 hours\n\n";
+    $text .= "Save this token! You'll need it to track your sponsorship.\n\n";
+    $text .= "SPONSORSHIP CONFIRMED\n";
+    $text .= "Your sponsorship is now confirmed!\n";
+    $text .= "These children are reserved for you.\n";
+    $text .= "Only Christmas for Kids admin can cancel this sponsorship.\n";
+    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime($reservation['created_at'])) . "\n\n";
     $text .= "YOUR SPONSORED CHILDREN (" . count($children) . ")\n";
     $text .= str_repeat('-', 50) . "\n\n";
 
@@ -310,10 +305,10 @@ function generateReservationConfirmationText(array $reservation): string {
     }
 
     $text .= "WHAT HAPPENS NEXT?\n";
-    $text .= "1. Shop for gifts based on each child's wishes and sizes\n";
-    $text .= "2. Wrap gifts separately and label with child ID\n";
-    $text .= "3. Contact us for delivery instructions: " . config('admin_email') . "\n";
-    $text .= "4. Make a difference in " . count($children) . " " . (count($children) === 1 ? "child's" : "children's") . " Christmas!\n\n";
+    $text .= "1. Your sponsorship is confirmed! No further approval needed.\n";
+    $text .= "2. Shop for gifts based on each child's wishes and sizes\n";
+    $text .= "3. Wrap gifts separately and label with child ID\n";
+    $text .= "4. Contact us for delivery instructions: " . config('admin_email') . "\n\n";
     $text .= "Questions? Contact us at " . config('admin_email') . "\n";
 
     return $text;
