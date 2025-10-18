@@ -184,8 +184,14 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
 
             <div class="sponsor-directory">
-                <?php foreach ($groupedSponsors as $sponsor): ?>
-                    <div class="sponsor-card">
+                <?php if (empty($groupedSponsors)): ?>
+                    <div class="empty-state">
+                        <h3>No Sponsors Found</h3>
+                        <p>There are currently no sponsorships in the system.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($groupedSponsors as $sponsor): ?>
+                        <div class="sponsor-card">
                         <div class="sponsor-info">
                             <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
@@ -229,7 +235,8 @@ include __DIR__ . '/includes/admin_header.php';
                             </table>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
 
         <?php elseif ($reportType === 'child_sponsor'): ?>
@@ -250,20 +257,26 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Child ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Status</th>
-                        <th>Sponsor</th>
-                        <th>Contact</th>
-                        <th>Sponsorship Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($children as $child): ?>
+            <?php if (empty($children)): ?>
+                <div class="empty-state">
+                    <h3>No Children Found</h3>
+                    <p><?php echo $searchTerm ? 'No children match your search criteria.' : 'There are currently no children in the system.'; ?></p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Child ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Status</th>
+                            <th>Sponsor</th>
+                            <th>Contact</th>
+                            <th>Sponsorship Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($children as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                             <td><?php echo sanitizeString($child['child_name']); ?></td>
@@ -293,6 +306,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
 
         <?php elseif ($reportType === 'family_report'): ?>
             <?php $families = CFK_Report_Manager::getFamilySponsorshipReport(); ?>
@@ -302,19 +316,25 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=family_report&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Family #</th>
-                        <th>Total Children</th>
-                        <th>Available</th>
-                        <th>Pending</th>
-                        <th>Sponsored</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($families as $family): ?>
+            <?php if (empty($families)): ?>
+                <div class="empty-state">
+                    <h3>No Families Found</h3>
+                    <p>There are currently no families in the system.</p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Family #</th>
+                            <th>Total Children</th>
+                            <th>Available</th>
+                            <th>Pending</th>
+                            <th>Sponsored</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($families as $family): ?>
                         <tr>
                             <td><?php echo sanitizeString($family['family_number']); ?></td>
                             <td><?php echo $family['total_children']; ?></td>
@@ -334,6 +354,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
 
         <?php elseif ($reportType === 'available_children'): ?>
             <?php
@@ -364,21 +385,27 @@ include __DIR__ . '/includes/admin_header.php';
                 </form>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Child ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Grade</th>
-                        <th>Family</th>
-                        <th>Siblings</th>
-                        <th>Wishes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($availableChildren as $child): ?>
+            <?php if (empty($availableChildren)): ?>
+                <div class="empty-state">
+                    <h3>No Available Children</h3>
+                    <p>There are currently no children available for sponsorship.</p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Child ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Grade</th>
+                            <th>Family</th>
+                            <th>Siblings</th>
+                            <th>Wishes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($availableChildren as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
                             <td><?php echo sanitizeString($child['name']); ?></td>
@@ -392,6 +419,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
 
         <?php elseif ($reportType === 'complete_export'): ?>
             <?php
@@ -710,6 +738,25 @@ include __DIR__ . '/includes/admin_header.php';
 
 .btn-secondary:hover {
     background: #545b62;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: #999;
+    font-size: 1rem;
 }
 </style>
 

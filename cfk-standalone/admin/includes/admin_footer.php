@@ -10,9 +10,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="<?php echo baseUrl('assets/js/admin.js'); ?>"></script>
-    
+    <!-- JavaScript (inline - no external admin.js needed) -->
     <script>
         // Simple confirmation for delete actions
         document.addEventListener('DOMContentLoaded', function() {
