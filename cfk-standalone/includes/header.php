@@ -21,6 +21,9 @@
     <!-- Selections System v1.5 -->
     <script src="<?php echo baseUrl('assets/js/selections.js'); ?>"></script>
 
+    <!-- Safari Keyboard Navigation Helper -->
+    <script src="<?php echo baseUrl('assets/js/safari-keyboard-helper.js'); ?>"></script>
+
     <style>
         /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
         [x-cloak] {

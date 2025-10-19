@@ -4084,6 +4084,161 @@ tr:hover {
     outline: none;
 }
 
+/* ========================================
+   SAFARI-SPECIFIC ACCESSIBILITY FIXES
+   Ensures keyboard navigation works in Safari on macOS and iOS
+   ======================================== */
+
+/* Force focus visibility in Safari */
+a, button, input, select, textarea, [tabindex] {
+    -webkit-tap-highlight-color: rgba(255, 193, 7, 0.3);
+}
+
+/* Safari: Ensure all interactive elements show focus */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[role="button"]:focus,
+[tabindex="0"]:focus,
+.btn:focus {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+    /* Safari-specific webkit outline */
+    -webkit-focus-ring-color: var(--color-warning);
+}
+
+/* Safari: Force outline on all focusable elements */
+*:focus {
+    outline-width: 3px;
+    outline-style: solid;
+    outline-color: var(--color-warning);
+}
+
+/* Remove default Safari outline, replace with custom */
+*:focus:not(:focus-visible) {
+    /* For Safari that supports :focus-visible, only show on keyboard */
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+}
+
+/* Safari: Ensure skip link is keyboard accessible */
+.skip-link {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.skip-link:focus {
+    top: 0 !important;
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+    z-index: 99999 !important;
+}
+
+/* Safari: Ensure buttons are keyboard accessible */
+button,
+.btn,
+[role="button"] {
+    -webkit-appearance: button;
+    cursor: pointer;
+}
+
+button:focus,
+.btn:focus,
+[role="button"]:focus {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 3px !important;
+}
+
+/* iOS Safari: Larger touch targets (minimum 44x44px) */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific styles */
+    .btn,
+    button,
+    a.btn,
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 24px;
+    }
+
+    /* Ensure text inputs are at least 16px to prevent zoom */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+
+    /* Improve tap targets for links */
+    a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 0;
+    }
+
+    /* Navigation links need sufficient tap area */
+    .main-nav a {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+}
+
+/* Safari on macOS: Ensure form controls are keyboard accessible */
+@media not all and (pointer: coarse) {
+    /* Desktop Safari */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    input[type="password"],
+    textarea,
+    select {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid var(--color-primary) !important;
+        outline-offset: 2px !important;
+        border-color: var(--color-primary);
+    }
+}
+
+/* Safari: Ensure disabled elements are not focusable */
+button:disabled,
+.btn:disabled,
+[disabled],
+[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Safari: High contrast mode support */
+@media (prefers-contrast: high) {
+    *:focus,
+    *:focus-visible {
+        outline-width: 4px !important;
+        outline-color: #000 !important;
+        background-color: #ff0 !important;
+        color: #000 !important;
+    }
+}
+
 @media (prefers-contrast: high) {
     .hero {
         background: var(--color-black);
