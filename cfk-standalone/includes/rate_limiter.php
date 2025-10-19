@@ -86,8 +86,9 @@ class RateLimiter {
             return false;
         } catch (Exception $e) {
             error_log('Email rate limit check failed: ' . $e->getMessage());
-            // On error, allow the request (fail open)
-            return false;
+            // On error, deny the request (fail closed for security)
+            // Better to block legitimate requests during DB issues than allow attacks
+            return true;
         }
     }
 
@@ -138,8 +139,9 @@ class RateLimiter {
             return false;
         } catch (Exception $e) {
             error_log('IP rate limit check failed: ' . $e->getMessage());
-            // On error, allow the request (fail open)
-            return false;
+            // On error, deny the request (fail closed for security)
+            // Better to block legitimate requests during DB issues than allow attacks
+            return true;
         }
     }
 

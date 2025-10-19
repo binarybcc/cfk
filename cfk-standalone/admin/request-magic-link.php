@@ -16,6 +16,9 @@ require_once __DIR__ . '/../includes/magic_link_email_template.php';
 
 header('Content-Type: application/json');
 
+// Track execution time to prevent timing attacks (email enumeration)
+$startTime = microtime(true);
+
 try {
     // Only accept POST requests
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -47,6 +50,9 @@ try {
             'email' => $email
         ]);
 
+        // Ensure constant-time response before returning
+        ensureConstantTime($startTime);
+
         // Return generic response (don't reveal rate limiting)
         echo json_encode([
             'success' => true,
@@ -59,55 +65,65 @@ try {
     $adminSql = "SELECT id, email FROM admin_users WHERE email = :email LIMIT 1";
     $adminUser = Database::fetchRow($adminSql, ['email' => $email]);
 
-    // CRITICAL: Generic response regardless of whether email exists (prevent enumeration)
-    if (!$adminUser) {
-        MagicLinkManager::logEvent(null, 'magic_link_requested_nonexistent_email', $ipAddress, $userAgent, 'success', [
-            'email' => $email
-        ]);
-
-        echo json_encode([
-            'success' => true,
-            'message' => 'If your email is registered, you will receive a magic link'
-        ]);
-        exit;
-    }
-
-    // Generate magic link token
-    $token = MagicLinkManager::createMagicLink($email, $ipAddress, $userAgent);
-
-    // Build login URL
+    // ALWAYS generate token and prepare email (prevents timing attacks)
+    // Only send if admin exists, but preparation happens regardless
+    $token = MagicLinkManager::generateToken();
     $loginUrl = baseUrl('admin/verify-magic-link.php?token=' . urlencode($token));
     $expirationMinutes = MagicLinkManager::getExpirationMinutes();
-
-    // Prepare email content
     $htmlContent = MagicLinkEmailTemplate::getHtmlTemplate($loginUrl, $expirationMinutes);
     $textContent = MagicLinkEmailTemplate::getPlainTextTemplate($loginUrl, $expirationMinutes);
 
-    // Send email
-    $emailManager = new EmailManager();
-    $subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
+    // CRITICAL: Only store token and send email if admin exists
+    // But preparation time is identical regardless
+    if ($adminUser) {
+        // Store the token in database (only for valid admins)
+        $tokenHash = MagicLinkManager::hashToken($token);
+        $expiresAt = date('Y-m-d H:i:s', time() + ($expirationMinutes * 60));
 
-    $sent = $emailManager->send(
-        to: $email,
-        subject: $subject,
-        htmlContent: $htmlContent,
-        textContent: $textContent
-    );
+        $sql = "
+            INSERT INTO admin_magic_links (token_hash, email, expires_at, ip_address, user_agent)
+            VALUES (:token_hash, :email, :expires_at, :ip_address, :user_agent)
+        ";
 
-    if (!$sent) {
-        MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
-            'email' => $email
+        Database::execute($sql, [
+            'token_hash' => $tokenHash,
+            'email' => $email,
+            'expires_at' => $expiresAt,
+            'ip_address' => $ipAddress,
+            'user_agent' => $userAgent
         ]);
 
-        throw new Exception('Failed to send magic link email');
+        // Send email (only for valid admins)
+        $emailManager = new EmailManager();
+        $subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
+
+        $sent = $emailManager->send(
+            to: $email,
+            subject: $subject,
+            htmlContent: $htmlContent,
+            textContent: $textContent
+        );
+
+        if (!$sent) {
+            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
+                'email' => $email
+            ]);
+        } else {
+            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_sent', $ipAddress, $userAgent, 'success', [
+                'email' => $email
+            ]);
+        }
+    } else {
+        // Log non-existent email attempt (for security monitoring)
+        MagicLinkManager::logEvent(null, 'magic_link_requested_nonexistent_email', $ipAddress, $userAgent, 'success', [
+            'email' => $email
+        ]);
     }
 
-    // Log successful magic link request
-    MagicLinkManager::logEvent($adminUser['id'], 'magic_link_sent', $ipAddress, $userAgent, 'success', [
-        'email' => $email
-    ]);
+    // Ensure constant-time response regardless of email validity
+    ensureConstantTime($startTime);
 
-    // Return success response (generic)
+    // CRITICAL: Generic response regardless of whether email exists (prevent enumeration)
     echo json_encode([
         'success' => true,
         'message' => 'If your email is registered, you will receive a magic link'
@@ -116,10 +132,27 @@ try {
 } catch (Exception $e) {
     error_log('Magic link request error: ' . $e->getMessage());
 
+    // Ensure constant-time even on error
+    ensureConstantTime($startTime);
+
     // Return generic error response
     http_response_code(400);
     echo json_encode([
         'success' => false,
         'message' => config('debug') ? $e->getMessage() : 'Unable to process request'
     ]);
+}
+
+/**
+ * Ensure constant-time response to prevent timing attacks
+ * Minimum execution time: 800ms (typical email send time)
+ */
+function ensureConstantTime(float $startTime): void {
+    $executionTimeMs = (microtime(true) - $startTime) * 1000;
+    $targetTimeMs = 800; // Target 800ms minimum (typical for SMTP send)
+
+    if ($executionTimeMs < $targetTimeMs) {
+        $sleepMs = (int)($targetTimeMs - $executionTimeMs);
+        usleep($sleepMs * 1000); // Convert to microseconds
+    }
 }

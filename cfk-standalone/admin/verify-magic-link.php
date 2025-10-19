@@ -146,16 +146,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // Delete token immediately (single-use enforcement)
-        MagicLinkManager::consumeToken($tokenData['id']);
+        // Token already deleted in validateToken() to prevent race conditions
+        // No need to call consumeToken() here
 
         // Regenerate session ID (prevent session fixation attacks)
         session_regenerate_id(true);
-
-        // Set secure session cookies
-        ini_set('session.cookie_httponly', '1');
-        ini_set('session.cookie_secure', '1');
-        ini_set('session.cookie_samesite', 'Strict');
 
         // Create admin session
         $_SESSION['admin_id'] = $adminUser['id'];

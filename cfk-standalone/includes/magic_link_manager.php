@@ -74,11 +74,18 @@ class MagicLinkManager {
     /**
      * Validate a magic link token
      * Uses constant-time comparison to prevent timing attacks
+     * Uses row-level locking to prevent race conditions
      */
     public static function validateToken(string $token): ?array {
+        $db = Database::getConnection();
+
         try {
+            // Start transaction for atomic validation + deletion
+            $db->beginTransaction();
+
             $tokenHash = self::hashToken($token);
 
+            // Use FOR UPDATE to acquire row-level lock (prevents concurrent validation)
             $sql = "
                 SELECT aml.*, au.id as admin_user_id, au.email as admin_email
                 FROM admin_magic_links aml
@@ -86,11 +93,13 @@ class MagicLinkManager {
                 WHERE aml.token_hash = :token_hash
                 AND aml.expires_at > NOW()
                 LIMIT 1
+                FOR UPDATE
             ";
 
             $result = Database::fetchRow($sql, ['token_hash' => $tokenHash]);
 
             if (!$result) {
+                $db->rollback();
                 self::logEvent(null, 'magic_link_validation_failed', $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'failed', [
                     'reason' => 'token_not_found_or_expired'
                 ]);
@@ -99,14 +108,25 @@ class MagicLinkManager {
 
             // Use hash_equals for constant-time comparison (prevent timing attacks)
             if (!hash_equals($result['token_hash'], $tokenHash)) {
+                $db->rollback();
                 self::logEvent(null, 'magic_link_validation_failed', $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'failed', [
                     'reason' => 'token_mismatch'
                 ]);
                 return null;
             }
 
+            // Delete token immediately while still holding lock (single-use enforcement)
+            $deleteSql = "DELETE FROM admin_magic_links WHERE id = :id";
+            Database::execute($deleteSql, ['id' => $result['id']]);
+
+            // Commit transaction - releases lock
+            $db->commit();
+
             return $result;
         } catch (Exception $e) {
+            if ($db->inTransaction()) {
+                $db->rollback();
+            }
             error_log('Token validation error: ' . $e->getMessage());
             return null;
         }
@@ -114,20 +134,15 @@ class MagicLinkManager {
 
     /**
      * Mark token as used and delete it
+     * NOTE: This method is now deprecated as token deletion happens in validateToken()
+     * to prevent race conditions. Kept for backward compatibility.
      */
     public static function consumeToken(int $tokenId): bool {
         try {
-            // Use transaction to prevent race conditions
-            $db = Database::getConnection();
-            $db->beginTransaction();
-
             $sql = "DELETE FROM admin_magic_links WHERE id = :id";
             Database::execute($sql, ['id' => $tokenId]);
-
-            $db->commit();
             return true;
         } catch (Exception $e) {
-            $db->rollback();
             error_log('Token consumption failed: ' . $e->getMessage());
             return false;
         }
