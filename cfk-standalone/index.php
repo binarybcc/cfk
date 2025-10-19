@@ -18,7 +18,7 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Get requested page
 $page = $_GET['page'] ?? 'home';
-$validPages = ['home', 'children', 'child', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply', 'my_sponsorships', 'selections', 'confirm_sponsorship', 'reservation_review', 'reservation_success'];
+$validPages = ['home', 'children', 'child', 'family', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply', 'my_sponsorships', 'selections', 'confirm_sponsorship', 'reservation_review', 'reservation_success'];
 
 // Redirect search to children page with search parameter (before headers are sent)
 if ($page === 'search') {
@@ -49,6 +49,9 @@ switch ($page) {
         break;
     case 'child':
         include __DIR__ . '/pages/child.php';
+        break;
+    case 'family':
+        include __DIR__ . '/pages/family.php';
         break;
     case 'sponsor':
         include __DIR__ . '/pages/sponsor.php';

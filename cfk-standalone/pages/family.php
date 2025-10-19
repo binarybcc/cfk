@@ -11,62 +11,35 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/../includes/db.php';
-
 // Get family_id from URL
-$family_id = isset($_GET['family_id']) ? intval($_GET['family_id']) : 0;
+$family_id = sanitizeInt($_GET['family_id'] ?? 0);
 
 if (!$family_id) {
     setMessage('Invalid family ID.', 'error');
-    redirect('?page=children');
+    header('Location: ' . baseUrl('?page=children'));
     exit;
 }
 
-// Get database connection
-$db = getDBConnection();
-
-// Fetch family information
-$stmt = $db->prepare("
-    SELECT
-        f.id,
-        f.family_number,
-        f.total_children,
-        f.background_info
-    FROM families f
-    WHERE f.id = :family_id
-    LIMIT 1
-");
-$stmt->execute(['family_id' => $family_id]);
-$family = $stmt->fetch(PDO::FETCH_ASSOC);
+// Fetch family information using helper function
+$family = getFamilyById($family_id);
 
 if (!$family) {
     setMessage('Family not found.', 'error');
-    redirect('?page=children');
+    header('Location: ' . baseUrl('?page=children'));
     exit;
 }
 
-// Fetch all family members
-$stmt = $db->prepare("
-    SELECT
-        c.id,
-        c.display_id,
-        c.age,
-        c.gender,
-        c.grade,
-        c.school,
-        c.interests,
-        c.wishes,
-        c.special_needs,
-        c.clothing_sizes,
-        c.shoe_size,
-        c.status,
-        c.photo_filename
-    FROM children c
-    WHERE c.family_id = :family_id
-    ORDER BY c.age DESC
-");
-$stmt->execute(['family_id' => $family_id]);
-$family_members = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Fetch all family members using helper function
+$members = getFamilyMembers($family_id);
+
+if (empty($members)) {
+    setMessage('No family members found.', 'error');
+    header('Location: ' . baseUrl('?page=children'));
+    exit;
+}
+
+// Members are already fetched, just assign to expected variable name
+$family_members = $members;
 
 // Count available members
 $available_count = count(array_filter($family_members, function($member) {
