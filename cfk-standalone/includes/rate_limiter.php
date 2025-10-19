@@ -12,14 +12,12 @@ if (!defined('CFK_APP')) {
 }
 
 class RateLimiter {
-    // TESTING MODE: Increased limits for development/testing
-    // TODO: Reduce to production values after testing complete
-    // Production: EMAIL_RATE_PER_WINDOW = 1, EMAIL_RATE_PER_HOUR = 3
-    // Production: IP_RATE_PER_WINDOW = 5, IP_RATE_PER_HOUR = 10
-    private const EMAIL_RATE_PER_WINDOW = 10; // 10 requests per 5 minutes (TESTING)
-    private const EMAIL_RATE_PER_HOUR = 30; // max 30 per hour (TESTING)
-    private const IP_RATE_PER_WINDOW = 50; // 50 requests per 5 minutes (TESTING)
-    private const IP_RATE_PER_HOUR = 100; // max 100 per hour (TESTING)
+    // Production Rate Limits (balanced for security + usability)
+    // Accounts for: multiple admins on same IP, browser switching, email retries
+    private const EMAIL_RATE_PER_WINDOW = 4; // 4 requests per 5 minutes
+    private const EMAIL_RATE_PER_HOUR = 12; // max 12 per hour
+    private const IP_RATE_PER_WINDOW = 20; // 20 requests per 5 minutes
+    private const IP_RATE_PER_HOUR = 20; // max 20 per hour
     private const WINDOW_MINUTES = 5;
 
     /**
