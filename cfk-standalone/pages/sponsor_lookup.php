@@ -106,7 +106,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
                     <?php endif; ?>
 
                     <div class="form-group">
-                        <label for="sponsor_email" class="form-label">Your Email Address</label>
+                        <label for="sponsor_email" class="form-label">Your Email Address <span aria-label="required">*</span></label>
                         <input type="email"
                                id="sponsor_email"
                                name="sponsor_email"
@@ -114,8 +114,10 @@ if ($_POST && isset($_POST['lookup_email'])) {
                                placeholder="example@email.com"
                                value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
                                required
+                               aria-required="true"
+                               aria-describedby="email-help"
                                autocomplete="email">
-                        <div class="form-help">Enter the email address you used when sponsoring</div>
+                        <div id="email-help" class="form-help">Enter the email address you used when sponsoring</div>
                     </div>
 
                     <button type="submit" name="lookup_email" class="btn btn-large btn-primary">

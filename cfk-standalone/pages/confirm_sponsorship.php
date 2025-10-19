@@ -36,7 +36,7 @@ $pageTitle = 'Confirm Your Sponsorship';
         <div class="confirmation-container">
             <!-- Selections Summary -->
             <div class="selections-summary-card">
-                <h3>Your Selections</h3>
+                <h2>Your Selections</h2>
                 <p class="summary-count">
                     <strong x-text="selectionCount"></strong>
                     <span x-text="selectionCount === 1 ? 'child' : 'children'"></span> selected
@@ -59,7 +59,7 @@ $pageTitle = 'Confirm Your Sponsorship';
 
             <!-- Sponsor Form -->
             <div class="sponsor-form-card">
-                <h3>Your Contact Information</h3>
+                <h2>Your Contact Information</h2>
                 <p class="form-intro">We'll use this information to send you confirmation and follow-up details.</p>
 
                 <form @submit.prevent="submitForm()" class="sponsor-form">

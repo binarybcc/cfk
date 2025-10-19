@@ -120,6 +120,9 @@
     <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
 </head>
 <body>
+    <!-- Skip Navigation Link for Keyboard Users (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header class="main-header" x-data="{ mobileMenuOpen: false, isDesktop: window.innerWidth > 968 }"
             x-init="window.addEventListener('resize', () => { isDesktop = window.innerWidth > 968 })">
         <div class="container">
@@ -164,22 +167,29 @@
 
             <!-- Search Bar - Always visible on desktop, toggle with menu on mobile -->
             <div class="header-search" :class="{ 'search-visible': isDesktop || mobileMenuOpen }">
-                <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form">
+                <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form" role="search">
                     <input type="hidden" name="page" value="children">
                     <div class="search-group">
+                        <label for="header-search-input" class="visually-hidden">Search for children</label>
                         <input type="text"
+                               id="header-search-input"
                                name="search"
                                value="<?php echo isset($_GET['search']) ? sanitizeString($_GET['search']) : ''; ?>"
                                placeholder="Search children..."
-                               class="search-input">
-                        <button type="submit" class="search-btn">Search</button>
+                               class="search-input"
+                               aria-describedby="header-search-hint">
+                        <span id="header-search-hint" class="visually-hidden">Search by family number, age, grade, or interests</span>
+                        <button type="submit" class="search-btn" aria-label="Submit search">Search</button>
                     </div>
                 </form>
             </div>
         </div>
     </header>
 
-    <main class="main-content">
+    <!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
+    <div id="a11y-announcements" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+    <main id="main-content" class="main-content" tabindex="-1">
         <div class="container">
             <?php
             // Display messages

@@ -340,7 +340,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         <div class="children-grid">
             <!-- No Results Message -->
             <div x-show="filteredChildren.length === 0" x-transition class="no-results">
-                <h3>No Children Found</h3>
+                <h2>No Children Found</h2>
                 <p>No children match your current filters. Try adjusting your search criteria.</p>
             </div>
 
@@ -421,7 +421,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                          @click="showFamilyModal = false">
                         <div class="family-modal-content" @click.stop>
                             <div class="family-modal-header">
-                                <h3>Family <span x-text="child.display_id.replace(/[A-Z]$/, '')"></span></h3>
+                                <h2>Family <span x-text="child.display_id.replace(/[A-Z]$/, '')"></span></h2>
                                 <button @click="showFamilyModal = false" class="modal-close">&times;</button>
                             </div>
 

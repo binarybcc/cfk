@@ -69,6 +69,7 @@ const SelectionsManager = {
 
         // Check if already selected
         if (selections.some(c => c.id === child.id)) {
+            this.announce(`Child ${child.display_id} is already in your selections.`);
             return false;
         }
 
@@ -88,6 +89,7 @@ const SelectionsManager = {
         });
 
         this.saveSelections(selections);
+        this.announce(`Added child ${child.display_id} to your selections. You have ${selections.length} ${selections.length === 1 ? 'child' : 'children'} selected.`);
         return true;
     },
 
@@ -123,6 +125,9 @@ const SelectionsManager = {
 
         if (addedCount > 0) {
             this.saveSelections(selections);
+            this.announce(`Added ${addedCount} ${addedCount === 1 ? 'child' : 'children'} to your selections. You now have ${selections.length} total selected.`);
+        } else {
+            this.announce('No new children were added. They may already be in your selections.');
         }
 
         return addedCount;
@@ -134,8 +139,13 @@ const SelectionsManager = {
      */
     removeChild(childId) {
         const selections = this.getSelections();
+        const child = selections.find(c => c.id === childId);
         const filtered = selections.filter(c => c.id !== childId);
         this.saveSelections(filtered);
+
+        if (child) {
+            this.announce(`Removed child ${child.display_id} from your selections. You have ${filtered.length} ${filtered.length === 1 ? 'child' : 'children'} remaining.`);
+        }
     },
 
     /**
@@ -160,11 +170,16 @@ const SelectionsManager = {
      * Clear all selections
      */
     clearAll() {
+        const count = this.getCount();
         localStorage.removeItem(this.STORAGE_KEY);
         this.updateBadge();
         window.dispatchEvent(new CustomEvent('selectionsUpdated', {
             detail: { count: 0 }
         }));
+
+        if (count > 0) {
+            this.announce(`All selections cleared. Your cart is now empty.`);
+        }
     },
 
     /**
@@ -177,6 +192,22 @@ const SelectionsManager = {
         if (badge) {
             badge.textContent = count;
             badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    },
+
+    /**
+     * Announce changes to screen readers (WCAG 4.1.3)
+     * @param {String} message - Message to announce
+     */
+    announce(message) {
+        const announcer = document.getElementById('a11y-announcements');
+        if (announcer) {
+            // Clear previous message
+            announcer.textContent = '';
+            // Set new message after brief delay (ensures screen reader catches the change)
+            setTimeout(() => {
+                announcer.textContent = message;
+            }, 100);
         }
     },
 
