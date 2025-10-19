@@ -4274,3 +4274,276 @@ button:disabled,
         transition: none !important;
     }
 }
+
+/* ========================================
+   FIREFOX & EDGE ACCESSIBILITY ENHANCEMENTS
+   Optimizations for Mozilla Firefox and Microsoft Edge browsers
+   ======================================== */
+
+/* Firefox: Enhanced focus indicators */
+@-moz-document url-prefix() {
+    /* Firefox-specific styles */
+    *:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 2px;
+        -moz-outline-radius: 3px; /* Firefox-specific rounded outline */
+    }
+
+    button:focus,
+    .btn:focus,
+    a:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 3px;
+        -moz-outline-radius: 3px;
+    }
+
+    /* Firefox: Better form focus */
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 2px;
+        border-color: var(--color-primary);
+    }
+
+    /* Firefox: Skip link enhancement */
+    .skip-link:focus {
+        -moz-outline-radius: 4px;
+    }
+}
+
+/* Windows High Contrast Mode (Edge & Firefox on Windows) */
+@media (forced-colors: active) {
+    /* Ensure focus is visible in high contrast mode */
+    *:focus,
+    *:focus-visible {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+        forced-color-adjust: none;
+    }
+
+    /* Buttons in high contrast mode */
+    .btn,
+    button {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    .btn:hover,
+    button:hover {
+        background: Highlight;
+        color: HighlightText;
+        border-color: HighlightText;
+    }
+
+    .btn:focus,
+    button:focus {
+        outline: 3px solid Highlight;
+        outline-offset: 2px;
+    }
+
+    /* Links in high contrast mode */
+    a {
+        color: LinkText;
+        text-decoration: underline;
+        forced-color-adjust: none;
+    }
+
+    a:visited {
+        color: VisitedText;
+    }
+
+    a:hover,
+    a:focus {
+        color: HighlightText;
+        background: Highlight;
+        outline: 2px solid HighlightText;
+    }
+
+    /* Forms in high contrast mode */
+    input,
+    textarea,
+    select {
+        border: 2px solid ButtonText;
+        background: Canvas;
+        color: CanvasText;
+        forced-color-adjust: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid Highlight;
+        outline-offset: 2px;
+        border-color: Highlight;
+    }
+
+    /* Status badges in high contrast mode */
+    .status-badge,
+    .badge {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Cards and containers */
+    .card,
+    .child-card,
+    .family-member-card {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Alert messages */
+    .alert {
+        border: 3px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Images should not be affected */
+    img {
+        forced-color-adjust: auto;
+    }
+}
+
+/* Edge: Specific enhancements */
+@supports (-ms-ime-align: auto) {
+    /* Legacy Edge (pre-Chromium) */
+    *:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 2px;
+    }
+}
+
+/* Modern Edge (Chromium): Narrator screen reader optimizations */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    /* High contrast mode for legacy Edge */
+    *:focus {
+        outline: 4px solid;
+        outline-offset: 2px;
+    }
+
+    .btn:focus,
+    button:focus,
+    a:focus {
+        outline: 4px solid;
+        outline-offset: 3px;
+    }
+}
+
+/* Firefox: Screen reader (NVDA) optimizations */
+@media screen {
+    /* Ensure screen reader content is properly hidden/shown */
+    .visually-hidden {
+        clip-path: inset(50%);
+    }
+
+    /* Firefox: Better handling of aria-live regions */
+    [aria-live="polite"],
+    [aria-live="assertive"] {
+        position: relative; /* Firefox handles absolute positioning differently */
+    }
+}
+
+/* Edge & Firefox: Better form validation display */
+input:invalid,
+textarea:invalid,
+select:invalid {
+    border-color: var(--color-danger);
+    outline: 2px solid var(--color-danger);
+    outline-offset: 0;
+}
+
+input:invalid:focus,
+textarea:invalid:focus,
+select:invalid:focus {
+    outline-width: 3px;
+    outline-offset: 2px;
+}
+
+/* Edge & Firefox: Enhanced error messages */
+.error-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.error-message::before {
+    content: "⚠️";
+    flex-shrink: 0;
+    font-size: 1.2em;
+}
+
+/* Firefox & Edge: Better table accessibility */
+table {
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    font-weight: 700;
+}
+
+/* Ensure table headers are announced properly */
+th[scope="col"],
+th[scope="row"] {
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--color-border);
+}
+
+/* Edge & Firefox: Better disabled state visibility */
+button:disabled,
+.btn:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+/* Firefox: Better handling of SVG icons */
+svg {
+    pointer-events: none; /* Prevents focus issues with icon buttons */
+}
+
+button svg,
+.btn svg,
+a svg {
+    flex-shrink: 0; /* Prevents SVG from shrinking in flex containers */
+}
+
+/* Edge: Smooth scrolling for better UX */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Firefox & Edge: Better print accessibility */
+@media print {
+    /* Ensure focus indicators don't print */
+    *:focus {
+        outline: none !important;
+    }
+
+    /* Ensure links show URL in print */
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #555;
+    }
+
+    /* Don't print skip links */
+    .skip-link {
+        display: none !important;
+    }
+
+    /* Ensure form inputs are readable when printed */
+    input,
+    textarea,
+    select {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+    }
+}
