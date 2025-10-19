@@ -363,16 +363,16 @@ if ($_POST && isset($_POST['login'])) {
 
         <!-- Login Tabs -->
         <div class="login-tabs">
-            <button type="button" class="login-tab active" data-tab="password">
-                🔐 Password
-            </button>
-            <button type="button" class="login-tab" data-tab="magic-link">
+            <button type="button" class="login-tab active" data-tab="magic-link">
                 ✉️ Magic Link
+            </button>
+            <button type="button" class="login-tab" data-tab="password">
+                🔐 Password
             </button>
         </div>
 
         <!-- Password Login Form -->
-        <form method="POST" action="" id="loginForm" class="login-form-section active">
+        <form method="POST" action="" id="loginForm" class="login-form-section">
             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
             <div class="form-group">
@@ -383,8 +383,7 @@ if ($_POST && isset($_POST['login'])) {
                        class="form-input"
                        value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
                        required
-                       autocomplete="username"
-                       autofocus>
+                       autocomplete="username">
             </div>
 
             <div class="form-group">
@@ -408,7 +407,7 @@ if ($_POST && isset($_POST['login'])) {
         </form>
 
         <!-- Magic Link Login Form -->
-        <form method="POST" action="<?php echo baseUrl('admin/request-magic-link.php'); ?>" id="magicLinkForm" class="login-form-section">
+        <form method="POST" action="<?php echo baseUrl('admin/request-magic-link.php'); ?>" id="magicLinkForm" class="login-form-section active">
             <div class="magic-link-info">
                 <strong>🎄 Magic Link Login</strong>
                 <p>A secure login link will be sent to your email. No password needed!</p>
@@ -428,7 +427,8 @@ if ($_POST && isset($_POST['login'])) {
                        name="email"
                        class="form-input"
                        placeholder="your-email@example.com"
-                       required>
+                       required
+                       autofocus>
             </div>
 
             <button type="submit" class="login-btn" id="magicLinkBtn">
