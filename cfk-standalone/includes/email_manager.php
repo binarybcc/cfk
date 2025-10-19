@@ -739,3 +739,6 @@ class CFK_Email_Manager {
         return $html;
     }
 }
+
+// Create alias for backward compatibility with magic link system
+class_alias('CFK_Email_Manager', 'EmailManager');
