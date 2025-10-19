@@ -81,17 +81,17 @@ try {
     if ($adminUser) {
         // Store the token in database (only for valid admins)
         $tokenHash = MagicLinkManager::hashToken($token);
-        $expiresAt = date('Y-m-d H:i:s', time() + ($expirationMinutes * 60));
 
+        // Use MySQL's DATE_ADD to avoid timezone issues
         $sql = "
             INSERT INTO admin_magic_links (token_hash, email, expires_at, ip_address, user_agent)
-            VALUES (:token_hash, :email, :expires_at, :ip_address, :user_agent)
+            VALUES (:token_hash, :email, DATE_ADD(NOW(), INTERVAL :expiration_minutes MINUTE), :ip_address, :user_agent)
         ";
 
         Database::execute($sql, [
             'token_hash' => $tokenHash,
             'email' => $email,
-            'expires_at' => $expiresAt,
+            'expiration_minutes' => $expirationMinutes,
             'ip_address' => $ipAddress,
             'user_agent' => $userAgent
         ]);

@@ -10,6 +10,7 @@ define('CFK_APP', true);
 session_start();
 
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/email_manager.php';
 require_once __DIR__ . '/../includes/magic_link_manager.php';
 
@@ -106,47 +107,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 // Handle POST request - validate token and create session
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Verify CSRF token
-    $csrfToken = $_POST['csrf_token'] ?? '';
-    if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
-        MagicLinkManager::logEvent(null, 'magic_link_csrf_failure', $ipAddress, $userAgent, 'failed');
-        setMessage('Security validation failed. Please try again.', 'error');
-        header('Location: ' . baseUrl('admin/'));
-        exit;
-    }
-
-    $token = sanitizeString($_POST['token'] ?? '');
-
-    if (empty($token)) {
-        setMessage('Invalid or missing magic link', 'error');
-        header('Location: ' . baseUrl('admin/'));
-        exit;
-    }
-
-    // Validate token
-    $tokenData = MagicLinkManager::validateToken($token);
-
-    if (!$tokenData) {
-        MagicLinkManager::logEvent(null, 'magic_link_validation_failed', $ipAddress, $userAgent, 'failed');
-        setMessage('Invalid or expired magic link. Please request a new one.', 'error');
-        header('Location: ' . baseUrl('admin/'));
-        exit;
-    }
-
-    // Check if email has associated admin account
-    $adminSql = "SELECT id, email, username FROM admin_users WHERE email = :email LIMIT 1";
-    $adminUser = Database::fetchRow($adminSql, ['email' => $tokenData['email']]);
-
-    if (!$adminUser) {
-        MagicLinkManager::logEvent(null, 'magic_link_no_admin_account', $ipAddress, $userAgent, 'failed', [
-            'email' => $tokenData['email']
-        ]);
-        setMessage('No admin account found for this email', 'error');
-        header('Location: ' . baseUrl('admin/'));
-        exit;
-    }
-
     try {
+        // Verify CSRF token
+        $csrfToken = $_POST['csrf_token'] ?? '';
+        if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+            MagicLinkManager::logEvent(null, 'magic_link_csrf_failure', $ipAddress, $userAgent, 'failed');
+            setMessage('Security validation failed. Please try again.', 'error');
+            header('Location: ' . baseUrl('admin/'));
+            exit;
+        }
+
+        $token = sanitizeString($_POST['token'] ?? '');
+
+        if (empty($token)) {
+            setMessage('Invalid or missing magic link', 'error');
+            header('Location: ' . baseUrl('admin/'));
+            exit;
+        }
+
+        // Validate token
+        $tokenData = MagicLinkManager::validateToken($token);
+
+        if (!$tokenData) {
+            MagicLinkManager::logEvent(null, 'magic_link_validation_failed', $ipAddress, $userAgent, 'failed');
+            setMessage('Invalid or expired magic link. Please request a new one.', 'error');
+            header('Location: ' . baseUrl('admin/'));
+            exit;
+        }
+
+        // Check if email has associated admin account
+        $adminSql = "SELECT id, email, username FROM admin_users WHERE email = :email LIMIT 1";
+        $adminUser = Database::fetchRow($adminSql, ['email' => $tokenData['email']]);
+
+        if (!$adminUser) {
+            MagicLinkManager::logEvent(null, 'magic_link_no_admin_account', $ipAddress, $userAgent, 'failed', [
+                'email' => $tokenData['email']
+            ]);
+            setMessage('No admin account found for this email', 'error');
+            header('Location: ' . baseUrl('admin/'));
+            exit;
+        }
         // Token already deleted in validateToken() to prevent race conditions
         // No need to call consumeToken() here
 
@@ -172,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     } catch (Exception $e) {
         error_log('Magic link verification error: ' . $e->getMessage());
-        MagicLinkManager::logEvent($adminUser['id'], 'magic_link_verification_error', $ipAddress, $userAgent, 'failed');
+        MagicLinkManager::logEvent($adminUser['id'] ?? null, 'magic_link_verification_error', $ipAddress, $userAgent, 'failed');
         setMessage('An error occurred during login. Please try again.', 'error');
         header('Location: ' . baseUrl('admin/'));
         exit;
