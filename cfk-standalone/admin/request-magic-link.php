@@ -7,9 +7,9 @@ declare(strict_types=1);
  */
 
 define('CFK_APP', true);
-session_start();
 
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/email_manager.php';
 require_once __DIR__ . '/../includes/magic_link_manager.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/magic_link_email_template.php';
