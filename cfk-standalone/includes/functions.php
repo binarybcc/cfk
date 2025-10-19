@@ -180,7 +180,7 @@ function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
  */
 function getFamilyById(int $familyId): ?array {
     $sql = "SELECT * FROM families WHERE id = :family_id";
-    return Database::fetch($sql, ['family_id' => $familyId]);
+    return Database::fetchRow($sql, ['family_id' => $familyId]);
 }
 
 /**
