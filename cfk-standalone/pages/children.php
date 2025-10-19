@@ -161,11 +161,6 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         return siblings.filter(s => s.status === 'available').length - 1;
     };
 
-    // Helper function to get all family members
-    window.getFamilyMembers = function(familyId) {
-        return window.siblingsByFamily[familyId] || [];
-    };
-
     // Selections System v1.5 - Real implementation
     window.addToSelections = function(child) {
         if (SelectionsManager.addChild(child)) {
@@ -174,26 +169,6 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         } else {
             // Already in selections
             showNotification(`${child.display_id} is already in your selections.`, 'info');
-        }
-    };
-
-    // Add entire family to selections
-    window.addEntireFamily = function(familyId) {
-        const familyMembers = window.siblingsByFamily[familyId] || [];
-        const availableMembers = familyMembers.filter(m => m.status === 'available');
-
-        if (availableMembers.length === 0) {
-            showNotification('No family members are currently available for sponsorship.', 'warning');
-            return;
-        }
-
-        const addedCount = SelectionsManager.addMultiple(availableMembers);
-        if (addedCount > 0) {
-            const names = availableMembers.map(m => m.display_id).slice(0, 3).join(', ');
-            const more = availableMembers.length > 3 ? ` and ${availableMembers.length - 3} more` : '';
-            showNotification(`Added ${addedCount} family member${addedCount > 1 ? 's' : ''}: ${names}${more}`, 'success');
-        } else {
-            showNotification('All family members are already in your selections.', 'info');
         }
     };
 
@@ -348,9 +323,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
             <template x-for="child in filteredChildren" :key="child.id">
                 <div class="child-card child-card-v2"
                      x-data="{
-                         showFamilyModal: false,
-                         siblingCount: window.getSiblingCount(child.family_id),
-                         familyMembers: window.getFamilyMembers(child.family_id)
+                         siblingCount: window.getSiblingCount(child.family_id)
                      }"
                      x-transition>
                     <!-- Top Section: Image + Metadata Side by Side -->
@@ -401,11 +374,12 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
                         <!-- Action Buttons -->
                         <div class="action-buttons">
-                            <button @click="showFamilyModal = true"
-                                    class="btn btn-secondary btn-view-family"
-                                    :disabled="siblingCount === 0">
+                            <a :href="'<?php echo baseUrl('?page=family&family_id='); ?>' + child.family_id"
+                               class="btn btn-secondary btn-view-family"
+                               :class="siblingCount === 0 ? 'btn-disabled' : ''"
+                               :aria-disabled="siblingCount === 0 ? 'true' : 'false'">
                                 View Family
-                            </button>
+                            </a>
                             <button @click="addToSelections(child)"
                                     class="btn btn-primary btn-sponsor">
                                 SPONSOR
@@ -413,89 +387,6 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
                         </div>
                     </div>
 
-                    <!-- Family Modal -->
-                    <div x-show="showFamilyModal"
-                         x-cloak
-                         x-transition.opacity.duration.300ms
-                         class="family-modal-overlay"
-                         @click="showFamilyModal = false">
-                        <div class="family-modal-content" @click.stop>
-                            <div class="family-modal-header">
-                                <h2>Family <span x-text="child.display_id.replace(/[A-Z]$/, '')"></span></h2>
-                                <button @click="showFamilyModal = false" class="modal-close">&times;</button>
-                            </div>
-
-                            <!-- Add Entire Family Button -->
-                            <div class="family-modal-actions">
-                                <button @click="addEntireFamily(child.family_id); showFamilyModal = false;"
-                                        class="btn btn-primary btn-add-family"
-                                        x-show="siblingCount > 0">
-                                    <span x-text="'Add All ' + (siblingCount + 1) + ' Family Members'"></span>
-                                </button>
-                            </div>
-
-                            <div class="family-modal-body">
-                                <template x-for="member in familyMembers" :key="member.id">
-                                    <div class="family-member-card-detailed">
-                                        <!-- Member Header -->
-                                        <div class="family-member-header">
-                                            <div class="family-member-title">
-                                                <strong x-text="member.display_id"></strong>
-                                                <span :class="member.status === 'available' ? 'badge badge-success' : 'badge badge-secondary'"
-                                                      x-text="member.status === 'available' ? 'Available' : 'Sponsored'"></span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Member Basic Info -->
-                                        <div class="family-member-basic-info">
-                                            <div class="info-item">
-                                                <strong>Age:</strong> <span x-text="member.age"></span>
-                                            </div>
-                                            <div class="info-item">
-                                                <strong>Gender:</strong> <span x-text="member.gender === 'M' ? 'Boy' : 'Girl'"></span>
-                                            </div>
-                                            <div class="info-item" x-show="member.grade">
-                                                <strong>Grade:</strong> <span x-text="member.grade"></span>
-                                            </div>
-                                        </div>
-
-                                        <!-- Member Details -->
-                                        <div class="family-member-details">
-                                            <div x-show="member.interests" class="detail-section">
-                                                <strong class="detail-label">Interests:</strong>
-                                                <p class="detail-text" x-text="member.interests"></p>
-                                            </div>
-                                            <div x-show="member.wishes" class="detail-section">
-                                                <strong class="detail-label">Wishes:</strong>
-                                                <p class="detail-text" x-text="member.wishes"></p>
-                                            </div>
-                                            <div x-show="member.clothing_sizes" class="detail-section">
-                                                <strong class="detail-label">Clothing Sizes:</strong>
-                                                <p class="detail-text" x-text="member.clothing_sizes"></p>
-                                            </div>
-                                            <div x-show="member.shoe_size" class="detail-section">
-                                                <strong class="detail-label">Shoe Size:</strong>
-                                                <p class="detail-text" x-text="member.shoe_size"></p>
-                                            </div>
-                                        </div>
-
-                                        <!-- Member Actions -->
-                                        <div class="family-member-actions">
-                                            <button @click="addToSelections(member); showFamilyModal = false;"
-                                                    class="btn btn-primary btn-sm"
-                                                    x-show="member.status === 'available'">
-                                                Add to Selections
-                                            </button>
-                                            <a :href="'<?php echo baseUrl(); ?>?page=child&id=' + member.id"
-                                               class="btn btn-secondary btn-sm">
-                                                View Details
-                                            </a>
-                                        </div>
-                                    </div>
-                                </template>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </template>
         </div>
