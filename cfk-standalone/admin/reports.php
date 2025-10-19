@@ -34,32 +34,39 @@ if ($exportFormat === 'csv') {
     switch ($reportType) {
         case 'sponsor_directory':
             $data = CFK_Report_Manager::getSponsorDirectoryReport();
-            $headers = ['Sponsor Name', 'Email', 'Phone', 'Child ID', 'Child Name', 'Age', 'Status'];
+            $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
             break;
 
         case 'child_sponsor':
             $data = CFK_Report_Manager::getChildSponsorLookup();
-            $headers = ['Child ID', 'Child Name', 'Age', 'Gender', 'Sponsor Name', 'Sponsor Email', 'Status'];
+            $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
             break;
 
         case 'family_report':
             $data = CFK_Report_Manager::getFamilySponsorshipReport();
-            $headers = ['Family Number', 'Family Name', 'Total Children', 'Available', 'Pending', 'Sponsored'];
+            $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
-            break;
-
-        case 'delivery_tracking':
-            $data = CFK_Report_Manager::getGiftDeliveryReport();
-            $headers = ['Sponsor Name', 'Email', 'Phone', 'Child ID', 'Child Name', 'Status', 'Days Since Confirmed'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'delivery-tracking-' . date('Y-m-d') . '.csv');
             break;
 
         case 'available_children':
             $data = CFK_Report_Manager::getAvailableChildrenReport();
-            $headers = ['Child ID', 'Name', 'Age', 'Gender', 'Family', 'Family Size', 'Available Siblings'];
+            $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
             CFK_Report_Manager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
+            break;
+
+        case 'complete_export':
+            $data = CFK_Report_Manager::getCompleteChildSponsorReport();
+            $headers = [
+                'Child ID', 'Child Name', 'Age', 'Gender', 'Grade', 'School',
+                'Shirt Size', 'Pant Size', 'Shoe Size', 'Jacket Size',
+                'Interests', 'Wishes', 'Special Needs', 'Child Status',
+                'Family Number',
+                'Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Sponsor Address',
+                'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date'
+            ];
+            CFK_Report_Manager::exportToCSV($data, $headers, 'complete-children-sponsors-' . date('Y-m-d') . '.csv');
             break;
     }
 }
@@ -87,11 +94,11 @@ include __DIR__ . '/includes/admin_header.php';
         <a href="?type=family_report" class="report-nav-item <?php echo $reportType === 'family_report' ? 'active' : ''; ?>">
             👨‍👩‍👧‍👦 Family Report
         </a>
-        <a href="?type=delivery_tracking" class="report-nav-item <?php echo $reportType === 'delivery_tracking' ? 'active' : ''; ?>">
-            🎁 Gift Delivery Tracking
-        </a>
         <a href="?type=available_children" class="report-nav-item <?php echo $reportType === 'available_children' ? 'active' : ''; ?>">
             ⭐ Available Children
+        </a>
+        <a href="?type=complete_export" class="report-nav-item <?php echo $reportType === 'complete_export' ? 'active' : ''; ?>">
+            📋 Complete Export
         </a>
     </div>
 
@@ -144,8 +151,8 @@ include __DIR__ . '/includes/admin_header.php';
 
                 <div class="quick-actions">
                     <h3>Quick Actions</h3>
+                    <a href="?type=complete_export&export=csv" class="btn btn-primary">📋 Export Complete Database</a>
                     <a href="?type=sponsor_directory&export=csv" class="btn btn-primary">Export All Sponsors</a>
-                    <a href="?type=delivery_tracking&export=csv" class="btn btn-primary">Export Delivery List</a>
                     <a href="?type=available_children&export=csv" class="btn btn-primary">Export Available Children</a>
                 </div>
             </div>
@@ -177,8 +184,14 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
 
             <div class="sponsor-directory">
-                <?php foreach ($groupedSponsors as $sponsor): ?>
-                    <div class="sponsor-card">
+                <?php if (empty($groupedSponsors)): ?>
+                    <div class="empty-state">
+                        <h3>No Sponsors Found</h3>
+                        <p>There are currently no sponsorships in the system.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($groupedSponsors as $sponsor): ?>
+                        <div class="sponsor-card">
                         <div class="sponsor-info">
                             <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
@@ -222,7 +235,8 @@ include __DIR__ . '/includes/admin_header.php';
                             </table>
                         </div>
                     </div>
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
 
         <?php elseif ($reportType === 'child_sponsor'): ?>
@@ -243,20 +257,26 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Child ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Status</th>
-                        <th>Sponsor</th>
-                        <th>Contact</th>
-                        <th>Sponsorship Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($children as $child): ?>
+            <?php if (empty($children)): ?>
+                <div class="empty-state">
+                    <h3>No Children Found</h3>
+                    <p><?php echo $searchTerm ? 'No children match your search criteria.' : 'There are currently no children in the system.'; ?></p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Child ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Status</th>
+                            <th>Sponsor</th>
+                            <th>Contact</th>
+                            <th>Sponsorship Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($children as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                             <td><?php echo sanitizeString($child['child_name']); ?></td>
@@ -286,6 +306,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
 
         <?php elseif ($reportType === 'family_report'): ?>
             <?php $families = CFK_Report_Manager::getFamilySponsorshipReport(); ?>
@@ -295,23 +316,27 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=family_report&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Family #</th>
-                        <th>Family Name</th>
-                        <th>Total Children</th>
-                        <th>Available</th>
-                        <th>Pending</th>
-                        <th>Sponsored</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($families as $family): ?>
+            <?php if (empty($families)): ?>
+                <div class="empty-state">
+                    <h3>No Families Found</h3>
+                    <p>There are currently no families in the system.</p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Family #</th>
+                            <th>Total Children</th>
+                            <th>Available</th>
+                            <th>Pending</th>
+                            <th>Sponsored</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($families as $family): ?>
                         <tr>
                             <td><?php echo sanitizeString($family['family_number']); ?></td>
-                            <td><?php echo sanitizeString($family['family_name'] ?? '-'); ?></td>
                             <td><?php echo $family['total_children']; ?></td>
                             <td><?php echo $family['available_count']; ?></td>
                             <td><?php echo $family['pending_count']; ?></td>
@@ -329,46 +354,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
-
-        <?php elseif ($reportType === 'delivery_tracking'): ?>
-            <?php $deliveries = CFK_Report_Manager::getGiftDeliveryReport(); ?>
-
-            <div class="report-header">
-                <h2>Gift Delivery Tracking</h2>
-                <a href="?type=delivery_tracking&export=csv" class="btn btn-primary">Export to CSV</a>
-            </div>
-
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Sponsor</th>
-                        <th>Contact</th>
-                        <th>Child ID</th>
-                        <th>Child Name</th>
-                        <th>Status</th>
-                        <th>Confirmed Date</th>
-                        <th>Days Waiting</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($deliveries as $delivery): ?>
-                        <tr>
-                            <td><?php echo sanitizeString($delivery['sponsor_name']); ?></td>
-                            <td>
-                                <a href="mailto:<?php echo $delivery['sponsor_email']; ?>"><?php echo $delivery['sponsor_email']; ?></a><br>
-                                <?php if ($delivery['sponsor_phone']): ?>
-                                    <?php echo sanitizeString($delivery['sponsor_phone']); ?>
-                                <?php endif; ?>
-                            </td>
-                            <td><?php echo sanitizeString($delivery['child_display_id']); ?></td>
-                            <td><?php echo sanitizeString($delivery['child_name']); ?></td>
-                            <td><span class="status-badge status-<?php echo $delivery['status']; ?>"><?php echo ucfirst($delivery['status']); ?></span></td>
-                            <td><?php echo $delivery['confirmation_date'] ? date('M j, Y', strtotime($delivery['confirmation_date'])) : '-'; ?></td>
-                            <td><?php echo $delivery['days_since_confirmed'] ?? 0; ?> days</td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+            <?php endif; ?>
 
         <?php elseif ($reportType === 'available_children'): ?>
             <?php
@@ -399,21 +385,27 @@ include __DIR__ . '/includes/admin_header.php';
                 </form>
             </div>
 
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Child ID</th>
-                        <th>Name</th>
-                        <th>Age</th>
-                        <th>Gender</th>
-                        <th>Grade</th>
-                        <th>Family</th>
-                        <th>Siblings</th>
-                        <th>Wishes</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($availableChildren as $child): ?>
+            <?php if (empty($availableChildren)): ?>
+                <div class="empty-state">
+                    <h3>No Available Children</h3>
+                    <p>There are currently no children available for sponsorship.</p>
+                </div>
+            <?php else: ?>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Child ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Grade</th>
+                            <th>Family</th>
+                            <th>Siblings</th>
+                            <th>Wishes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($availableChildren as $child): ?>
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
                             <td><?php echo sanitizeString($child['name']); ?></td>
@@ -427,9 +419,112 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <?php endif; ?>
+
+        <?php elseif ($reportType === 'complete_export'): ?>
+            <?php
+            $filters = [];
+            $completeData = CFK_Report_Manager::getCompleteChildSponsorReport($filters);
+
+            // Count sponsored vs unsponsored
+            $sponsoredCount = 0;
+            $unsponsoredCount = 0;
+            foreach ($completeData as $row) {
+                if (!empty($row['sponsor_name'])) {
+                    $sponsoredCount++;
+                } else {
+                    $unsponsoredCount++;
+                }
+            }
+            ?>
+
+            <div class="report-header">
+                <h2>Complete Children & Sponsor Export</h2>
+                <a href="?type=complete_export&export=csv" class="btn btn-primary">📥 Download CSV</a>
+            </div>
+
+            <div class="export-summary">
+                <p><strong>This report includes all children in the database with complete information:</strong></p>
+                <ul>
+                    <li>✅ Total Children: <?php echo count($completeData); ?></li>
+                    <li>✅ Sponsored: <?php echo $sponsoredCount; ?></li>
+                    <li>✅ Not Yet Sponsored: <?php echo $unsponsoredCount; ?></li>
+                </ul>
+                <p><strong>Data Included:</strong></p>
+                <ul>
+                    <li>Child Information: ID, Name, Age, Gender, Grade, School, Clothing Sizes, Interests, Wishes, Special Needs</li>
+                    <li>Family Information: Family Number</li>
+                    <li>Sponsor Information: Name, Email, Phone, Address (if child is sponsored)</li>
+                    <li>Sponsorship Details: Status, Request Date, Confirmation Date, Completion Date (if applicable)</li>
+                </ul>
+            </div>
+
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Child ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Grade</th>
+                        <th>Child Status</th>
+                        <th>Sponsor</th>
+                        <th>Contact</th>
+                        <th>Sponsorship Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($completeData as $row): ?>
+                        <tr>
+                            <td><?php echo sanitizeString($row['child_id']); ?></td>
+                            <td><?php echo sanitizeString($row['child_name']); ?></td>
+                            <td><?php echo $row['age']; ?></td>
+                            <td><?php echo $row['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
+                            <td><?php echo sanitizeString($row['grade'] ?? '-'); ?></td>
+                            <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst($row['child_status']); ?></span></td>
+                            <td><?php echo $row['sponsor_name'] ? sanitizeString($row['sponsor_name']) : '-'; ?></td>
+                            <td>
+                                <?php if ($row['sponsor_email']): ?>
+                                    <a href="mailto:<?php echo $row['sponsor_email']; ?>"><?php echo $row['sponsor_email']; ?></a>
+                                    <?php if ($row['sponsor_phone']): ?>
+                                        <br><?php echo sanitizeString($row['sponsor_phone']); ?>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($row['sponsorship_date']): ?>
+                                    <?php echo date('M j, Y', strtotime($row['sponsorship_date'])); ?>
+                                <?php else: ?>
+                                    -
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+.export-summary {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #2c5530;
+}
+
+.export-summary ul {
+    margin: 0.5rem 0 0.5rem 2rem;
+}
+
+.export-summary li {
+    margin: 0.25rem 0;
+}
+</style>
 
 <style>
 .reports-page {
@@ -643,6 +738,25 @@ include __DIR__ . '/includes/admin_header.php';
 
 .btn-secondary:hover {
     background: #545b62;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 2rem 0;
+}
+
+.empty-state h3 {
+    color: #666;
+    margin-bottom: 0.5rem;
+    font-size: 1.5rem;
+}
+
+.empty-state p {
+    color: #999;
+    font-size: 1rem;
 }
 </style>
 

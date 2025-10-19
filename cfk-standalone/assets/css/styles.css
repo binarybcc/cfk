@@ -251,8 +251,11 @@ a:focus {
    ---------------------------------------- */
 
 .btn {
-    display: inline-block;
+    display: inline-flex;          /* Better alignment */
+    align-items: center;
+    justify-content: center;
     padding: 0.75rem 1.5rem;
+    min-height: 44px;              /* Minimum touch target */
     border: none;
     border-radius: var(--radius-md);
     text-decoration: none;
@@ -445,6 +448,7 @@ button:focus-visible {
 .form-textarea {
     width: 100%;
     padding: 0.75rem;
+    min-height: 44px;              /* Minimum touch target */
     border: 2px solid var(--color-border);
     border-radius: var(--radius-md);
     font-size: var(--font-size-base);
@@ -559,7 +563,7 @@ textarea:focus {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-md) 0;
+    padding: var(--spacing-sm) 0;
 }
 
 .logo h1 {
@@ -659,50 +663,62 @@ textarea:focus {
     padding-left: 2rem !important;
 }
 
-/* Header Search */
-.header-search {
-    padding: var(--spacing-md) 0;
-    border-top: 1px solid var(--color-border-lighter);
-    margin-top: var(--spacing-md);
-}
+/* Mobile Navigation Behavior */
+@media (max-width: 968px) {
+    .main-header {
+        margin-bottom: var(--spacing-md);
+    }
 
-.search-form {
-    max-width: 600px;
-    margin: 0 auto;
-}
+    .header-content {
+        position: relative;
+    }
 
-.search-group {
-    display: flex;
-    gap: var(--spacing-sm);
-}
+    .main-nav {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--color-white);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out;
+        z-index: 1000;
+    }
 
-.search-input {
-    flex: 1;
-    padding: 0.75rem var(--spacing-md);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-    transition: border-color var(--transition-fast);
-}
+    .main-nav.mobile-nav-open {
+        max-height: 500px;
+        border-top: 2px solid var(--color-primary);
+    }
 
-.search-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-}
+    .main-nav ul {
+        flex-direction: column;
+        gap: 0;
+        padding: var(--spacing-sm) 0;
+    }
 
-.search-btn {
-    padding: 0.75rem 1.5rem;
-    background: var(--color-primary);
-    color: var(--color-white);
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: bold;
-    cursor: pointer;
-    transition: background var(--transition-fast);
-}
+    .main-nav li {
+        width: 100%;
+        border-bottom: 1px solid var(--color-border-lighter);
+    }
 
-.search-btn:hover {
-    background: var(--color-primary-dark);
+    .main-nav li:last-child {
+        border-bottom: none;
+    }
+
+    .main-nav a {
+        display: block;
+        width: 100%;
+        padding: 1rem var(--spacing-md);
+        text-align: left;
+        border-radius: 0;
+    }
+
+    .admin-link {
+        border-left: none;
+        padding-left: var(--spacing-md) !important;
+        border-top: 2px solid var(--color-border);
+    }
 }
 
 /* ----------------------------------------
@@ -759,6 +775,35 @@ textarea:focus {
     background: var(--color-warning-bg);
     border-color: var(--color-warning);
     color: var(--color-warning-text);
+}
+
+/* Form Error States - WCAG 3.3.1, 3.3.3 */
+.input-error,
+input.input-error,
+select.input-error,
+textarea.input-error {
+    border-color: var(--color-danger) !important;
+    border-width: 2px;
+    background-color: var(--color-danger-bg);
+}
+
+.input-error:focus,
+input.input-error:focus,
+select.input-error:focus,
+textarea.input-error:focus {
+    outline: 2px solid var(--color-danger);
+    outline-offset: 2px;
+}
+
+.error-message {
+    display: block;
+    color: var(--color-danger-text);
+    font-size: 0.875rem;
+    margin-top: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--color-danger-bg);
+    border-left: 3px solid var(--color-danger);
+    border-radius: 4px;
 }
 
 .alert-info {
@@ -878,8 +923,12 @@ textarea:focus {
     border-radius: var(--radius-xl);
     margin-bottom: var(--spacing-2xl);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.hero-inner {
     display: flex;
-    align-items: center;
+    justify-content: space-between;
+    align-items: flex-start;
     gap: var(--spacing-2xl);
 }
 
@@ -906,7 +955,7 @@ textarea:focus {
 
 .hero-stats {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: var(--spacing-xl);
     margin: var(--spacing-xl) 0;
     flex-wrap: wrap;
@@ -939,8 +988,15 @@ textarea:focus {
 
 .hero-actions {
     display: flex;
+    flex-direction: column;
     gap: var(--spacing-md);
-    flex-wrap: wrap;
+    min-width: 280px;
+    align-self: flex-start;
+}
+
+.hero-actions .btn {
+    width: 100%;
+    white-space: nowrap;
 }
 
 .hero-image {
@@ -1286,6 +1342,32 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
 }
 
+.search-input-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+.search-help-text {
+    display: block;
+    color: var(--color-text-tertiary);
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    margin: 0;
+    padding-left: 2px;
+}
+
+.filter-group-search {
+    align-self: flex-start;
+    background: #f0f4f8;
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 2px solid #e0e7ef;
+    flex: 1;
+    min-width: 300px;
+}
+
 .filter-actions {
     display: flex;
     gap: var(--spacing-sm);
@@ -1309,16 +1391,353 @@ textarea:focus {
     background: var(--color-white);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-md);
-    overflow: hidden;
-    transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    overflow: visible;
+    transition: box-shadow var(--transition-fast);
     border: 1px solid var(--color-border-light);
 }
 
 .child-card:hover {
-    transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
+/* Vertical Card V2 Layout - Image + Metadata side by side at top */
+.child-card-v2 {
+    display: flex;
+    flex-direction: column;
+}
+
+.child-top-section {
+    display: flex;
+    flex-direction: row;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+}
+
+.child-photo-compact {
+    width: 120px;
+    min-width: 120px;
+    height: 120px;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.child-photo-compact img {
+    width: 100%;
+    height: auto;
+    max-height: 100px;
+    object-fit: contain;
+    display: block;
+}
+
+.child-header-meta {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.child-meta-item {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+.child-meta-item strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+/* Child Action Section - No border */
+.child-action-section {
+    padding: 0 var(--spacing-lg) var(--spacing-lg);
+    background: var(--color-white);
+}
+
+.sibling-info {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+}
+
+.sibling-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.sibling-text strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-base);
+}
+
+.action-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
+.btn-view-family {
+    background: var(--color-secondary) !important;
+    color: var(--color-white) !important;
+    border: 2px solid var(--color-secondary) !important;
+}
+
+.btn-view-family:hover:not(:disabled) {
+    background: var(--color-secondary-dark) !important;
+}
+
+.btn-view-family:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-sponsor {
+    background: var(--color-primary) !important;
+    color: var(--color-white) !important;
+    font-weight: 700 !important;
+    border: 2px solid var(--color-primary) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn-sponsor:hover {
+    background: var(--color-primary-dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(44, 85, 48, 0.3);
+}
+
+/* Family Modal */
+.family-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-lg);
+}
+
+.family-modal-content {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.family-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 2px solid var(--color-border-lighter);
+    background: var(--color-bg-secondary);
+}
+
+.family-modal-header h3 {
+    margin: 0;
+    color: var(--color-primary);
+    font-size: var(--font-size-xl);
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    color: var(--color-text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.modal-close:hover {
+    background: var(--color-danger);
+    color: var(--color-white);
+}
+
+.family-modal-body {
+    padding: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.family-member-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-md);
+    background: var(--color-bg-primary);
+    transition: all var(--transition-fast);
+}
+
+.family-member-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.family-member-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.family-member-info strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-base);
+}
+
+.family-member-status {
+    margin-top: var(--spacing-xs);
+}
+
+.family-member-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+/* Enhanced Family Modal Styles */
+.family-modal-actions {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-bg-secondary);
+    border-bottom: 1px solid var(--color-border-lighter);
+    text-align: center;
+}
+
+.btn-add-family {
+    width: 100%;
+    font-size: var(--font-size-base);
+    font-weight: 700;
+    padding: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.family-member-card-detailed {
+    padding: var(--spacing-md);
+    border: 1px solid var(--color-border-lighter);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    transition: all var(--transition-fast);
+}
+
+.family-member-card-detailed:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--color-primary);
+}
+
+.family-member-header {
+    margin-bottom: var(--spacing-sm);
+}
+
+.family-member-title {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.family-member-title strong {
+    color: var(--color-primary);
+    font-size: var(--font-size-lg);
+}
+
+.family-member-basic-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-sm);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-sm);
+}
+
+.info-item {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.info-item strong {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.family-member-details {
+    margin: var(--spacing-md) 0;
+}
+
+.detail-section {
+    margin-bottom: var(--spacing-md);
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-label {
+    display: block;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.detail-text {
+    margin: 0;
+    padding: var(--spacing-sm);
+    background: var(--color-bg-primary);
+    border-left: 3px solid var(--color-secondary);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+}
+
+.family-member-card-detailed .family-member-actions {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border-lighter);
+    flex-direction: row;
+    gap: var(--spacing-sm);
+}
+
+.family-member-card-detailed .family-member-actions .btn {
+    flex: 1;
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+/* Legacy vertical card styles (for backward compatibility) */
 .child-photo {
     width: 100%;
     height: 250px;
@@ -2821,17 +3240,7 @@ tr:hover {
    ======================================== */
 
 @media (max-width: 968px) {
-    .header-content {
-        flex-direction: column;
-        gap: var(--spacing-md);
-        text-align: center;
-    }
-
-    .main-nav ul {
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: var(--spacing-md);
-    }
+    /* Mobile header layout - removed conflicting styles, handled above in navigation section */
 
     .admin-link {
         border-left: none;
@@ -2854,9 +3263,13 @@ tr:hover {
     }
 
     .hero {
+        padding: var(--spacing-2xl) var(--spacing-lg);
+    }
+
+    .hero-inner {
         flex-direction: column;
         text-align: center;
-        padding: var(--spacing-2xl) var(--spacing-lg);
+        gap: var(--spacing-xl);
     }
 
     .hero h1 {
@@ -2875,6 +3288,9 @@ tr:hover {
 
     .hero-actions {
         flex-direction: column;
+        min-width: 100%;
+        width: 100%;
+        align-items: center;
     }
 
     .hero-actions .btn {
@@ -3092,14 +3508,6 @@ tr:hover {
         padding: 0 var(--spacing-sm);
     }
 
-    .search-group {
-        flex-direction: column;
-    }
-
-    .search-input {
-        margin-bottom: var(--spacing-sm);
-    }
-
     h1 { font-size: var(--font-size-3xl); }
     h2 { font-size: var(--font-size-2xl); }
 
@@ -3168,6 +3576,303 @@ tr:hover {
 }
 
 /* ========================================
+   MOBILE-FIRST CRITICAL OPTIMIZATIONS
+   Touch targets, spacing, and UX improvements
+   for 70% smartphone users
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* === CRITICAL: Touch Target Sizes === */
+    .btn {
+        min-height: 48px;           /* 2025 standard for mobile */
+        padding: 14px 24px;
+    }
+
+    .btn-primary {
+        min-height: 56px;           /* Larger for important CTAs */
+        font-size: 18px;
+    }
+
+    /* === CRITICAL: Form Inputs (Prevent iOS Zoom) === */
+    .form-input,
+    .form-select,
+    .form-textarea,
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    textarea,
+    select {
+        min-height: 48px;
+        padding: 14px 16px;
+        font-size: 16px;            /* CRITICAL: Prevents iOS auto-zoom */
+        border-radius: 8px;
+    }
+
+    /* === CRITICAL: Button Spacing (Prevent Fat Finger Errors) === */
+    .filter-actions button,
+    .filter-actions .btn {
+        margin: 8px 4px;            /* Minimum 8px spacing */
+    }
+
+    .child-card-actions .btn {
+        margin-bottom: 12px;
+        width: 100%;
+    }
+
+    /* === Navigation Touch Targets === */
+    /* Handled in mobile navigation section above - removed duplicate styles */
+
+    /* === Sticky CTAs (Thumb-Friendly Zone) === */
+    .sponsor-action-sticky {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: white;
+        padding: 16px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .sponsor-action-sticky .btn-primary {
+        width: 100%;
+        min-height: 56px;
+        font-size: 18px;
+    }
+
+    /* === Child Profile Mobile Optimization === */
+    .child-profile-actions {
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 16px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        z-index: 100;
+        margin: 0 -16px;            /* Full width on mobile */
+    }
+
+    .child-profile-actions .btn {
+        width: 100%;
+        min-height: 56px;
+    }
+
+    /* === Typography (Readability) === */
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    .child-card p,
+    .child-card-description {
+        font-size: 16px;
+        line-height: 1.5;
+    }
+
+    /* === Filters Mobile Optimization === */
+    .filters-section {
+        position: sticky;
+        top: 0;
+        background: white;
+        z-index: 50;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 12px;
+    }
+
+    .filter-group label {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .filter-group {
+        margin-bottom: 16px;
+    }
+
+    /* === FAQ Accordion Touch Targets === */
+    .faq-question,
+    [x-on\:click] button {
+        min-height: 56px;
+        padding: 16px 20px;
+        font-size: 18px;
+    }
+
+    .faq-answer {
+        padding: 16px 20px;
+        font-size: 16px;
+        line-height: 1.6;
+    }
+
+    /* === Card Spacing === */
+    .children-grid {
+        gap: 20px;
+        grid-template-columns: 1fr; /* Single column on mobile */
+    }
+
+    .child-card {
+        margin-bottom: 20px;
+    }
+
+    /* === Vertical Card V2 Mobile === */
+    .child-top-section {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--spacing-md);
+    }
+
+    .child-photo-compact {
+        width: 100px;
+        min-width: 100px;
+        height: 100px;
+        margin: 0 auto;
+    }
+
+    .child-photo-compact img {
+        max-height: 80px;
+    }
+
+    .child-header-meta {
+        text-align: center;
+        gap: var(--spacing-xs);
+    }
+
+    .child-meta-item {
+        font-size: var(--font-size-xs);
+    }
+
+    /* === Action Section Mobile === */
+    .child-action-section {
+        padding: 0 var(--spacing-md) var(--spacing-md);
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+
+    .action-buttons .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    /* === Family Modal Mobile === */
+    .family-modal-overlay {
+        padding: var(--spacing-sm);
+    }
+
+    .family-modal-content {
+        max-height: 90vh;
+    }
+
+    .family-member-card {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+
+    .family-member-info {
+        text-align: center;
+    }
+
+    /* === Enhanced Family Modal Mobile === */
+    .family-modal-overlay {
+        padding: var(--spacing-sm);
+    }
+
+    .family-modal-content {
+        max-height: 90vh;
+    }
+
+    .family-modal-actions {
+        padding: var(--spacing-md);
+    }
+
+    .btn-add-family {
+        font-size: 16px;
+        padding: var(--spacing-md);
+        min-height: 56px;
+    }
+
+    .family-member-card-detailed {
+        padding: var(--spacing-md);
+    }
+
+    .family-member-title {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+
+    .family-member-basic-info {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-xs);
+    }
+
+    .family-member-card-detailed .family-member-actions {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+
+    .family-member-card-detailed .family-member-actions .btn {
+        width: 100%;
+        min-height: 48px;
+    }
+
+    .detail-section {
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .detail-label {
+        font-size: 14px;
+    }
+
+    .detail-text {
+        font-size: 14px;
+        padding: var(--spacing-xs);
+    }
+
+    /* === Improved Tap Targets for Links === */
+    a:not(.btn) {
+        min-height: 32px;
+        display: inline-block;
+        padding: 4px 0;
+    }
+
+    /* === Table Touch Optimization === */
+    .table th,
+    .table td {
+        padding: 12px 8px;
+        font-size: 14px;
+    }
+
+    /* === Sponsor Portal Mobile === */
+    .sponsor-portal .btn {
+        width: 100%;
+        min-height: 48px;
+        margin-bottom: 12px;
+    }
+}
+
+/* === Additional Small Phone Optimization === */
+@media (max-width: 480px) {
+    .btn-primary {
+        font-size: 16px;           /* Slightly smaller on very small screens */
+        min-height: 52px;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .filter-actions button,
+    .filter-actions .btn {
+        width: 100%;
+        margin: 6px 0;
+    }
+}
+
+/* ========================================
    12. PRINT STYLES
    Optimized styles for printing
    ======================================== */
@@ -3176,8 +3881,7 @@ tr:hover {
     .main-header,
     .main-footer,
     .btn,
-    .pagination,
-    .search-form {
+    .pagination {
         display: none;
     }
 
@@ -3242,6 +3946,211 @@ tr:hover {
    High contrast and reduced motion support
    ======================================== */
 
+/* Skip Link - WCAG 2.4.1 Bypass Blocks */
+.skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 8px 16px;
+    text-decoration: none;
+    z-index: 10000;
+    font-weight: 700;
+    border-radius: 0 0 4px 0;
+    transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+    top: 0;
+    outline: 3px solid var(--color-warning);
+    outline-offset: 2px;
+}
+
+/* Visually Hidden - Screen Reader Only Content */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.visually-hidden:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: inherit;
+    margin: inherit;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+}
+
+/* Focus Management for Main Content */
+#main-content:focus {
+    outline: none;
+}
+
+/* ========================================
+   SAFARI-SPECIFIC ACCESSIBILITY FIXES
+   Ensures keyboard navigation works in Safari on macOS and iOS
+   ======================================== */
+
+/* Force focus visibility in Safari */
+a, button, input, select, textarea, [tabindex] {
+    -webkit-tap-highlight-color: rgba(255, 193, 7, 0.3);
+}
+
+/* Safari: Ensure all interactive elements show focus */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus,
+[role="button"]:focus,
+[tabindex="0"]:focus,
+.btn:focus {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+    /* Safari-specific webkit outline */
+    -webkit-focus-ring-color: var(--color-warning);
+}
+
+/* Safari: Force outline on all focusable elements */
+*:focus {
+    outline-width: 3px;
+    outline-style: solid;
+    outline-color: var(--color-warning);
+}
+
+/* Remove default Safari outline, replace with custom */
+*:focus:not(:focus-visible) {
+    /* For Safari that supports :focus-visible, only show on keyboard */
+    outline: none;
+}
+
+*:focus-visible {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+}
+
+/* Safari: Ensure skip link is keyboard accessible */
+.skip-link {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.skip-link:focus {
+    top: 0 !important;
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 2px !important;
+    z-index: 99999 !important;
+}
+
+/* Safari: Ensure buttons are keyboard accessible */
+button,
+.btn,
+[role="button"] {
+    -webkit-appearance: button;
+    cursor: pointer;
+}
+
+button:focus,
+.btn:focus,
+[role="button"]:focus {
+    outline: 3px solid var(--color-warning) !important;
+    outline-offset: 3px !important;
+}
+
+/* iOS Safari: Larger touch targets (minimum 44x44px) */
+@supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific styles */
+    .btn,
+    button,
+    a.btn,
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 24px;
+    }
+
+    /* Ensure text inputs are at least 16px to prevent zoom */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+
+    /* Improve tap targets for links */
+    a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 0;
+    }
+
+    /* Navigation links need sufficient tap area */
+    .main-nav a {
+        min-height: 44px;
+        padding: 12px 20px;
+    }
+}
+
+/* Safari on macOS: Ensure form controls are keyboard accessible */
+@media not all and (pointer: coarse) {
+    /* Desktop Safari */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="search"],
+    input[type="password"],
+    textarea,
+    select {
+        -webkit-appearance: none;
+        appearance: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid var(--color-primary) !important;
+        outline-offset: 2px !important;
+        border-color: var(--color-primary);
+    }
+}
+
+/* Safari: Ensure disabled elements are not focusable */
+button:disabled,
+.btn:disabled,
+[disabled],
+[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Safari: High contrast mode support */
+@media (prefers-contrast: high) {
+    *:focus,
+    *:focus-visible {
+        outline-width: 4px !important;
+        outline-color: #000 !important;
+        background-color: #ff0 !important;
+        color: #000 !important;
+    }
+}
+
 @media (prefers-contrast: high) {
     .hero {
         background: var(--color-black);
@@ -3275,5 +4184,278 @@ tr:hover {
     * {
         animation: none !important;
         transition: none !important;
+    }
+}
+
+/* ========================================
+   FIREFOX & EDGE ACCESSIBILITY ENHANCEMENTS
+   Optimizations for Mozilla Firefox and Microsoft Edge browsers
+   ======================================== */
+
+/* Firefox: Enhanced focus indicators */
+@-moz-document url-prefix() {
+    /* Firefox-specific styles */
+    *:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 2px;
+        -moz-outline-radius: 3px; /* Firefox-specific rounded outline */
+    }
+
+    button:focus,
+    .btn:focus,
+    a:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 3px;
+        -moz-outline-radius: 3px;
+    }
+
+    /* Firefox: Better form focus */
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid var(--color-primary);
+        outline-offset: 2px;
+        border-color: var(--color-primary);
+    }
+
+    /* Firefox: Skip link enhancement */
+    .skip-link:focus {
+        -moz-outline-radius: 4px;
+    }
+}
+
+/* Windows High Contrast Mode (Edge & Firefox on Windows) */
+@media (forced-colors: active) {
+    /* Ensure focus is visible in high contrast mode */
+    *:focus,
+    *:focus-visible {
+        outline: 3px solid CanvasText;
+        outline-offset: 2px;
+        forced-color-adjust: none;
+    }
+
+    /* Buttons in high contrast mode */
+    .btn,
+    button {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    .btn:hover,
+    button:hover {
+        background: Highlight;
+        color: HighlightText;
+        border-color: HighlightText;
+    }
+
+    .btn:focus,
+    button:focus {
+        outline: 3px solid Highlight;
+        outline-offset: 2px;
+    }
+
+    /* Links in high contrast mode */
+    a {
+        color: LinkText;
+        text-decoration: underline;
+        forced-color-adjust: none;
+    }
+
+    a:visited {
+        color: VisitedText;
+    }
+
+    a:hover,
+    a:focus {
+        color: HighlightText;
+        background: Highlight;
+        outline: 2px solid HighlightText;
+    }
+
+    /* Forms in high contrast mode */
+    input,
+    textarea,
+    select {
+        border: 2px solid ButtonText;
+        background: Canvas;
+        color: CanvasText;
+        forced-color-adjust: none;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+        outline: 3px solid Highlight;
+        outline-offset: 2px;
+        border-color: Highlight;
+    }
+
+    /* Status badges in high contrast mode */
+    .status-badge,
+    .badge {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Cards and containers */
+    .card,
+    .child-card,
+    .family-member-card {
+        border: 2px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Alert messages */
+    .alert {
+        border: 3px solid ButtonText;
+        forced-color-adjust: none;
+    }
+
+    /* Images should not be affected */
+    img {
+        forced-color-adjust: auto;
+    }
+}
+
+/* Edge: Specific enhancements */
+@supports (-ms-ime-align: auto) {
+    /* Legacy Edge (pre-Chromium) */
+    *:focus {
+        outline: 3px solid var(--color-warning);
+        outline-offset: 2px;
+    }
+}
+
+/* Modern Edge (Chromium): Narrator screen reader optimizations */
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    /* High contrast mode for legacy Edge */
+    *:focus {
+        outline: 4px solid;
+        outline-offset: 2px;
+    }
+
+    .btn:focus,
+    button:focus,
+    a:focus {
+        outline: 4px solid;
+        outline-offset: 3px;
+    }
+}
+
+/* Firefox: Screen reader (NVDA) optimizations */
+@media screen {
+    /* Ensure screen reader content is properly hidden/shown */
+    .visually-hidden {
+        clip-path: inset(50%);
+    }
+
+    /* Firefox: Better handling of aria-live regions */
+    [aria-live="polite"],
+    [aria-live="assertive"] {
+        position: relative; /* Firefox handles absolute positioning differently */
+    }
+}
+
+/* Edge & Firefox: Better form validation display */
+input:invalid,
+textarea:invalid,
+select:invalid {
+    border-color: var(--color-danger);
+    outline: 2px solid var(--color-danger);
+    outline-offset: 0;
+}
+
+input:invalid:focus,
+textarea:invalid:focus,
+select:invalid:focus {
+    outline-width: 3px;
+    outline-offset: 2px;
+}
+
+/* Edge & Firefox: Enhanced error messages */
+.error-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.error-message::before {
+    content: "⚠️";
+    flex-shrink: 0;
+    font-size: 1.2em;
+}
+
+/* Firefox & Edge: Better table accessibility */
+table {
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    font-weight: 700;
+}
+
+/* Ensure table headers are announced properly */
+th[scope="col"],
+th[scope="row"] {
+    background: var(--color-bg-secondary);
+    border-bottom: 2px solid var(--color-border);
+}
+
+/* Edge & Firefox: Better disabled state visibility */
+button:disabled,
+.btn:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled,
+[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(100%);
+}
+
+/* Firefox: Better handling of SVG icons */
+svg {
+    pointer-events: none; /* Prevents focus issues with icon buttons */
+}
+
+button svg,
+.btn svg,
+a svg {
+    flex-shrink: 0; /* Prevents SVG from shrinking in flex containers */
+}
+
+/* Edge: Smooth scrolling for better UX */
+@media (prefers-reduced-motion: no-preference) {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+/* Firefox & Edge: Better print accessibility */
+@media print {
+    /* Ensure focus indicators don't print */
+    *:focus {
+        outline: none !important;
+    }
+
+    /* Ensure links show URL in print */
+    a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #555;
+    }
+
+    /* Don't print skip links */
+    .skip-link {
+        display: none !important;
+    }
+
+    /* Ensure form inputs are readable when printed */
+    input,
+    textarea,
+    select {
+        border: 1px solid #000 !important;
+        background: transparent !important;
     }
 }

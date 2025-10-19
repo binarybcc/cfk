@@ -94,67 +94,350 @@ find_tasks(filter_by="project", filter_value="proj-123")
 
 ## Project Overview
 
-This is a web app called"Christmas for Kids - Sponsorship System" that manages child sponsorship programs for the Christmas for Kids charity. The plugin handles child profiles, CSV imports, sponsorship tracking, and automated email communications.
+⚠️ **CRITICAL: This is a STANDALONE PHP APPLICATION, NOT a WordPress plugin!**
+
+This is a web app called "Christmas for Kids - Sponsorship System" that manages child sponsorship programs for the Christmas for Kids charity. It's a pure PHP 8.2+ application that handles:
+
+- Child profiles with avatar-based privacy system (no real photos)
+- CSV import/export for bulk data management
+- Time-limited reservation system for child selection
+- Automated email notifications for sponsors and admins
+- Complete sponsorship workflow from selection to confirmation
+- Admin dashboard with comprehensive reporting
 
 ## Architecture
 
-The plugin follows a modular component-based architecture with these core components:
+**Location**: All code is in `cfk-standalone/` directory
 
-- **Main Plugin Class** (`ChristmasForKidsPlugin`): Singleton pattern initialization and component orchestration
-- **Children Manager**: Custom post type management for child profiles
-- **CSV Importer**: Bulk import functionality for child data
-- **Sponsorship Manager**: Handles child selection, temporary reservations, and sponsor confirmations
-- **Email Manager**: Automated email notifications for sponsors and admins
-- **Admin Dashboard**: Administrative interface and reporting
-- **Frontend Display**: Public-facing sponsorship interface
+The application follows a modular component-based architecture:
+
+### Core Components
+
+- **Email Manager** (`includes/email_manager.php`): PHPMailer integration with fallback system
+- **Reservation System** (`includes/reservation_functions.php`, `includes/reservation_emails.php`): Time-limited child selection management
+- **Sponsorship Manager** (`includes/sponsorship_manager.php`): Complete sponsorship workflow
+- **CSV Handler** (`includes/csv_handler.php`): Import/export with validation
+- **Avatar Manager** (`includes/avatar_manager.php`): Privacy-focused avatar system (7 categories)
+- **Report Manager** (`includes/report_manager.php`): Admin reporting and analytics
+- **Archive Manager** (`includes/archive_manager.php`): Year-end archiving and reset
+
+### File Structure
+
+```
+cfk-standalone/
+├── index.php              # Main entry point (routing)
+├── config/
+│   ├── config.php         # Database and settings
+│   └── database.php       # PDO connection
+├── includes/              # Core functionality (see above)
+├── pages/                 # Public-facing pages
+│   ├── children.php       # Browse children
+│   ├── child.php          # Individual profile
+│   ├── selections.php     # Shopping cart
+│   ├── reservation_review.php # Confirm reservation
+│   ├── my_sponsorships.php    # Sponsor portal
+│   └── sponsor_portal.php     # Access link entry
+├── admin/                 # Admin interface
+│   ├── index.php          # Dashboard
+│   ├── manage_children.php    # Child management
+│   ├── manage_sponsorships.php # Sponsorship processing
+│   ├── import_csv.php     # Bulk import
+│   └── reports.php        # Analytics
+├── assets/
+│   ├── css/styles.css     # Main styles
+│   └── images/avatars/    # Avatar images
+├── database/
+│   └── schema.sql         # Database structure
+└── cron/
+    └── cleanup_reservations.php # Automated cleanup
+```
 
 ## Key Design Patterns
 
-- **Modern PHP 8.2+ features**: Uses typed enums, readonly classes, match expressions, and constructor property promotion
-- **Readonly DTOs**: Immutable data transfer objects for type safety (e.g., `CFK_ChildDetails`, `CFK_SponsorData`)
-- **Enums for type safety**: Status enums (`CFK_Status`, `CFK_EmailType`, `CFK_DeliveryStatus`) prevent invalid states
-- **Component initialization**: All components are loaded via the main plugin class using dependency injection
-- **Error handling**: Comprehensive error logging and graceful degradation
+- **Modern PHP 8.2+ features**: Typed properties, enums, match expressions, constructor property promotion
+- **Component-based architecture**: Each major feature is a separate component
+- **Session-based cart system**: Sponsors can select multiple children before confirming
+- **Time-limited reservations**: 2-hour window to complete sponsorship
+- **Automated cleanup**: Cron job releases expired reservations
+- **Email queueing**: Reliable delivery with logging
+- **Avatar privacy system**: 7-category age/gender-based avatars (no real photos)
+- **PDO prepared statements**: SQL injection protection
+- **CSRF protection**: Form token validation
+- **Comprehensive error handling**: Graceful degradation with logging
 
 ## Database Schema
 
-Two main tables:
+**Five main tables:**
 
-- `wp_cfk_sponsorships`: Tracks sponsorship selections, confirmations, and cancellations
-- `wp_cfk_email_log`: Logs all email communications for audit trail
+- `families`: Family groupings (family_number: 175, 176, etc.)
+- `children`: Individual child profiles with complete information
+  - Demographics, clothing sizes, interests, wishes, special needs
+  - Avatar category assignment (baby-boy, elementary-girl, etc.)
+- `sponsorships`: Confirmed sponsorships (sponsor info, status tracking)
+- `reservations`: Time-limited child selections (2-hour window)
+- `email_log`: All automated email communications with delivery status
 
 ## Development Workflow
 
-Since this is a WordPress plugin:
+**This is NOT a WordPress plugin. It's a standalone application.**
 
-1. **Testing**: Install in WordPress development environment
-2. **Activation**: Plugin creates database tables and sets default options
-3. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
-4. **Security**: Proper nonce verification and capability checks throughout
+### Environment Notation System 🏷️
 
-## Plugin Entry Points
+To prevent confusion about which environment we're working in:
 
-- **Admin Menu**: Located under "Christmas for Kids" in WordPress admin
-- **AJAX Handlers**: Four main endpoints for child selection, confirmation, CSV import, and cancellation
-- **Cron Jobs**: Hourly cleanup of abandoned child selections
-- **Emergency Deactivation**: Available via URL parameter for debugging
+- 🏠 **LOCAL** = Your development machine
+- 🐳 **DOCKER** = OrbStack/Docker containers (PHP 8.2)
+- 🌐 **PRODUCTION** = Live cforkids.org server
+
+Always use these markers when working on files or running commands.
+
+### Initial Setup (New Machine)
+
+1. **Clone and Checkout**
+   ```bash
+   🏠 LOCAL:
+   git clone https://github.com/binarybcc/cfk.git
+   cd cfk/cfk-standalone
+   git checkout v1.5-reservation-system
+   ```
+
+2. **Configure Environment Variables (CRITICAL!)**
+   ```bash
+   🏠 LOCAL:
+   cp .env.example .env
+   # Edit .env with your Docker/local settings
+   chmod 600 .env
+
+   # Verify .env is NOT tracked by git
+   git status  # Should not show .env
+   ```
+
+3. **Start Docker Environment**
+   ```bash
+   🐳 DOCKER:
+   docker-compose up -d
+   # Access: http://localhost:8082
+   ```
+
+4. **Run Automated Tests**
+   ```bash
+   🐳 DOCKER:
+   ./tests/security-functional-tests.sh
+   # Should show: 35/36 tests passing
+   ```
+
+### Daily Development Workflow
+
+1. **Before Starting Work**
+   ```bash
+   🏠 LOCAL:
+   git pull origin v1.5-reservation-system
+   docker-compose ps  # Verify containers running
+   ```
+
+2. **During Development**
+   - Test changes in Docker before deploying
+   - Run functional tests: `./tests/security-functional-tests.sh`
+   - Check logs: `docker-compose logs web`
+
+3. **Before Committing**
+   ```bash
+   🏠 LOCAL:
+   ./tests/security-functional-tests.sh  # All tests must pass
+   git add -A
+   git commit -m "description"
+   git push origin v1.5-reservation-system
+   ```
+
+### Technical Details
+
+1. **File Structure**: All PHP files use strict typing (`declare(strict_types=1);`)
+
+2. **Database Access**: Uses PDO with prepared statements (no WordPress wpdb)
+
+3. **Security**:
+   - Environment variables for all secrets (.env files)
+   - Session-based authentication
+   - CSRF token validation
+   - Input sanitization
+   - SQL injection protection via PDO
+   - Rate limiting (5 attempts, 15-min lockout)
+
+4. **Configuration**:
+   - Environment variables in `.env` files
+   - Application settings in `config/config.php`
+   - No WordPress options table
+
+## Application Entry Points
+
+### Public Pages (via `index.php` routing)
+- `/` - Homepage
+- `/children` - Browse children with search/filter
+- `/child?id=123` - Individual child profile
+- `/selections` - View shopping cart (selected children)
+- `/reservation_review` - Confirm reservation
+- `/my_sponsorships` - Sponsor portal (access via email link)
+
+### Admin Interface
+- `/admin/` - Dashboard with statistics
+- `/admin/manage_children.php` - Add/edit/delete children
+- `/admin/manage_sponsorships.php` - Process sponsorship requests
+- `/admin/import_csv.php` - Bulk import children
+- `/admin/reports.php` - Generate reports
+
+### Automated Tasks
+- Cron job: Hourly cleanup of expired reservations (`cron/cleanup_reservations.php`)
+- Email queue processing (built into email_manager.php)
 
 ## Configuration
 
-Plugin settings stored in WordPress options table with `cfk_` prefix. Key settings include:
+### ⚠️  CRITICAL: Environment Variables (.env Files)
 
-- Selection timeout (default 2 hours)
-- Admin email notifications
-- Email templates and sender information
-- Sponsorship open/closed status
+**ALWAYS USE .env FILES FOR SENSITIVE DATA**
 
-## File Organization
+This project uses environment variables for all sensitive configuration. **NEVER hardcode credentials in source files.**
 
-- `cfk_main_plugin.php`: Main plugin file and initialization
-- `includes/`: Core functionality classes
-- `admin/`: Administrative interface files
+**Required Setup (Every Machine):**
+1. Copy `.env.example` to `.env`
+2. Configure your environment-specific values
+3. Set secure permissions: `chmod 600 .env`
+4. Verify `.env` is in `.gitignore` (NEVER commit!)
+
+**Local Development (.env):**
+```ini
+DB_HOST=db                        # Docker: 'db', Local: 'localhost'
+DB_NAME=cfk_sponsorship_dev
+DB_USER=cfk_user
+DB_PASSWORD=cfk_pass              # Local dev password
+
+SMTP_USERNAME=                    # Optional for local
+SMTP_PASSWORD=
+
+APP_DEBUG=true
+BASE_URL=http://localhost:8082
+```
+
+**Production Server (.env):**
+```ini
+DB_HOST=localhost
+DB_NAME=a4409d26_509946
+DB_USER=a4409d26_509946
+DB_PASSWORD=Fests42Cue50Fennel56Auk46
+
+SMTP_USERNAME=your_smtp_user
+SMTP_PASSWORD=your_smtp_pass
+
+APP_DEBUG=false
+BASE_URL=https://cforkids.org
+```
+
+**How It Works:**
+- `config/config.php` loads `.env` file at startup
+- Uses `getenv()` to read environment variables
+- Falls back to safe defaults if not set
+- Production credentials stay on server, never in git
+
+**Security Checklist:**
+- [ ] `.env` file exists with correct values
+- [ ] `.env` has 600 permissions (owner read/write only)
+- [ ] `.env` is listed in `.gitignore`
+- [ ] No hardcoded credentials in `config/config.php`
+- [ ] Production `.env` only exists on production server
+
+**Files That Use Environment Variables:**
+- `config/config.php` - Database connection, SMTP settings
+- All includes that access database
+- Email manager for SMTP credentials
+
+### Application Settings
+
+Additional settings in `config/config.php`:
+
+- Email settings (SMTP or PHP mail())
+- Reservation timeout (default 2 hours)
+- Admin email addresses
+- Base URL and paths
+- Avatar system configuration
+- Upload limits
+
+## Current Active Branch & Status
+
+**Branch**: `v1.5-reservation-system`
+**Main branch**: `v1.0.3-rebuild`
+**Status**: ✅ STABLE - Ready for use
+
+**For detailed status, see:** `PROJECT-STATUS.md`
+
+### Recent Major Work (Oct 13-14, 2025)
+- ✅ Security audit complete (v1.5.1)
+- ✅ Security fixes deployed (9.5/10 score)
+- ✅ Logout functionality fixed
+- ✅ Functional testing infrastructure (35/36 tests passing)
+- ✅ Environment variable system (.env files)
+- ✅ Comprehensive documentation
+
+### Critical Files to Reference
+- `PROJECT-STATUS.md` - Current project state and next steps
+- `docs/audits/v1.5.1-functional-testing-report.md` - Testing results
+- `docs/audits/v1.5.1-security-audit.md` - Security analysis
+- `tests/security-functional-tests.sh` - Automated testing
+
+## Documentation Location
+
+**All project documentation is located in `cfk-standalone/docs/`**
+
+### Documentation Structure (Organized by Category)
+
+```
+cfk-standalone/docs/
+├── README.md              # Main documentation index
+├── features/              # Feature implementation docs (7 files)
+│   ├── zeffy-donation-modal.md
+│   ├── donation-page.md
+│   └── ...
+├── components/            # Component documentation (7 files)
+│   ├── button-system.md
+│   ├── email-system.md
+│   └── ...
+├── guides/                # User guides (6 files)
+│   ├── admin-guide.md
+│   ├── csv-import-guide.md
+│   └── ...
+├── technical/             # Technical specifications (5 files)
+│   ├── alpine-js-patterns.md
+│   ├── php-82-compliance.md
+│   └── ...
+├── audits/                # Audit reports (6 files)
+├── deployment/            # Deployment guides (5 files)
+├── releases/              # Release notes (6 files)
+└── archive/               # Historical docs (1 file)
+```
+
+### Quick Access
+
+- **For feature implementation details**: `cfk-standalone/docs/features/`
+- **For component API reference**: `cfk-standalone/docs/components/`
+- **For user guides**: `cfk-standalone/docs/guides/`
+- **For technical specs**: `cfk-standalone/docs/technical/`
+- **For deployment**: `cfk-standalone/docs/deployment/`
+
+### When to Reference Documentation
+
+1. **Understanding a feature**: Check `features/` directory
+2. **Using a component**: Check `components/` directory
+3. **Deploying changes**: Check `deployment/` directory
+4. **Learning the architecture**: Check `technical/` directory
 
 ## Development Guidelines
+
+### Working with This Codebase
+
+1. **Remember**: This is NOT WordPress. No hooks, no shortcodes, no WP functions.
+2. **Testing**: Always test in `cfk-standalone/` directory
+3. **Database**: Use PDO, not wpdb
+4. **Sessions**: PHP sessions, not WordPress user system
+5. **Email**: PHPMailer with custom wrapper, not wp_mail()
+6. **Documentation**: All docs organized in `cfk-standalone/docs/` by category
 
 ### Claude Code Task Tool Usage
 
@@ -165,5 +448,6 @@ Plugin settings stored in WordPress options table with `cfk_` prefix. Key settin
 ### File Management Rules
 
 - Never save working files to the root directory
-- Organize documentation in appropriate subdirectories
+- Organize documentation in appropriate subdirectories (`cfk-standalone/docs/`)
 - Use concurrent execution patterns when possible
+- All development happens in `cfk-standalone/` directory

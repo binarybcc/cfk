@@ -22,6 +22,24 @@ if (!isLoggedIn()) {
     exit;
 }
 
+// Check if admin needs to change password (default password detection)
+$admin = Database::fetchRow(
+    "SELECT username, created_at, updated_at, last_login FROM admin_users WHERE id = ?",
+    [$_SESSION['cfk_admin_id']]
+);
+
+// Force password change if:
+// 1. Username is 'admin' AND
+// 2. Never logged in before (first login) OR created_at equals updated_at (password never changed)
+if ($admin && $admin['username'] === 'admin') {
+    $isFirstLogin = ($admin['last_login'] === null || $admin['created_at'] === $admin['updated_at']);
+    if ($isFirstLogin) {
+        $_SESSION['force_password_change'] = true;
+        header('Location: change_password.php');
+        exit;
+    }
+}
+
 $pageTitle = 'Admin Dashboard';
 
 // Get dashboard statistics
@@ -35,7 +53,7 @@ $stats = [
 
 // Get recent activity
 $recentSponsorships = Database::fetchAll("
-    SELECT s.*, c.name as child_name, 
+    SELECT s.*, CONCAT(f.family_number, c.child_letter) as child_name,
            CONCAT(f.family_number, c.child_letter) as child_display_id
     FROM sponsorships s
     JOIN children c ON s.child_id = c.id
@@ -109,7 +127,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <h3><?php echo $stats['total_families']; ?></h3>
                 <p>Families</p>
             </div>
-            <a href="manage_families.php" class="stat-link">Manage</a>
+            <a href="manage_children.php" class="stat-link">Manage</a>
         </div>
     </div>
 
@@ -117,13 +135,13 @@ include __DIR__ . '/includes/admin_header.php';
     <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="action-buttons">
-            <a href="add_child.php" class="btn btn-primary">
+            <a href="manage_children.php?action=add" class="btn btn-primary">
                 <span class="btn-icon">➕</span>
                 Add New Child
             </a>
-            <a href="add_family.php" class="btn btn-secondary">
+            <a href="manage_children.php" class="btn btn-secondary">
                 <span class="btn-icon">🏠</span>
-                Add New Family
+                Manage Children & Families
             </a>
             <a href="import_csv.php" class="btn btn-success">
                 <span class="btn-icon">📊</span>
@@ -145,8 +163,7 @@ include __DIR__ . '/includes/admin_header.php';
             <?php foreach ($childrenNeedingAttention as $child): ?>
                 <div class="attention-item">
                     <div class="attention-info">
-                        <strong><?php echo sanitizeString($child['name']); ?></strong>
-                        (ID: <?php echo sanitizeString($child['display_id']); ?>)
+                        <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
                         <span class="attention-date">
                             Pending since <?php echo date('M j, Y', strtotime($child['request_date'])); ?>
                         </span>

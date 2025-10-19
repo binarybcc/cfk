@@ -12,28 +12,39 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-// Environment detection
-$isProduction = $_SERVER['HTTP_HOST'] !== 'localhost' && 
-                strpos($_SERVER['HTTP_HOST'], '.local') === false && 
-                strpos($_SERVER['HTTP_HOST'], ':') === false;
+// Load environment variables from .env file if it exists
+if (file_exists(__DIR__ . '/../.env')) {
+    $envFile = parse_ini_file(__DIR__ . '/../.env');
+    if ($envFile) {
+        foreach ($envFile as $key => $value) {
+            putenv("$key=$value");
+            $_ENV[$key] = $value;
+        }
+    }
+}
 
-// Database Configuration
+// Environment detection
+$isProduction = ($_SERVER['HTTP_HOST'] ?? 'localhost') !== 'localhost' &&
+                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', '.local') === false &&
+                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', ':') === false;
+
+// Database Configuration - USE ENVIRONMENT VARIABLES
 $dbConfig = [
-    'host' => $isProduction ? 'localhost' : 'db',
-    'database' => $isProduction ? 'cfk_sponsorship' : 'cfk_sponsorship_dev',
-    'username' => $isProduction ? 'cfk_user' : 'root',
-    'password' => $isProduction ? 'CHANGE_THIS_PASSWORD' : 'root'
+    'host' => getenv('DB_HOST') ?: ($isProduction ? 'localhost' : 'db'),
+    'database' => getenv('DB_NAME') ?: ($isProduction ? 'a4409d26_509946' : 'cfk_sponsorship_dev'),
+    'username' => getenv('DB_USER') ?: ($isProduction ? 'a4409d26_509946' : 'root'),
+    'password' => getenv('DB_PASSWORD') ?: ($isProduction ? '' : 'root')
 ];
 
 // Application Settings
 $appConfig = [
     'app_name' => 'Christmas for Kids Sponsorship',
-    'app_version' => '1.0.0',
+    'app_version' => '1.6',
     'timezone' => 'America/New_York',
     'debug' => !$isProduction,
     
     // Paths
-    'base_url' => $isProduction ? 'https://www.cforkids.org/sponsor/' : 'http://localhost:8082/',
+    'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',
     'upload_path' => __DIR__ . '/../uploads/',
     'photo_path' => __DIR__ . '/../uploads/photos/',
     
@@ -47,7 +58,7 @@ $appConfig = [
     'max_pending_hours' => 48,
     
     // Email settings
-    'admin_email' => 'admin@cforkids.org',
+    'admin_email' => 'christmasforkids@upstatetoday.com',
     'from_email' => 'noreply@cforkids.org',
     'from_name' => 'Christmas for Kids',
 
@@ -127,9 +138,8 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
 }
 
 // Initialize database
-require_once __DIR__ . '/../src/Config/Database.php';
 require_once __DIR__ . '/../includes/database_wrapper.php';
-\CFK\Config\Database::init($dbConfig);
+Database::init($dbConfig);
 
 // Helper function to get config values
 function config(string $key, $default = null) {

@@ -19,7 +19,7 @@
                     <ul>
                         <li>Browse children who need sponsorship</li>
                         <li>Select a child or family to sponsor</li>
-                        <li>Provide gifts or gift cards</li>
+                        <li>Provide gifts</li>
                         <li>Make a child's Christmas special</li>
                     </ul>
                 </div>
@@ -38,7 +38,7 @@
                 
                 <div class="footer-section">
                     <h3>Contact</h3>
-                    <p>Email: <a href="mailto:<?php echo config('admin_email'); ?>"><?php echo config('admin_email'); ?></a></p>
+                    <p>Email: <a href="mailto:christmasforkids@upstatetoday.com">christmasforkids@upstatetoday.com</a></p>
                     <p>Questions about sponsorship? We're here to help!</p>
                 </div>
             </div>

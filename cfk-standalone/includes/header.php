@@ -15,7 +15,18 @@
     <link rel="icon" type="image/png" sizes="16x16" href="<?php echo baseUrl('assets/images/favicon-16x16.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo baseUrl('assets/images/apple-touch-icon.png'); ?>">
 
+    <!-- Alpine.js v1.4 - Progressive Enhancement -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+    <!-- Selections System v1.5 -->
+    <script src="<?php echo baseUrl('assets/js/selections.js'); ?>"></script>
+
     <style>
+        /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
+        [x-cloak] {
+            display: none !important;
+        }
+
         /* Logo Styling */
         .logo-link {
             display: block;
@@ -23,7 +34,7 @@
         }
 
         .logo-image {
-            height: 80px;
+            height: 70px;
             width: auto;
             max-width: 100%;
             display: block;
@@ -40,10 +51,68 @@
             text-decoration: none;
         }
 
+        /* Mobile Logo - More compact */
         @media (max-width: 768px) {
             .logo-image {
-                height: 60px;
+                height: 45px;
             }
+
+            .tagline {
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* Hamburger Menu Button */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: 2px solid #2c5530;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: #f8f9fa;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #2c5530;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 968px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Selections Badge */
+        .selections-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #c41e3a;
+            color: white;
+            border-radius: 12px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 6px;
+            line-height: 1;
+        }
+
+        .selections-link a {
+            display: flex;
+            align-items: center;
         }
     </style>
     
@@ -51,7 +120,11 @@
     <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
 </head>
 <body>
-    <header class="main-header">
+    <!-- Skip Navigation Link for Keyboard Users (WCAG 2.4.1) -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header class="main-header" x-data="{ mobileMenuOpen: false, isDesktop: window.innerWidth > 968 }"
+            x-init="window.addEventListener('resize', () => { isDesktop = window.innerWidth > 968 })">
         <div class="container">
             <div class="header-content">
                 <div class="logo">
@@ -64,38 +137,40 @@
                     </a>
                     <p class="tagline">Bringing Christmas joy to local children in need</p>
                 </div>
-                
-                <nav class="main-nav">
+
+                <!-- Mobile Menu Toggle Button -->
+                <button class="mobile-menu-toggle"
+                        @click="mobileMenuOpen = !mobileMenuOpen"
+                        :aria-expanded="mobileMenuOpen"
+                        aria-label="Toggle navigation menu">
+                    <span :style="mobileMenuOpen ? 'transform: rotate(45deg) translateY(8px)' : ''"></span>
+                    <span :style="mobileMenuOpen ? 'opacity: 0' : ''"></span>
+                    <span :style="mobileMenuOpen ? 'transform: rotate(-45deg) translateY(-8px)' : ''"></span>
+                </button>
+
+                <nav class="main-nav" :class="{ 'mobile-nav-open': mobileMenuOpen }">
                     <ul>
                         <li><a href="<?php echo baseUrl('?page=home'); ?>" <?php echo ($page ?? '') === 'home' ? 'class="active"' : ''; ?>>Home</a></li>
                         <li><a href="<?php echo baseUrl('?page=children'); ?>" <?php echo ($page ?? '') === 'children' ? 'class="active"' : ''; ?>>Children</a></li>
                         <li><a href="<?php echo baseUrl('?page=how_to_apply'); ?>" <?php echo ($page ?? '') === 'how_to_apply' ? 'class="active"' : ''; ?>>How to Apply</a></li>
-                        <li><a href="<?php echo baseUrl('?page=sponsor_lookup'); ?>" <?php echo in_array($page ?? '', ['sponsor_lookup', 'sponsor_portal']) ? 'class="active"' : ''; ?>>My Sponsorships</a></li>
+                        <li class="selections-link">
+                            <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" <?php echo in_array($page ?? '', ['my_sponsorships', 'selections', 'sponsor_lookup', 'sponsor_portal']) ? 'class="active"' : ''; ?>>
+                                My Sponsorships
+                                <span id="selections-badge" class="selections-badge">0</span>
+                            </a>
+                        </li>
                         <li><a href="<?php echo baseUrl('?page=about'); ?>" <?php echo ($page ?? '') === 'about' ? 'class="active"' : ''; ?>>About</a></li>
-                        <li class="donate-link"><a href="<?php echo baseUrl('?page=donate'); ?>" class="donate-btn">Donate</a></li>
                         <li class="admin-link"><a href="<?php echo baseUrl('admin/'); ?>">Admin</a></li>
                     </ul>
                 </nav>
             </div>
-            
-            <!-- Search Bar -->
-            <div class="header-search">
-                <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form">
-                    <input type="hidden" name="page" value="search">
-                    <div class="search-group">
-                        <input type="text" 
-                               name="q" 
-                               value="<?php echo isset($_GET['q']) ? sanitizeString($_GET['q']) : ''; ?>"
-                               placeholder="Search by name, interests, or wishes..." 
-                               class="search-input">
-                        <button type="submit" class="search-btn">Search</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </header>
 
-    <main class="main-content">
+    <!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
+    <div id="a11y-announcements" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+
+    <main id="main-content" class="main-content" tabindex="-1">
         <div class="container">
             <?php
             // Display messages

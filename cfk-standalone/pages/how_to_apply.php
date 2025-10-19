@@ -155,8 +155,153 @@ if (!defined('CFK_APP')) {
             <p class="spanish-text"><em>Lo siento, pero actualmente no tenemos voluntarios que hablen español. Por favor, traiga un intérprete con usted o no podremos completar su solicitud. Todos los formularios deben completarse en inglés. Gracias.</em></p>
         </div>
 
+        <!-- FAQ Accordion Section (Alpine.js Enhanced) -->
+        <div class="faq-section" x-data="{ activeQuestion: null }">
+            <h2>❓ Frequently Asked Questions</h2>
+            <p class="faq-intro">Click any question to see the answer:</p>
+
+            <div class="faq-accordion">
+                <!-- Q1: Wait Times -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 1 ? null : 1"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 1 }">
+                        <span>How long is the typical wait time?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 1 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 1"
+                        x-collapse
+                        class="faq-answer">
+                        <p>Wait times can vary significantly depending on the day and time you arrive. Typically, waits range from 30 minutes to 2 hours during peak times. Coming right when we open or later in our hours tends to have shorter waits.</p>
+                    </div>
+                </div>
+
+                <!-- Q2: Bring Children -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 2 ? null : 2"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 2 }">
+                        <span>Should I bring my children when I apply?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 2 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 2"
+                        x-collapse
+                        class="faq-answer">
+                        <p><strong>Please do not bring your children unless it is completely unavoidable.</strong> The application process can take time, and the office environment may not be suitable for young children during long waits.</p>
+                    </div>
+                </div>
+
+                <!-- Q3: Forms -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 3 ? null : 3"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 3 }">
+                        <span>Can I fill out the forms at home before I come?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 3 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 3"
+                        x-collapse
+                        class="faq-answer">
+                        <p><strong>Yes! We highly recommend it.</strong> Download the Application and Family Wish Lists PDFs above, print them, complete them at home, and bring them with you. This will significantly reduce your wait time. You may not join the queue until your forms are completed.</p>
+                    </div>
+                </div>
+
+                <!-- Q4: Documents -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 4 ? null : 4"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 4 }">
+                        <span>What if I don't have all the required documents?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 4 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 4"
+                        x-collapse
+                        class="faq-answer">
+                        <p>Unfortunately, we cannot process your application without the required documentation. If you have a current DSS Family Profile or proof of Food Stamps, that's all you need. Otherwise, you must bring proof of income, proof children live with you, and valid photo ID. Contact us at <a href="mailto:christmasforkids@upstatetoday.com">christmasforkids@upstatetoday.com</a> if you have questions about specific documents.</p>
+                    </div>
+                </div>
+
+                <!-- Q5: Age Limits -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 5 ? null : 5"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 5 }">
+                        <span>My child just turned 18. Are they still eligible?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 5 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 5"
+                        x-collapse
+                        class="faq-answer">
+                        <p>We accept children birth through age 17. However, teens must still be attending school to qualify. If your child is 18 or has graduated/left school, they are not eligible for the program.</p>
+                    </div>
+                </div>
+
+                <!-- Q6: Other Organizations -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 6 ? null : 6"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 6 }">
+                        <span>Can I apply with other Christmas assistance programs too?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 6 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 6"
+                        x-collapse
+                        class="faq-answer">
+                        <p><strong>No. This is very important:</strong> Families who apply for Christmas assistance with Christmas for Kids <strong>cannot apply for similar assistance with any other agency, church, or organization</strong>. If we find your family on any other list, you will not receive gifts through Christmas For Kids. This policy ensures we can help as many families as possible.</p>
+                    </div>
+                </div>
+
+                <!-- Q7: Expensive Items -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 7 ? null : 7"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 7 }">
+                        <span>Can my child request expensive items or specific brands?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 7 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 7"
+                        x-collapse
+                        class="faq-answer">
+                        <p>Requests for expensive items or specific name brands typically will not be fulfilled. We recommend listing 12 general wish list ideas or favorite characters for each child. Sponsors shop based on your child's interests and preferences, but within reasonable budget constraints.</p>
+                    </div>
+                </div>
+
+                <!-- Q8: Spanish Speakers -->
+                <div class="faq-item">
+                    <button
+                        @click="activeQuestion = activeQuestion === 8 ? null : 8"
+                        class="faq-question"
+                        :class="{ 'active': activeQuestion === 8 }">
+                        <span>¿Hablan español? / Do you have Spanish-speaking staff?</span>
+                        <span class="faq-icon" x-text="activeQuestion === 8 ? '−' : '+'">+</span>
+                    </button>
+                    <div
+                        x-show="activeQuestion === 8"
+                        x-collapse
+                        class="faq-answer">
+                        <p>Lo siento, pero actualmente no tenemos voluntarios que hablen español. Por favor, traiga un intérprete con usted o no podremos completar su solicitud. Todos los formularios deben completarse en inglés.</p>
+                        <p><em>(We currently do not have Spanish-speaking volunteers. Please bring an interpreter with you, or we will not be able to complete your application. All forms must be completed in English.)</em></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="contact-section">
-            <h2>❓ Questions?</h2>
+            <h2>💬 Still Have Questions?</h2>
             <p>Please email us at <a href="mailto:christmasforkids@upstatetoday.com">christmasforkids@upstatetoday.com</a></p>
         </div>
     </div>
@@ -492,6 +637,104 @@ if (!defined('CFK_APP')) {
     text-decoration: underline;
 }
 
+/* FAQ Accordion Styles (Alpine.js Enhanced) */
+.faq-section {
+    margin: 40px 0;
+}
+
+.faq-intro {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+
+.faq-accordion {
+    margin-top: 20px;
+}
+
+.faq-item {
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.faq-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.faq-question {
+    width: 100%;
+    padding: 20px;
+    background: white;
+    border: none;
+    text-align: left;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #2c5530;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.faq-question:hover {
+    background: #f8f9fa;
+}
+
+.faq-question.active {
+    background: #2c5530;
+    color: white;
+}
+
+.faq-icon {
+    font-size: 1.5em;
+    font-weight: bold;
+    margin-left: 15px;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+}
+
+.faq-question.active .faq-icon {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    padding: 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e0e0e0;
+}
+
+.faq-answer p {
+    margin: 0 0 10px 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+.faq-answer p:last-child {
+    margin-bottom: 0;
+}
+
+.faq-answer a {
+    color: #c41e3a;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.faq-answer a:hover {
+    text-decoration: underline;
+}
+
+.faq-answer strong {
+    color: #2c5530;
+}
+
+.faq-answer em {
+    color: #666;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
     .apply-container {
@@ -507,6 +750,19 @@ if (!defined('CFK_APP')) {
     }
 
     .big-text {
+        font-size: 1.3em;
+    }
+
+    .faq-question {
+        padding: 15px;
+        font-size: 1em;
+    }
+
+    .faq-answer {
+        padding: 15px;
+    }
+
+    .faq-icon {
         font-size: 1.3em;
     }
 }

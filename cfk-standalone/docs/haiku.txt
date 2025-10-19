@@ -1,0 +1,184 @@
+You are implementing a Magic Link authentication system for the Christmas for Kids admin portal. Admin emails already have 2FA enabled at the provider level, making this secure.
+
+  PROJECT CONTEXT:
+  - Repository: https://github.com/binarybcc/cfk
+  - Branch: v1.6
+  - Location: cfk-standalone/ directory
+  - Stack: PHP 8.2+, MySQL, PDO, PHPMailer (already integrated)
+  - Existing: password-based admin login (to be replaced)
+
+  IMPLEMENTATION REQUIREMENTS:
+
+  === PHASE 1: CORE MAGIC LINK SYSTEM ===
+
+  1. DATABASE SCHEMA
+  Create database/migrations/006_create_magic_link_system.sql:
+  - admin_magic_links table:
+    * id (INT PRIMARY KEY AUTO_INCREMENT)
+    * admin_user_id (INT, FK to admin_users.id)
+    * token_hash (VARCHAR(64) - SHA256 hash of token, UNIQUE INDEX)
+    * email (VARCHAR(255), INDEX)
+    * expires_at (DATETIME, INDEX)
+    * created_at (DATETIME)
+    * ip_address (VARCHAR(45) - supports IPv6)
+    * user_agent (TEXT)
+    
+  - admin_login_log table (audit trail):
+    * id, admin_user_id, event_type, ip_address, user_agent, result, timestamp
+
+  2. TOKEN GENERATION (includes/magic_link_manager.php)
+  Create MagicLinkManager class with:
+  - generateToken(): Use random_bytes(32), return hex string (64 chars)
+  - hashToken($token): Return hash('sha256', $token)
+  - createMagicLink($email, $ipAddress, $userAgent):
+    * Generate token with random_bytes(32)
+    * Store HASHED token (SHA256) in database
+    * Set expires_at = now + 5 minutes
+    * Return plaintext token (never stored)
+    
+  3. EMAIL TEMPLATE
+  Create includes/magic_link_email_template.php:
+  - HTML email with Christmas for Kids branding
+  - Large "Login to Admin Panel" button
+  - Warning: "Link expires in 5 minutes"
+  - Security notice: "Don't share this link"
+  - Plain text fallback version
+  - Use existing PHPMailer wrapper (includes/email_manager.php)
+
+  4. REQUEST HANDLER (admin/request-magic-link.php)
+  - Accept POST with email field
+  - Validate email format
+  - Check rate limits (see Phase 2)
+  - Generate token and send email
+  - CRITICAL: Generic response "If your email is registered, you'll receive a link" (prevent enumeration)
+  - Log all requests to admin_login_log
+
+  5. TOKEN VALIDATION (in MagicLinkManager class)
+  - validateToken($token):
+    * Hash submitted token with SHA256
+    * Find record WHERE token_hash = hashed AND expires_at > NOW()
+    * Use hash_equals() for constant-time comparison (prevent timing attacks)
+    * Return admin_user_id on success, null on failure
+
+  6. VERIFICATION ENDPOINT (admin/verify-magic-link.php)
+  - Accept GET with token parameter (initial landing page)
+  - Display auto-submit POST form (prevents token in browser history)
+  - POST handler:
+    * Validate token with MagicLinkManager::validateToken()
+    * Delete token immediately (single-use)
+    * Create admin session
+    * Regenerate session ID (session_regenerate_id(true))
+    * Redirect to admin dashboard
+
+  === PHASE 2: SECURITY HARDENING ===
+
+  7. RATE LIMITING
+  Create includes/rate_limiter.php:
+  - checkRateLimit($email, $ipAddress):
+    * Per email: 1 request per 5 minutes, max 3 per hour
+    * Per IP: 5 requests per 5 minutes, max 10 per hour
+    * Store in database: rate_limit_tracking table (email, ip, last_request, request_count, window_start)
+    * Return 429 Too Many Requests if exceeded
+    * Clean up old entries (older than 1 hour)
+
+  8. POST-BASED TOKEN SUBMISSION
+  In admin/verify-magic-link.php landing page:
+  ```php
+  <form id="magic-link-form" method="POST" action="/admin/verify-magic-link.php">
+      <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+      <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+      <button type="submit">Complete Login</button>
+  </form>
+  <script>document.getElementById('magic-link-form').submit();</script>
+
+  9. SESSION SECURITY
+  After successful validation:
+  - session_regenerate_id(true)
+  - Set secure cookie options:
+    - HttpOnly: true
+    - Secure: true (HTTPS only)
+    - SameSite: Strict
+  - Store admin_user_id and login_time in session
+
+  10. LOGIN NOTIFICATION EMAIL
+  After successful login, send email to admin:
+  - Subject: "New Admin Login - Christmas for Kids"
+  - Include: timestamp, IP address, browser/device info
+  - Message: "If this wasn't you, contact support immediately"
+
+  11. AUDIT LOGGING
+  Log ALL events to admin_login_log:
+  - Magic link requested (email, IP, success/failure)
+  - Token validation attempt (success/expired/invalid)
+  - Session created (admin_user_id, IP)
+  - Rate limit exceeded (email/IP blocked)
+
+  === PHASE 3: POLISH & UX ===
+
+  12. CONFIRMATION PAGE (admin/magic-link-sent.php)
+  - Generic message: "If your email is registered, you'll receive a magic link"
+  - Reminder: "Check your spam folder"
+  - Expiration notice: "Link expires in 5 minutes"
+  - Resend button (respects rate limiting)
+
+  13. ERROR HANDLING (admin/magic-link-error.php)
+  Create friendly error pages for:
+  - Expired token: "Your link has expired. Request a new one?"
+  - Invalid token: "Invalid link. Please request a new one."
+  - Already used: "This link has already been used."
+  - Rate limited: "Too many requests. Please wait 5 minutes."
+
+  14. ENUMERATION PREVENTION
+  - All responses MUST be generic
+  - Same response time for valid/invalid emails
+  - Use sleep() to normalize timing if needed
+  - Never reveal if email exists in system
+
+  15. CLEANUP CRON JOB (cron/cleanup_magic_links.php)
+  - Delete expired tokens (older than 1 hour)
+  - Delete old rate limiting records (older than 1 hour)
+  - Delete old audit logs (older than 90 days, optional)
+  - Run hourly via cron
+
+  SECURITY CHECKLIST:
+  ✅ Use random_bytes(32) for token generation
+  ✅ Store SHA256 hash, never plaintext token
+  ✅ Use hash_equals() for comparison (constant-time)
+  ✅ 5 minute token expiration
+  ✅ Single-use tokens (delete after validation)
+  ✅ Rate limiting (per email + per IP)
+  ✅ POST-based token submission (not GET)
+  ✅ HTTPS only (no HTTP)
+  ✅ Session regeneration after login
+  ✅ HttpOnly, Secure, SameSite cookies
+  ✅ Generic responses (prevent enumeration)
+  ✅ Comprehensive audit logging
+
+  FILE STRUCTURE:
+  database/migrations/006_create_magic_link_system.sql
+  includes/magic_link_manager.php
+  includes/magic_link_email_template.php
+  includes/rate_limiter.php
+  admin/request-magic-link.php (form + handler)
+  admin/verify-magic-link.php (landing + POST handler)
+  admin/magic-link-sent.php (confirmation)
+  admin/magic-link-error.php (errors)
+  cron/cleanup_magic_links.php
+
+  INTEGRATION NOTES:
+  - Use existing Database class (includes/database_wrapper.php)
+  - Use existing EmailManager (includes/email_manager.php)
+  - Use existing sanitization helpers (sanitizeString, sanitizeEmail)
+  - Follow existing code style (PHP 8.2+, strict types, type hints)
+  - Add to existing admin login page as alternative login method
+
+  TEST CASES TO CONSIDER:
+  1. Happy path: request → email → click → login
+  2. Expired token handling
+  3. Invalid token handling
+  4. Rate limit enforcement
+  5. Double-use prevention (click link twice)
+  6. Email enumeration attempts
+  7. Timing attack attempts
+
+  Begin implementation. Create all files in proper locations. Use proper error handling and logging throughout.

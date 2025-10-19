@@ -37,7 +37,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     // Apply filters
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
-        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
@@ -97,7 +97,7 @@ function getChildrenCount(array $filters = []): int {
     // Apply same filters as getChildren()
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
-        $sql .= " AND (c.name LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
+        $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
@@ -180,7 +180,38 @@ function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
  */
 function getFamilyById(int $familyId): ?array {
     $sql = "SELECT * FROM families WHERE id = :family_id";
-    return Database::fetch($sql, ['family_id' => $familyId]);
+    return Database::fetchRow($sql, ['family_id' => $familyId]);
+}
+
+/**
+ * Get family information by family number (user-facing ID like 201, 202, etc.)
+ */
+function getFamilyByNumber(string $familyNumber): ?array {
+    $sql = "SELECT * FROM families WHERE family_number = :family_number";
+    return Database::fetchRow($sql, ['family_number' => $familyNumber]);
+}
+
+/**
+ * Get all family members by family number
+ */
+function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array {
+    $sql = "
+        SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
+        FROM children c
+        JOIN families f ON c.family_id = f.id
+        WHERE f.family_number = :family_number
+    ";
+
+    $params = ['family_number' => $familyNumber];
+
+    if ($excludeChildId) {
+        $sql .= " AND c.id != :exclude_id";
+        $params['exclude_id'] = $excludeChildId;
+    }
+
+    $sql .= " ORDER BY c.child_letter";
+
+    return Database::fetchAll($sql, $params);
 }
 
 /**
@@ -261,7 +292,7 @@ function createSponsorship(int $childId, array $sponsorData): int {
  */
 function getSponsorshipById(int $sponsorshipId): ?array {
     $sql = "
-        SELECT s.*, c.name as child_name, 
+        SELECT s.*, CONCAT(f.family_number, c.child_letter) as child_name,
                CONCAT(f.family_number, c.child_letter) as child_display_id
         FROM sponsorships s
         JOIN children c ON s.child_id = c.id
@@ -561,3 +592,34 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
         );
     }
 }
+
+/**
+ * Format a datetime string for display
+ */
+function formatDateTime(?string $datetime): string {
+    if (empty($datetime)) {
+        return "";
+    }
+    try {
+        $dt = new DateTime($datetime);
+        return $dt->format("M j, Y g:i A");
+    } catch (Exception $e) {
+        return $datetime;
+    }
+}
+
+/**
+ * Format a date string for display
+ */
+function formatDate(?string $date): string {
+    if (empty($date)) {
+        return "";
+    }
+    try {
+        $dt = new DateTime($date);
+        return $dt->format("M j, Y");
+    } catch (Exception $e) {
+        return $date;
+    }
+}
+

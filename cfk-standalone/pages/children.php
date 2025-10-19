@@ -103,97 +103,294 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
     require_once __DIR__ . '/../includes/components/page_header.php';
     ?>
 
-    <!-- Filters Section (hidden in family view mode) -->
+    <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
     <?php if (!$viewingFamily): ?>
-    <div class="filters-section">
-        <form method="GET" action="<?php echo baseUrl(); ?>" class="filters-form">
-            <input type="hidden" name="page" value="children">
-            
-            <div class="filter-group">
-                <label for="search">Search:</label>
-                <input type="text" 
-                       id="search" 
-                       name="search" 
-                       value="<?php echo $filters['search'] ?? ''; ?>"
-                       placeholder="Name, interests, or wishes">
+    <script>
+    // Define children data for Alpine.js
+    window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+
+    // Define siblings data for Alpine.js
+    window.siblingsByFamily = <?php echo json_encode($siblingsByFamily, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
+
+    // Helper function for age/gender-appropriate placeholder images
+    window.getPlaceholderImage = function(age, gender) {
+        const baseUrl = '<?php echo baseUrl('assets/images/'); ?>';
+
+        // Age categories
+        if (age <= 5) {
+            return baseUrl + (gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
+        } else if (age <= 11) {
+            return baseUrl + (gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
+        } else if (age <= 14) {
+            return baseUrl + (gender === 'M' ? 'middleboysm.png' : 'middlegirlsm.png');
+        } else {
+            return baseUrl + (gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
+        }
+    };
+
+    // Helper function to get age category from age
+    window.getAgeCategory = function(age) {
+        if (age <= 4) {
+            return 'birth_to_4';
+        } else if (age <= 10) {
+            return 'elementary';
+        } else if (age <= 13) {
+            return 'middle_school';
+        } else if (age <= 18) {
+            return 'high_school';
+        }
+        return 'high_school'; // Default for ages > 18
+    };
+
+    // Helper function to get age category label
+    window.getAgeCategoryLabel = function(age) {
+        const category = window.getAgeCategory(age);
+        const labels = {
+            'birth_to_4': 'Birth to 4 Years',
+            'elementary': 'Elementary',
+            'middle_school': 'Middle School',
+            'high_school': 'High School'
+        };
+        return labels[category] || '';
+    };
+
+    // Helper function to get sibling count
+    window.getSiblingCount = function(familyId) {
+        const siblings = window.siblingsByFamily[familyId] || [];
+        // Count available siblings (excluding current child)
+        return siblings.filter(s => s.status === 'available').length - 1;
+    };
+
+    // Selections System v1.5 - Real implementation
+    window.addToSelections = function(child) {
+        if (SelectionsManager.addChild(child)) {
+            // Successfully added
+            showNotification(`Added ${child.display_id} to your selections!`, 'success');
+        } else {
+            // Already in selections
+            showNotification(`${child.display_id} is already in your selections.`, 'info');
+        }
+    };
+
+    // Simple notification system
+    window.showNotification = function(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: ${type === 'success' ? '#2c5530' : type === 'warning' ? '#f39c12' : '#3498db'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+            max-width: 300px;
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    };
+    </script>
+    <div class="filters-section" x-data="{
+        search: '',
+        genderFilter: '',
+        ageCategoryFilter: '',
+        allChildren: [],
+        isLoading: true,
+        async init() {
+            // Load ALL available children from database
+            const apiUrl = '<?php echo baseUrl('api/get_all_children.php'); ?>';
+            console.log('Loading all children from:', apiUrl);
+
+            try {
+                const response = await fetch(apiUrl);
+                console.log('Response status:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('API returned:', data.count, 'children');
+
+                if (data.success && data.children) {
+                    this.allChildren = data.children;
+                    // Also update the window variables for other functions
+                    window.childrenData = data.children;
+                    window.siblingsByFamily = data.siblings || {};
+                    console.log('Successfully loaded', this.allChildren.length, 'children');
+                } else {
+                    console.warn('API response not successful:', data);
+                    // Fallback to page data
+                    this.allChildren = window.childrenData || [];
+                }
+            } catch (error) {
+                console.error('Error loading children:', error);
+                console.error('Error details:', error.message);
+                // Fallback to page data
+                this.allChildren = window.childrenData || [];
+                console.log('Falling back to page data:', this.allChildren.length, 'children');
+            } finally {
+                this.isLoading = false;
+            }
+        },
+        get filteredChildren() {
+            return this.allChildren.filter(child => {
+                const searchLower = this.search.toLowerCase();
+                const matchesSearch = !this.search ||
+                    (child.display_id && child.display_id.toLowerCase().includes(searchLower)) ||
+                    (child.interests && child.interests.toLowerCase().includes(searchLower)) ||
+                    (child.wishes && child.wishes.toLowerCase().includes(searchLower)) ||
+                    child.age.toString().includes(searchLower);
+                const matchesGender = !this.genderFilter || child.gender === this.genderFilter;
+                const matchesAgeCategory = !this.ageCategoryFilter ||
+                    window.getAgeCategory(child.age) === this.ageCategoryFilter;
+                return matchesSearch && matchesGender && matchesAgeCategory;
+            });
+        }
+    }">
+        <div class="filters-form">
+            <div class="filter-group filter-group-search">
+                <label for="child-search-input">Search:</label>
+                <div class="search-input-wrapper">
+                    <input type="text"
+                           id="child-search-input"
+                           x-model="search"
+                           placeholder="Family code, interests, wishes, age...">
+                    <small class="search-help-text">
+                        Try: "123A", "bike", "doll", "boy 6", etc.
+                    </small>
+                </div>
             </div>
-            
+
             <div class="filter-group">
-                <label for="age_category">Age Group:</label>
-                <select id="age_category" name="age_category">
-                    <option value="">All Ages</option>
-                    <?php 
-                    global $ageCategories;
-                    foreach ($ageCategories as $key => $category): ?>
-                        <option value="<?php echo $key; ?>" 
-                                <?php echo ($filters['age_category'] ?? '') === $key ? 'selected' : ''; ?>>
-                            <?php echo $category['label']; ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div class="filter-group">
-                <label for="gender">Gender:</label>
-                <select id="gender" name="gender">
+                <label for="child-gender-filter">Gender:</label>
+                <select id="child-gender-filter" x-model="genderFilter">
                     <option value="">Both</option>
-                    <option value="M" <?php echo ($filters['gender'] ?? '') === 'M' ? 'selected' : ''; ?>>Boys</option>
-                    <option value="F" <?php echo ($filters['gender'] ?? '') === 'F' ? 'selected' : ''; ?>>Girls</option>
+                    <option value="M">Boys</option>
+                    <option value="F">Girls</option>
                 </select>
             </div>
-            
+
+            <div class="filter-group">
+                <label for="child-age-category-filter">Age Group:</label>
+                <select id="child-age-category-filter" x-model="ageCategoryFilter">
+                    <option value="">All Age Groups</option>
+                    <option value="birth_to_4">Birth to 4 Years</option>
+                    <option value="elementary">Elementary (5-10)</option>
+                    <option value="middle_school">Middle School (11-13)</option>
+                    <option value="high_school">High School (14-18)</option>
+                </select>
+            </div>
+
             <div class="filter-actions">
-                <?php echo renderButton('Filter', null, 'primary', ['submit' => true]); ?>
-                <?php echo renderButton('Clear', baseUrl('?page=children'), 'secondary'); ?>
+                <button @click="search = ''; genderFilter = ''; ageCategoryFilter = '';" class="btn btn-secondary">
+                    Clear Filters
+                </button>
             </div>
-        </form>
-    </div>
-    <?php endif; ?>
+        </div>
 
-    <!-- Children Grid -->
-    <?php if (empty($children)): ?>
-        <div class="no-results">
-            <h3>No Children Found</h3>
-            <p>
-                <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                    No children match your current filters. Try adjusting your search criteria.
-                <?php else: ?>
-                    There are no children currently available for sponsorship.
-                <?php endif; ?>
+        <!-- Results Counter -->
+        <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+            <p style="margin: 0; font-weight: 600; color: #2c5530;">
+                <span x-show="isLoading">Loading children...</span>
+                <span x-show="!isLoading">
+                    Showing <span x-text="filteredChildren.length"></span> of <span x-text="allChildren.length"></span> children
+                    <span x-show="search || genderFilter || ageCategoryFilter" style="color: #666; font-weight: normal;">
+                        (filtered)
+                    </span>
+                </span>
             </p>
-            <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                <?php echo renderButton('View All Children', baseUrl('?page=children'), 'primary'); ?>
-            <?php endif; ?>
         </div>
-    <?php else: ?>
+
+        <!-- Children Grid with Alpine.js Instant Filtering -->
         <div class="children-grid">
-            <?php foreach ($children as $child):
-                // Get pre-loaded siblings (no database query!)
-                $allFamilyMembers = $siblingsByFamily[$child['family_id']] ?? [];
-                $siblings = array_filter($allFamilyMembers, fn($s) => $s['id'] != $child['id']);
-
-                // Set options for the child card component
-                $options = [
-                    'show_wishes' => true,
-                    'show_interests' => true,
-                    'show_id' => true,
-                    'show_siblings' => !$viewingFamily, // Hide siblings info when viewing family
-                    'siblings' => $siblings,
-                    'card_class' => 'child-card',
-                    'button_text' => 'Learn More & Sponsor',
-                    'show_actions' => true,
-                    'show_family_button' => !$viewingFamily // Hide "View Family" button in family view
-                ];
-                include __DIR__ . '/../includes/components/child_card.php';
-            endforeach; ?>
-        </div>
-
-        <!-- Pagination (hidden in family view mode) -->
-        <?php if (!$viewingFamily && $totalPages > 1): ?>
-            <div class="pagination-wrapper">
-                <?php echo generatePagination($currentPage, $totalPages, $baseUrl); ?>
+            <!-- No Results Message -->
+            <div x-show="filteredChildren.length === 0" x-transition class="no-results">
+                <h2>No Children Found</h2>
+                <p>No children match your current filters. Try adjusting your search criteria.</p>
             </div>
-        <?php endif; ?>
+
+            <!-- Filtered Children Cards -->
+            <template x-for="child in filteredChildren" :key="child.id">
+                <div class="child-card child-card-v2"
+                     x-data="{
+                         siblingCount: window.getSiblingCount(child.family_id)
+                     }"
+                     x-transition>
+                    <!-- Top Section: Image + Metadata Side by Side -->
+                    <div class="child-top-section">
+                        <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
+                        <div class="child-photo-compact">
+                            <img :src="window.getPlaceholderImage(child.age, child.gender)"
+                                 :alt="'Child ' + child.display_id">
+                        </div>
+
+                        <!-- Metadata beside image -->
+                        <div class="child-header-meta">
+                            <div class="child-meta-item">
+                                <strong>Child:</strong> <span x-text="child.display_id"></span>
+                            </div>
+                            <div class="child-meta-item">
+                                <strong>Age:</strong> <span x-text="child.age"></span>
+                            </div>
+                            <div class="child-meta-item">
+                                <strong></strong> <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
+                            </div>
+                            <div class="child-meta-item" x-show="child.grade">
+                                <strong>Age Group:</strong> <span x-text="child.grade || 'N/A'"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle Section: Details -->
+                    <div class="child-info">
+                        <!-- Interests & Wishes -->
+                        <div x-show="child.interests" style="margin-bottom: 15px;">
+                            <strong style="color: #2c5530;">Interests:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.interests"></p>
+                        </div>
+
+                        <div x-show="child.wishes" style="margin-bottom: 15px;">
+                            <strong style="color: #c41e3a;">Wishes:</strong>
+                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.wishes"></p>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Section: Sibling Info + Actions (Blue Border Area) -->
+                    <div class="child-action-section">
+                        <!-- Sibling Count -->
+                        <div class="sibling-info">
+                            <span class="sibling-text">Number of Siblings available: <strong x-text="siblingCount"></strong></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons">
+                            <a :href="'<?php echo baseUrl('?page=family&family_number='); ?>' + child.family_number"
+                               class="btn btn-secondary btn-view-family"
+                               :class="siblingCount === 0 ? 'btn-disabled' : ''"
+                               :aria-disabled="siblingCount === 0 ? 'true' : 'false'">
+                                View Family
+                            </a>
+                            <button @click="addToSelections(child)"
+                                    class="btn btn-primary btn-sponsor">
+                                SPONSOR
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
+        </div>
+    </div>
     <?php endif; ?>
 
     <!-- Call to Action -->

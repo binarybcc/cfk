@@ -23,9 +23,11 @@
                 <ul>
                     <li><a href="index.php" <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'class="active"' : ''; ?>>Dashboard</a></li>
                     <li><a href="manage_children.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_children.php' ? 'class="active"' : ''; ?>>Children</a></li>
-                    <li><a href="manage_families.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_families.php' ? 'class="active"' : ''; ?>>Families</a></li>
                     <li><a href="manage_sponsorships.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
                     <li><a href="reports.php" <?php echo basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
+                    <?php if ($_SESSION['cfk_admin_role'] === 'admin'): ?>
+                    <li><a href="manage_admins.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_admins.php' ? 'class="active"' : ''; ?>>Administrators</a></li>
+                    <?php endif; ?>
                     <li><a href="year_end_reset.php" <?php echo basename($_SERVER['PHP_SELF']) === 'year_end_reset.php' ? 'class="active"' : ''; ?> style="color: #dc3545;">Year-End Reset</a></li>
                 </ul>
             </nav>
@@ -44,11 +46,18 @@
 
     <main class="admin-content">
         <?php
-        // Display messages
-        $message = getMessage();
-        if ($message): ?>
-            <div class="alert alert-<?php echo $message['type']; ?>">
-                <?php echo sanitizeString($message['text']); ?>
+        // Display messages - support both session-based and direct variable approaches
+        $displayMessage = getMessage(); // Check session first
+        if (!$displayMessage && isset($message) && !empty($message)) {
+            // Fallback to direct variables (for pages not using session-based messaging)
+            $displayMessage = [
+                'text' => $message,
+                'type' => $messageType ?? 'success'
+            ];
+        }
+        if ($displayMessage): ?>
+            <div class="alert alert-<?php echo $displayMessage['type']; ?>">
+                <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
         <?php endif; ?>
 

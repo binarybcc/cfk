@@ -1,0 +1,11 @@
+⚠️⚠️⚠️ REMINDER: SETUP GIT ON LIVE SERVER ⚠️⚠️⚠️
+
+See detailed instructions in:
+/Users/johncorbin/Desktop/projs/cfk/cfk-standalone/docs/SETUP-GIT-ON-SERVER.md
+
+This will make deployments much easier and safer!
+
+Current status: Using manual SCP uploads
+Recommended: Use git pull for deployments
+
+Takes about 2 minutes to set up.

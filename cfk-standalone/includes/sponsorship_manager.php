@@ -19,18 +19,18 @@ class CFK_Sponsorship_Manager {
     const STATUS_SPONSORED = 'confirmed';  // Match database enum
     const STATUS_COMPLETED = 'completed';
     const STATUS_INACTIVE = 'inactive';
-    
-    const PENDING_TIMEOUT_HOURS = 48; // Hours before pending expires
+
+    const PENDING_TIMEOUT_HOURS = 2; // Hours before pending expires (shopping cart timeout)
     
     /**
      * Check if a child is available for sponsorship
      */
     public static function isChildAvailable(int $childId): array {
         $child = Database::fetchRow(
-            "SELECT c.id, c.name, c.status, 
+            "SELECT c.id, CONCAT(f.family_number, c.child_letter) as name, c.status,
                     CONCAT(f.family_number, c.child_letter) as display_id
              FROM children c
-             JOIN families f ON c.family_id = f.id  
+             JOIN families f ON c.family_id = f.id
              WHERE c.id = ?",
             [$childId]
         );
@@ -154,7 +154,7 @@ class CFK_Sponsorship_Manager {
                 // Get full sponsorship data for emails (includes ALL child details for shopping)
                 $fullSponsorship = Database::fetchRow(
                     "SELECT s.*,
-                            c.name as child_name,
+                            CONCAT(f.family_number, c.child_letter) as child_name,
                             c.age as child_age,
                             c.grade as child_grade,
                             c.gender as child_gender,
@@ -487,7 +487,7 @@ class CFK_Sponsorship_Manager {
         return Database::fetchAll(
             "SELECT s.*,
                     c.id as child_id,
-                    c.name as child_name,
+                    CONCAT(f.family_number, c.child_letter) as child_name,
                     c.age as child_age,
                     c.grade as child_grade,
                     c.gender as child_gender,
@@ -502,7 +502,6 @@ class CFK_Sponsorship_Manager {
                     c.status as child_status,
                     f.id as family_id,
                     f.family_number,
-                    f.family_name,
                     CONCAT(f.family_number, c.child_letter) as child_display_id
              FROM sponsorships s
              JOIN children c ON s.child_id = c.id
@@ -515,27 +514,31 @@ class CFK_Sponsorship_Manager {
     }
 
     /**
-     * Generate portal access token for sponsor email
+     * Generate portal access token for sponsor email (DATABASE STORED)
      */
     public static function generatePortalToken(string $email): string {
         $token = bin2hex(random_bytes(32));
+        $tokenHash = password_hash($token, PASSWORD_DEFAULT);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
 
-        // Store token in session (could also use database for production)
-        if (!isset($_SESSION['portal_tokens'])) {
-            $_SESSION['portal_tokens'] = [];
+        try {
+            // Store in database for revocation capability
+            Database::insert('portal_access_tokens', [
+                'token_hash' => $tokenHash,
+                'sponsor_email' => $email,
+                'expires_at' => $expiresAt,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+            ]);
+        } catch (Exception $e) {
+            error_log('Failed to store portal token: ' . $e->getMessage());
         }
 
-        $_SESSION['portal_tokens'][$token] = [
-            'email' => $email,
-            'expires_at' => $expiresAt
-        ];
-
-        return $token;
+        return $token;  // Return plain token (only sent via email once)
     }
 
     /**
-     * Verify portal access token
+     * Verify portal access token (DATABASE VERIFIED)
      */
     public static function verifyPortalToken(string $token): array {
         if (empty($token)) {
@@ -546,31 +549,78 @@ class CFK_Sponsorship_Manager {
             ];
         }
 
-        if (!isset($_SESSION['portal_tokens'][$token])) {
+        try {
+            // Get recent tokens (within last 24 hours, not expired, not used, not revoked)
+            $recentTokens = Database::fetchAll(
+                "SELECT * FROM portal_access_tokens
+                 WHERE expires_at > NOW()
+                 AND used_at IS NULL
+                 AND revoked_at IS NULL
+                 AND created_at > DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                 ORDER BY created_at DESC"
+            );
+
+            // Check token against each hash (constant-time comparison via password_verify)
+            foreach ($recentTokens as $tokenRecord) {
+                if (password_verify($token, $tokenRecord['token_hash'])) {
+                    // Check expiration
+                    if (strtotime($tokenRecord['expires_at']) < time()) {
+                        return [
+                            'valid' => false,
+                            'message' => 'Access token has expired. Please request a new access link.',
+                            'email' => null
+                        ];
+                    }
+
+                    // Mark as used
+                    Database::update('portal_access_tokens',
+                        ['used_at' => date('Y-m-d H:i:s')],
+                        ['id' => $tokenRecord['id']]
+                    );
+
+                    return [
+                        'valid' => true,
+                        'message' => 'Token valid',
+                        'email' => $tokenRecord['sponsor_email']
+                    ];
+                }
+            }
+
             return [
                 'valid' => false,
                 'message' => 'Invalid or expired access token.',
                 'email' => null
             ];
-        }
-
-        $tokenData = $_SESSION['portal_tokens'][$token];
-
-        // Check if expired
-        if (strtotime($tokenData['expires_at']) < time()) {
-            unset($_SESSION['portal_tokens'][$token]);
+        } catch (Exception $e) {
+            error_log('Failed to verify portal token: ' . $e->getMessage());
             return [
                 'valid' => false,
-                'message' => 'Access token has expired. Please request a new access link.',
+                'message' => 'System error occurred.',
                 'email' => null
             ];
         }
+    }
 
-        return [
-            'valid' => true,
-            'message' => 'Token valid',
-            'email' => $tokenData['email']
-        ];
+    /**
+     * Revoke all portal access tokens for an email address
+     */
+    public static function revokePortalTokens(string $email): bool {
+        try {
+            $updated = Database::execute(
+                "UPDATE portal_access_tokens SET revoked_at = NOW()
+                 WHERE sponsor_email = ? AND revoked_at IS NULL",
+                [$email]
+            );
+
+            if ($updated > 0) {
+                error_log("CFK: Revoked $updated portal tokens for $email");
+            }
+
+            return true;
+        } catch (Exception $e) {
+            error_log('Failed to revoke portal tokens: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
