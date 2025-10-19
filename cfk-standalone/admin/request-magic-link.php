@@ -44,9 +44,7 @@ try {
     $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 
-    // TEMPORARILY DISABLED: Check rate limiting
-    // TODO: Fix rate limiter and re-enable
-    /*
+    // Check rate limiting
     if (RateLimiter::isRateLimited($email, $ipAddress)) {
         MagicLinkManager::logEvent(null, 'rate_limit_exceeded', $ipAddress, $userAgent, 'blocked', [
             'email' => $email
@@ -62,7 +60,6 @@ try {
         ]);
         exit;
     }
-    */
 
     // Check if email is registered as admin
     $adminSql = "SELECT id, email FROM admin_users WHERE email = :email LIMIT 1";
@@ -147,11 +144,11 @@ try {
 
 /**
  * Ensure constant-time response to prevent timing attacks
- * Minimum execution time: 200ms (reduced for browser compatibility)
+ * Minimum execution time: 800ms (typical SMTP send duration)
  */
 function ensureConstantTime(float $startTime): void {
     $executionTimeMs = (microtime(true) - $startTime) * 1000;
-    $targetTimeMs = 200; // Target 200ms minimum (reduced from 800ms for testing)
+    $targetTimeMs = 800; // Target 800ms minimum (typical email send time)
 
     if ($executionTimeMs < $targetTimeMs) {
         $sleepMs = (int)($targetTimeMs - $executionTimeMs);
