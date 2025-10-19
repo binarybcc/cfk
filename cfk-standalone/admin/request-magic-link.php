@@ -16,26 +16,18 @@ require_once __DIR__ . '/../includes/magic_link_email_template.php';
 
 header('Content-Type: application/json');
 
-// DEBUG: Log script start
-error_log("Magic link request started from IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
-
 // Track execution time to prevent timing attacks (email enumeration)
 $startTime = microtime(true);
 
 try {
-    error_log("Magic link: Entering try block");
-
     // Only accept POST requests
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         throw new Exception('Method not allowed');
     }
 
-    error_log("Magic link: POST method confirmed");
-
     // Get email from POST
     $email = sanitizeString($_POST['email'] ?? '');
-    error_log("Magic link: Email received: " . $email);
 
     if (empty($email)) {
         http_response_code(400);
@@ -104,16 +96,15 @@ try {
             'user_agent' => $userAgent
         ]);
 
-        // Send email (only for valid admins)
-        $emailManager = new EmailManager();
-        $subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
+        // Send email (only for valid admins) - Use working pattern from reservation_emails.php
+        $mailer = CFK_Email_Manager::getMailer();
+        $mailer->clearAddresses();
+        $mailer->addAddress($email);
+        $mailer->Subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
+        $mailer->Body = $htmlContent;
+        $mailer->AltBody = $textContent;
 
-        $sent = $emailManager->send(
-            to: $email,
-            subject: $subject,
-            htmlContent: $htmlContent,
-            textContent: $textContent
-        );
+        $sent = $mailer->send();
 
         if (!$sent) {
             MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
