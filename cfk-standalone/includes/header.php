@@ -164,25 +164,6 @@
                     </ul>
                 </nav>
             </div>
-
-            <!-- Search Bar - Always visible on desktop, toggle with menu on mobile -->
-            <div class="header-search" :class="{ 'search-visible': isDesktop || mobileMenuOpen }">
-                <form method="GET" action="<?php echo baseUrl(); ?>" class="search-form" role="search">
-                    <input type="hidden" name="page" value="children">
-                    <div class="search-group">
-                        <label for="header-search-input" class="visually-hidden">Search for children</label>
-                        <input type="text"
-                               id="header-search-input"
-                               name="search"
-                               value="<?php echo isset($_GET['search']) ? sanitizeString($_GET['search']) : ''; ?>"
-                               placeholder="Search children..."
-                               class="search-input"
-                               aria-describedby="header-search-hint">
-                        <span id="header-search-hint" class="visually-hidden">Search by family number, age, grade, or interests</span>
-                        <button type="submit" class="search-btn" aria-label="Submit search">Search</button>
-                    </div>
-                </form>
-            </div>
         </div>
     </header>
 

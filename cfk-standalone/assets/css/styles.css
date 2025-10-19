@@ -721,77 +721,6 @@ textarea:focus {
     }
 }
 
-/* Header Search */
-.header-search {
-    padding: var(--spacing-sm) 0;
-    border-top: 1px solid var(--color-border-lighter);
-    margin-top: var(--spacing-sm);
-    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
-}
-
-/* Hide search on mobile by default, show when menu is open */
-@media (max-width: 968px) {
-    .header-search {
-        max-height: 0;
-        overflow: hidden;
-        opacity: 0;
-        padding: 0;
-        margin: 0;
-        border: none;
-    }
-
-    .header-search.search-visible {
-        max-height: 200px;
-        opacity: 1;
-        padding: var(--spacing-md) 0;
-        margin-top: var(--spacing-md);
-        border-top: 1px solid var(--color-border-lighter);
-    }
-
-    .search-input {
-        font-size: 16px; /* Prevents iOS zoom on focus */
-    }
-}
-
-.search-form {
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-.search-group {
-    display: flex;
-    gap: var(--spacing-sm);
-}
-
-.search-input {
-    flex: 1;
-    padding: 0.75rem var(--spacing-md);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-    transition: border-color var(--transition-fast);
-}
-
-.search-input:focus {
-    outline: none;
-    border-color: var(--color-primary);
-}
-
-.search-btn {
-    padding: 0.75rem 1.5rem;
-    background: var(--color-primary);
-    color: var(--color-white);
-    border: none;
-    border-radius: var(--radius-md);
-    font-weight: bold;
-    cursor: pointer;
-    transition: background var(--transition-fast);
-}
-
-.search-btn:hover {
-    background: var(--color-primary-dark);
-}
-
 /* ----------------------------------------
    4.6 Alerts & Messages
    ---------------------------------------- */
@@ -3579,14 +3508,6 @@ tr:hover {
         padding: 0 var(--spacing-sm);
     }
 
-    .search-group {
-        flex-direction: column;
-    }
-
-    .search-input {
-        margin-bottom: var(--spacing-sm);
-    }
-
     h1 { font-size: var(--font-size-3xl); }
     h2 { font-size: var(--font-size-2xl); }
 
@@ -3910,14 +3831,6 @@ tr:hover {
         padding: var(--spacing-xs);
     }
 
-    /* === Search Input === */
-    .search-input,
-    input[type="search"] {
-        min-height: 48px;
-        font-size: 16px;           /* Prevent zoom */
-        padding: 12px 16px;
-    }
-
     /* === Improved Tap Targets for Links === */
     a:not(.btn) {
         min-height: 32px;
@@ -3968,8 +3881,7 @@ tr:hover {
     .main-header,
     .main-footer,
     .btn,
-    .pagination,
-    .search-form {
+    .pagination {
         display: none;
     }
 
