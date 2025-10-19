@@ -55,7 +55,6 @@ class RateLimiter {
                 SELECT COUNT(*) as count
                 FROM rate_limit_tracking
                 WHERE email = :email
-                AND window_start > :window_start
                 AND last_request > :window_start
             ";
 
@@ -108,7 +107,6 @@ class RateLimiter {
                 SELECT COUNT(*) as count
                 FROM rate_limit_tracking
                 WHERE ip_address = :ip_address
-                AND window_start > :window_start
                 AND last_request > :window_start
             ";
 
