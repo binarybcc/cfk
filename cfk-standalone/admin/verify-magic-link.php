@@ -153,10 +153,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Regenerate session ID (prevent session fixation attacks)
         session_regenerate_id(true);
 
-        // Create admin session
-        $_SESSION['admin_id'] = $adminUser['id'];
-        $_SESSION['admin_email'] = $adminUser['email'];
-        $_SESSION['admin_username'] = $adminUser['username'];
+        // Create admin session (use cfk_ prefix to match isLoggedIn() check)
+        $_SESSION['cfk_admin_id'] = $adminUser['id'];
+        $_SESSION['cfk_admin_email'] = $adminUser['email'];
+        $_SESSION['cfk_admin_username'] = $adminUser['username'];
+        $_SESSION['cfk_admin_role'] = 'admin';
         $_SESSION['login_time'] = time();
         $_SESSION['login_ip'] = $ipAddress;
 
