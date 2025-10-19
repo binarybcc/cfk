@@ -307,8 +307,9 @@ $pageTitle = 'My Sponsorships';
                         <input type="hidden" name="lookup_email" value="1">
 
                         <?php if (!empty($errors)): ?>
-                            <div class="alert alert-error">
-                                <ul>
+                            <div class="alert alert-error" role="alert" aria-live="polite">
+                                <strong>Error:</strong>
+                                <ul id="sponsorship-form-errors">
                                     <?php foreach ($errors as $error): ?>
                                         <li><?php echo sanitizeString($error); ?></li>
                                     <?php endforeach; ?>
@@ -317,16 +318,19 @@ $pageTitle = 'My Sponsorships';
                         <?php endif; ?>
 
                         <div class="form-group">
-                            <label for="sponsor_email" class="form-label">Your Email Address</label>
+                            <label for="sponsor_email" class="form-label">Your Email Address <span aria-label="required">*</span></label>
                             <input type="email"
                                    id="sponsor_email"
                                    name="sponsor_email"
-                                   class="form-input"
+                                   class="form-input <?php echo !empty($errors) ? 'input-error' : ''; ?>"
                                    placeholder="example@email.com"
                                    value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
                                    required
+                                   aria-required="true"
+                                   aria-describedby="sponsorship-email-help<?php echo !empty($errors) ? ' sponsorship-form-errors' : ''; ?>"
+                                   <?php echo !empty($errors) ? 'aria-invalid="true"' : ''; ?>
                                    autocomplete="email">
-                            <div class="form-help">Enter the email address you used when sponsoring</div>
+                            <div id="sponsorship-email-help" class="form-help">Enter the email address you used when sponsoring</div>
                         </div>
 
                         <button type="submit" class="btn btn-large btn-primary">

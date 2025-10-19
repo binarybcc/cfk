@@ -65,31 +65,37 @@ $pageTitle = 'Confirm Your Sponsorship';
                 <form @submit.prevent="submitForm()" class="sponsor-form">
                     <!-- Name -->
                     <div class="form-group">
-                        <label for="sponsor_name">Full Name <span class="required">*</span></label>
+                        <label for="sponsor_name">Full Name <span class="required" aria-label="required">*</span></label>
                         <input
                             type="text"
                             id="sponsor_name"
                             x-model="formData.name"
                             required
+                            aria-required="true"
                             placeholder="Enter your full name"
-                            class="form-input">
+                            :class="errors.name ? 'form-input input-error' : 'form-input'"
+                            :aria-invalid="errors.name ? 'true' : 'false'"
+                            :aria-describedby="errors.name ? 'name-error' : null">
                         <template x-if="errors.name">
-                            <span class="error-message" x-text="errors.name"></span>
+                            <span class="error-message" id="name-error" role="alert" x-text="errors.name"></span>
                         </template>
                     </div>
 
                     <!-- Email -->
                     <div class="form-group">
-                        <label for="sponsor_email">Email Address <span class="required">*</span></label>
+                        <label for="sponsor_email">Email Address <span class="required" aria-label="required">*</span></label>
                         <input
                             type="email"
                             id="sponsor_email"
                             x-model="formData.email"
                             required
+                            aria-required="true"
                             placeholder="your.email@example.com"
-                            class="form-input">
+                            :class="errors.email ? 'form-input input-error' : 'form-input'"
+                            :aria-invalid="errors.email ? 'true' : 'false'"
+                            :aria-describedby="errors.email ? 'email-error' : null">
                         <template x-if="errors.email">
-                            <span class="error-message" x-text="errors.email"></span>
+                            <span class="error-message" id="email-error" role="alert" x-text="errors.email"></span>
                         </template>
                     </div>
 
@@ -101,7 +107,12 @@ $pageTitle = 'Confirm Your Sponsorship';
                             id="sponsor_phone"
                             x-model="formData.phone"
                             placeholder="(555) 123-4567"
-                            class="form-input">
+                            class="form-input"
+                            :aria-invalid="errors.phone ? 'true' : 'false'"
+                            :aria-describedby="errors.phone ? 'phone-error' : null">
+                        <template x-if="errors.phone">
+                            <span class="error-message" id="phone-error" role="alert" x-text="errors.phone"></span>
+                        </template>
                         <small class="form-help">Optional - for follow-up questions only</small>
                     </div>
 
