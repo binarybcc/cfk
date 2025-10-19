@@ -246,7 +246,7 @@ if (isLoggedIn()) {
         <?php endif; ?>
 
         <!-- Magic Link Login Form -->
-        <form method="POST" action="<?php echo baseUrl('admin/request-magic-link.php'); ?>" id="magicLinkForm">
+        <form id="magicLinkForm">
             <div class="magic-link-info">
                 <strong>✉️ Passwordless Login</strong>
                 <p>A secure login link will be sent to your email. No password needed!</p>
