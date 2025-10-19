@@ -10,6 +10,7 @@ define('CFK_APP', true);
 session_start();
 
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../includes/email_manager.php';
 require_once __DIR__ . '/../includes/magic_link_manager.php';
 
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
@@ -249,13 +250,14 @@ If this login wasn't you, please contact the system administrator immediately.
 This is an automated security notification.
 TEXT;
 
-        $emailManager = new EmailManager();
-        $emailManager->send(
-            to: $email,
-            subject: $subject,
-            htmlContent: $htmlContent,
-            textContent: $textContent
-        );
+        // Use working email pattern from reservation_emails.php
+        $mailer = CFK_Email_Manager::getMailer();
+        $mailer->clearAddresses();
+        $mailer->addAddress($email);
+        $mailer->Subject = $subject;
+        $mailer->Body = $htmlContent;
+        $mailer->AltBody = $textContent;
+        $mailer->send();
     } catch (Exception $e) {
         error_log('Failed to send login notification: ' . $e->getMessage());
         // Don't fail the login if notification fails
