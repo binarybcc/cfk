@@ -11,17 +11,17 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-// Get family_id from URL
-$family_id = sanitizeInt($_GET['family_id'] ?? 0);
+// Get family_number from URL (e.g., 201, 202, etc.)
+$family_number = sanitizeString($_GET['family_number'] ?? '');
 
-if (!$family_id) {
-    setMessage('Invalid family ID.', 'error');
+if (empty($family_number)) {
+    setMessage('Invalid family number.', 'error');
     header('Location: ' . baseUrl('?page=children'));
     exit;
 }
 
 // Fetch family information using helper function
-$family = getFamilyById($family_id);
+$family = getFamilyByNumber($family_number);
 
 if (!$family) {
     setMessage('Family not found.', 'error');
@@ -30,7 +30,7 @@ if (!$family) {
 }
 
 // Fetch all family members using helper function
-$members = getFamilyMembers($family_id);
+$members = getFamilyMembersByNumber($family_number);
 
 if (empty($members)) {
     setMessage('No family members found.', 'error');
@@ -72,7 +72,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
         </div>
 
         <?php if ($available_count > 0): ?>
-            <button onclick="addEntireFamily(<?php echo $family_id; ?>)"
+            <button onclick="addEntireFamily()"
                     class="btn btn-large btn-primary btn-add-all-family"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All <?php echo $available_count; ?> Available Member<?php echo $available_count > 1 ? 's' : ''; ?>
@@ -171,7 +171,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
             ← Back to Children
         </a>
         <?php if ($available_count > 0): ?>
-            <button onclick="addEntireFamily(<?php echo $family_id; ?>)"
+            <button onclick="addEntireFamily()"
                     class="btn btn-primary"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All Available (<?php echo $available_count; ?>)
@@ -471,7 +471,7 @@ function addChildToCart(childId, displayId) {
 }
 
 // Add entire family
-function addEntireFamily(familyId) {
+function addEntireFamily() {
     // Get all available children
     const availableChildren = document.querySelectorAll('.family-member-card:not(.member-sponsored)');
 

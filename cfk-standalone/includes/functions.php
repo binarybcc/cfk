@@ -184,6 +184,37 @@ function getFamilyById(int $familyId): ?array {
 }
 
 /**
+ * Get family information by family number (user-facing ID like 201, 202, etc.)
+ */
+function getFamilyByNumber(string $familyNumber): ?array {
+    $sql = "SELECT * FROM families WHERE family_number = :family_number";
+    return Database::fetchRow($sql, ['family_number' => $familyNumber]);
+}
+
+/**
+ * Get all family members by family number
+ */
+function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array {
+    $sql = "
+        SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
+        FROM children c
+        JOIN families f ON c.family_id = f.id
+        WHERE f.family_number = :family_number
+    ";
+
+    $params = ['family_number' => $familyNumber];
+
+    if ($excludeChildId) {
+        $sql .= " AND c.id != :exclude_id";
+        $params['exclude_id'] = $excludeChildId;
+    }
+
+    $sql .= " ORDER BY c.child_letter";
+
+    return Database::fetchAll($sql, $params);
+}
+
+/**
  * Eager load family members for multiple children (prevents N+1 queries)
  * Returns array indexed by family_id containing arrays of siblings
  */

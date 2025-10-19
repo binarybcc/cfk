@@ -374,7 +374,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
 
                         <!-- Action Buttons -->
                         <div class="action-buttons">
-                            <a :href="'<?php echo baseUrl('?page=family&family_id='); ?>' + child.family_id"
+                            <a :href="'<?php echo baseUrl('?page=family&family_number='); ?>' + child.family_number"
                                class="btn btn-secondary btn-view-family"
                                :class="siblingCount === 0 ? 'btn-disabled' : ''"
                                :aria-disabled="siblingCount === 0 ? 'true' : 'false'">
