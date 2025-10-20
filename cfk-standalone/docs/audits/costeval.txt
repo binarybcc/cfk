@@ -1,0 +1,86 @@
+You are acting as a senior software project manager and technical documentation specialist.  
+Using the **actual cforkids.org website**, its **source code**, **development notes**, and any project documentation or commit history available, generate a **comprehensive Statement of Work (SOW)** describing the real project as completed.
+
+This SOW must reflect the actual architecture, tools, workflows, and deliverables — not generic estimates. The purpose is to document the real scope, effort, and cost range for presentation to stakeholders and potential funders.
+
+---
+
+### Include the Following Sections:
+
+1. **Project Overview**
+   - Summarize the cforkids.org platform: its purpose (child/family sponsorship), main user types, and goals (connect donors with families, streamline sponsorships, manage donor records, etc.).
+   - Describe the system architecture and main technologies actually used (frontend stack, backend framework, CMS, database, hosting platform, payment gateway, APIs).
+   - Note the project timeline (inception → launch) and current production status.
+
+2. **Phased Breakdown (as actually executed)**
+   Organize the real work performed into these standard software phases:
+   - **Discovery & Planning:** research, requirements gathering, design brief, data modeling.
+   - **Design:** UI/UX wireframes, visual themes, responsive layouts, accessibility.
+   - **Build / Implementation:** actual coding of frontend, backend, CMS setup, payment integration, data imports, and configuration.
+   - **Testing / QA:** describe real test coverage, browser/device testing, performance and security checks.
+   - **Launch & Handoff:** production deployment steps, DNS setup, hosting configuration, content load, and team training if applicable.
+
+   For each phase, specify:
+   - Actual work performed (key deliverables and tools)
+   - Actual or estimated hours
+   - Resources/roles involved (developer, designer, tester, PM, etc.)
+
+3. **Estimate Table**
+   Create a table summarizing realistic **Low / Medium / High** cost and effort ranges based on:
+   - The real work done (actual effort = “Medium” baseline)
+   - “Low” = accelerated AI-assisted workflow estimate
+   - “High” = fully human-built equivalent
+
+   Example:
+   | Phase | Low Estimate (AI-accelerated) | Medium (Actual Project) | High (Full Human Equivalent) |
+   |--------|------------------------------|--------------------------|------------------------------|
+   | Discovery | $1,800 / 20h | $2,500 / 28h | $4,000 / 40h |
+   | Design | ... | ... | ... |
+
+4. **Resource Breakdown**
+   Use your actual resource data or inferred roles (developer, AI tool, content creator, QA, PM).  
+   Include typical hourly or equivalent cost rates for each.  
+   Note where AI systems replaced or augmented human labor.
+
+5. **AI Development Impact Section**
+   - Explain specifically how AI tools were used in cforkids.org (e.g., code generation, UI design, text generation, integration support).
+   - Quantify or describe time/cost savings.
+   - Clarify which components were human-validated (security, UX testing, accessibility, etc.)
+   - Evaluate maintainability and long-term sustainability of the AI-produced codebase.
+
+6. **Deliverables Checklist**
+   List every major deliverable actually produced:
+   - Live website and domain setup
+   - Source code repository
+   - CMS configuration and admin panel
+   - Payment integration (e.g., Stripe/PayPal)
+   - Documentation / training materials
+   - Analytics, SSL, backups, etc.
+
+7. **Assumptions and Exclusions**
+   Note what was not in scope (e.g., no mobile app, no CRM integration, no advanced donor analytics).
+
+8. **Maintenance & Support Plan**
+   - Document any ongoing maintenance processes, hosting costs, or AI automation for content updates.
+   - Provide suggested monthly or annual support cost ranges.
+
+9. **Executive Summary**
+   - Provide a final paragraph summarizing total project cost range and impact.
+   - Example: “The cforkids.org project was successfully delivered using a human-directed AI development model, achieving full donor-facing functionality at approximately 40–50% of traditional development cost, with strong scalability and maintainability.”
+
+---
+
+### Formatting Requirements:
+- Use clear, professional SOW headings and subheadings.
+- Include cost and time tables where possible.
+- Write in a tone suitable for presentation to board members, donors, and technical reviewers.
+- Avoid placeholders — base content on real project evidence wherever available.
+- Output in structured Markdown or Word-compatible format.
+
+---
+
+### Optional Follow-up Prompts:
+- “Now output a one-page executive summary version of this SOW for presentation to nontechnical stakeholders.”
+- “Generate a cost and effort chart comparing AI-assisted vs traditional build.”
+- “Add an appendix describing the code architecture and third-party integrations.”
+
