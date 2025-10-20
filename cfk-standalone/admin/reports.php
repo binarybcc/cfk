@@ -15,7 +15,9 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/report_manager.php';
+
+// Use namespaced classes
+use CFK\Report\Manager as ReportManager;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -33,31 +35,31 @@ $exportFormat = $_GET['export'] ?? '';
 if ($exportFormat === 'csv') {
     switch ($reportType) {
         case 'sponsor_directory':
-            $data = CFK_Report_Manager::getSponsorDirectoryReport();
+            $data = ReportManager::getSponsorDirectoryReport();
             $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
+            ReportManager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
             break;
 
         case 'child_sponsor':
-            $data = CFK_Report_Manager::getChildSponsorLookup();
+            $data = ReportManager::getChildSponsorLookup();
             $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
+            ReportManager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
             break;
 
         case 'family_report':
-            $data = CFK_Report_Manager::getFamilySponsorshipReport();
+            $data = ReportManager::getFamilySponsorshipReport();
             $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
+            ReportManager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
             break;
 
         case 'available_children':
-            $data = CFK_Report_Manager::getAvailableChildrenReport();
+            $data = ReportManager::getAvailableChildrenReport();
             $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
+            ReportManager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
             break;
 
         case 'complete_export':
-            $data = CFK_Report_Manager::getCompleteChildSponsorReport();
+            $data = ReportManager::getCompleteChildSponsorReport();
             $headers = [
                 'Child ID', 'Child Name', 'Age', 'Gender', 'Grade', 'School',
                 'Shirt Size', 'Pant Size', 'Shoe Size', 'Jacket Size',
@@ -66,7 +68,7 @@ if ($exportFormat === 'csv') {
                 'Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Sponsor Address',
                 'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date'
             ];
-            CFK_Report_Manager::exportToCSV($data, $headers, 'complete-children-sponsors-' . date('Y-m-d') . '.csv');
+            ReportManager::exportToCSV($data, $headers, 'complete-children-sponsors-' . date('Y-m-d') . '.csv');
             break;
     }
 }
@@ -105,7 +107,7 @@ include __DIR__ . '/includes/admin_header.php';
     <!-- Report Content -->
     <div class="report-content">
         <?php if ($reportType === 'dashboard'): ?>
-            <?php $stats = CFK_Report_Manager::getStatisticsSummary(); ?>
+            <?php $stats = ReportManager::getStatisticsSummary(); ?>
 
             <div class="stats-dashboard">
                 <h2>Statistics Summary</h2>
@@ -159,7 +161,7 @@ include __DIR__ . '/includes/admin_header.php';
 
         <?php elseif ($reportType === 'sponsor_directory'): ?>
             <?php
-            $sponsors = CFK_Report_Manager::getSponsorDirectoryReport();
+            $sponsors = ReportManager::getSponsorDirectoryReport();
 
             // Group by sponsor
             $groupedSponsors = [];
@@ -242,7 +244,7 @@ include __DIR__ . '/includes/admin_header.php';
         <?php elseif ($reportType === 'child_sponsor'): ?>
             <?php
             $searchTerm = $_GET['search'] ?? '';
-            $children = CFK_Report_Manager::getChildSponsorLookup($searchTerm);
+            $children = ReportManager::getChildSponsorLookup($searchTerm);
             ?>
 
             <div class="report-header">
@@ -309,7 +311,7 @@ include __DIR__ . '/includes/admin_header.php';
             <?php endif; ?>
 
         <?php elseif ($reportType === 'family_report'): ?>
-            <?php $families = CFK_Report_Manager::getFamilySponsorshipReport(); ?>
+            <?php $families = ReportManager::getFamilySponsorshipReport(); ?>
 
             <div class="report-header">
                 <h2>Family Sponsorship Report</h2>
@@ -363,7 +365,7 @@ include __DIR__ . '/includes/admin_header.php';
                 'age_max' => $_GET['age_max'] ?? '',
                 'gender' => $_GET['gender'] ?? ''
             ];
-            $availableChildren = CFK_Report_Manager::getAvailableChildrenReport($filters);
+            $availableChildren = ReportManager::getAvailableChildrenReport($filters);
             ?>
 
             <div class="report-header">
@@ -424,7 +426,7 @@ include __DIR__ . '/includes/admin_header.php';
         <?php elseif ($reportType === 'complete_export'): ?>
             <?php
             $filters = [];
-            $completeData = CFK_Report_Manager::getCompleteChildSponsorReport($filters);
+            $completeData = ReportManager::getCompleteChildSponsorReport($filters);
 
             // Count sponsored vs unsponsored
             $sponsoredCount = 0;

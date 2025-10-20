@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace CFK\Report;
 
 use CFK\Database\Connection;
+use RuntimeException;
 
 /**
  * Report Manager - Comprehensive Reporting for CFK
@@ -250,6 +251,10 @@ class Manager
 
         $output = fopen('php://output', 'w');
 
+        if ($output === false) {
+            throw new RuntimeException("Failed to open output stream for CSV export");
+        }
+
         // Write headers
         fputcsv($output, $headers);
 
@@ -400,7 +405,7 @@ class Manager
             FROM sponsorships
             WHERE status != 'cancelled'
         ");
-        $stats['unique_sponsors'] = $uniqueSponsors['count'];
+        $stats['unique_sponsors'] = $uniqueSponsors['count'] ?? 0;
 
         // Families
         $familyStats = Connection::fetchRow("

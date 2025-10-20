@@ -200,9 +200,9 @@ $isAvailable = $child['status'] === 'available';
         </div>
 
         <!-- Sponsorship Action -->
-        <?php 
-        require_once __DIR__ . '/../includes/sponsorship_manager.php';
-        $availability = CFK_Sponsorship_Manager::isChildAvailable($child['id']);
+        <?php
+        use CFK\Sponsorship\Manager as SponsorshipManager;
+        $availability = SponsorshipManager::isChildAvailable($child['id']);
         ?>
         <?php if ($availability['available']): ?>
             <div class="sponsorship-action">

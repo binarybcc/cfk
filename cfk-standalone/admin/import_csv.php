@@ -15,9 +15,11 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/csv_handler.php';
-require_once __DIR__ . '/../includes/backup_manager.php';
 require_once __DIR__ . '/../includes/import_analyzer.php';
+
+// Use namespaced classes
+use CFK\CSV\Handler as CSVHandler;
+use CFK\Backup\Manager as BackupManager;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -113,7 +115,7 @@ function handlePreviewImport(): array {
         }
 
         // Parse CSV for preview
-        $handler = new CFK_CSV_Handler();
+        $handler = new CSVHandler();
         $parseResult = $handler->parseCSVForPreview($tempFile);
 
         if (!$parseResult['success']) {
@@ -158,7 +160,7 @@ function handleConfirmImport(): array {
         $keepInactive = isset($_POST['keep_inactive_children']);
 
         // CREATE AUTOMATIC BACKUP BEFORE IMPORT
-        $backupResult = CFK_Backup_Manager::createAutoBackup('csv_import');
+        $backupResult = BackupManager::createAutoBackup('csv_import');
         if (!$backupResult['success']) {
             error_log('Backup creation failed: ' . $backupResult['message']);
         }
@@ -245,7 +247,7 @@ function handleRestoreBackup(): array {
 
         $clearExisting = isset($_POST['clear_existing']);
 
-        return CFK_Backup_Manager::restoreFromBackup($filename, $clearExisting);
+        return BackupManager::restoreFromBackup($filename, $clearExisting);
 
     } catch (Exception $e) {
         error_log('Restore backup error: ' . $e->getMessage());
@@ -260,7 +262,7 @@ function handleDownloadBackup(): void {
         die('No backup file specified');
     }
 
-    CFK_Backup_Manager::downloadBackup($filename);
+    BackupManager::downloadBackup($filename);
 }
 
 function downloadTemplate(): void {
@@ -322,7 +324,7 @@ $stats = [
 ];
 
 // Get backup information
-$backupStats = CFK_Backup_Manager::getBackupStats();
+$backupStats = BackupManager::getBackupStats();
 
 include __DIR__ . '/includes/admin_header.php';
 ?>

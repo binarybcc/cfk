@@ -15,7 +15,10 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/archive_manager.php';
+
+// Use namespaced classes
+use CFK\Archive\Manager as ArchiveManager;
+use CFK\Database\Connection as Database;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -45,7 +48,7 @@ try {
 
 // Get available archives
 try {
-    $archives = CFK_Archive_Manager::getAvailableArchives();
+    $archives = ArchiveManager::getAvailableArchives();
 } catch (Exception $e) {
     error_log("Failed to get archives: " . $e->getMessage());
     $archives = [];
@@ -78,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
         } else {
             // Perform reset
             error_log("YEAR_END_RESET: Calling performYearEndReset for year={$year}, code={$confirmationCode}");
-            $resetResult = CFK_Archive_Manager::performYearEndReset($year, $confirmationCode);
+            $resetResult = ArchiveManager::performYearEndReset($year, $confirmationCode);
             error_log("YEAR_END_RESET: Result: " . print_r($resetResult, true));
 
             if ($resetResult['success']) {
@@ -262,7 +265,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="archive-card">
                         <div class="archive-header">
                             <h3>Year <?php echo sanitizeString($archive['year']); ?></h3>
-                            <span class="archive-size"><?php echo CFK_Archive_Manager::formatBytes($archive['size']); ?></span>
+                            <span class="archive-size"><?php echo ArchiveManager::formatBytes($archive['size']); ?></span>
                         </div>
                         <div class="archive-details">
                             <p><strong>Files:</strong> <?php echo $archive['file_count']; ?></p>

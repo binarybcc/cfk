@@ -15,8 +15,10 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+
+// Use namespaced classes
+use CFK\Sponsorship\Manager as SponsorshipManager;
+use CFK\Email\Manager as EmailManager;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -39,21 +41,21 @@ if ($_POST !== []) {
 
         switch ($action) {
             case 'complete':
-                $result = CFK_Sponsorship_Manager::completeSponsorship($sponsorshipId);
+                $result = SponsorshipManager::completeSponsorship($sponsorshipId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
-                
+
             case 'cancel':
                 $reason = sanitizeString($_POST['reason'] ?? 'Cancelled by admin');
-                $result = CFK_Sponsorship_Manager::cancelSponsorship($sponsorshipId, $reason);
+                $result = SponsorshipManager::cancelSponsorship($sponsorshipId, $reason);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
-                
+
             case 'release_child':
                 $childId = sanitizeInt($_POST['child_id'] ?? 0);
-                if (CFK_Sponsorship_Manager::releaseChild($childId)) {
+                if (SponsorshipManager::releaseChild($childId)) {
                     $message = 'Child released and is now available for sponsorship';
                     $messageType = 'success';
                 } else {
@@ -102,8 +104,8 @@ $sponsorships = Database::fetchAll("
 ", $params);
 
 // Get statistics
-$stats = CFK_Sponsorship_Manager::getStats();
-$childrenNeedingAttention = CFK_Sponsorship_Manager::getChildrenNeedingAttention();
+$stats = SponsorshipManager::getStats();
+$childrenNeedingAttention = SponsorshipManager::getChildrenNeedingAttention();
 
 include __DIR__ . '/includes/admin_header.php';
 ?>

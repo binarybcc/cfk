@@ -10,8 +10,9 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Use namespaced classes
+use CFK\Sponsorship\Manager as SponsorshipManager;
+use CFK\Email\Manager as EmailManager;
 
 $errors = [];
 $success = false;
@@ -31,13 +32,13 @@ if ($_POST && isset($_POST['lookup_email'])) {
             $errors[] = 'Please enter a valid email address.';
         } else {
             // Check if email has any sponsorships
-            $sponsorships = CFK_Sponsorship_Manager::getSponsorshipsByEmail($email);
+            $sponsorships = SponsorshipManager::getSponsorshipsByEmail($email);
 
             if ($sponsorships === []) {
                 $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
             } else {
                 // Generate verification token and send email
-                $result = CFK_Sponsorship_Manager::sendPortalAccessEmail($email);
+                $result = SponsorshipManager::sendPortalAccessEmail($email);
 
                 if ($result['success']) {
                     $emailSent = true;

@@ -10,12 +10,13 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Use namespaced classes
+use CFK\Sponsorship\Manager as SponsorshipManager;
+use CFK\Email\Manager as EmailManager;
 
 // Check for verification token
 $token = $_GET['token'] ?? '';
-$verificationResult = CFK_Sponsorship_Manager::verifyPortalToken($token);
+$verificationResult = SponsorshipManager::verifyPortalToken($token);
 
 if (!$verificationResult['valid']) {
     // Token invalid or expired
@@ -34,7 +35,7 @@ if (!$verificationResult['valid']) {
 $sponsorEmail = $verificationResult['email'];
 
 // Get all sponsorships for this email
-$sponsorships = CFK_Sponsorship_Manager::getSponsorshipsWithDetails($sponsorEmail);
+$sponsorships = SponsorshipManager::getSponsorshipsWithDetails($sponsorEmail);
 
 // Group sponsorships by family
 $families = [];
@@ -75,7 +76,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 'message' => 'Additional children added to existing sponsorship'
             ];
 
-            $addChildrenResult = CFK_Sponsorship_Manager::addChildrenToSponsorship($selectedChildIds, $sponsorData, $sponsorEmail);
+            $addChildrenResult = SponsorshipManager::addChildrenToSponsorship($selectedChildIds, $sponsorData, $sponsorEmail);
 
             if ($addChildrenResult['success']) {
                 // Refresh sponsorships

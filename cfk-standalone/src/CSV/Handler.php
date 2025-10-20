@@ -6,6 +6,7 @@ namespace CFK\CSV;
 
 use CFK\Database\Connection;
 use Exception;
+use RuntimeException;
 
 /**
  * CSV Handler - Import/Export for Children Data
@@ -207,6 +208,10 @@ class Handler
 
         $output = fopen('php://temp', 'w');
 
+        if ($output === false) {
+            throw new RuntimeException("Failed to open temporary stream for CSV export");
+        }
+
         // Write header
         fputcsv($output, self::ALL_COLUMNS);
 
@@ -220,7 +225,7 @@ class Handler
         $csvContent = stream_get_contents($output);
         fclose($output);
 
-        return $csvContent ?: '';
+        return $csvContent !== false ? $csvContent : '';
     }
 
     /**

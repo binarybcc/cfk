@@ -10,8 +10,9 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Use namespaced classes
+use CFK\Sponsorship\Manager as SponsorshipManager;
+use CFK\Email\Manager as EmailManager;
 
 // Get child ID or family ID
 $childId = sanitizeInt($_GET['child_id'] ?? 0);
@@ -42,7 +43,7 @@ if ($isFamilySponsorship) {
     }
 
     // Check if child is available
-    $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+    $availability = SponsorshipManager::isChildAvailable($childId);
     $child = $availability['child'];
 
     if (!$child) {
@@ -79,7 +80,7 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
             $sponsoredChildren = [];
 
             foreach ($childrenToSponsor as $childToSponsor) {
-                $result = CFK_Sponsorship_Manager::createSponsorshipRequest($childToSponsor['id'], $formData);
+                $result = SponsorshipManager::createSponsorshipRequest($childToSponsor['id'], $formData);
 
                 if ($result['success']) {
                     $sponsoredChildren[] = $childToSponsor['display_id'];
@@ -97,7 +98,7 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
             }
         } else {
             // Single child sponsorship
-            $result = CFK_Sponsorship_Manager::createSponsorshipRequest($childId, $formData);
+            $result = SponsorshipManager::createSponsorshipRequest($childId, $formData);
 
             if ($result['success']) {
                 setMessage($result['message'], 'success');
@@ -115,7 +116,7 @@ if ($isFamilySponsorship) {
     $isAvailable = $childrenToSponsor !== [];
     $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
 } else {
-    $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+    $availability = SponsorshipManager::isChildAvailable($childId);
     $isAvailable = $availability['available'];
     $unavailableReason = $availability['reason'] ?? '';
 }
