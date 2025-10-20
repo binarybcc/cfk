@@ -1,18 +1,15 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Avatar Manager - Silhouetted Avatar System
- * Creates dignified, privacy-preserving avatars for children
+ * DEPRECATED: Moved to src/Avatar/Manager.php
+ * Class available via class_alias() in config.php
  */
-
-// Prevent direct access
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
+return;
 
-class CFK_Avatar_Manager {
+class CFK_Avatar_Manager_DEPRECATED {
     
     const CATEGORIES = [
         'infant' => 'Infant (0-2)',
@@ -42,12 +39,12 @@ class CFK_Avatar_Manager {
         }
 
         // Elementary (5-10)
-        if ($age >= 5 && $age <= 10) {
+        if ($age <= 10) {
             return $gender === 'M' ? 'male_elementary' : 'female_elementary';
         }
 
         // Middle School (11-13)
-        if ($age >= 11 && $age <= 13) {
+        if ($age <= 13) {
             return $gender === 'M' ? 'male_middle' : 'female_middle';
         }
 
@@ -93,24 +90,16 @@ class CFK_Avatar_Manager {
         $baseColor = '#2c5530'; // Christmas green silhouette
         $bgColor = '#f8f9fa';   // Light background
         
-        switch ($category) {
-            case 'infant':
-                return self::getInfantSvg($baseColor, $bgColor);
-            case 'male_toddler':
-                return self::getMaleToddlerSvg($baseColor, $bgColor);
-            case 'female_toddler':
-                return self::getFemaleToddlerSvg($baseColor, $bgColor);
-            case 'male_child':
-                return self::getMaleChildSvg($baseColor, $bgColor);
-            case 'female_child':
-                return self::getFemaleChildSvg($baseColor, $bgColor);
-            case 'male_teen':
-                return self::getMaleTeenSvg($baseColor, $bgColor);
-            case 'female_teen':
-                return self::getFemaleTeenSvg($baseColor, $bgColor);
-            default:
-                return self::getDefaultSvg($baseColor, $bgColor);
-        }
+        return match ($category) {
+            'infant' => self::getInfantSvg($baseColor, $bgColor),
+            'male_toddler' => self::getMaleToddlerSvg($baseColor, $bgColor),
+            'female_toddler' => self::getFemaleToddlerSvg($baseColor, $bgColor),
+            'male_child' => self::getMaleChildSvg($baseColor, $bgColor),
+            'female_child' => self::getFemaleChildSvg($baseColor, $bgColor),
+            'male_teen' => self::getMaleTeenSvg($baseColor, $bgColor),
+            'female_teen' => self::getFemaleTeenSvg($baseColor, $bgColor),
+            default => self::getDefaultSvg($baseColor, $bgColor),
+        };
     }
     
     /**

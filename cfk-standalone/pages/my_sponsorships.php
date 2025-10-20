@@ -46,7 +46,7 @@ if (!empty($token)) {
             [$verifiedEmail]
         );
 
-        if (!empty($sponsorships)) {
+        if ($sponsorships !== []) {
             $success = true;
             $lookupEmail = $verifiedEmail;
         } else {
@@ -176,7 +176,7 @@ $pageTitle = 'My Sponsorships';
                 Already sponsored children? Enter your email to view your sponsorships.
             </p>
 
-            <?php if ($emailSent && empty($sponsorships)): ?>
+            <?php if ($emailSent && $sponsorships === []): ?>
                 <!-- Email Sent Confirmation -->
                 <div class="email-sent-confirmation">
                     <div class="alert alert-success">
@@ -198,7 +198,7 @@ $pageTitle = 'My Sponsorships';
                     </div>
                 </div>
 
-            <?php elseif ($success && !empty($sponsorships)): ?>
+            <?php elseif ($success && $sponsorships !== []): ?>
                 <!-- Sponsorship Results -->
                 <div class="sponsorships-found">
                     <div class="alert alert-success">
@@ -235,7 +235,7 @@ $pageTitle = 'My Sponsorships';
                                     <?php endif; ?>
                                     <div class="info-item">
                                         <strong>Confirmed:</strong>
-                                        <span><?php echo date('M j, Y', strtotime($sponsorship['confirmation_date'])); ?></span>
+                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date'])); ?></span>
                                     </div>
                                 </div>
 
@@ -306,7 +306,7 @@ $pageTitle = 'My Sponsorships';
                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                         <input type="hidden" name="lookup_email" value="1">
 
-                        <?php if (!empty($errors)): ?>
+                        <?php if ($errors !== []): ?>
                             <div class="alert alert-error" role="alert" aria-live="polite">
                                 <strong>Error:</strong>
                                 <ul id="sponsorship-form-errors">
@@ -322,13 +322,13 @@ $pageTitle = 'My Sponsorships';
                             <input type="email"
                                    id="sponsor_email"
                                    name="sponsor_email"
-                                   class="form-input <?php echo !empty($errors) ? 'input-error' : ''; ?>"
+                                   class="form-input <?php echo $errors === [] ? '' : 'input-error'; ?>"
                                    placeholder="example@email.com"
                                    value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
                                    required
                                    aria-required="true"
-                                   aria-describedby="sponsorship-email-help<?php echo !empty($errors) ? ' sponsorship-form-errors' : ''; ?>"
-                                   <?php echo !empty($errors) ? 'aria-invalid="true"' : ''; ?>
+                                   aria-describedby="sponsorship-email-help<?php echo $errors === [] ? '' : ' sponsorship-form-errors'; ?>"
+                                   <?php echo $errors === [] ? '' : 'aria-invalid="true"'; ?>
                                    autocomplete="email">
                             <div id="sponsorship-email-help" class="form-help">Enter the email address you used when sponsoring</div>
                         </div>

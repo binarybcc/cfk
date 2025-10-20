@@ -15,10 +15,9 @@ if (!defined('CFK_APP')) {
 class Validator {
 
     private array $errors = [];
-    private array $data = [];
 
-    public function __construct(array $data) {
-        $this->data = $data;
+    public function __construct(private array $data)
+    {
     }
 
     /**
@@ -27,7 +26,7 @@ class Validator {
     public function required(array $fields): self {
         foreach ($fields as $field) {
             $value = $this->data[$field] ?? null;
-            if ($value === null || $value === '' || (is_array($value) && empty($value))) {
+            if ($value === null || $value === '' || ($value === [])) {
                 $this->errors[$field][] = ucfirst(str_replace('_', ' ', $field)) . ' is required';
             }
         }
@@ -142,7 +141,7 @@ class Validator {
         if ($value) {
             // Remove common formatting characters
             $cleaned = preg_replace('/[\s\-\(\)\.]/', '', (string)$value);
-            if (!preg_match('/^[\+]?[1]?[0-9]{10,15}$/', $cleaned)) {
+            if (!preg_match('/^[\+]?[1]?\d{10,15}$/', (string) $cleaned)) {
                 $this->errors[$field][] = 'Must be a valid phone number';
             }
         }
@@ -201,14 +200,14 @@ class Validator {
      * Check if validation passed
      */
     public function passes(): bool {
-        return empty($this->errors);
+        return $this->errors === [];
     }
 
     /**
      * Check if validation failed
      */
     public function fails(): bool {
-        return !empty($this->errors);
+        return $this->errors !== [];
     }
 
     /**
@@ -230,7 +229,7 @@ class Validator {
      */
     public function allErrors(): array {
         $flat = [];
-        foreach ($this->errors as $field => $messages) {
+        foreach ($this->errors as $messages) {
             foreach ($messages as $message) {
                 $flat[] = $message;
             }
@@ -266,11 +265,11 @@ function validate(array $data, array $rules): Validator {
     $validator = Validator::make($data);
 
     foreach ($rules as $field => $ruleString) {
-        $fieldRules = explode('|', $ruleString);
+        $fieldRules = explode('|', (string) $ruleString);
 
         foreach ($fieldRules as $rule) {
             // Parse rule with parameters
-            if (strpos($rule, ':') !== false) {
+            if (str_contains($rule, ':')) {
                 [$ruleName, $params] = explode(':', $rule, 2);
                 $params = explode(',', $params);
             } else {

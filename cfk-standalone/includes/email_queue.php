@@ -44,7 +44,7 @@ class CFK_Email_Queue {
             'max_attempts' => $options['max_attempts'] ?? 3,
             'reference_type' => $options['reference_type'] ?? null,
             'reference_id' => $options['reference_id'] ?? null,
-            'metadata' => !empty($options['metadata']) ? json_encode($options['metadata']) : null,
+            'metadata' => empty($options['metadata']) ? null : json_encode($options['metadata']),
             'status' => self::STATUS_QUEUED
         ];
 
@@ -149,7 +149,7 @@ class CFK_Email_Queue {
         $newAttempts = $email['attempts'] + 1;
 
         // Calculate next retry time (exponential backoff)
-        $retryMinutes = min(60, pow(2, $newAttempts)); // 2, 4, 8, 16, 32, 60 minutes
+        $retryMinutes = min(60, 2 ** $newAttempts); // 2, 4, 8, 16, 32, 60 minutes
         $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes"));
 
         $updates = [
@@ -191,7 +191,7 @@ class CFK_Email_Queue {
 
             // Handle metadata (CC, BCC, etc.)
             if ($email['metadata']) {
-                $metadata = json_decode($email['metadata'], true);
+                $metadata = json_decode((string) $email['metadata'], true);
                 if (isset($metadata['cc'])) {
                     foreach ((array)$metadata['cc'] as $cc) {
                         $mailer->addCC($cc);
@@ -254,7 +254,7 @@ class CFK_Email_Queue {
      * Retry failed emails
      */
     public static function retryFailed(int $limit = 10): int {
-        $updated = Database::query("
+        return Database::query("
             UPDATE email_queue
             SET status = :queued,
                 attempts = 0,
@@ -267,8 +267,6 @@ class CFK_Email_Queue {
             'failed' => self::STATUS_FAILED,
             'limit' => $limit
         ]);
-
-        return $updated;
     }
 
     /**
@@ -277,13 +275,11 @@ class CFK_Email_Queue {
     public static function cleanup(int $daysOld = 30): int {
         $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
 
-        $deleted = Database::query("
+        return Database::query("
             DELETE FROM email_queue
             WHERE status IN ('sent', 'failed')
               AND queued_at < :cutoff
         ", ['cutoff' => $cutoffDate]);
-
-        return $deleted;
     }
 
     /**

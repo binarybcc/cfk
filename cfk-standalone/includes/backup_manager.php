@@ -1,18 +1,15 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Backup Manager - Automatic database backups for CSV imports
- * Stores the last 2 versions of children data for recovery
+ * DEPRECATED: Moved to src/Backup/Manager.php
+ * Class available via class_alias() in config.php
  */
-
-// Prevent direct access
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
+return;
 
-class CFK_Backup_Manager {
+class CFK_Backup_Manager_DEPRECATED {
 
     private const BACKUP_DIR = __DIR__ . '/../backups/';
     private const MAX_BACKUPS = 2;

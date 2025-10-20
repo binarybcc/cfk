@@ -32,7 +32,7 @@ if (!$family) {
 // Fetch all family members using helper function
 $members = getFamilyMembersByNumber($family_number);
 
-if (empty($members)) {
+if ($members === []) {
     setMessage('No family members found.', 'error');
     header('Location: ' . baseUrl('?page=children'));
     exit;
@@ -42,9 +42,7 @@ if (empty($members)) {
 $family_members = $members;
 
 // Count available members
-$available_count = count(array_filter($family_members, function($member) {
-    return $member['status'] === 'available';
-}));
+$available_count = count(array_filter($family_members, fn($member): bool => $member['status'] === 'available'));
 
 $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 ?>
@@ -100,7 +98,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <div class="member-title">
                         <h2>Child <?php echo sanitizeString($member['display_id']); ?></h2>
                         <span class="status-badge status-<?php echo $member['status']; ?>">
-                            <?php echo ucfirst($member['status']); ?>
+                            <?php echo ucfirst((string) $member['status']); ?>
                         </span>
                     </div>
                 </div>

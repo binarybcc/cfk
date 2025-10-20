@@ -1,18 +1,15 @@
 <?php
-declare(strict_types=1);
-
 /**
- * CSV Handler - Import/Export for Children Data
- * Handles standardized CSV format for bulk operations
+ * DEPRECATED: Moved to src/CSV/Handler.php
+ * Class available via class_alias() in config.php
  */
-
-// Prevent direct access
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
+return;
 
-class CFK_CSV_Handler {
+class CFK_CSV_Handler_DEPRECATED {
     
     const REQUIRED_COLUMNS = [
         'age', 'gender'
@@ -70,12 +67,14 @@ class CFK_CSV_Handler {
         while (($data = fgetcsv($handle)) !== false) {
             $rowNumber++;
             
-            if (empty(array_filter($data))) {
+            if (array_filter($data) === []) {
                 continue; // Skip empty rows
             }
             
             $row = $this->parseRow($headers, $data, $rowNumber);
-            if (!$row) continue;
+            if (!$row) {
+                continue;
+            }
             
             // Create family if not exists (skip in dry run)
             if ($options['dry_run'] ?? false) {
@@ -90,7 +89,9 @@ class CFK_CSV_Handler {
             } else {
                 // Normal operation: create family and child
                 $familyId = $this->ensureFamilyExists($row, $familiesCreated);
-                if (!$familyId) continue;
+                if (!$familyId) {
+                    continue;
+                }
                 
                 // Create child
                 $childId = $this->createChild($row, $familyId);
@@ -146,7 +147,7 @@ class CFK_CSV_Handler {
         while (($data = fgetcsv($handle)) !== false) {
             $rowNumber++;
 
-            if (empty(array_filter($data))) {
+            if (array_filter($data) === []) {
                 continue; // Skip empty rows
             }
 
@@ -159,7 +160,7 @@ class CFK_CSV_Handler {
         fclose($handle);
 
         return [
-            'success' => empty($this->errors),
+            'success' => $this->errors === [],
             'children' => $children,
             'errors' => $this->errors,
             'warnings' => $this->warnings
@@ -194,7 +195,7 @@ class CFK_CSV_Handler {
      * Get import results
      */
     public function getResults(): array {
-        $success = empty($this->errors);
+        $success = $this->errors === [];
         $imported_count = count($this->imported);
         
         return [
@@ -213,7 +214,7 @@ class CFK_CSV_Handler {
      * Validate CSV headers
      */
     private function validateHeaders(array $headers): bool {
-        if (!$headers) {
+        if ($headers === []) {
             $this->errors[] = 'Empty CSV file or no headers found';
             return false;
         }
@@ -226,7 +227,7 @@ class CFK_CSV_Handler {
             }
         }
         
-        if (!empty($missing)) {
+        if ($missing !== []) {
             $this->errors[] = 'Missing required columns: ' . implode(', ', $missing);
             return false;
         }
@@ -254,11 +255,9 @@ class CFK_CSV_Handler {
                     $this->errors[] = "Row $rowNumber: Missing or invalid required field '$field'";
                     return null;
                 }
-            } else {
-                if (empty($value)) {
-                    $this->errors[] = "Row $rowNumber: Missing required field '$field'";
-                    return null;
-                }
+            } elseif ($value === '' || $value === '0') {
+                $this->errors[] = "Row $rowNumber: Missing required field '$field'";
+                return null;
             }
         }
         
@@ -278,18 +277,20 @@ class CFK_CSV_Handler {
         }
         
         // Ensure required fields have values - handle months format
-        if (preg_match('/^(\d+)m$/', $row['age'], $matches)) {
+        if (preg_match('/^(\d+)m$/', (string) $row['age'], $matches)) {
             // Convert months to decimal age (e.g., 10m = 0.83 years)
             $months = (int) $matches[1];
             $row['age'] = round($months / 12, 2);
-            if ($row['age'] == 0 && $months > 0) $row['age'] = 0.1; // Ensure non-zero for babies
+            if ($row['age'] == 0 && $months > 0) {
+                $row['age'] = 0.1;
+            } // Ensure non-zero for babies
         } else {
             $row['age'] = (int) $row['age'];
         }
-        $row['gender'] = strtoupper($row['gender']);
+        $row['gender'] = strtoupper((string) $row['gender']);
         
         // Parse family ID from name field (e.g., "001A" -> family_id=001, child_letter=A)
-        if (preg_match('/^(\d{1,4})([A-Z])$/', $row['name'], $matches)) {
+        if (preg_match('/^(\d{1,4})([A-Z])$/', (string) $row['name'], $matches)) {
             $row['family_id'] = (int) $matches[1];
             $row['child_letter'] = $matches[2];
         } else {
@@ -298,16 +299,16 @@ class CFK_CSV_Handler {
         }
         
         // Set defaults for optional fields
-        $row['grade'] = $row['grade'] ?? '';
-        $row['special_needs'] = $row['special_needs'] ?? 'None';
-        $row['family_situation'] = $row['family_situation'] ?? '';
-        $row['greatest_need'] = $row['greatest_need'] ?? '';
-        $row['wish_list'] = $row['wish_list'] ?? '';
-        $row['interests'] = $row['interests'] ?? '';
-        $row['shirt_size'] = $row['shirt_size'] ?? '';
-        $row['pant_size'] = $row['pant_size'] ?? '';
-        $row['shoe_size'] = $row['shoe_size'] ?? '';
-        $row['jacket_size'] = $row['jacket_size'] ?? '';
+        $row['grade'] ??= '';
+        $row['special_needs'] ??= 'None';
+        $row['family_situation'] ??= '';
+        $row['greatest_need'] ??= '';
+        $row['wish_list'] ??= '';
+        $row['interests'] ??= '';
+        $row['shirt_size'] ??= '';
+        $row['pant_size'] ??= '';
+        $row['shoe_size'] ??= '';
+        $row['jacket_size'] ??= '';
         
         return $row;
     }
@@ -338,9 +339,9 @@ class CFK_CSV_Handler {
         
         // Text length validation
         foreach (self::MAX_LENGTHS as $field => $maxLength) {
-            if (isset($row[$field]) && strlen($row[$field]) > $maxLength) {
+            if (isset($row[$field]) && strlen((string) $row[$field]) > $maxLength) {
                 $this->warnings[] = "Row $rowNumber: $field exceeds $maxLength characters, will be truncated";
-                $row[$field] = substr($row[$field], 0, $maxLength);
+                $row[$field] = substr((string) $row[$field], 0, $maxLength);
             }
         }
         
@@ -430,16 +431,16 @@ class CFK_CSV_Handler {
             "SELECT child_letter FROM children WHERE family_id = ? ORDER BY child_letter",
             [$familyId]
         );
-        
+
         $usedLetters = array_column($existingLetters, 'child_letter');
-        
+
         for ($i = 0; $i < 26; $i++) {
             $letter = chr(65 + $i); // A, B, C...
             if (!in_array($letter, $usedLetters)) {
                 return $letter;
             }
         }
-        
+
         return 'A'; // Fallback
     }
     
@@ -483,7 +484,7 @@ class CFK_CSV_Handler {
     private function formatChildForExport(array $child): array {
         // Split wishes back into greatest_need and wish_list
         $wishes = $child['wishes'] ?? '';
-        $wishParts = explode('. Wish List: ', $wishes);
+        $wishParts = explode('. Wish List: ', (string) $wishes);
         $greatestNeed = $wishParts[0] ?? '';
         $wishList = $wishParts[1] ?? '';
 

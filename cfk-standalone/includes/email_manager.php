@@ -1,9 +1,10 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Email Manager - PHPMailer Integration
- * Handles email notifications for sponsors and administrators
+ * DEPRECATED: This file is kept for backwards compatibility only.
+ * The actual implementation has moved to src/Email/Manager.php
+ *
+ * The CFK_Email_Manager class is automatically available via class_alias()
+ * defined in config/config.php - no need to define it here.
  */
 
 // Prevent direct access
@@ -12,29 +13,37 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class CFK_Email_Manager {
-    
-    private static ?PHPMailer\PHPMailer\PHPMailer $mailer = null;
-    
+// Class is now loaded via Composer autoloader and aliased in config.php
+// This file intentionally left empty to maintain backwards compatibility
+// with existing require_once statements
+
+return; // Exit early - nothing to do here
+
+// DEPRECATED CODE BELOW - DO NOT USE
+// ====================================
+class CFK_Email_Manager_DEPRECATED {
+
+    private static ?PHPMailer $mailer = null;
+
     /**
      * Initialize PHPMailer instance (public for email queue access)
      */
     public static function getMailer(): object {
-        if (self::$mailer === null) {
+        if (!self::$mailer instanceof PHPMailer) {
             // Auto-load PHPMailer if available via Composer
             if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
                 require_once __DIR__ . '/../vendor/autoload.php';
             }
-            
+
             // Fallback: Use basic PHP mail() function
             if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
                 $fallback = self::getFallbackMailer();
                 $fallback->setFrom(config('from_email'), config('from_name'));
                 return $fallback;
             }
-            
-            self::$mailer = new PHPMailer\PHPMailer\PHPMailer(true);
-            
+
+            self::$mailer = new PHPMailer(true);
+
             // SMTP Configuration (can be configured via environment)
             if (config('email_use_smtp', false)) {
                 self::$mailer->isSMTP();
@@ -48,16 +57,16 @@ class CFK_Email_Manager {
                 // Use sendmail/mail() function
                 self::$mailer->isSendmail();
             }
-            
+
             // Set defaults
             self::$mailer->setFrom(config('from_email'), config('from_name'));
             self::$mailer->isHTML(true);
             self::$mailer->CharSet = 'UTF-8';
         }
-        
+
         return self::$mailer;
     }
-    
+
     /**
      * Fallback mailer for basic PHP mail() function
      */
@@ -66,8 +75,8 @@ class CFK_Email_Manager {
             public $Subject = '';
             public $Body = '';
             public $AltBody = '';
-            private $to = [];
-            private $from = ['email' => '', 'name' => ''];
+            private array $to = [];
+            private array $from = ['email' => '', 'name' => ''];
 
             public function addAddress(string $email, string $name = ''): void {
                 $this->to[] = ['email' => $email, 'name' => $name];
@@ -80,39 +89,39 @@ class CFK_Email_Manager {
             public function setFrom(string $email, string $name = ''): void {
                 $this->from = ['email' => $email, 'name' => $name];
             }
-            
+
             public function send(): bool {
                 $headers = "From: " . ($this->from['name'] ? $this->from['name'] . ' <' . $this->from['email'] . '>' : $this->from['email']) . "\r\n";
                 $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-                
+
                 foreach ($this->to as $recipient) {
                     $toAddress = $recipient['name'] ? $recipient['name'] . ' <' . $recipient['email'] . '>' : $recipient['email'];
-                    if (!mail($toAddress, $this->Subject, $this->Body, $headers)) {
+                    if (!mail((string) $toAddress, (string) $this->Subject, (string) $this->Body, $headers)) {
                         return false;
                     }
                 }
-                
+
                 return true;
             }
-            
+
             public function isHTML(bool $html): void {}
         };
     }
-    
+
     /**
      * Send sponsorship confirmation email to sponsor
      */
     public static function sendSponsorConfirmation(array $sponsorship): bool {
         try {
             $mailer = self::getMailer();
-            
+
             $mailer->addAddress($sponsorship['sponsor_email'], $sponsorship['sponsor_name']);
             $mailer->Subject = 'Christmas for Kids - Sponsorship Confirmation';
-            
+
             $mailer->Body = self::getSponsorConfirmationTemplate($sponsorship);
-            
+
             $success = $mailer->send();
-            
+
             // Log the email
             self::logEmail(
                 $sponsorship['sponsor_email'],
@@ -120,9 +129,9 @@ class CFK_Email_Manager {
                 $success ? 'sent' : 'failed',
                 $sponsorship['id']
             );
-            
+
             return $success;
-            
+
         } catch (Exception $e) {
             error_log('Failed to send sponsor confirmation email: ' . $e->getMessage());
             self::logEmail(
@@ -135,21 +144,21 @@ class CFK_Email_Manager {
             return false;
         }
     }
-    
+
     /**
      * Send admin notification email
      */
     public static function sendAdminNotification(string $subject, string $message, array $sponsorship = []): bool {
         try {
             $mailer = self::getMailer();
-            
+
             $mailer->addAddress(config('admin_email'));
             $mailer->Subject = 'CFK Admin - ' . $subject;
-            
+
             $mailer->Body = self::getAdminNotificationTemplate($subject, $message, $sponsorship);
-            
+
             $success = $mailer->send();
-            
+
             // Log the email
             self::logEmail(
                 config('admin_email'),
@@ -157,15 +166,15 @@ class CFK_Email_Manager {
                 $success ? 'sent' : 'failed',
                 $sponsorship['id'] ?? 0
             );
-            
+
             return $success;
-            
+
         } catch (Exception $e) {
             error_log('Failed to send admin notification email: ' . $e->getMessage());
             return false;
         }
     }
-    
+
     /**
      * Get sponsor confirmation email template (public for email queue access)
      */
@@ -271,11 +280,11 @@ class CFK_Email_Manager {
                     <strong>💡 Tip:</strong> Print this email and take it with you while shopping! It has everything you need.
                 </div>
 
-                " . (!empty($sponsorship['special_message']) ? "
+                " . (empty($sponsorship['special_message']) ? "" : "
                 <div style='margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;'>
                     <p><strong>Your Message:</strong> <em>{$sponsorship['special_message']}</em></p>
                 </div>
-                " : "") . "
+                ") . "
 
                 <p style='margin-top: 20px;'><strong>Questions or need to make changes?</strong> Please contact us - we're here to help!</p>
 
@@ -291,7 +300,7 @@ class CFK_Email_Manager {
         </body>
         </html>";
     }
-    
+
     /**
      * Get admin notification email template (public for email queue access)
      */
@@ -302,8 +311,8 @@ class CFK_Email_Manager {
         $content .= "<div style='background: #f9f9f9; padding: 15px; border-left: 4px solid #2c5530;'>";
         $content .= "<p>$message</p>";
         $content .= "</div>";
-        
-        if (!empty($sponsorship)) {
+
+        if ($sponsorship !== []) {
             $childId = $sponsorship['child_display_id'] ?? 'Unknown';
             $requestDate = $sponsorship['request_date'] ?? 'Unknown';
 
@@ -315,13 +324,12 @@ class CFK_Email_Manager {
             $content .= "<li><strong>Date:</strong> {$requestDate}</li>";
             $content .= "</ul>";
         }
-        
+
         $content .= "<p><a href='" . baseUrl('admin/manage_sponsorships.php') . "'>View in Admin Panel</a></p>";
-        $content .= "</body></html>";
-        
-        return $content;
+
+        return $content . "</body></html>";
     }
-    
+
     /**
      * Log email for audit trail
      */
@@ -339,7 +347,7 @@ class CFK_Email_Manager {
             error_log('Failed to log email: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Test email configuration
      */
@@ -371,7 +379,7 @@ class CFK_Email_Manager {
      * Send multi-child sponsorship email (when sponsor adds more children)
      */
     public static function sendMultiChildSponsorshipEmail(string $sponsorEmail, array $sponsorships): bool {
-        if (empty($sponsorships)) {
+        if ($sponsorships === []) {
             return false;
         }
 
@@ -537,7 +545,7 @@ class CFK_Email_Manager {
                 </div>";
         }
 
-        $html .= "
+        return $html . ("
                 <div style='background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>
                     <p><strong>💡 Shopping Tip:</strong> Print this email and take it with you! It has complete details for all {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ".</p>
                 </div>
@@ -554,9 +562,7 @@ class CFK_Email_Manager {
                 <p style='font-size: 11px; color: #666; margin-top: 10px;'>You are sponsoring {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ". Please deliver unwrapped gifts to our office.</p>
             </div>
         </body>
-        </html>";
-
-        return $html;
+        </html>");
     }
 
     /**
@@ -578,7 +584,7 @@ class CFK_Email_Manager {
                 [$email]
             );
 
-            if (empty($sponsorships)) {
+            if ($sponsorships === []) {
                 return false; // No sponsorships found
             }
 
@@ -648,7 +654,7 @@ class CFK_Email_Manager {
     public static function verifyAccessToken(string $token): ?string {
         try {
             $decoded = base64_decode($token);
-            list($json, $signature) = explode('|', $decoded, 2);
+            [$json, $signature] = explode('|', $decoded, 2);
 
             $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
 
@@ -664,7 +670,7 @@ class CFK_Email_Manager {
 
             return $data['email'];
 
-        } catch (Exception $e) {
+        } catch (Exception) {
             return null;
         }
     }
@@ -673,7 +679,7 @@ class CFK_Email_Manager {
      * Get access link email template
      */
     private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string {
-        $html = "
+        return "
         <!DOCTYPE html>
         <html>
         <head>
@@ -735,8 +741,6 @@ class CFK_Email_Manager {
             </div>
         </body>
         </html>";
-
-        return $html;
     }
 }
 

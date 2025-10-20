@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
             <form id="magic-link-form" method="POST" action="<?php echo baseUrl('admin/verify-magic-link.php'); ?>" style="display: none;">
                 <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $csrfToken); ?>">
                 <button type="submit">Complete Login</button>
             </form>
 
@@ -278,15 +278,15 @@ function getLocationFromIp(string $ip): string {
  * Parse user agent for device info
  */
 function parseUserAgent(string $userAgent): string {
-    if (strpos($userAgent, 'Windows') !== false) {
+    if (str_contains($userAgent, 'Windows')) {
         return 'Windows';
-    } elseif (strpos($userAgent, 'Mac') !== false) {
+    } elseif (str_contains($userAgent, 'Mac')) {
         return 'macOS';
-    } elseif (strpos($userAgent, 'Linux') !== false) {
+    } elseif (str_contains($userAgent, 'Linux')) {
         return 'Linux';
-    } elseif (strpos($userAgent, 'iPhone') !== false) {
+    } elseif (str_contains($userAgent, 'iPhone')) {
         return 'iPhone';
-    } elseif (strpos($userAgent, 'Android') !== false) {
+    } elseif (str_contains($userAgent, 'Android')) {
         return 'Android';
     }
     return 'Unknown Device';

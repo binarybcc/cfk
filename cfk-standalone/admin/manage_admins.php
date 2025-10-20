@@ -32,110 +32,101 @@ $message = '';
 $error = '';
 
 // Handle form submissions
-if ($_POST) {
+if ($_POST !== []) {
     // Validate CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Security token invalid. Please try again.';
-    } else {
+    } elseif (isset($_POST['add_admin'])) {
         // Add new admin
-        if (isset($_POST['add_admin'])) {
-            $username = sanitizeString($_POST['username'] ?? '');
-            $email = sanitizeEmail($_POST['email'] ?? '');
-            $fullName = sanitizeString($_POST['full_name'] ?? '');
-            $password = $_POST['password'] ?? '';
-            $confirmPassword = $_POST['confirm_password'] ?? '';
-            $role = sanitizeString($_POST['role'] ?? 'editor');
+        $username = sanitizeString($_POST['username'] ?? '');
+        $email = sanitizeEmail($_POST['email'] ?? '');
+        $fullName = sanitizeString($_POST['full_name'] ?? '');
+        $password = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+        $role = sanitizeString($_POST['role'] ?? 'editor');
+        if (empty($username) || empty($email) || empty($password)) {
+            $error = 'Username, email, and password are required.';
+        } elseif ($password !== $confirmPassword) {
+            $error = 'Passwords do not match.';
+        } elseif (strlen((string) $password) < 8) {
+            $error = 'Password must be at least 8 characters long.';
+        } elseif (!in_array($role, ['admin', 'editor'])) {
+            $error = 'Invalid role selected.';
+        } else {
+            // Check if username already exists
+            $existing = Database::fetchRow(
+                "SELECT id FROM admin_users WHERE username = ?",
+                [$username]
+            );
 
-            if (empty($username) || empty($email) || empty($password)) {
-                $error = 'Username, email, and password are required.';
-            } elseif ($password !== $confirmPassword) {
-                $error = 'Passwords do not match.';
-            } elseif (strlen($password) < 8) {
-                $error = 'Password must be at least 8 characters long.';
-            } elseif (!in_array($role, ['admin', 'editor'])) {
-                $error = 'Invalid role selected.';
+            if ($existing) {
+                $error = 'Username already exists. Please choose a different username.';
             } else {
-                // Check if username already exists
-                $existing = Database::fetchRow(
-                    "SELECT id FROM admin_users WHERE username = ?",
-                    [$username]
-                );
+                // Create new admin user
+                $passwordHash = password_hash((string) $password, PASSWORD_DEFAULT);
 
-                if ($existing) {
-                    $error = 'Username already exists. Please choose a different username.';
-                } else {
-                    // Create new admin user
-                    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-                    Database::insert('admin_users', [
-                        'username' => $username,
-                        'password_hash' => $passwordHash,
-                        'email' => $email,
-                        'full_name' => $fullName,
-                        'role' => $role,
-                        'created_at' => date('Y-m-d H:i:s')
-                    ]);
-
-                    $message = "Administrator '{$username}' has been created successfully.";
-                    error_log("CFK Admin: New admin user created: $username by " . $_SESSION['cfk_admin_username']);
-                }
-            }
-        }
-
-        // Edit admin
-        elseif (isset($_POST['edit_admin'])) {
-            $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
-            $email = sanitizeEmail($_POST['email'] ?? '');
-            $fullName = sanitizeString($_POST['full_name'] ?? '');
-            $role = sanitizeString($_POST['role'] ?? 'editor');
-            $newPassword = $_POST['new_password'] ?? '';
-
-            if ($adminId <= 0 || empty($email)) {
-                $error = 'Invalid admin ID or email.';
-            } elseif (!in_array($role, ['admin', 'editor'])) {
-                $error = 'Invalid role selected.';
-            } else {
-                $updateData = [
+                Database::insert('admin_users', [
+                    'username' => $username,
+                    'password_hash' => $passwordHash,
                     'email' => $email,
                     'full_name' => $fullName,
                     'role' => $role,
-                    'updated_at' => date('Y-m-d H:i:s')
-                ];
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
 
-                // Update password if provided
-                if (!empty($newPassword)) {
-                    if (strlen($newPassword) < 8) {
-                        $error = 'New password must be at least 8 characters long.';
-                    } else {
-                        $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
-                    }
-                }
-
-                if (empty($error)) {
-                    Database::update('admin_users', $updateData, ['id' => $adminId]);
-                    $message = 'Administrator updated successfully.';
-                    error_log("CFK Admin: Admin user updated: ID $adminId by " . $_SESSION['cfk_admin_username']);
-                }
+                $message = "Administrator '{$username}' has been created successfully.";
+                error_log("CFK Admin: New admin user created: $username by " . $_SESSION['cfk_admin_username']);
             }
         }
+    } elseif (isset($_POST['edit_admin'])) {
+        $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
+        $email = sanitizeEmail($_POST['email'] ?? '');
+        $fullName = sanitizeString($_POST['full_name'] ?? '');
+        $role = sanitizeString($_POST['role'] ?? 'editor');
+        $newPassword = $_POST['new_password'] ?? '';
 
-        // Delete admin
-        elseif (isset($_POST['delete_admin'])) {
-            $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
+        if ($adminId <= 0 || empty($email)) {
+            $error = 'Invalid admin ID or email.';
+        } elseif (!in_array($role, ['admin', 'editor'])) {
+            $error = 'Invalid role selected.';
+        } else {
+            $updateData = [
+                'email' => $email,
+                'full_name' => $fullName,
+                'role' => $role,
+                'updated_at' => date('Y-m-d H:i:s')
+            ];
 
-            // Prevent deleting yourself
-            if ($adminId == $_SESSION['cfk_admin_id']) {
-                $error = 'You cannot delete your own account.';
-            } elseif ($adminId <= 0) {
-                $error = 'Invalid admin ID.';
-            } else {
-                // Get admin details before deleting
-                $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
-
-                Database::delete('admin_users', ['id' => $adminId]);
-                $message = "Administrator '{$admin['username']}' has been deleted.";
-                error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
+            // Update password if provided
+            if (!empty($newPassword)) {
+                if (strlen((string) $newPassword) < 8) {
+                    $error = 'New password must be at least 8 characters long.';
+                } else {
+                    $updateData['password_hash'] = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+                }
             }
+
+            if ($error === '' || $error === '0') {
+                Database::update('admin_users', $updateData, ['id' => $adminId]);
+                $message = 'Administrator updated successfully.';
+                error_log("CFK Admin: Admin user updated: ID $adminId by " . $_SESSION['cfk_admin_username']);
+            }
+        }
+    } elseif (isset($_POST['delete_admin'])) {
+        $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
+
+        // Prevent deleting yourself
+        if ($adminId == $_SESSION['cfk_admin_id']) {
+            $error = 'You cannot delete your own account.';
+        } elseif ($adminId <= 0) {
+            $error = 'Invalid admin ID.';
+        } else {
+            // Get admin details before deleting
+            $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
+
+            Database::delete('admin_users', ['id' => $adminId]);
+            $message = "Administrator '{$admin['username']}' has been deleted.";
+            error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
         }
     }
 }
@@ -156,13 +147,13 @@ include __DIR__ . '/includes/admin_header.php';
         <p class="subtitle">Manage administrator accounts and permissions</p>
     </div>
 
-    <?php if ($message): ?>
+    <?php if ($message !== '' && $message !== '0'): ?>
         <div class="alert alert-success">
             ✓ <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
 
-    <?php if ($error): ?>
+    <?php if ($error !== '' && $error !== '0'): ?>
         <div class="alert alert-error">
             ✗ <?php echo htmlspecialchars($error); ?>
         </div>
@@ -267,7 +258,7 @@ include __DIR__ . '/includes/admin_header.php';
     <div class="data-table-container">
         <h2>Current Administrators</h2>
 
-        <?php if (empty($admins)): ?>
+        <?php if ($admins === []): ?>
             <p class="no-data">No administrators found.</p>
         <?php else: ?>
             <table class="data-table">
@@ -286,20 +277,20 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php foreach ($admins as $admin): ?>
                         <tr>
                             <td>
-                                <strong><?php echo htmlspecialchars($admin['username']); ?></strong>
+                                <strong><?php echo htmlspecialchars((string) $admin['username']); ?></strong>
                                 <?php if ($admin['id'] == $_SESSION['cfk_admin_id']): ?>
                                     <span class="badge badge-primary">You</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?php echo htmlspecialchars($admin['email']); ?></td>
+                            <td><?php echo htmlspecialchars((string) $admin['email']); ?></td>
                             <td><?php echo htmlspecialchars($admin['full_name'] ?? '—'); ?></td>
                             <td>
                                 <span class="badge badge-<?php echo $admin['role'] === 'admin' ? 'danger' : 'info'; ?>">
-                                    <?php echo ucfirst($admin['role']); ?>
+                                    <?php echo ucfirst((string) $admin['role']); ?>
                                 </span>
                             </td>
-                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime($admin['last_login'])) : 'Never'; ?></td>
-                            <td><?php echo date('M j, Y', strtotime($admin['created_at'])); ?></td>
+                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime((string) $admin['last_login'])) : 'Never'; ?></td>
+                            <td><?php echo date('M j, Y', strtotime((string) $admin['created_at'])); ?></td>
                             <td class="actions">
                                 <button onclick="editAdmin(<?php echo $admin['id']; ?>)"
                                         class="btn btn-sm btn-edit"
@@ -307,7 +298,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     ✏️ Edit
                                 </button>
                                 <?php if ($admin['id'] != $_SESSION['cfk_admin_id']): ?>
-                                    <button onclick="deleteAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars($admin['username'], ENT_QUOTES); ?>')"
+                                    <button onclick="deleteAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars((string) $admin['username'], ENT_QUOTES); ?>')"
                                             class="btn btn-sm btn-delete"
                                             title="Delete">
                                         🗑️ Delete
@@ -327,7 +318,7 @@ include __DIR__ . '/includes/admin_header.php';
                                         <div class="form-group">
                                             <label>Username</label>
                                             <input type="text"
-                                                   value="<?php echo htmlspecialchars($admin['username']); ?>"
+                                                   value="<?php echo htmlspecialchars((string) $admin['username']); ?>"
                                                    class="form-control"
                                                    disabled>
                                             <small>Username cannot be changed</small>
@@ -337,7 +328,7 @@ include __DIR__ . '/includes/admin_header.php';
                                             <label>Email Address *</label>
                                             <input type="email"
                                                    name="email"
-                                                   value="<?php echo htmlspecialchars($admin['email']); ?>"
+                                                   value="<?php echo htmlspecialchars((string) $admin['email']); ?>"
                                                    class="form-control"
                                                    required>
                                         </div>

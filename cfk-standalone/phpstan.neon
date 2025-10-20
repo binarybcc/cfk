@@ -1,0 +1,35 @@
+parameters:
+    level: 8
+    paths:
+        # Focus on new PSR-4 classes during migration
+        - src
+        # Uncomment to check legacy files after migration complete
+        # - includes
+        # - pages
+        # - admin
+        # - cron
+    excludePaths:
+        - vendor
+        - tests
+
+    # Ignore specific errors during migration
+    ignoreErrors:
+        # Ignore missing class errors for now (we're migrating)
+        - '#Class CFK_[a-zA-Z_]+ not found#'
+        - '#Function [a-zA-Z_]+ not found#'
+        # Ignore fallback mailer anonymous class issues
+        - '#Call to an undefined method object::(addAddress|clearAddresses|send|setFrom)#'
+        - '#Access to an undefined property object::\$(Subject|Body|AltBody)#'
+        # PHPMailer is optional dependency (fallback exists)
+        - '#Class PHPMailer\\PHPMailer\\PHPMailer not found#'
+        - '#unknown class PHPMailer\\PHPMailer\\PHPMailer#'
+
+    # Check for missing type hints
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true
+
+    # Report unused private methods/properties
+    reportUnmatchedIgnoredErrors: false
+
+    # Don't be too strict during migration
+    treatPhpDocTypesAsCertain: true

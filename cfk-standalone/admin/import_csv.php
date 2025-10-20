@@ -92,7 +92,7 @@ function handlePreviewImport(): array {
         $file = $_FILES['csv_file'];
 
         // Validate file type
-        if ($file['type'] !== 'text/csv' && !in_array(pathinfo($file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
+        if ($file['type'] !== 'text/csv' && !in_array(pathinfo((string) $file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
             return ['success' => false, 'message' => 'Please upload a CSV file (.csv extension).'];
         }
 
@@ -244,9 +244,8 @@ function handleRestoreBackup(): array {
         }
 
         $clearExisting = isset($_POST['clear_existing']);
-        $result = CFK_Backup_Manager::restoreFromBackup($filename, $clearExisting);
 
-        return $result;
+        return CFK_Backup_Manager::restoreFromBackup($filename, $clearExisting);
 
     } catch (Exception $e) {
         error_log('Restore backup error: ' . $e->getMessage());
@@ -845,7 +844,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <div class="backup-item">
                             <div class="backup-info">
                                 <div class="backup-filename">
-                                    <strong>📄 <?php echo htmlspecialchars($backup['filename']); ?></strong>
+                                    <strong>📄 <?php echo htmlspecialchars((string) $backup['filename']); ?></strong>
                                 </div>
                                 <div class="backup-meta">
                                     <span>🕐 <?php echo $created; ?></span>
@@ -858,7 +857,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <form method="POST" style="display: inline;" onsubmit="return confirm('Restore this backup? Current data will be replaced.');">
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <input type="hidden" name="action" value="restore_backup">
-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars($backup['filename']); ?>">
+                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
                                     <input type="hidden" name="clear_existing" value="1">
                                     <button type="submit" class="btn btn-warning btn-sm">
                                         ♻️ Restore
@@ -867,7 +866,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <form method="POST" style="display: inline;">
                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                     <input type="hidden" name="action" value="download_backup">
-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars($backup['filename']); ?>">
+                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
                                     <button type="submit" class="btn btn-secondary btn-sm">
                                         💾 Download
                                     </button>
@@ -1120,7 +1119,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                 </div>
                 <div class="section-body">
                     <div class="alert alert-success">
-                        <strong>✅ CSV Parsed Successfully!</strong> File: <code><?php echo htmlspecialchars($previewData['filename']); ?></code> (<?php echo $previewData['total_rows']; ?> rows)
+                        <strong>✅ CSV Parsed Successfully!</strong> File: <code><?php echo htmlspecialchars((string) $previewData['filename']); ?></code> (<?php echo $previewData['total_rows']; ?> rows)
                     </div>
 
                     <!-- Change Statistics -->
@@ -1150,7 +1149,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                             <ul style="margin: 0; padding-left: 1.5rem;">
                                 <?php foreach ($previewData['analysis']['warnings'] as $warning): ?>
                                     <li style="margin-bottom: 0.5rem;">
-                                        <strong><?php echo htmlspecialchars($warning['message']); ?></strong>
+                                        <strong><?php echo htmlspecialchars((string) $warning['message']); ?></strong>
                                         <?php if ($warning['type'] === 'sponsored_child_removed'): ?>
                                             <br><small style="color: #856404;">This child has an active sponsorship. You can choose to keep them as inactive below.</small>
                                         <?php endif; ?>
@@ -1208,7 +1207,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                 <div class="section-body">
                     <div class="alert alert-success">
                         <h3 style="margin-bottom: 0.5rem;">🎉 Success!</h3>
-                        <p style="margin: 0;"><?php echo htmlspecialchars($message); ?></p>
+                        <p style="margin: 0;"><?php echo htmlspecialchars((string) $message); ?></p>
                     </div>
 
                     <div class="results-grid" style="margin-top: 1.5rem;">

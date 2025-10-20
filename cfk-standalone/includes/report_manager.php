@@ -1,18 +1,15 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Report Manager - Comprehensive Reporting for CFK
- * Handles all report generation and data export functionality
+ * DEPRECATED: Moved to src/Report/Manager.php
+ * Class available via class_alias() in config.php
  */
-
-// Prevent direct access
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
+return;
 
-class CFK_Report_Manager {
+class CFK_Report_Manager_DEPRECATED {
 
     /**
      * Get sponsor directory report
@@ -92,7 +89,7 @@ class CFK_Report_Manager {
 
         $params = [];
 
-        if (!empty($childId)) {
+        if ($childId !== '' && $childId !== '0') {
             $sql .= " WHERE CONCAT(f.family_number, c.child_letter) LIKE :child_id";
             $params['child_id'] = '%' . $childId . '%';
         }
@@ -244,7 +241,7 @@ class CFK_Report_Manager {
      * Generate shopping list for sponsor
      */
     public static function generateShoppingList(string $sponsorEmail): array {
-        $sponsorships = Database::fetchAll("
+        return Database::fetchAll("
             SELECT
                 s.sponsor_name,
                 s.sponsor_email,
@@ -267,8 +264,6 @@ class CFK_Report_Manager {
             AND s.status != 'cancelled'
             ORDER BY f.family_number, c.child_letter
         ", ['email' => $sponsorEmail]);
-
-        return $sponsorships;
     }
 
     /**

@@ -35,7 +35,7 @@ if ($token && $username) {
         [sanitizeString($username)]
     );
 
-    if ($user && password_verify($token, $user['reset_token'])) {
+    if ($user && password_verify((string) $token, (string) $user['reset_token'])) {
         $validToken = true;
     } else {
         $error = 'Invalid or expired reset link. Please request a new password reset.';
@@ -60,11 +60,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
             $error = 'Both password fields are required.';
         } elseif ($newPassword !== $confirmPassword) {
             $error = 'Passwords do not match.';
-        } elseif (strlen($newPassword) < 8) {
+        } elseif (strlen((string) $newPassword) < 8) {
             $error = 'Password must be at least 8 characters long.';
         } else {
         // Update password and clear reset token
-        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $passwordHash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
 
         $updated = Database::update('admin_users',
             [
@@ -311,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                 <p>Choose a strong password for your admin account.</p>
             </div>
 
-            <?php if ($error): ?>
+            <?php if ($error !== '' && $error !== '0'): ?>
                 <div class="error-message">
                     <?php echo htmlspecialchars($error); ?>
                 </div>

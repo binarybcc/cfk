@@ -1,0 +1,774 @@
+Note: Using configuration file /Users/user/Development/work/cfk/cfk/cfk-standalone/phpstan.neon.
+  0/22 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░]  90%[1G[2K 22/22 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   archive_manager.php                                                                   
+ ------ -------------------------------------------------------------------------------------- 
+  :20    Method CFK_Archive_Manager::createDatabaseBackup() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :77    Method CFK_Archive_Manager::exportAllDataToCSV() return type has no                   
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :144   Method CFK_Archive_Manager::writeCSV() has parameter $data with no                    
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :163   Method CFK_Archive_Manager::createArchiveSummary() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :241   Method CFK_Archive_Manager::clearSeasonalData() return type has no                    
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :286   Method CFK_Archive_Manager::performYearEndReset() return type has no                  
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :353   Method CFK_Archive_Manager::getAvailableArchives() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   avatar_manager.php                                                                    
+ ------ -------------------------------------------------------------------------------------- 
+  :30    Method CFK_Avatar_Manager::getAvatarForChild() has parameter $child                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :45    Comparison operation ">=" between int<5, max> and 5 is always true.                   
+  :50    Comparison operation ">=" between int<11, max> and 11 is always true.                 
+  :333   Method CFK_Avatar_Manager::getAvailableCategories() return type has                   
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :340   Method CFK_Avatar_Manager::generateTestAvatars() return type has no                   
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   backup_manager.php                                                                    
+ ------ -------------------------------------------------------------------------------------- 
+  :23    Method CFK_Backup_Manager::createAutoBackup() return type has no                      
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :87    Method CFK_Backup_Manager::listBackups() return type has no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :117   Method CFK_Backup_Manager::restoreFromBackup() return type has no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :133   Call to an undefined static method Database::query().                                 
+  :134   Call to an undefined static method Database::query().                                 
+  :135   Call to an undefined static method Database::query().                                 
+  :220   Method CFK_Backup_Manager::getBackupStats() return type has no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   csv_handler.php                                                                       
+ ------ -------------------------------------------------------------------------------------- 
+  :39    Property CFK_CSV_Handler::$errors type has no value type specified in                 
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :40    Property CFK_CSV_Handler::$warnings type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :41    Property CFK_CSV_Handler::$imported type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :46    Method CFK_CSV_Handler::importChildren() has parameter $options with                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :46    Method CFK_CSV_Handler::importChildren() return type has no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :115   Method CFK_CSV_Handler::importChildrenFromCsv() has parameter                         
+         $options with no value type specified in iterable type array.                         
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :115   Method CFK_CSV_Handler::importChildrenFromCsv() return type has no                    
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :124   Method CFK_CSV_Handler::parseCSVForPreview() return type has no value                 
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :172   Method CFK_CSV_Handler::exportChildren() has parameter $filters with                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :196   Method CFK_CSV_Handler::getResults() return type has no value type                    
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :215   Method CFK_CSV_Handler::validateHeaders() has parameter $headers with                 
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :240   Method CFK_CSV_Handler::parseRow() has parameter $data with no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :240   Method CFK_CSV_Handler::parseRow() has parameter $headers with no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :240   Method CFK_CSV_Handler::parseRow() return type has no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :274   Method CFK_CSV_Handler::cleanRowData() has parameter $row with no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :274   Method CFK_CSV_Handler::cleanRowData() return type has no value type                  
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :318   Method CFK_CSV_Handler::validateRowData() has parameter $row with no                  
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :358   Method CFK_CSV_Handler::ensureFamilyExists() has parameter                            
+         $familiesCreated with no value type specified in iterable type array.                 
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :358   Method CFK_CSV_Handler::ensureFamilyExists() has parameter $row with                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :395   Method CFK_CSV_Handler::createChild() has parameter $row with no                      
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :420   Undefined variable: $familyNumber                                                     
+  :449   Method CFK_CSV_Handler::getChildrenForExport() has parameter $filters                 
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :449   Method CFK_CSV_Handler::getChildrenForExport() return type has no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :483   Method CFK_CSV_Handler::formatChildForExport() has parameter $child                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :483   Method CFK_CSV_Handler::formatChildForExport() return type has no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   database_wrapper.php                                                                  
+ ------ -------------------------------------------------------------------------------------- 
+  :20    Method Database::init() has parameter $config with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :57    Method Database::fetchAll() has parameter $params with no value type                  
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :57    Method Database::fetchAll() return type has no value type specified                   
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :67    Method Database::fetchRow() has parameter $params with no value type                  
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :67    Method Database::fetchRow() return type has no value type specified                   
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :78    Method Database::execute() has parameter $params with no value type                   
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :88    Method Database::insert() has parameter $data with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :104   Method Database::update() has parameter $data with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :104   Method Database::update() has parameter $where with no value type                     
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :143   Method Database::delete() has parameter $where with no value type                     
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   email_manager.php                                                                     
+ ------ -------------------------------------------------------------------------------------- 
+  :17    Property CFK_Email_Manager::$mailer has unknown class                                 
+         PHPMailer\PHPMailer\PHPMailer as its type.                                            
+         💡 Learn more at https://phpstan.org/user-guide/discovering-symbols                   
+  :66    Property class@anonymous/email_manager.php:65::$Subject has no type                   
+         specified.                                                                            
+  :67    Property class@anonymous/email_manager.php:65::$Body has no type                      
+         specified.                                                                            
+  :68    Property class@anonymous/email_manager.php:65::$AltBody has no type                   
+         specified.                                                                            
+  :69    Property class@anonymous/email_manager.php:65::$to has no type                        
+         specified.                                                                            
+  :70    Property class@anonymous/email_manager.php:65::$from has no type                      
+         specified.                                                                            
+  :105   Method CFK_Email_Manager::sendSponsorConfirmation() has parameter                     
+         $sponsorship with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :142   Method CFK_Email_Manager::sendAdminNotification() has parameter                       
+         $sponsorship with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :172   Method CFK_Email_Manager::getSponsorConfirmationTemplate() has                        
+         parameter $sponsorship with no value type specified in iterable type                  
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :298   Method CFK_Email_Manager::getAdminNotificationTemplate() has                          
+         parameter $sponsorship with no value type specified in iterable type                  
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :346   Method CFK_Email_Manager::testEmailConfig() return type has no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :373   Method CFK_Email_Manager::sendMultiChildSponsorshipEmail() has                        
+         parameter $sponsorships with no value type specified in iterable type                 
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :407   Method CFK_Email_Manager::getMultiChildSponsorshipTemplate() has                      
+         parameter $sponsorships with no value type specified in iterable type                 
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :619   Variable $email on left side of ?? always exists and is not nullable.                 
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   email_queue.php                                                                       
+ ------ -------------------------------------------------------------------------------------- 
+  :30    Method CFK_Email_Queue::queue() has parameter $options with no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :62    Method CFK_Email_Queue::processQueue() return type has no value type                  
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :104   Method CFK_Email_Queue::getEmailsToProcess() return type has no value                 
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :175   Method CFK_Email_Queue::sendEmail() has parameter $email with no                      
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :175   Method CFK_Email_Queue::sendEmail() return type has no value type                     
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :225   Method CFK_Email_Queue::getStats() return type has no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :257   Call to an undefined static method Database::query().                                 
+  :280   Call to an undefined static method Database::query().                                 
+  :292   Method CFK_Email_Queue::queueSponsorConfirmation() has parameter                      
+         $sponsorship with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :313   Method CFK_Email_Queue::queueAdminNotification() has parameter $data                  
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   functions.php                                                                         
+ ------ -------------------------------------------------------------------------------------- 
+  :22    Deprecated in PHP 8.4: Parameter #3 $limit (int) is implicitly                        
+         nullable via default value null.                                                      
+  :22    Function getChildren() has parameter $filters with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :22    Function getChildren() return type has no value type specified in                     
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :87    Function getChildrenCount() has parameter $filters with no value type                 
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :143   Function getChildById() return type has no value type specified in                    
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :158   Deprecated in PHP 8.4: Parameter #2 $excludeChildId (int) is                          
+         implicitly nullable via default value null.                                           
+  :158   Function getFamilyMembers() return type has no value type specified                   
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :181   Function getFamilyById() return type has no value type specified in                   
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :189   Function getFamilyByNumber() return type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :197   Deprecated in PHP 8.4: Parameter #2 $excludeChildId (int) is                          
+         implicitly nullable via default value null.                                           
+  :197   Function getFamilyMembersByNumber() return type has no value type                     
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :221   Function eagerLoadFamilyMembers() has parameter $children with no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :221   Function eagerLoadFamilyMembers() return type has no value type                       
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :229   Variable $familyIds in empty() always exists and is not falsy.                        
+  :271   Function createSponsorship() has parameter $sponsorData with no value                 
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :293   Function getSponsorshipById() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :382   Function getMessage() return type has no value type specified in                      
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :394   Deprecated in PHP 8.4: Parameter #1 $filename (string) is implicitly                  
+         nullable via default value null.                                                      
+  :394   Deprecated in PHP 8.4: Parameter #2 $child (array) is implicitly                      
+         nullable via default value null.                                                      
+  :394   Function getPhotoUrl() has parameter $child with no value type                        
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :445   Function validateRequired() has parameter $data with no value type                    
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :445   Function validateRequired() has parameter $requiredFields with no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :445   Function validateRequired() return type has no value type specified                   
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :500   Function renderButton() has parameter $options with no value type                     
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   import_analyzer.php                                                                   
+ ------ -------------------------------------------------------------------------------------- 
+  :20    Method CFK_Import_Analyzer::analyzeImport() has parameter                             
+         $newChildren with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :20    Method CFK_Import_Analyzer::analyzeImport() return type has no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :109   Method CFK_Import_Analyzer::detectChanges() has parameter $newChild                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :109   Method CFK_Import_Analyzer::detectChanges() has parameter $oldChild                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :109   Method CFK_Import_Analyzer::detectChanges() return type has no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Import_Analyzer::checkForWarnings() has parameter $changes                 
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Import_Analyzer::checkForWarnings() has parameter                          
+         $newChild with no value type specified in iterable type array.                        
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Import_Analyzer::checkForWarnings() has parameter                          
+         $oldChild with no value type specified in iterable type array.                        
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Import_Analyzer::checkForWarnings() return type has no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :179   Method CFK_Import_Analyzer::getCurrentChildren() return type has no                   
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :191   Method CFK_Import_Analyzer::applyImportWithPreservation() has                         
+         parameter $options with no value type specified in iterable type                      
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :191   Method CFK_Import_Analyzer::applyImportWithPreservation() return type                 
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :211   Call to an undefined static method Database::query().                                 
+  :212   Call to an undefined static method Database::query().                                 
+  :229   Call to an undefined static method Database::query().                                 
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   magic_link_manager.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  :79    Method MagicLinkManager::validateToken() return type has no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :154   Method MagicLinkManager::logEvent() has parameter $details with no                    
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   remember_me_tokens.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  :55    Method RememberMeTokens::validateToken() return type has no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :187   Method RememberMeTokens::getUserTokens() return type has no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   report_manager.php                                                                    
+ ------ -------------------------------------------------------------------------------------- 
+  :20    Method CFK_Report_Manager::getSponsorDirectoryReport() has parameter                  
+         $filters with no value type specified in iterable type array.                         
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :20    Method CFK_Report_Manager::getSponsorDirectoryReport() return type                    
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :71    Method CFK_Report_Manager::getChildSponsorLookup() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :108   Method CFK_Report_Manager::getFamilySponsorshipReport() return type                   
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Report_Manager::getGiftDeliveryReport() has parameter                      
+         $filters with no value type specified in iterable type array.                         
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :132   Method CFK_Report_Manager::getGiftDeliveryReport() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :169   Method CFK_Report_Manager::getAvailableChildrenReport() has parameter                 
+         $filters with no value type specified in iterable type array.                         
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :169   Method CFK_Report_Manager::getAvailableChildrenReport() return type                   
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :217   Method CFK_Report_Manager::exportToCSV() has parameter $data with no                  
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :217   Method CFK_Report_Manager::exportToCSV() has parameter $headers with                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :246   Method CFK_Report_Manager::generateShoppingList() return type has no                  
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :278   Method CFK_Report_Manager::getCompleteChildSponsorReport() has                        
+         parameter $filters with no value type specified in iterable type                      
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :278   Method CFK_Report_Manager::getCompleteChildSponsorReport() return                     
+         type has no value type specified in iterable type array.                              
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :335   Method CFK_Report_Manager::getStatisticsSummary() return type has no                  
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   reservation_emails.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  :22    Function sendReservationConfirmationEmail() has parameter                             
+         $reservation with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :22    Function sendReservationConfirmationEmail() return type has no value                  
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :84    Function sendAdminReservationNotification() has parameter                             
+         $reservation with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :106   Function generateReservationConfirmationHTML() has parameter                          
+         $reservation with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :279   Function generateReservationConfirmationText() has parameter                          
+         $reservation with no value type specified in iterable type array.                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :320   Function generateAdminNotificationHTML() has parameter $reservation                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :327   Function generateAdminNotificationText() has parameter $reservation                   
+         with no value type specified in iterable type array.                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :356   Function sendAccessLinkEmail() return type has no value type                          
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :436   Variable $email on left side of ?? always exists and is not nullable.                 
+  :498   Function generateAccessLinkHTML() has parameter $sponsorships with no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :604   Function generateAccessLinkText() has parameter $sponsorships with no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   reservation_functions.php                                                             
+ ------ -------------------------------------------------------------------------------------- 
+  :22    Function createReservation() has parameter $childrenIds with no value                 
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :22    Function createReservation() has parameter $sponsorData with no value                 
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :22    Function createReservation() return type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :129   Function getReservation() return type has no value type specified in                  
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :161   Function confirmReservation() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :237   Function cancelReservation() return type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :306   Function cleanupExpiredReservations() return type has no value type                   
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :374   Function checkChildrenAvailability() has parameter $childrenIds with                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :374   Function checkChildrenAvailability() return type has no value type                    
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :405   Function getAllReservations() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   sponsorship_manager.php                                                               
+ ------ -------------------------------------------------------------------------------------- 
+  :28    Method CFK_Sponsorship_Manager::isChildAvailable() return type has no                 
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :65    Method CFK_Sponsorship_Manager::reserveChild() return type has no                     
+         value type specified in iterable type array.                                          
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :120   Method CFK_Sponsorship_Manager::createSponsorshipRequest() has                        
+         parameter $sponsorData with no value type specified in iterable type                  
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :120   Method CFK_Sponsorship_Manager::createSponsorshipRequest() return                     
+         type has no value type specified in iterable type array.                              
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :228   Method CFK_Sponsorship_Manager::confirmSponsorship() return type has                  
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :276   Method CFK_Sponsorship_Manager::completeSponsorship() return type has                 
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :308   Method CFK_Sponsorship_Manager::cancelSponsorship() return type has                   
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :386   Method CFK_Sponsorship_Manager::getStats() return type has no value                   
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :413   Method CFK_Sponsorship_Manager::validateSponsorData() has parameter                   
+         $data with no value type specified in iterable type array.                            
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :413   Method CFK_Sponsorship_Manager::validateSponsorData() return type has                 
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :455   Method CFK_Sponsorship_Manager::getChildrenNeedingAttention() return                  
+         type has no value type specified in iterable type array.                              
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :473   Method CFK_Sponsorship_Manager::getSponsorshipsByEmail() return type                  
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :486   Method CFK_Sponsorship_Manager::getSponsorshipsWithDetails() return                   
+         type has no value type specified in iterable type array.                              
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :543   Method CFK_Sponsorship_Manager::verifyPortalToken() return type has                   
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :629   Method CFK_Sponsorship_Manager::sendPortalAccessEmail() return type                   
+         has no value type specified in iterable type array.                                   
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :756   Method CFK_Sponsorship_Manager::addChildrenToSponsorship() has                        
+         parameter $childIds with no value type specified in iterable type                     
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :756   Method CFK_Sponsorship_Manager::addChildrenToSponsorship() has                        
+         parameter $sponsorData with no value type specified in iterable type                  
+         array.                                                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :756   Method CFK_Sponsorship_Manager::addChildrenToSponsorship() return                     
+         type has no value type specified in iterable type array.                              
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   validator.php                                                                         
+ ------ -------------------------------------------------------------------------------------- 
+  :17    Property Validator::$errors type has no value type specified in                       
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :18    Property Validator::$data type has no value type specified in                         
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :20    Method Validator::__construct() has parameter $data with no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :27    Method Validator::required() has parameter $fields with no value type                 
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :95    Method Validator::in() has parameter $allowed with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :107   Method Validator::min() has parameter $min with no type specified.                    
+  :118   Method Validator::max() has parameter $max with no type specified.                    
+  :217   Method Validator::errors() return type has no value type specified in                 
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :231   Method Validator::allErrors() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :244   Method Validator::validated() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :257   Method Validator::make() has parameter $data with no value type                       
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :265   Function validate() has parameter $data with no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  :265   Function validate() has parameter $rules with no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ [ERROR] Found 187 errors                                                       
+
+Script phpstan analyse includes --level=6 --memory-limit=512M handling the phpstan:includes event returned with error code 1

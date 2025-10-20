@@ -33,7 +33,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
             // Check if email has any sponsorships
             $sponsorships = CFK_Sponsorship_Manager::getSponsorshipsByEmail($email);
 
-            if (empty($sponsorships)) {
+            if ($sponsorships === []) {
                 $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
             } else {
                 // Generate verification token and send email
@@ -95,7 +95,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
                 <form method="POST" action="" class="lookup-form" id="lookupForm">
                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
-                    <?php if (!empty($errors)): ?>
+                    <?php if ($errors !== []): ?>
                         <div class="alert alert-error" role="alert" aria-live="polite">
                             <strong>Error:</strong>
                             <ul id="form-errors">
@@ -111,13 +111,13 @@ if ($_POST && isset($_POST['lookup_email'])) {
                         <input type="email"
                                id="sponsor_email"
                                name="sponsor_email"
-                               class="form-input <?php echo !empty($errors) ? 'input-error' : ''; ?>"
+                               class="form-input <?php echo $errors === [] ? '' : 'input-error'; ?>"
                                placeholder="example@email.com"
                                value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
                                required
                                aria-required="true"
-                               aria-describedby="email-help<?php echo !empty($errors) ? ' form-errors' : ''; ?>"
-                               <?php echo !empty($errors) ? 'aria-invalid="true"' : ''; ?>
+                               aria-describedby="email-help<?php echo $errors === [] ? '' : ' form-errors'; ?>"
+                               <?php echo $errors === [] ? '' : 'aria-invalid="true"'; ?>
                                autocomplete="email">
                         <div id="email-help" class="form-help">Enter the email address you used when sponsoring</div>
                     </div>

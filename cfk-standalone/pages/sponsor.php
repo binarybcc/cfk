@@ -23,9 +23,9 @@ $childrenToSponsor = [];
 if ($isFamilySponsorship) {
     // Family sponsorship - get all available children in family
     $allFamilyMembers = getFamilyMembers($familyId);
-    $childrenToSponsor = array_filter($allFamilyMembers, fn($c) => $c['status'] === 'available');
+    $childrenToSponsor = array_filter($allFamilyMembers, fn($c): bool => $c['status'] === 'available');
 
-    if (empty($childrenToSponsor)) {
+    if ($childrenToSponsor === []) {
         setMessage('No available children in this family to sponsor.', 'error');
         header('Location: ' . baseUrl('?page=children'));
         exit;
@@ -112,7 +112,7 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
 
 // Check availability
 if ($isFamilySponsorship) {
-    $isAvailable = !empty($childrenToSponsor);
+    $isAvailable = $childrenToSponsor !== [];
     $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
 } else {
     $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
@@ -171,7 +171,7 @@ if (!$isFamilySponsorship) {
                         <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-primary">
                             Browse Other Children
                         </a>
-                        <?php if (!empty($siblings)): ?>
+                        <?php if ($siblings !== []): ?>
                             <a href="<?php echo baseUrl('?page=children&family_id=' . $fullChild['family_id']); ?>" class="btn btn-secondary">
                                 View This Child's Family
                             </a>
@@ -244,7 +244,7 @@ if (!$isFamilySponsorship) {
                 
                 <h2>Your Sponsorship Information</h2>
                 
-                <?php if (!empty($errors)): ?>
+                <?php if ($errors !== []): ?>
                     <div class="alert alert-error">
                         <ul>
                             <?php foreach ($errors as $error): ?>

@@ -105,6 +105,8 @@ CREATE TABLE admin_users (
     INDEX idx_reset_token (reset_token)
 );
 
+-- NOTE: admin_remember_tokens table NOT NEEDED - we use magic links only for authentication
+
 -- Settings table - configuration options
 CREATE TABLE settings (
     setting_key VARCHAR(100) PRIMARY KEY,

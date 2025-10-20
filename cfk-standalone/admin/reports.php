@@ -184,7 +184,7 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
 
             <div class="sponsor-directory">
-                <?php if (empty($groupedSponsors)): ?>
+                <?php if ($groupedSponsors === []): ?>
                     <div class="empty-state">
                         <h3>No Sponsors Found</h3>
                         <p>There are currently no sponsorships in the system.</p>
@@ -228,7 +228,7 @@ include __DIR__ . '/includes/admin_header.php';
                                                 Shoes: <?php echo sanitizeString($child['shoe_size'] ?? 'N/A'); ?>
                                             </td>
                                             <td><?php echo sanitizeString(substr($child['wishes'] ?? '', 0, 50)) . '...'; ?></td>
-                                            <td><span class="status-badge status-<?php echo $child['status']; ?>"><?php echo ucfirst($child['status']); ?></span></td>
+                                            <td><span class="status-badge status-<?php echo $child['status']; ?>"><?php echo ucfirst((string) $child['status']); ?></span></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
@@ -257,7 +257,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
 
-            <?php if (empty($children)): ?>
+            <?php if ($children === []): ?>
                 <div class="empty-state">
                     <h3>No Children Found</h3>
                     <p><?php echo $searchTerm ? 'No children match your search criteria.' : 'There are currently no children in the system.'; ?></p>
@@ -281,7 +281,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                             <td><?php echo sanitizeString($child['child_name']); ?></td>
                             <td><?php echo $child['age']; ?></td>
-                            <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst($child['child_status']); ?></span></td>
+                            <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst((string) $child['child_status']); ?></span></td>
                             <td><?php echo $child['sponsor_name'] ? sanitizeString($child['sponsor_name']) : '-'; ?></td>
                             <td>
                                 <?php if ($child['sponsor_email']): ?>
@@ -296,7 +296,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <td>
                                 <?php if ($child['sponsorship_status']): ?>
                                     <span class="status-badge status-<?php echo $child['sponsorship_status']; ?>">
-                                        <?php echo ucfirst($child['sponsorship_status']); ?>
+                                        <?php echo ucfirst((string) $child['sponsorship_status']); ?>
                                     </span>
                                 <?php else: ?>
                                     -
@@ -316,7 +316,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=family_report&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
-            <?php if (empty($families)): ?>
+            <?php if ($families === []): ?>
                 <div class="empty-state">
                     <h3>No Families Found</h3>
                     <p>There are currently no families in the system.</p>
@@ -385,7 +385,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </form>
             </div>
 
-            <?php if (empty($availableChildren)): ?>
+            <?php if ($availableChildren === []): ?>
                 <div class="empty-state">
                     <h3>No Available Children</h3>
                     <p>There are currently no children available for sponsorship.</p>
@@ -481,7 +481,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><?php echo $row['age']; ?></td>
                             <td><?php echo $row['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
                             <td><?php echo sanitizeString($row['grade'] ?? '-'); ?></td>
-                            <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst($row['child_status']); ?></span></td>
+                            <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst((string) $row['child_status']); ?></span></td>
                             <td><?php echo $row['sponsor_name'] ? sanitizeString($row['sponsor_name']) : '-'; ?></td>
                             <td>
                                 <?php if ($row['sponsor_email']): ?>
@@ -495,7 +495,7 @@ include __DIR__ . '/includes/admin_header.php';
                             </td>
                             <td>
                                 <?php if ($row['sponsorship_date']): ?>
-                                    <?php echo date('M j, Y', strtotime($row['sponsorship_date'])); ?>
+                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date'])); ?>
                                 <?php else: ?>
                                     -
                                 <?php endif; ?>

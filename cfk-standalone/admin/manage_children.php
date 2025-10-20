@@ -110,7 +110,7 @@ if (!empty($searchQuery)) {
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
 }
 
-$whereClause = empty($whereConditions) ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
+$whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
 
 // Get total count for pagination
 $countQuery = "SELECT COUNT(*) as total FROM children c JOIN families f ON c.family_id = f.id $whereClause";
@@ -283,7 +283,7 @@ function updateChildStatus($childId, $newStatus): array {
 function validateChildData($data): array {
     $errors = [];
     
-    if (empty(trim($data['name'] ?? ''))) {
+    if (in_array(trim($data['name'] ?? ''), ['', '0'], true)) {
         $errors[] = 'Name is required';
     }
     
@@ -292,11 +292,11 @@ function validateChildData($data): array {
         $errors[] = 'Age must be between 1 and 18';
     }
     
-    if (empty(trim($data['gender'] ?? '')) || !in_array($data['gender'], ['M', 'F'])) {
+    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
         $errors[] = 'Valid gender is required';
     }
     
-    if (empty(trim($data['child_letter'] ?? '')) || !preg_match('/^[A-Z]$/', $data['child_letter'])) {
+    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
         $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
     }
     
@@ -305,7 +305,7 @@ function validateChildData($data): array {
     }
     
     return [
-        'valid' => empty($errors),
+        'valid' => $errors === [],
         'errors' => $errors
     ];
 }
@@ -621,7 +621,7 @@ include __DIR__ . '/includes/admin_header.php';
         </form>
 
         <!-- Children Grid -->
-        <?php if (empty($children)): ?>
+        <?php if ($children === []): ?>
             <div class="empty-state">
                 <h3>No Children Found</h3>
                 <p>No children match the current filters. Try adjusting your search criteria or add a new child.</p>
@@ -634,7 +634,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <div class="child-header">
                             <div class="child-id"><?php echo sanitizeString($child['display_id']); ?></div>
                             <span class="status-badge status-<?php echo $child['status']; ?>">
-                                <?php echo ucfirst($child['status']); ?>
+                                <?php echo ucfirst((string) $child['status']); ?>
                             </span>
                         </div>
                         
@@ -652,7 +652,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 
                                 <div class="info-item">
                                     <div class="info-label">Grade</div>
-                                    <div class="info-value"><?php echo !empty($child['grade']) ? sanitizeString($child['grade']) : 'Not specified'; ?></div>
+                                    <div class="info-value"><?php echo empty($child['grade']) ? 'Not specified' : sanitizeString($child['grade']); ?></div>
                                 </div>
                                 
                                 <div class="info-item">
@@ -672,7 +672,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <?php if (!empty($child['wishes'])): ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Christmas Wishes</div>
-                                        <div class="detail-value"><?php echo sanitizeString(substr($child['wishes'], 0, 100)); ?><?php echo strlen($child['wishes']) > 100 ? '...' : ''; ?></div>
+                                        <div class="detail-value"><?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?><?php echo strlen((string) $child['wishes']) > 100 ? '...' : ''; ?></div>
                                     </div>
                                 <?php endif; ?>
                                 

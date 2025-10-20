@@ -1,0 +1,2863 @@
+  0/38 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K  6/38 [▓▓▓▓░░░░░░░░░░░░░░░░░░░░░░░░]  15%[1G[2K 22/38 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░]  57%[1G[2K 38/38 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+37 files with changes
+=====================
+
+1) pages/children.php:24
+
+    ---------- begin diff ----------
+@@ @@
+     $currentPage = 1;
+
+     // Get family info for display
+-    $familyInfo = !empty($children) ? getFamilyById($familyId) : null;
++    $familyInfo = $children === [] ? null : getFamilyById($familyId);
+
+     // No need for eager loading since we're showing one family
+     $siblingsByFamily = [$familyId => $children];
+@@ @@
+
+     // Pagination (using 'p' parameter to avoid conflict with page routing)
+     $currentPage = sanitizeInt($_GET['p'] ?? 1);
+-    if ($currentPage < 1) $currentPage = 1;
++    if ($currentPage < 1) {
++        $currentPage = 1;
++    }
+     $limit = config('children_per_page');
+
+     // Get children and count
+@@ @@
+
+ // Build query string for pagination
+ $queryParams = [];
+-if (!empty($filters['search'])) $queryParams['search'] = $filters['search'];
+-if (!empty($filters['age_category'])) $queryParams['age_category'] = $filters['age_category'];
+-if (!empty($filters['gender'])) $queryParams['gender'] = $filters['gender'];
++if (!empty($filters['search'])) {
++    $queryParams['search'] = $filters['search'];
++}
++if (!empty($filters['age_category'])) {
++    $queryParams['age_category'] = $filters['age_category'];
++}
++if (!empty($filters['gender'])) {
++    $queryParams['gender'] = $filters['gender'];
++}
+ $queryString = http_build_query($queryParams);
+-$baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
++$baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '0' ? '&' . $queryString : ''));
+ ?>
+
+ <div class="children-page">
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * CompleteMissingIfElseBracketRector
+ * ExplicitBoolCompareRector
+ * SwitchNegatedTernaryRector
+
+
+2) pages/family.php:31
+
+    ---------- begin diff ----------
+@@ @@
+ // Fetch all family members using helper function
+ $members = getFamilyMembersByNumber($family_number);
+
+-if (empty($members)) {
++if ($members === []) {
+     setMessage('No family members found.', 'error');
+     header('Location: ' . baseUrl('?page=children'));
+     exit;
+@@ @@
+ $family_members = $members;
+
+ // Count available members
+-$available_count = count(array_filter($family_members, function($member) {
+-    return $member['status'] === 'available';
+-}));
++$available_count = count(array_filter($family_members, fn($member): bool => $member['status'] === 'available'));
+
+ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
+ ?>
+@@ @@
+                     <div class="member-title">
+                         <h2>Child <?php echo sanitizeString($member['display_id']); ?></h2>
+                         <span class="status-badge status-<?php echo $member['status']; ?>">
+-                            <?php echo ucfirst($member['status']); ?>
++                            <?php echo ucfirst((string) $member['status']); ?>
+                         </span>
+                     </div>
+                 </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * ClosureToArrowFunctionRector
+ * NullToStrictStringFuncCallArgRector
+ * AddArrowFunctionReturnTypeRector
+
+
+3) pages/my_sponsorships.php:45
+
+    ---------- begin diff ----------
+@@ @@
+             [$verifiedEmail]
+         );
+
+-        if (!empty($sponsorships)) {
++        if ($sponsorships !== []) {
+             $success = true;
+             $lookupEmail = $verifiedEmail;
+         } else {
+@@ @@
+                 Already sponsored children? Enter your email to view your sponsorships.
+             </p>
+
+-            <?php if ($emailSent && empty($sponsorships)): ?>
++            <?php if ($emailSent && $sponsorships === []): ?>
+                 <!-- Email Sent Confirmation -->
+                 <div class="email-sent-confirmation">
+                     <div class="alert alert-success">
+@@ @@
+                     </div>
+                 </div>
+
+-            <?php elseif ($success && !empty($sponsorships)): ?>
++            <?php elseif ($success && $sponsorships !== []): ?>
+                 <!-- Sponsorship Results -->
+                 <div class="sponsorships-found">
+                     <div class="alert alert-success">
+@@ @@
+                                     <?php endif; ?>
+                                     <div class="info-item">
+                                         <strong>Confirmed:</strong>
+-                                        <span><?php echo date('M j, Y', strtotime($sponsorship['confirmation_date'])); ?></span>
++                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date'])); ?></span>
+                                     </div>
+                                 </div>
+
+@@ @@
+                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                         <input type="hidden" name="lookup_email" value="1">
+
+-                        <?php if (!empty($errors)): ?>
++                        <?php if ($errors !== []): ?>
+                             <div class="alert alert-error" role="alert" aria-live="polite">
+                                 <strong>Error:</strong>
+                                 <ul id="sponsorship-form-errors">
+@@ @@
+                             <input type="email"
+                                    id="sponsor_email"
+                                    name="sponsor_email"
+-                                   class="form-input <?php echo !empty($errors) ? 'input-error' : ''; ?>"
++                                   class="form-input <?php echo $errors === [] ? '' : 'input-error'; ?>"
+                                    placeholder="example@email.com"
+                                    value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
+                                    required
+                                    aria-required="true"
+-                                   aria-describedby="sponsorship-email-help<?php echo !empty($errors) ? ' sponsorship-form-errors' : ''; ?>"
+-                                   <?php echo !empty($errors) ? 'aria-invalid="true"' : ''; ?>
++                                   aria-describedby="sponsorship-email-help<?php echo $errors === [] ? '' : ' sponsorship-form-errors'; ?>"
++                                   <?php echo $errors === [] ? '' : 'aria-invalid="true"'; ?>
+                                    autocomplete="email">
+                             <div id="sponsorship-email-help" class="form-help">Enter the email address you used when sponsoring</div>
+                         </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SwitchNegatedTernaryRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+4) pages/sponsor.php:22
+
+    ---------- begin diff ----------
+@@ @@
+ if ($isFamilySponsorship) {
+     // Family sponsorship - get all available children in family
+     $allFamilyMembers = getFamilyMembers($familyId);
+-    $childrenToSponsor = array_filter($allFamilyMembers, fn($c) => $c['status'] === 'available');
++    $childrenToSponsor = array_filter($allFamilyMembers, fn($c): bool => $c['status'] === 'available');
+
+-    if (empty($childrenToSponsor)) {
++    if ($childrenToSponsor === []) {
+         setMessage('No available children in this family to sponsor.', 'error');
+         header('Location: ' . baseUrl('?page=children'));
+         exit;
+@@ @@
+
+ // Check availability
+ if ($isFamilySponsorship) {
+-    $isAvailable = !empty($childrenToSponsor);
++    $isAvailable = $childrenToSponsor !== [];
+     $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
+ } else {
+     $availability = CFK_Sponsorship_Manager::isChildAvailable($childId);
+@@ @@
+                         <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-primary">
+                             Browse Other Children
+                         </a>
+-                        <?php if (!empty($siblings)): ?>
++                        <?php if ($siblings !== []): ?>
+                             <a href="<?php echo baseUrl('?page=children&family_id=' . $fullChild['family_id']); ?>" class="btn btn-secondary">
+                                 View This Child's Family
+                             </a>
+@@ @@
+                 
+                 <h2>Your Sponsorship Information</h2>
+                 
+-                <?php if (!empty($errors)): ?>
++                <?php if ($errors !== []): ?>
+                     <div class="alert alert-error">
+                         <ul>
+                             <?php foreach ($errors as $error): ?>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * DisallowedEmptyRuleFixerRector
+ * AddArrowFunctionReturnTypeRector
+
+
+5) pages/sponsor_lookup.php:32
+
+    ---------- begin diff ----------
+@@ @@
+             // Check if email has any sponsorships
+             $sponsorships = CFK_Sponsorship_Manager::getSponsorshipsByEmail($email);
+
+-            if (empty($sponsorships)) {
++            if ($sponsorships === []) {
+                 $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
+             } else {
+                 // Generate verification token and send email
+@@ @@
+                 <form method="POST" action="" class="lookup-form" id="lookupForm">
+                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+
+-                    <?php if (!empty($errors)): ?>
++                    <?php if ($errors !== []): ?>
+                         <div class="alert alert-error" role="alert" aria-live="polite">
+                             <strong>Error:</strong>
+                             <ul id="form-errors">
+@@ @@
+                         <input type="email"
+                                id="sponsor_email"
+                                name="sponsor_email"
+-                               class="form-input <?php echo !empty($errors) ? 'input-error' : ''; ?>"
++                               class="form-input <?php echo $errors === [] ? '' : 'input-error'; ?>"
+                                placeholder="example@email.com"
+                                value="<?php echo sanitizeString($_POST['sponsor_email'] ?? ''); ?>"
+                                required
+                                aria-required="true"
+-                               aria-describedby="email-help<?php echo !empty($errors) ? ' form-errors' : ''; ?>"
+-                               <?php echo !empty($errors) ? 'aria-invalid="true"' : ''; ?>
++                               aria-describedby="email-help<?php echo $errors === [] ? '' : ' form-errors'; ?>"
++                               <?php echo $errors === [] ? '' : 'aria-invalid="true"'; ?>
+                                autocomplete="email">
+                         <div id="email-help" class="form-help">Enter the email address you used when sponsoring</div>
+                     </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SwitchNegatedTernaryRector
+ * DisallowedEmptyRuleFixerRector
+
+
+6) pages/sponsor_portal.php:78
+
+    ---------- begin diff ----------
+@@ @@
+
+             if ($addChildrenResult['success']) {
+                 // Refresh sponsorships
+-                header('Location: ' . baseUrl('?page=sponsor_portal&token=' . urlencode($token)));
++                header('Location: ' . baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token)));
+                 exit;
+             }
+         }
+@@ @@
+         <!-- Display Sponsorships -->
+         <div class="sponsorships-container">
+             <div class="portal-actions">
+-                <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode($token) . '&add_children=1'); ?>" class="btn btn-primary">
++                <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token) . '&add_children=1'); ?>" class="btn btn-primary">
+                     ➕ Add More Children
+                 </a>
+                 <a href="<?php echo baseUrl('?page=sponsor_lookup'); ?>" class="btn btn-secondary">
+@@ @@
+                 <p>You are sponsoring <strong><?php echo count($sponsorships); ?></strong> child(ren) across <strong><?php echo count($families); ?></strong> family(ies).</p>
+             </div>
+
+-            <?php foreach ($families as $familyId => $family): ?>
++            <?php foreach ($families as $family): ?>
+                 <div class="family-section">
+                     <div class="family-header">
+                         <h3>Family <?php echo sanitizeString($family['family_number']); ?></h3>
+@@ @@
+                                 <div class="child-header">
+                                     <h4>Child <?php echo sanitizeString($child['child_display_id']); ?></h4>
+                                     <span class="status-badge status-<?php echo $child['status']; ?>">
+-                                        <?php echo ucfirst($child['status']); ?>
++                                        <?php echo ucfirst((string) $child['status']); ?>
+                                     </span>
+                                 </div>
+
+@@ @@
+                                 <?php endif; ?>
+
+                                 <div class="child-meta">
+-                                    <small>Requested: <?php echo date('M j, Y', strtotime($child['request_date'])); ?></small>
++                                    <small>Requested: <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?></small>
+                                 </div>
+                             </div>
+                         <?php endforeach; ?>
+@@ @@
+                 // Get available children
+                 $availableChildren = getChildren(['status' => 'available'], 1, 100);
+
+-                if (empty($availableChildren)): ?>
++                if ($availableChildren === []): ?>
+                     <div class="alert alert-info">
+                         <p>There are currently no available children to add. All children have been sponsored!</p>
+                     </div>
+@@ @@
+                         <button type="submit" name="add_children" class="btn btn-large btn-primary">
+                             Add Selected Children
+                         </button>
+-                        <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode($token)); ?>" class="btn btn-large btn-secondary">
++                        <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token)); ?>" class="btn btn-large btn-secondary">
+                             Cancel
+                         </a>
+                     </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * RemoveUnusedForeachKeyRector
+ * NullToStrictStringFuncCallArgRector
+
+
+7) admin/change_password.php:41
+
+    ---------- begin diff ----------
+@@ @@
+         $error = 'Security token invalid. Please try again.';
+     } elseif (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
+         $error = 'All fields are required.';
+-    } elseif (!password_verify($currentPassword, $admin['password_hash'])) {
++    } elseif (!password_verify((string) $currentPassword, (string) $admin['password_hash'])) {
+         $error = 'Current password is incorrect.';
+     } elseif ($newPassword !== $confirmPassword) {
+         $error = 'New passwords do not match.';
+-    } elseif (strlen($newPassword) < 8) {
++    } elseif (strlen((string) $newPassword) < 8) {
+         $error = 'New password must be at least 8 characters long.';
+     } elseif ($currentPassword === $newPassword) {
+         $error = 'New password must be different from current password.';
+@@ @@
+         // Update password
+         try {
+             Database::update('admin_users',
+-                ['password_hash' => password_hash($newPassword, PASSWORD_DEFAULT)],
++                ['password_hash' => password_hash((string) $newPassword, PASSWORD_DEFAULT)],
+                 ['id' => $_SESSION['cfk_admin_id']]
+             );
+
+@@ @@
+             </div>
+         <?php endif; ?>
+
+-        <?php if ($error): ?>
++        <?php if ($error !== '' && $error !== '0'): ?>
+             <div class="error-message">
+                 <?php echo htmlspecialchars($error); ?>
+             </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * ExplicitBoolCompareRector
+ * NullToStrictStringFuncCallArgRector
+
+
+8) admin/forgot_password.php:75
+
+    ---------- begin diff ----------
+@@ @@
+             $headers .= "Reply-To: " . config('admin_email') . "\r\n";
+             $headers .= "X-Mailer: PHP/" . phpversion();
+
+-            if (mail($to, $subject, $message, $headers)) {
++            if (mail((string) $to, $subject, $message, $headers)) {
+                 $success = true;
+                 $message = 'Password reset instructions have been sent to your email address.';
+
+@@ @@
+             <p>Enter your username and email address to receive password reset instructions.</p>
+         </div>
+
+-        <?php if ($error): ?>
++        <?php if ($error !== '' && $error !== '0'): ?>
+             <div class="error-message">
+                 <?php echo htmlspecialchars($error); ?>
+             </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * ExplicitBoolCompareRector
+ * NullToStrictStringFuncCallArgRector
+
+
+9) admin/import_csv.php:91
+
+    ---------- begin diff ----------
+@@ @@
+         $file = $_FILES['csv_file'];
+
+         // Validate file type
+-        if ($file['type'] !== 'text/csv' && !in_array(pathinfo($file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
++        if ($file['type'] !== 'text/csv' && !in_array(pathinfo((string) $file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
+             return ['success' => false, 'message' => 'Please upload a CSV file (.csv extension).'];
+         }
+
+@@ @@
+         }
+
+         $clearExisting = isset($_POST['clear_existing']);
+-        $result = CFK_Backup_Manager::restoreFromBackup($filename, $clearExisting);
+
+-        return $result;
++        return CFK_Backup_Manager::restoreFromBackup($filename, $clearExisting);
+
+     } catch (Exception $e) {
+         error_log('Restore backup error: ' . $e->getMessage());
+@@ @@
+                         <div class="backup-item">
+                             <div class="backup-info">
+                                 <div class="backup-filename">
+-                                    <strong>📄 <?php echo htmlspecialchars($backup['filename']); ?></strong>
++                                    <strong>📄 <?php echo htmlspecialchars((string) $backup['filename']); ?></strong>
+                                 </div>
+                                 <div class="backup-meta">
+                                     <span>🕐 <?php echo $created; ?></span>
+@@ @@
+                                 <form method="POST" style="display: inline;" onsubmit="return confirm('Restore this backup? Current data will be replaced.');">
+                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                     <input type="hidden" name="action" value="restore_backup">
+-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars($backup['filename']); ?>">
++                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
+                                     <input type="hidden" name="clear_existing" value="1">
+                                     <button type="submit" class="btn btn-warning btn-sm">
+                                         ♻️ Restore
+@@ @@
+                                 <form method="POST" style="display: inline;">
+                                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                     <input type="hidden" name="action" value="download_backup">
+-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars($backup['filename']); ?>">
++                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
+                                     <button type="submit" class="btn btn-secondary btn-sm">
+                                         💾 Download
+                                     </button>
+@@ @@
+                 </div>
+                 <div class="section-body">
+                     <div class="alert alert-success">
+-                        <strong>✅ CSV Parsed Successfully!</strong> File: <code><?php echo htmlspecialchars($previewData['filename']); ?></code> (<?php echo $previewData['total_rows']; ?> rows)
++                        <strong>✅ CSV Parsed Successfully!</strong> File: <code><?php echo htmlspecialchars((string) $previewData['filename']); ?></code> (<?php echo $previewData['total_rows']; ?> rows)
+                     </div>
+
+                     <!-- Change Statistics -->
+@@ @@
+                             <ul style="margin: 0; padding-left: 1.5rem;">
+                                 <?php foreach ($previewData['analysis']['warnings'] as $warning): ?>
+                                     <li style="margin-bottom: 0.5rem;">
+-                                        <strong><?php echo htmlspecialchars($warning['message']); ?></strong>
++                                        <strong><?php echo htmlspecialchars((string) $warning['message']); ?></strong>
+                                         <?php if ($warning['type'] === 'sponsored_child_removed'): ?>
+                                             <br><small style="color: #856404;">This child has an active sponsorship. You can choose to keep them as inactive below.</small>
+                                         <?php endif; ?>
+@@ @@
+                 <div class="section-body">
+                     <div class="alert alert-success">
+                         <h3 style="margin-bottom: 0.5rem;">🎉 Success!</h3>
+-                        <p style="margin: 0;"><?php echo htmlspecialchars($message); ?></p>
++                        <p style="margin: 0;"><?php echo htmlspecialchars((string) $message); ?></p>
+                     </div>
+
+                     <div class="results-grid" style="margin-top: 1.5rem;">
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyUselessVariableRector
+ * NullToStrictStringFuncCallArgRector
+
+
+10) admin/includes/admin_header.php:20
+
+    ---------- begin diff ----------
+@@ @@
+             
+             <nav class="admin-nav">
+                 <ul>
+-                    <li><a href="index.php" <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'class="active"' : ''; ?>>Dashboard</a></li>
+-                    <li><a href="manage_children.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_children.php' ? 'class="active"' : ''; ?>>Children</a></li>
+-                    <li><a href="manage_sponsorships.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
+-                    <li><a href="reports.php" <?php echo basename($_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
++                    <li><a href="index.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'index.php' ? 'class="active"' : ''; ?>>Dashboard</a></li>
++                    <li><a href="manage_children.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_children.php' ? 'class="active"' : ''; ?>>Children</a></li>
++                    <li><a href="manage_sponsorships.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
++                    <li><a href="reports.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
+                     <?php if ($_SESSION['cfk_admin_role'] === 'admin'): ?>
+-                    <li><a href="manage_admins.php" <?php echo basename($_SERVER['PHP_SELF']) === 'manage_admins.php' ? 'class="active"' : ''; ?>>Administrators</a></li>
++                    <li><a href="manage_admins.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_admins.php' ? 'class="active"' : ''; ?>>Administrators</a></li>
+                     <?php endif; ?>
+-                    <li><a href="year_end_reset.php" <?php echo basename($_SERVER['PHP_SELF']) === 'year_end_reset.php' ? 'class="active"' : ''; ?> style="color: #dc3545;">Year-End Reset</a></li>
++                    <li><a href="year_end_reset.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'year_end_reset.php' ? 'class="active"' : ''; ?> style="color: #dc3545;">Year-End Reset</a></li>
+                 </ul>
+             </nav>
+    ----------- end diff -----------
+
+Applied rules:
+ * NullToStrictStringFuncCallArgRector
+
+
+11) admin/index.php:154
+
+    ---------- begin diff ----------
+@@ @@
+     </div>
+
+     <!-- Attention Needed -->
+-    <?php if (!empty($childrenNeedingAttention)): ?>
++    <?php if ($childrenNeedingAttention !== []): ?>
+     <div class="attention-section">
+         <h2>🚨 Children Needing Attention</h2>
+         <p>These children have pending sponsorships that may have expired or need follow-up:</p>
+@@ @@
+                     <div class="attention-info">
+                         <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
+                         <span class="attention-date">
+-                            Pending since <?php echo date('M j, Y', strtotime($child['request_date'])); ?>
++                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?>
+                         </span>
+                     </div>
+                     <div class="attention-actions">
+@@ @@
+     <!-- Recent Activity -->
+     <div class="recent-activity">
+         <h2>Recent Sponsorship Activity</h2>
+-        <?php if (empty($recentSponsorships)): ?>
++        <?php if ($recentSponsorships === []): ?>
+             <p>No recent sponsorship activity.</p>
+         <?php else: ?>
+             <div class="activity-list">
+@@ @@
+                             </div>
+                             <div class="activity-meta">
+                                 Status: <span class="status status-<?php echo $sponsorship['status']; ?>">
+-                                    <?php echo ucfirst($sponsorship['status']); ?>
++                                    <?php echo ucfirst((string) $sponsorship['status']); ?>
+                                 </span>
+-                                • <?php echo date('M j, Y g:i A', strtotime($sponsorship['request_date'])); ?>
++                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date'])); ?>
+                             </div>
+                         </div>
+                         <div class="activity-actions">
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * NullToStrictStringFuncCallArgRector
+
+
+12) admin/login.php:240
+
+    ---------- begin diff ----------
+@@ @@
+         if ($message && $message['type'] === 'success'):
+         ?>
+             <div class="success-message">
+-                <?php echo htmlspecialchars($message['text']); ?>
++                <?php echo htmlspecialchars((string) $message['text']); ?>
+             </div>
+         <?php endif; ?>
+    ----------- end diff -----------
+
+Applied rules:
+ * NullToStrictStringFuncCallArgRector
+
+
+13) admin/logout.php:17
+
+    ---------- begin diff ----------
+@@ @@
+
+ // Clear remember-me cookie if it exists
+ if (isset($_COOKIE['cfk_remember_token'])) {
+-    setcookie('cfk_remember_token', '', time() - 3600, '/', '', false, true);
++    setcookie('cfk_remember_token', '', ['expires' => time() - 3600, 'path' => '/', 'domain' => '', 'secure' => false, 'httponly' => true]);
+     unset($_COOKIE['cfk_remember_token']);
+ }
+
+@@ @@
+
+ // Destroy the session cookie
+ if (isset($_COOKIE[session_name()])) {
+-    setcookie(session_name(), '', time() - 3600, '/');
++    setcookie(session_name(), '', ['expires' => time() - 3600, 'path' => '/']);
+ }
+
+ // Destroy session
+    ----------- end diff -----------
+
+Applied rules:
+ * SetCookieRector
+
+
+14) admin/manage_admins.php:31
+
+    ---------- begin diff ----------
+@@ @@
+ $error = '';
+
+ // Handle form submissions
+-if ($_POST) {
++if ($_POST !== []) {
+     // Validate CSRF token
+     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+         $error = 'Security token invalid. Please try again.';
+-    } else {
++    } elseif (isset($_POST['add_admin'])) {
+         // Add new admin
+-        if (isset($_POST['add_admin'])) {
+-            $username = sanitizeString($_POST['username'] ?? '');
+-            $email = sanitizeEmail($_POST['email'] ?? '');
+-            $fullName = sanitizeString($_POST['full_name'] ?? '');
+-            $password = $_POST['password'] ?? '';
+-            $confirmPassword = $_POST['confirm_password'] ?? '';
+-            $role = sanitizeString($_POST['role'] ?? 'editor');
++        $username = sanitizeString($_POST['username'] ?? '');
++        $email = sanitizeEmail($_POST['email'] ?? '');
++        $fullName = sanitizeString($_POST['full_name'] ?? '');
++        $password = $_POST['password'] ?? '';
++        $confirmPassword = $_POST['confirm_password'] ?? '';
++        $role = sanitizeString($_POST['role'] ?? 'editor');
++        if (empty($username) || empty($email) || empty($password)) {
++            $error = 'Username, email, and password are required.';
++        } elseif ($password !== $confirmPassword) {
++            $error = 'Passwords do not match.';
++        } elseif (strlen((string) $password) < 8) {
++            $error = 'Password must be at least 8 characters long.';
++        } elseif (!in_array($role, ['admin', 'editor'])) {
++            $error = 'Invalid role selected.';
++        } else {
++            // Check if username already exists
++            $existing = Database::fetchRow(
++                "SELECT id FROM admin_users WHERE username = ?",
++                [$username]
++            );
+
+-            if (empty($username) || empty($email) || empty($password)) {
+-                $error = 'Username, email, and password are required.';
+-            } elseif ($password !== $confirmPassword) {
+-                $error = 'Passwords do not match.';
+-            } elseif (strlen($password) < 8) {
+-                $error = 'Password must be at least 8 characters long.';
+-            } elseif (!in_array($role, ['admin', 'editor'])) {
+-                $error = 'Invalid role selected.';
++            if ($existing) {
++                $error = 'Username already exists. Please choose a different username.';
+             } else {
+-                // Check if username already exists
+-                $existing = Database::fetchRow(
+-                    "SELECT id FROM admin_users WHERE username = ?",
+-                    [$username]
+-                );
++                // Create new admin user
++                $passwordHash = password_hash((string) $password, PASSWORD_DEFAULT);
+
+-                if ($existing) {
+-                    $error = 'Username already exists. Please choose a different username.';
+-                } else {
+-                    // Create new admin user
+-                    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
++                Database::insert('admin_users', [
++                    'username' => $username,
++                    'password_hash' => $passwordHash,
++                    'email' => $email,
++                    'full_name' => $fullName,
++                    'role' => $role,
++                    'created_at' => date('Y-m-d H:i:s')
++                ]);
+
+-                    Database::insert('admin_users', [
+-                        'username' => $username,
+-                        'password_hash' => $passwordHash,
+-                        'email' => $email,
+-                        'full_name' => $fullName,
+-                        'role' => $role,
+-                        'created_at' => date('Y-m-d H:i:s')
+-                    ]);
+-
+-                    $message = "Administrator '{$username}' has been created successfully.";
+-                    error_log("CFK Admin: New admin user created: $username by " . $_SESSION['cfk_admin_username']);
+-                }
++                $message = "Administrator '{$username}' has been created successfully.";
++                error_log("CFK Admin: New admin user created: $username by " . $_SESSION['cfk_admin_username']);
+             }
+         }
++    } elseif (isset($_POST['edit_admin'])) {
++        $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
++        $email = sanitizeEmail($_POST['email'] ?? '');
++        $fullName = sanitizeString($_POST['full_name'] ?? '');
++        $role = sanitizeString($_POST['role'] ?? 'editor');
++        $newPassword = $_POST['new_password'] ?? '';
+
+-        // Edit admin
+-        elseif (isset($_POST['edit_admin'])) {
+-            $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
+-            $email = sanitizeEmail($_POST['email'] ?? '');
+-            $fullName = sanitizeString($_POST['full_name'] ?? '');
+-            $role = sanitizeString($_POST['role'] ?? 'editor');
+-            $newPassword = $_POST['new_password'] ?? '';
++        if ($adminId <= 0 || empty($email)) {
++            $error = 'Invalid admin ID or email.';
++        } elseif (!in_array($role, ['admin', 'editor'])) {
++            $error = 'Invalid role selected.';
++        } else {
++            $updateData = [
++                'email' => $email,
++                'full_name' => $fullName,
++                'role' => $role,
++                'updated_at' => date('Y-m-d H:i:s')
++            ];
+
+-            if ($adminId <= 0 || empty($email)) {
+-                $error = 'Invalid admin ID or email.';
+-            } elseif (!in_array($role, ['admin', 'editor'])) {
+-                $error = 'Invalid role selected.';
+-            } else {
+-                $updateData = [
+-                    'email' => $email,
+-                    'full_name' => $fullName,
+-                    'role' => $role,
+-                    'updated_at' => date('Y-m-d H:i:s')
+-                ];
+-
+-                // Update password if provided
+-                if (!empty($newPassword)) {
+-                    if (strlen($newPassword) < 8) {
+-                        $error = 'New password must be at least 8 characters long.';
+-                    } else {
+-                        $updateData['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+-                    }
++            // Update password if provided
++            if (!empty($newPassword)) {
++                if (strlen((string) $newPassword) < 8) {
++                    $error = 'New password must be at least 8 characters long.';
++                } else {
++                    $updateData['password_hash'] = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+                 }
++            }
+
+-                if (empty($error)) {
+-                    Database::update('admin_users', $updateData, ['id' => $adminId]);
+-                    $message = 'Administrator updated successfully.';
+-                    error_log("CFK Admin: Admin user updated: ID $adminId by " . $_SESSION['cfk_admin_username']);
+-                }
++            if ($error === '' || $error === '0') {
++                Database::update('admin_users', $updateData, ['id' => $adminId]);
++                $message = 'Administrator updated successfully.';
++                error_log("CFK Admin: Admin user updated: ID $adminId by " . $_SESSION['cfk_admin_username']);
+             }
+         }
++    } elseif (isset($_POST['delete_admin'])) {
++        $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
+
+-        // Delete admin
+-        elseif (isset($_POST['delete_admin'])) {
+-            $adminId = sanitizeInt($_POST['admin_id'] ?? 0);
++        // Prevent deleting yourself
++        if ($adminId == $_SESSION['cfk_admin_id']) {
++            $error = 'You cannot delete your own account.';
++        } elseif ($adminId <= 0) {
++            $error = 'Invalid admin ID.';
++        } else {
++            // Get admin details before deleting
++            $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
+
+-            // Prevent deleting yourself
+-            if ($adminId == $_SESSION['cfk_admin_id']) {
+-                $error = 'You cannot delete your own account.';
+-            } elseif ($adminId <= 0) {
+-                $error = 'Invalid admin ID.';
+-            } else {
+-                // Get admin details before deleting
+-                $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
+-
+-                Database::delete('admin_users', ['id' => $adminId]);
+-                $message = "Administrator '{$admin['username']}' has been deleted.";
+-                error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
+-            }
++            Database::delete('admin_users', ['id' => $adminId]);
++            $message = "Administrator '{$admin['username']}' has been deleted.";
++            error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
+         }
+     }
+ }
+@@ @@
+         <p class="subtitle">Manage administrator accounts and permissions</p>
+     </div>
+
+-    <?php if ($message): ?>
++    <?php if ($message !== '' && $message !== '0'): ?>
+         <div class="alert alert-success">
+             ✓ <?php echo htmlspecialchars($message); ?>
+         </div>
+     <?php endif; ?>
+
+-    <?php if ($error): ?>
++    <?php if ($error !== '' && $error !== '0'): ?>
+         <div class="alert alert-error">
+             ✗ <?php echo htmlspecialchars($error); ?>
+         </div>
+@@ @@
+     <div class="data-table-container">
+         <h2>Current Administrators</h2>
+
+-        <?php if (empty($admins)): ?>
++        <?php if ($admins === []): ?>
+             <p class="no-data">No administrators found.</p>
+         <?php else: ?>
+             <table class="data-table">
+@@ @@
+                     <?php foreach ($admins as $admin): ?>
+                         <tr>
+                             <td>
+-                                <strong><?php echo htmlspecialchars($admin['username']); ?></strong>
++                                <strong><?php echo htmlspecialchars((string) $admin['username']); ?></strong>
+                                 <?php if ($admin['id'] == $_SESSION['cfk_admin_id']): ?>
+                                     <span class="badge badge-primary">You</span>
+                                 <?php endif; ?>
+                             </td>
+-                            <td><?php echo htmlspecialchars($admin['email']); ?></td>
++                            <td><?php echo htmlspecialchars((string) $admin['email']); ?></td>
+                             <td><?php echo htmlspecialchars($admin['full_name'] ?? '—'); ?></td>
+                             <td>
+                                 <span class="badge badge-<?php echo $admin['role'] === 'admin' ? 'danger' : 'info'; ?>">
+-                                    <?php echo ucfirst($admin['role']); ?>
++                                    <?php echo ucfirst((string) $admin['role']); ?>
+                                 </span>
+                             </td>
+-                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime($admin['last_login'])) : 'Never'; ?></td>
+-                            <td><?php echo date('M j, Y', strtotime($admin['created_at'])); ?></td>
++                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime((string) $admin['last_login'])) : 'Never'; ?></td>
++                            <td><?php echo date('M j, Y', strtotime((string) $admin['created_at'])); ?></td>
+                             <td class="actions">
+                                 <button onclick="editAdmin(<?php echo $admin['id']; ?>)"
+                                         class="btn btn-sm btn-edit"
+@@ @@
+                                     ✏️ Edit
+                                 </button>
+                                 <?php if ($admin['id'] != $_SESSION['cfk_admin_id']): ?>
+-                                    <button onclick="deleteAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars($admin['username'], ENT_QUOTES); ?>')"
++                                    <button onclick="deleteAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars((string) $admin['username'], ENT_QUOTES); ?>')"
+                                             class="btn btn-sm btn-delete"
+                                             title="Delete">
+                                         🗑️ Delete
+@@ @@
+                                         <div class="form-group">
+                                             <label>Username</label>
+                                             <input type="text"
+-                                                   value="<?php echo htmlspecialchars($admin['username']); ?>"
++                                                   value="<?php echo htmlspecialchars((string) $admin['username']); ?>"
+                                                    class="form-control"
+                                                    disabled>
+                                             <small>Username cannot be changed</small>
+@@ @@
+                                             <label>Email Address *</label>
+                                             <input type="email"
+                                                    name="email"
+-                                                   value="<?php echo htmlspecialchars($admin['email']); ?>"
++                                                   value="<?php echo htmlspecialchars((string) $admin['email']); ?>"
+                                                    class="form-control"
+                                                    required>
+                                         </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * ExplicitBoolCompareRector
+ * ShortenElseIfRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+15) admin/manage_children.php:109
+
+    ---------- begin diff ----------
+@@ @@
+     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
+ }
+
+-$whereClause = empty($whereConditions) ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
++$whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
+
+ // Get total count for pagination
+ $countQuery = "SELECT COUNT(*) as total FROM children c JOIN families f ON c.family_id = f.id $whereClause";
+@@ @@
+ function validateChildData($data): array {
+     $errors = [];
+     
+-    if (empty(trim($data['name'] ?? ''))) {
++    if (in_array(trim($data['name'] ?? ''), ['', '0'], true)) {
+         $errors[] = 'Name is required';
+     }
+     
+@@ @@
+         $errors[] = 'Age must be between 1 and 18';
+     }
+     
+-    if (empty(trim($data['gender'] ?? '')) || !in_array($data['gender'], ['M', 'F'])) {
++    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
+         $errors[] = 'Valid gender is required';
+     }
+     
+-    if (empty(trim($data['child_letter'] ?? '')) || !preg_match('/^[A-Z]$/', $data['child_letter'])) {
++    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
+         $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
+     }
+     
+@@ @@
+     }
+     
+     return [
+-        'valid' => empty($errors),
++        'valid' => $errors === [],
+         'errors' => $errors
+     ];
+ }
+@@ @@
+         </form>
+
+         <!-- Children Grid -->
+-        <?php if (empty($children)): ?>
++        <?php if ($children === []): ?>
+             <div class="empty-state">
+                 <h3>No Children Found</h3>
+                 <p>No children match the current filters. Try adjusting your search criteria or add a new child.</p>
+@@ @@
+                         <div class="child-header">
+                             <div class="child-id"><?php echo sanitizeString($child['display_id']); ?></div>
+                             <span class="status-badge status-<?php echo $child['status']; ?>">
+-                                <?php echo ucfirst($child['status']); ?>
++                                <?php echo ucfirst((string) $child['status']); ?>
+                             </span>
+                         </div>
+                         
+@@ @@
+                                 
+                                 <div class="info-item">
+                                     <div class="info-label">Grade</div>
+-                                    <div class="info-value"><?php echo !empty($child['grade']) ? sanitizeString($child['grade']) : 'Not specified'; ?></div>
++                                    <div class="info-value"><?php echo empty($child['grade']) ? 'Not specified' : sanitizeString($child['grade']); ?></div>
+                                 </div>
+                                 
+                                 <div class="info-item">
+@@ @@
+                                 <?php if (!empty($child['wishes'])): ?>
+                                     <div class="detail-section">
+                                         <div class="detail-label">Christmas Wishes</div>
+-                                        <div class="detail-value"><?php echo sanitizeString(substr($child['wishes'], 0, 100)); ?><?php echo strlen($child['wishes']) > 100 ? '...' : ''; ?></div>
++                                        <div class="detail-value"><?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?><?php echo strlen((string) $child['wishes']) > 100 ? '...' : ''; ?></div>
+                                     </div>
+                                 <?php endif; ?>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SwitchNegatedTernaryRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+16) admin/manage_sponsorships.php:28
+
+    ---------- begin diff ----------
+@@ @@
+ $messageType = '';
+
+ // Handle actions
+-if ($_POST) {
++if ($_POST !== []) {
+     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+         $message = 'Security token invalid. Please try again.';
+         $messageType = 'error';
+@@ @@
+     $params[] = $statusFilter;
+ }
+
+-$whereClause = empty($whereConditions) ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
++$whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
+
+ // Sort options
+ $orderBy = match($sortBy) {
+@@ @@
+         </div>
+
+         <!-- Children Needing Attention -->
+-        <?php if (!empty($childrenNeedingAttention)): ?>
++        <?php if ($childrenNeedingAttention !== []): ?>
+             <div class="attention-section">
+                 <h3>⚠️ Children Needing Attention (<?php echo count($childrenNeedingAttention); ?>)</h3>
+                 <div class="attention-list">
+@@ @@
+                     </tr>
+                 </thead>
+                 <tbody>
+-                    <?php if (empty($sponsorships)): ?>
++                    <?php if ($sponsorships === []): ?>
+                         <tr>
+                             <td colspan="6" style="text-align: center; padding: 3rem; color: #666;">
+                                 No sponsorships found for the selected filters.
+@@ @@
+                                 <td>
+                                     <div class="child-info">
+                                         <div class="child-avatar">
+-                                            <?php echo strtoupper(substr($sponsorship['child_display_id'], 0, 2)); ?>
++                                            <?php echo strtoupper(substr((string) $sponsorship['child_display_id'], 0, 2)); ?>
+                                         </div>
+                                         <div class="child-details">
+                                             <div class="child-id"><?php echo sanitizeString($sponsorship['child_display_id']); ?></div>
+@@ @@
+                                                 <?php if (!empty($sponsorship['grade'])): ?>
+                                                     • Grade <?php echo sanitizeString($sponsorship['grade']); ?>
+                                                 <?php endif; ?>
+-                                                • <?php echo ucfirst($sponsorship['gender']); ?>
++                                                • <?php echo ucfirst((string) $sponsorship['gender']); ?>
+                                             </div>
+                                         </div>
+                                     </div>
+@@ @@
+                                         'gift_card' => 'Gift Cards',
+                                         'cash_donation' => 'Cash Donation'
+                                     ];
+-                                    echo $preferences[$sponsorship['gift_preference']] ?? ucfirst($sponsorship['gift_preference']);
++                                    echo $preferences[$sponsorship['gift_preference']] ?? ucfirst((string) $sponsorship['gift_preference']);
+                                     ?>
+                                 </td>
+                                 <td>
+                                     <span class="status-badge status-<?php echo $sponsorship['status']; ?>">
+-                                        <?php echo ucfirst($sponsorship['status']); ?>
++                                        <?php echo ucfirst((string) $sponsorship['status']); ?>
+                                     </span>
+                                 </td>
+                                 <td>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * ExplicitBoolCompareRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+17) admin/reports.php:183
+
+    ---------- begin diff ----------
+@@ @@
+             </div>
+
+             <div class="sponsor-directory">
+-                <?php if (empty($groupedSponsors)): ?>
++                <?php if ($groupedSponsors === []): ?>
+                     <div class="empty-state">
+                         <h3>No Sponsors Found</h3>
+                         <p>There are currently no sponsorships in the system.</p>
+@@ @@
+                                                 Shoes: <?php echo sanitizeString($child['shoe_size'] ?? 'N/A'); ?>
+                                             </td>
+                                             <td><?php echo sanitizeString(substr($child['wishes'] ?? '', 0, 50)) . '...'; ?></td>
+-                                            <td><span class="status-badge status-<?php echo $child['status']; ?>"><?php echo ucfirst($child['status']); ?></span></td>
++                                            <td><span class="status-badge status-<?php echo $child['status']; ?>"><?php echo ucfirst((string) $child['status']); ?></span></td>
+                                         </tr>
+                                     <?php endforeach; ?>
+                                 </tbody>
+@@ @@
+                 </div>
+             </div>
+
+-            <?php if (empty($children)): ?>
++            <?php if ($children === []): ?>
+                 <div class="empty-state">
+                     <h3>No Children Found</h3>
+                     <p><?php echo $searchTerm ? 'No children match your search criteria.' : 'There are currently no children in the system.'; ?></p>
+@@ @@
+                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
+                             <td><?php echo sanitizeString($child['child_name']); ?></td>
+                             <td><?php echo $child['age']; ?></td>
+-                            <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst($child['child_status']); ?></span></td>
++                            <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst((string) $child['child_status']); ?></span></td>
+                             <td><?php echo $child['sponsor_name'] ? sanitizeString($child['sponsor_name']) : '-'; ?></td>
+                             <td>
+                                 <?php if ($child['sponsor_email']): ?>
+@@ @@
+                             <td>
+                                 <?php if ($child['sponsorship_status']): ?>
+                                     <span class="status-badge status-<?php echo $child['sponsorship_status']; ?>">
+-                                        <?php echo ucfirst($child['sponsorship_status']); ?>
++                                        <?php echo ucfirst((string) $child['sponsorship_status']); ?>
+                                     </span>
+                                 <?php else: ?>
+                                     -
+@@ @@
+                 <a href="?type=family_report&export=csv" class="btn btn-primary">Export to CSV</a>
+             </div>
+
+-            <?php if (empty($families)): ?>
++            <?php if ($families === []): ?>
+                 <div class="empty-state">
+                     <h3>No Families Found</h3>
+                     <p>There are currently no families in the system.</p>
+@@ @@
+                 </form>
+             </div>
+
+-            <?php if (empty($availableChildren)): ?>
++            <?php if ($availableChildren === []): ?>
+                 <div class="empty-state">
+                     <h3>No Available Children</h3>
+                     <p>There are currently no children available for sponsorship.</p>
+@@ @@
+                             <td><?php echo $row['age']; ?></td>
+                             <td><?php echo $row['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
+                             <td><?php echo sanitizeString($row['grade'] ?? '-'); ?></td>
+-                            <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst($row['child_status']); ?></span></td>
++                            <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst((string) $row['child_status']); ?></span></td>
+                             <td><?php echo $row['sponsor_name'] ? sanitizeString($row['sponsor_name']) : '-'; ?></td>
+                             <td>
+                                 <?php if ($row['sponsor_email']): ?>
+@@ @@
+                             </td>
+                             <td>
+                                 <?php if ($row['sponsorship_date']): ?>
+-                                    <?php echo date('M j, Y', strtotime($row['sponsorship_date'])); ?>
++                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date'])); ?>
+                                 <?php else: ?>
+                                     -
+                                 <?php endif; ?>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * NullToStrictStringFuncCallArgRector
+
+
+18) admin/reset_password.php:34
+
+    ---------- begin diff ----------
+@@ @@
+         [sanitizeString($username)]
+     );
+
+-    if ($user && password_verify($token, $user['reset_token'])) {
++    if ($user && password_verify((string) $token, (string) $user['reset_token'])) {
+         $validToken = true;
+     } else {
+         $error = 'Invalid or expired reset link. Please request a new password reset.';
+@@ @@
+             $error = 'Both password fields are required.';
+         } elseif ($newPassword !== $confirmPassword) {
+             $error = 'Passwords do not match.';
+-        } elseif (strlen($newPassword) < 8) {
++        } elseif (strlen((string) $newPassword) < 8) {
+             $error = 'Password must be at least 8 characters long.';
+         } else {
+         // Update password and clear reset token
+-        $passwordHash = password_hash($newPassword, PASSWORD_DEFAULT);
++        $passwordHash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+
+         $updated = Database::update('admin_users',
+             [
+@@ @@
+                 <p>Choose a strong password for your admin account.</p>
+             </div>
+
+-            <?php if ($error): ?>
++            <?php if ($error !== '' && $error !== '0'): ?>
+                 <div class="error-message">
+                     <?php echo htmlspecialchars($error); ?>
+                 </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * ExplicitBoolCompareRector
+ * NullToStrictStringFuncCallArgRector
+
+
+19) admin/verify-magic-link.php:87
+
+    ---------- begin diff ----------
+@@ @@
+
+             <form id="magic-link-form" method="POST" action="<?php echo baseUrl('admin/verify-magic-link.php'); ?>" style="display: none;">
+                 <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
++                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars((string) $csrfToken); ?>">
+                 <button type="submit">Complete Login</button>
+             </form>
+
+@@ @@
+  * Parse user agent for device info
+  */
+ function parseUserAgent(string $userAgent): string {
+-    if (strpos($userAgent, 'Windows') !== false) {
++    if (str_contains($userAgent, 'Windows')) {
+         return 'Windows';
+-    } elseif (strpos($userAgent, 'Mac') !== false) {
++    } elseif (str_contains($userAgent, 'Mac')) {
+         return 'macOS';
+-    } elseif (strpos($userAgent, 'Linux') !== false) {
++    } elseif (str_contains($userAgent, 'Linux')) {
+         return 'Linux';
+-    } elseif (strpos($userAgent, 'iPhone') !== false) {
++    } elseif (str_contains($userAgent, 'iPhone')) {
+         return 'iPhone';
+-    } elseif (strpos($userAgent, 'Android') !== false) {
++    } elseif (str_contains($userAgent, 'Android')) {
+         return 'Android';
+     }
+     return 'Unknown Device';
+    ----------- end diff -----------
+
+Applied rules:
+ * StrContainsRector
+ * NullToStrictStringFuncCallArgRector
+
+
+20) admin/year_end_reset.php:107
+
+    ---------- begin diff ----------
+@@ @@
+ <div style="background: #fff3cd; border: 3px solid #856404; padding: 15px; margin: 20px; border-radius: 8px; font-family: monospace;">
+     <h3 style="margin: 0 0 10px 0; color: #856404;">🔍 DEBUG INFO</h3>
+     <p style="margin: 5px 0;"><strong>REQUEST_METHOD:</strong> <?php echo $_SERVER['REQUEST_METHOD'] ?? 'NOT SET'; ?></p>
+-    <p style="margin: 5px 0;"><strong>POST received:</strong> <?php echo empty($_POST) ? '❌ NO' : '✅ YES'; ?></p>
+-    <?php if (!empty($_POST)): ?>
++    <p style="margin: 5px 0;"><strong>POST received:</strong> <?php echo $_POST === [] ? '❌ NO' : '✅ YES'; ?></p>
++    <?php if ($_POST !== []): ?>
+         <p style="margin: 5px 0;"><strong>POST keys:</strong> <?php echo implode(', ', array_keys($_POST)); ?></p>
+         <p style="margin: 5px 0;"><strong>perform_reset present:</strong> <?php echo isset($_POST['perform_reset']) ? '✅ YES' : '❌ NO'; ?></p>
+     <?php endif; ?>
+@@ @@
+         <p class="page-subtitle">Archive current data and prepare for new season</p>
+     </div>
+
+-    <?php if (!empty($errors)): ?>
++    <?php if ($errors !== []): ?>
+         <div class="alert alert-error">
+             <h3>Errors:</h3>
+             <ul>
+@@ @@
+     </div>
+
+     <!-- Available Archives -->
+-    <?php if (!empty($archives)): ?>
++    <?php if ($archives !== []): ?>
+         <div class="archives-section">
+             <h2>📦 Available Archives</h2>
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * DisallowedEmptyRuleFixerRector
+
+
+21) includes/archive_manager.php:143
+
+    ---------- begin diff ----------
+@@ @@
+     private static function writeCSV(string $filename, array $data): void {
+         $handle = fopen($filename, 'w');
+
+-        if (!empty($data)) {
++        if ($data !== []) {
+             // Write headers
+             fputcsv($handle, array_keys($data[0]));
+
+@@ @@
+             $content .= "SPONSORSHIP BREAKDOWN:\n";
+             $content .= "----------------------\n";
+             foreach ($sponsorshipStats as $stat) {
+-                $content .= ucfirst($stat['status']) . ": {$stat['count']}\n";
++                $content .= ucfirst((string) $stat['status']) . ": {$stat['count']}\n";
+             }
+
+             $content .= "\nARCHIVE CONTENTS:\n";
+@@ @@
+         }
+
+         // Sort by year descending
+-        usort($archives, fn($a, $b) => strcmp($b['year'], $a['year']));
++        usort($archives, fn($a, $b): int => strcmp((string) $b['year'], (string) $a['year']));
+
+         return $archives;
+     }
+@@ @@
+      * Format bytes to human readable
+      */
+     public static function formatBytes(int $bytes): string {
+-        if ($bytes < 1024) return $bytes . ' B';
+-        if ($bytes < 1048576) return round($bytes / 1024, 2) . ' KB';
+-        if ($bytes < 1073741824) return round($bytes / 1048576, 2) . ' MB';
++        if ($bytes < 1024) {
++            return $bytes . ' B';
++        }
++        if ($bytes < 1048576) {
++            return round($bytes / 1024, 2) . ' KB';
++        }
++        if ($bytes < 1073741824) {
++            return round($bytes / 1048576, 2) . ' MB';
++        }
+         return round($bytes / 1073741824, 2) . ' GB';
+     }
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * CompleteMissingIfElseBracketRector
+ * NullToStrictStringFuncCallArgRector
+ * AddArrowFunctionReturnTypeRector
+
+
+22) includes/avatar_manager.php:41
+
+    ---------- begin diff ----------
+@@ @@
+         }
+
+         // Elementary (5-10)
+-        if ($age >= 5 && $age <= 10) {
++        if ($age <= 10) {
+             return $gender === 'M' ? 'male_elementary' : 'female_elementary';
+         }
+
+         // Middle School (11-13)
+-        if ($age >= 11 && $age <= 13) {
++        if ($age <= 13) {
+             return $gender === 'M' ? 'male_middle' : 'female_middle';
+         }
+
+@@ @@
+         $baseColor = '#2c5530'; // Christmas green silhouette
+         $bgColor = '#f8f9fa';   // Light background
+         
+-        switch ($category) {
+-            case 'infant':
+-                return self::getInfantSvg($baseColor, $bgColor);
+-            case 'male_toddler':
+-                return self::getMaleToddlerSvg($baseColor, $bgColor);
+-            case 'female_toddler':
+-                return self::getFemaleToddlerSvg($baseColor, $bgColor);
+-            case 'male_child':
+-                return self::getMaleChildSvg($baseColor, $bgColor);
+-            case 'female_child':
+-                return self::getFemaleChildSvg($baseColor, $bgColor);
+-            case 'male_teen':
+-                return self::getMaleTeenSvg($baseColor, $bgColor);
+-            case 'female_teen':
+-                return self::getFemaleTeenSvg($baseColor, $bgColor);
+-            default:
+-                return self::getDefaultSvg($baseColor, $bgColor);
+-        }
++        return match ($category) {
++            'infant' => self::getInfantSvg($baseColor, $bgColor),
++            'male_toddler' => self::getMaleToddlerSvg($baseColor, $bgColor),
++            'female_toddler' => self::getFemaleToddlerSvg($baseColor, $bgColor),
++            'male_child' => self::getMaleChildSvg($baseColor, $bgColor),
++            'female_child' => self::getFemaleChildSvg($baseColor, $bgColor),
++            'male_teen' => self::getMaleTeenSvg($baseColor, $bgColor),
++            'female_teen' => self::getFemaleTeenSvg($baseColor, $bgColor),
++            default => self::getDefaultSvg($baseColor, $bgColor),
++        };
+     }
+     
+     /**
+    ----------- end diff -----------
+
+Applied rules:
+ * RemoveAlwaysTrueIfConditionRector
+ * ChangeSwitchToMatchRector
+
+
+23) includes/components/child_card.php:28
+
+    ---------- begin diff ----------
+@@ @@
+ }
+
+ // Default options
+-$options = $options ?? [];
++$options ??= [];
+ $showWishes = $options['show_wishes'] ?? true;
+ $showInterests = $options['show_interests'] ?? false;
+ $showId = $options['show_id'] ?? false;
+@@ @@
+         <?php if ($showInterests && !empty($child['interests'])): ?>
+             <div class="child-interests">
+                 <strong>Likes:</strong>
+-                <?php echo sanitizeString(substr($child['interests'], 0, 100)); ?>
+-                <?php if (strlen($child['interests']) > 100): ?>...<?php endif; ?>
++                <?php echo sanitizeString(substr((string) $child['interests'], 0, 100)); ?>
++                <?php if (strlen((string) $child['interests']) > 100): ?>...<?php endif; ?>
+             </div>
+         <?php endif; ?>
+
+@@ @@
+             <div class="child-wishes">
+                 <?php if ($showInterests): ?>
+                     <strong>Wishes for:</strong>
+-                    <?php echo sanitizeString(substr($child['wishes'], 0, 100)); ?>
+-                    <?php if (strlen($child['wishes']) > 100): ?>...<?php endif; ?>
++                    <?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?>
++                    <?php if (strlen((string) $child['wishes']) > 100): ?>...<?php endif; ?>
+                 <?php else: ?>
+-                    "<?php echo sanitizeString(substr($child['wishes'], 0, 80)); ?><?php echo strlen($child['wishes']) > 80 ? '...' : ''; ?>"
++                    "<?php echo sanitizeString(substr((string) $child['wishes'], 0, 80)); ?><?php echo strlen((string) $child['wishes']) > 80 ? '...' : ''; ?>"
+                 <?php endif; ?>
+             </div>
+         <?php endif; ?>
+@@ @@
+             <div class="family-info">
+                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
+                 <?php
+-                $siblingCodes = array_map(function($s) {
+-                    return sanitizeString($s['display_id']);
+-                }, $siblings);
++                $siblingCodes = array_map(fn($s) => sanitizeString($s['display_id']), $siblings);
+                 echo implode(', ', $siblingCodes);
+                 ?>
+             </div>
+    ----------- end diff -----------
+
+Applied rules:
+ * NullCoalescingOperatorRector
+ * ClosureToArrowFunctionRector
+ * NullToStrictStringFuncCallArgRector
+
+
+24) includes/components/page_header.php:17
+
+    ---------- begin diff ----------
+@@ @@
+     die('Direct access not permitted');
+ }
+
+-$title = $title ?? '';
+-$description = $description ?? '';
+-$additionalClasses = $additionalClasses ?? '';
+-$additionalContent = $additionalContent ?? '';
++$title ??= '';
++$description ??= '';
++$additionalClasses ??= '';
++$additionalContent ??= '';
+ ?>
+
+ <div class="page-header <?php echo sanitizeString($additionalClasses); ?>">
+    ----------- end diff -----------
+
+Applied rules:
+ * NullCoalescingOperatorRector
+
+
+25) includes/csv_handler.php:69
+
+    ---------- begin diff ----------
+@@ @@
+         while (($data = fgetcsv($handle)) !== false) {
+             $rowNumber++;
+             
+-            if (empty(array_filter($data))) {
++            if (array_filter($data) === []) {
+                 continue; // Skip empty rows
+             }
+             
+             $row = $this->parseRow($headers, $data, $rowNumber);
+-            if (!$row) continue;
++            if (!$row) {
++                continue;
++            }
+             
+             // Create family if not exists (skip in dry run)
+             if ($options['dry_run'] ?? false) {
+@@ @@
+             } else {
+                 // Normal operation: create family and child
+                 $familyId = $this->ensureFamilyExists($row, $familiesCreated);
+-                if (!$familyId) continue;
++                if (!$familyId) {
++                    continue;
++                }
+                 
+                 // Create child
+                 $childId = $this->createChild($row, $familyId);
+@@ @@
+         while (($data = fgetcsv($handle)) !== false) {
+             $rowNumber++;
+
+-            if (empty(array_filter($data))) {
++            if (array_filter($data) === []) {
+                 continue; // Skip empty rows
+             }
+
+@@ @@
+         fclose($handle);
+
+         return [
+-            'success' => empty($this->errors),
++            'success' => $this->errors === [],
+             'children' => $children,
+             'errors' => $this->errors,
+             'warnings' => $this->warnings
+@@ @@
+      * Get import results
+      */
+     public function getResults(): array {
+-        $success = empty($this->errors);
++        $success = $this->errors === [];
+         $imported_count = count($this->imported);
+         
+         return [
+@@ @@
+      * Validate CSV headers
+      */
+     private function validateHeaders(array $headers): bool {
+-        if (!$headers) {
++        if ($headers === []) {
+             $this->errors[] = 'Empty CSV file or no headers found';
+             return false;
+         }
+@@ @@
+             }
+         }
+         
+-        if (!empty($missing)) {
++        if ($missing !== []) {
+             $this->errors[] = 'Missing required columns: ' . implode(', ', $missing);
+             return false;
+         }
+@@ @@
+                     $this->errors[] = "Row $rowNumber: Missing or invalid required field '$field'";
+                     return null;
+                 }
+-            } else {
+-                if (empty($value)) {
+-                    $this->errors[] = "Row $rowNumber: Missing required field '$field'";
+-                    return null;
+-                }
++            } elseif ($value === '' || $value === '0') {
++                $this->errors[] = "Row $rowNumber: Missing required field '$field'";
++                return null;
+             }
+         }
+         
+@@ @@
+         }
+         
+         // Ensure required fields have values - handle months format
+-        if (preg_match('/^(\d+)m$/', $row['age'], $matches)) {
++        if (preg_match('/^(\d+)m$/', (string) $row['age'], $matches)) {
+             // Convert months to decimal age (e.g., 10m = 0.83 years)
+             $months = (int) $matches[1];
+             $row['age'] = round($months / 12, 2);
+-            if ($row['age'] == 0 && $months > 0) $row['age'] = 0.1; // Ensure non-zero for babies
++            if ($row['age'] == 0 && $months > 0) {
++                $row['age'] = 0.1;
++            } // Ensure non-zero for babies
+         } else {
+             $row['age'] = (int) $row['age'];
+         }
+-        $row['gender'] = strtoupper($row['gender']);
++        $row['gender'] = strtoupper((string) $row['gender']);
+         
+         // Parse family ID from name field (e.g., "001A" -> family_id=001, child_letter=A)
+-        if (preg_match('/^(\d{1,4})([A-Z])$/', $row['name'], $matches)) {
++        if (preg_match('/^(\d{1,4})([A-Z])$/', (string) $row['name'], $matches)) {
+             $row['family_id'] = (int) $matches[1];
+             $row['child_letter'] = $matches[2];
+         } else {
+@@ @@
+         }
+         
+         // Set defaults for optional fields
+-        $row['grade'] = $row['grade'] ?? '';
+-        $row['special_needs'] = $row['special_needs'] ?? 'None';
+-        $row['family_situation'] = $row['family_situation'] ?? '';
+-        $row['greatest_need'] = $row['greatest_need'] ?? '';
+-        $row['wish_list'] = $row['wish_list'] ?? '';
+-        $row['interests'] = $row['interests'] ?? '';
+-        $row['shirt_size'] = $row['shirt_size'] ?? '';
+-        $row['pant_size'] = $row['pant_size'] ?? '';
+-        $row['shoe_size'] = $row['shoe_size'] ?? '';
+-        $row['jacket_size'] = $row['jacket_size'] ?? '';
++        $row['grade'] ??= '';
++        $row['special_needs'] ??= 'None';
++        $row['family_situation'] ??= '';
++        $row['greatest_need'] ??= '';
++        $row['wish_list'] ??= '';
++        $row['interests'] ??= '';
++        $row['shirt_size'] ??= '';
++        $row['pant_size'] ??= '';
++        $row['shoe_size'] ??= '';
++        $row['jacket_size'] ??= '';
+         
+         return $row;
+     }
+@@ @@
+         
+         // Text length validation
+         foreach (self::MAX_LENGTHS as $field => $maxLength) {
+-            if (isset($row[$field]) && strlen($row[$field]) > $maxLength) {
++            if (isset($row[$field]) && strlen((string) $row[$field]) > $maxLength) {
+                 $this->warnings[] = "Row $rowNumber: $field exceeds $maxLength characters, will be truncated";
+-                $row[$field] = substr($row[$field], 0, $maxLength);
++                $row[$field] = substr((string) $row[$field], 0, $maxLength);
+             }
+         }
+         
+@@ @@
+             "SELECT child_letter FROM children WHERE family_id = ? ORDER BY child_letter",
+             [$familyId]
+         );
+-        
++
+         $usedLetters = array_column($existingLetters, 'child_letter');
+-        
++
+         for ($i = 0; $i < 26; $i++) {
+             $letter = chr(65 + $i); // A, B, C...
+             if (!in_array($letter, $usedLetters)) {
+@@ @@
+                 return $letter;
+             }
+         }
+-        
++
+         return 'A'; // Fallback
+     }
+     
+@@ @@
+     private function formatChildForExport(array $child): array {
+         // Split wishes back into greatest_need and wish_list
+         $wishes = $child['wishes'] ?? '';
+-        $wishParts = explode('. Wish List: ', $wishes);
++        $wishParts = explode('. Wish List: ', (string) $wishes);
+         $greatestNeed = $wishParts[0] ?? '';
+         $wishList = $wishParts[1] ?? '';
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * CompleteMissingIfElseBracketRector
+ * ExplicitBoolCompareRector
+ * ShortenElseIfRector
+ * NullCoalescingOperatorRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+26) includes/database_wrapper.php:36
+
+    ---------- begin diff ----------
+@@ @@
+             );
+         } catch (PDOException $e) {
+             error_log('Database connection failed: ' . $e->getMessage());
+-            throw new RuntimeException('Database connection failed');
++            throw new RuntimeException('Database connection failed', $e->getCode(), $e);
+         }
+     }
+
+@@ @@
+      * Get PDO connection (for transaction support)
+      */
+     public static function getConnection(): PDO {
+-        if (self::$connection === null) {
++        if (!self::$connection instanceof PDO) {
+             throw new RuntimeException('Database not initialized. Call Database::init() first.');
+         }
+         return self::$connection;
+@@ @@
+         $pdo = self::getConnection();
+
+         $whereClause = [];
+-        foreach ($where as $column => $value) {
++        foreach (array_keys($where) as $column) {
+             $whereClause[] = "{$column} = :{$column}";
+         }
+    ----------- end diff -----------
+
+Applied rules:
+ * ThrowWithPreviousExceptionRector
+ * UnusedForeachValueToArrayKeysRector
+ * FlipTypeControlToUseExclusiveTypeRector
+
+
+27) includes/email_manager.php:0
+
+    ---------- begin diff ----------
+@@ @@
+ <?php
+ declare(strict_types=1);
+
++use PHPMailer\PHPMailer\PHPMailer;
++
+ /**
+  * Email Manager - PHPMailer Integration
+  * Handles email notifications for sponsors and administrators
+@@ @@
+ }
+
+ class CFK_Email_Manager {
+-    
+-    private static ?PHPMailer\PHPMailer\PHPMailer $mailer = null;
+-    
++
++    private static ?PHPMailer $mailer = null;
++
+     /**
+      * Initialize PHPMailer instance (public for email queue access)
+      */
+     public static function getMailer(): object {
+-        if (self::$mailer === null) {
++        if (!self::$mailer instanceof PHPMailer) {
+             // Auto-load PHPMailer if available via Composer
+             if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
+                 require_once __DIR__ . '/../vendor/autoload.php';
+             }
+-            
++
+             // Fallback: Use basic PHP mail() function
+             if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+                 $fallback = self::getFallbackMailer();
+@@ @@
+                 $fallback->setFrom(config('from_email'), config('from_name'));
+                 return $fallback;
+             }
+-            
+-            self::$mailer = new PHPMailer\PHPMailer\PHPMailer(true);
+-            
++
++            self::$mailer = new PHPMailer(true);
++
+             // SMTP Configuration (can be configured via environment)
+             if (config('email_use_smtp', false)) {
+                 self::$mailer->isSMTP();
+@@ @@
+                 // Use sendmail/mail() function
+                 self::$mailer->isSendmail();
+             }
+-            
++
+             // Set defaults
+             self::$mailer->setFrom(config('from_email'), config('from_name'));
+             self::$mailer->isHTML(true);
+             self::$mailer->CharSet = 'UTF-8';
+         }
+-        
++
+         return self::$mailer;
+     }
+-    
++
+     /**
+      * Fallback mailer for basic PHP mail() function
+      */
+@@ @@
+             public $Subject = '';
+             public $Body = '';
+             public $AltBody = '';
+-            private $to = [];
+-            private $from = ['email' => '', 'name' => ''];
++            private array $to = [];
++            private array $from = ['email' => '', 'name' => ''];
+
+             public function addAddress(string $email, string $name = ''): void {
+                 $this->to[] = ['email' => $email, 'name' => $name];
+@@ @@
+             public function setFrom(string $email, string $name = ''): void {
+                 $this->from = ['email' => $email, 'name' => $name];
+             }
+-            
++
+             public function send(): bool {
+                 $headers = "From: " . ($this->from['name'] ? $this->from['name'] . ' <' . $this->from['email'] . '>' : $this->from['email']) . "\r\n";
+                 $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+-                
++
+                 foreach ($this->to as $recipient) {
+                     $toAddress = $recipient['name'] ? $recipient['name'] . ' <' . $recipient['email'] . '>' : $recipient['email'];
+-                    if (!mail($toAddress, $this->Subject, $this->Body, $headers)) {
++                    if (!mail((string) $toAddress, (string) $this->Subject, (string) $this->Body, $headers)) {
+                         return false;
+                     }
+                 }
+-                
++
+                 return true;
+             }
+-            
++
+             public function isHTML(bool $html): void {}
+         };
+     }
+-    
++
+     /**
+      * Send sponsorship confirmation email to sponsor
+      */
+@@ @@
+     public static function sendSponsorConfirmation(array $sponsorship): bool {
+         try {
+             $mailer = self::getMailer();
+-            
++
+             $mailer->addAddress($sponsorship['sponsor_email'], $sponsorship['sponsor_name']);
+             $mailer->Subject = 'Christmas for Kids - Sponsorship Confirmation';
+-            
++
+             $mailer->Body = self::getSponsorConfirmationTemplate($sponsorship);
+-            
++
+             $success = $mailer->send();
+-            
++
+             // Log the email
+             self::logEmail(
+                 $sponsorship['sponsor_email'],
+@@ @@
+                 $success ? 'sent' : 'failed',
+                 $sponsorship['id']
+             );
+-            
++
+             return $success;
+-            
++
+         } catch (Exception $e) {
+             error_log('Failed to send sponsor confirmation email: ' . $e->getMessage());
+             self::logEmail(
+@@ @@
+             return false;
+         }
+     }
+-    
++
+     /**
+      * Send admin notification email
+      */
+@@ @@
+     public static function sendAdminNotification(string $subject, string $message, array $sponsorship = []): bool {
+         try {
+             $mailer = self::getMailer();
+-            
++
+             $mailer->addAddress(config('admin_email'));
+             $mailer->Subject = 'CFK Admin - ' . $subject;
+-            
++
+             $mailer->Body = self::getAdminNotificationTemplate($subject, $message, $sponsorship);
+-            
++
+             $success = $mailer->send();
+-            
++
+             // Log the email
+             self::logEmail(
+                 config('admin_email'),
+@@ @@
+                 $success ? 'sent' : 'failed',
+                 $sponsorship['id'] ?? 0
+             );
+-            
++
+             return $success;
+-            
++
+         } catch (Exception $e) {
+             error_log('Failed to send admin notification email: ' . $e->getMessage());
+             return false;
+         }
+     }
+-    
++
+     /**
+      * Get sponsor confirmation email template (public for email queue access)
+      */
+@@ @@
+                     <strong>💡 Tip:</strong> Print this email and take it with you while shopping! It has everything you need.
+                 </div>
+
+-                " . (!empty($sponsorship['special_message']) ? "
++                " . (empty($sponsorship['special_message']) ? "" : "
+                 <div style='margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 4px;'>
+                     <p><strong>Your Message:</strong> <em>{$sponsorship['special_message']}</em></p>
+                 </div>
+-                " : "") . "
++                ") . "
+
+                 <p style='margin-top: 20px;'><strong>Questions or need to make changes?</strong> Please contact us - we're here to help!</p>
+
+@@ @@
+         </body>
+         </html>";
+     }
+-    
++
+     /**
+      * Get admin notification email template (public for email queue access)
+      */
+@@ @@
+         $content .= "<div style='background: #f9f9f9; padding: 15px; border-left: 4px solid #2c5530;'>";
+         $content .= "<p>$message</p>";
+         $content .= "</div>";
+-        
+-        if (!empty($sponsorship)) {
++
++        if ($sponsorship !== []) {
+             $childId = $sponsorship['child_display_id'] ?? 'Unknown';
+             $requestDate = $sponsorship['request_date'] ?? 'Unknown';
+
+@@ @@
+             $content .= "<li><strong>Date:</strong> {$requestDate}</li>";
+             $content .= "</ul>";
+         }
+-        
++
+         $content .= "<p><a href='" . baseUrl('admin/manage_sponsorships.php') . "'>View in Admin Panel</a></p>";
+-        $content .= "</body></html>";
+-        
+-        return $content;
++
++        return $content . "</body></html>";
+     }
+-    
++
+     /**
+      * Log email for audit trail
+      */
+@@ @@
+             error_log('Failed to log email: ' . $e->getMessage());
+         }
+     }
+-    
++
+     /**
+      * Test email configuration
+      */
+@@ @@
+      * Send multi-child sponsorship email (when sponsor adds more children)
+      */
+     public static function sendMultiChildSponsorshipEmail(string $sponsorEmail, array $sponsorships): bool {
+-        if (empty($sponsorships)) {
++        if ($sponsorships === []) {
+             return false;
+         }
+
+@@ @@
+                 </div>";
+         }
+
+-        $html .= "
++        return $html . ("
+                 <div style='background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                     <p><strong>💡 Shopping Tip:</strong> Print this email and take it with you! It has complete details for all {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ".</p>
+                 </div>
+@@ @@
+                 <p style='font-size: 11px; color: #666; margin-top: 10px;'>You are sponsoring {$childCount} child" . ($childCount > 1 ? 'ren' : '') . ". Please deliver unwrapped gifts to our office.</p>
+             </div>
+         </body>
+-        </html>";
+-
+-        return $html;
++        </html>");
+     }
+
+     /**
+@@ @@
+                 [$email]
+             );
+
+-            if (empty($sponsorships)) {
++            if ($sponsorships === []) {
+                 return false; // No sponsorships found
+             }
+
+@@ @@
+     public static function verifyAccessToken(string $token): ?string {
+         try {
+             $decoded = base64_decode($token);
+-            list($json, $signature) = explode('|', $decoded, 2);
++            [$json, $signature] = explode('|', $decoded, 2);
+
+             $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+@@ @@
+
+             return $data['email'];
+
+-        } catch (Exception $e) {
++        } catch (Exception) {
+             return null;
+         }
+     }
+@@ @@
+      * Get access link email template
+      */
+     private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string {
+-        $html = "
++        return "
+         <!DOCTYPE html>
+         <html>
+         <head>
+@@ @@
+             </div>
+         </body>
+         </html>";
+-
+-        return $html;
+     }
+ }
+
+ // Create alias for backward compatibility with magic link system
+-class_alias('CFK_Email_Manager', 'EmailManager');
++class_alias('CFK_Email_Manager', 'EmailManager');
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SimplifyUselessVariableRector
+ * FlipTypeControlToUseExclusiveTypeRector
+ * SwitchNegatedTernaryRector
+ * ListToArrayDestructRector
+ * RemoveUnusedVariableInCatchRector
+ * NullToStrictStringFuncCallArgRector
+ * TypedPropertyFromAssignsRector
+
+
+28) includes/email_queue.php:43
+
+    ---------- begin diff ----------
+@@ @@
+             'max_attempts' => $options['max_attempts'] ?? 3,
+             'reference_type' => $options['reference_type'] ?? null,
+             'reference_id' => $options['reference_id'] ?? null,
+-            'metadata' => !empty($options['metadata']) ? json_encode($options['metadata']) : null,
++            'metadata' => empty($options['metadata']) ? null : json_encode($options['metadata']),
+             'status' => self::STATUS_QUEUED
+         ];
+
+@@ @@
+         $newAttempts = $email['attempts'] + 1;
+
+         // Calculate next retry time (exponential backoff)
+-        $retryMinutes = min(60, pow(2, $newAttempts)); // 2, 4, 8, 16, 32, 60 minutes
++        $retryMinutes = min(60, 2 ** $newAttempts); // 2, 4, 8, 16, 32, 60 minutes
+         $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes"));
+
+         $updates = [
+@@ @@
+
+             // Handle metadata (CC, BCC, etc.)
+             if ($email['metadata']) {
+-                $metadata = json_decode($email['metadata'], true);
++                $metadata = json_decode((string) $email['metadata'], true);
+                 if (isset($metadata['cc'])) {
+                     foreach ((array)$metadata['cc'] as $cc) {
+                         $mailer->addCC($cc);
+@@ @@
+      * Retry failed emails
+      */
+     public static function retryFailed(int $limit = 10): int {
+-        $updated = Database::query("
++        return Database::query("
+             UPDATE email_queue
+             SET status = :queued,
+                 attempts = 0,
+@@ @@
+             'failed' => self::STATUS_FAILED,
+             'limit' => $limit
+         ]);
+-
+-        return $updated;
+     }
+
+     /**
+@@ @@
+     public static function cleanup(int $daysOld = 30): int {
+         $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
+
+-        $deleted = Database::query("
++        return Database::query("
+             DELETE FROM email_queue
+             WHERE status IN ('sent', 'failed')
+               AND queued_at < :cutoff
+         ", ['cutoff' => $cutoffDate]);
+-
+-        return $deleted;
+     }
+
+     /**
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyUselessVariableRector
+ * SwitchNegatedTernaryRector
+ * PowToExpRector
+ * NullToStrictStringFuncCallArgRector
+
+
+29) includes/import_analyzer.php:60
+
+    ---------- begin diff ----------
+@@ @@
+                 $oldChild = $currentLookup[$key];
+                 $changes = self::detectChanges($oldChild, $newChild);
+
+-                if (!empty($changes)) {
++                if ($changes !== []) {
+                     $analysis['updated_children'][] = [
+                         'old' => $oldChild,
+                         'new' => $newChild,
+@@ @@
+
+                     // Check for concerning changes
+                     $warnings = self::checkForWarnings($oldChild, $newChild, $changes);
+-                    if (!empty($warnings)) {
++                    if ($warnings !== []) {
+                         $analysis['warnings'] = array_merge($analysis['warnings'], $warnings);
+                     }
+                 } else {
+@@ @@
+     /**
+      * Check for concerning changes that need warnings
+      */
+-    private static function checkForWarnings(array $oldChild, array $newChild, array $changes): array {
++    private static function checkForWarnings(array $oldChild, array $changes): array {
+         $warnings = [];
+
+         // Check for data becoming blank
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * RemoveUnusedPrivateMethodParameterRector
+
+
+30) includes/magic_link_manager.php:66
+
+    ---------- begin diff ----------
+@@ @@
+             return $token;
+         } catch (Exception $e) {
+             error_log('Magic link creation failed: ' . $e->getMessage());
+-            throw new RuntimeException('Failed to create magic link');
++            throw new RuntimeException('Failed to create magic link', $e->getCode(), $e);
+         }
+     }
+    ----------- end diff -----------
+
+Applied rules:
+ * ThrowWithPreviousExceptionRector
+
+
+31) includes/remember_me_tokens.php:94
+
+    ---------- begin diff ----------
+@@ @@
+      *
+      * @param string $token The token value
+      * @param bool $isProduction Whether we're in production (determines Secure flag)
+-     * @return void
+      */
+     public static function setCookie(string $token, bool $isProduction = false): void {
+         $expiry = time() + (self::TOKEN_EXPIRY_DAYS * 24 * 60 * 60);
+@@ @@
+
+     /**
+      * Clear remember-me cookie
+-     *
+-     * @return void
+      */
+     public static function clearCookie(): void {
+         setcookie(
+    ----------- end diff -----------
+
+Applied rules:
+ * RemoveUselessReturnTagRector
+
+
+32) includes/report_manager.php:91
+
+    ---------- begin diff ----------
+@@ @@
+
+         $params = [];
+
+-        if (!empty($childId)) {
++        if ($childId !== '' && $childId !== '0') {
+             $sql .= " WHERE CONCAT(f.family_number, c.child_letter) LIKE :child_id";
+             $params['child_id'] = '%' . $childId . '%';
+         }
+@@ @@
+      * Generate shopping list for sponsor
+      */
+     public static function generateShoppingList(string $sponsorEmail): array {
+-        $sponsorships = Database::fetchAll("
++        return Database::fetchAll("
+             SELECT
+                 s.sponsor_name,
+                 s.sponsor_email,
+@@ @@
+             AND s.status != 'cancelled'
+             ORDER BY f.family_number, c.child_letter
+         ", ['email' => $sponsorEmail]);
+-
+-        return $sponsorships;
+     }
+
+     /**
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyUselessVariableRector
+ * DisallowedEmptyRuleFixerRector
+
+
+33) includes/reservation_emails.php:78
+
+    ---------- begin diff ----------
+@@ @@
+  * Send reservation notification to admin
+  *
+  * @param array $reservation Reservation data
+- * @return bool
+  */
+ function sendAdminReservationNotification(array $reservation): bool {
+     try {
+@@ @@
+  */
+ function generateReservationConfirmationHTML(array $reservation): string {
+     $children = $reservation['children'] ?? [];
+-    $expiresAt = new DateTime($reservation['expires_at']);
++    new DateTime($reservation['expires_at']);
+     $createdAt = new DateTime($reservation['created_at']);
+
+     $html = '
+@@ @@
+                         <td style="padding: 30px; background-color: #fffbea; border-bottom: 3px solid #f5b800;">
+                             <h2 style="color: #856404; margin: 0 0 15px 0; font-size: 18px;">📋 Your Reservation Token</h2>
+                             <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 2px solid #f5b800;">
+-                                <code style="font-family: \'Courier New\', monospace; font-size: 16px; font-weight: bold; color: #2c5530; word-break: break-all;">' . htmlspecialchars($reservation['reservation_token']) . '</code>
++                                <code style="font-family: \'Courier New\', monospace; font-size: 16px; font-weight: bold; color: #2c5530; word-break: break-all;">' . htmlspecialchars((string) $reservation['reservation_token']) . '</code>
+                             </div>
+                             <p style="color: #856404; margin: 15px 0 0 0; font-size: 14px;">
+                                 <strong>Save this token!</strong> You\'ll need it to track your reservation or make changes.
+@@ @@
+     foreach ($children as $child) {
+         $html .= '
+                             <div style="background: #ffffff; border: 2px solid #2c5530; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+-                                <h3 style="color: #2c5530; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">' . htmlspecialchars($child['display_id']) . '</h3>
++                                <h3 style="color: #2c5530; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">' . htmlspecialchars((string) $child['display_id']) . '</h3>
+
+                                 <table width="100%" cellpadding="5">
+                                     <tr>
+                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Age:</td>
+-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['age']) . ' years old</td>
++                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['age']) . ' years old</td>
+                                     </tr>
+                                     <tr>
+                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
+@@ @@
+             $html .= '
+                                     <tr>
+                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Grade:</td>
+-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['grade']) . '</td>
++                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['grade']) . '</td>
+                                     </tr>';
+         }
+
+@@ @@
+             $html .= '
+                                     <tr>
+                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">School:</td>
+-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['school']) . '</td>
++                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['school']) . '</td>
+                                     </tr>';
+         }
+
+@@ @@
+             $html .= '
+                                 <div style="margin-top: 15px;">
+                                     <strong style="color: #2c5530;">Interests:</strong>
+-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars($child['interests'])) . '</p>
++                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['interests'])) . '</p>
+                                 </div>';
+         }
+
+@@ @@
+             $html .= '
+                                 <div style="margin-top: 15px;">
+                                     <strong style="color: #c41e3a;">🎁 Christmas Wishes:</strong>
+-                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars($child['wishes'])) . '</p>
++                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['wishes'])) . '</p>
+                                 </div>';
+         }
+
+@@ @@
+             $html .= '
+                                 <div style="margin-top: 15px;">
+                                     <strong style="color: #2c5530;">👕 Clothing Sizes:</strong>
+-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars($child['clothing_sizes']) . '</p>
++                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['clothing_sizes']) . '</p>
+                                 </div>';
+         }
+
+@@ @@
+             $html .= '
+                                 <div style="margin-top: 15px;">
+                                     <strong style="color: #2c5530;">👟 Shoe Size:</strong>
+-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars($child['shoe_size']) . '</p>
++                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['shoe_size']) . '</p>
+                                 </div>';
+         }
+
+@@ @@
+                             </div>';
+     }
+
+-    $html .= '
++    return $html . ('
+                         </td>
+                     </tr>
+
+@@ @@
+         </tr>
+     </table>
+ </body>
+-</html>';
+-
+-    return $html;
++</html>');
+ }
+
+ /**
+@@ @@
+     $text .= "Your sponsorship is now confirmed!\n";
+     $text .= "These children are reserved for you.\n";
+     $text .= "Only Christmas for Kids admin can cancel this sponsorship.\n";
+-    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime($reservation['created_at'])) . "\n\n";
++    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime((string) $reservation['created_at'])) . "\n\n";
+     $text .= "YOUR SPONSORED CHILDREN (" . count($children) . ")\n";
+     $text .= str_repeat('-', 50) . "\n\n";
+
+@@ @@
+         $text .= $child['display_id'] . "\n";
+         $text .= "Age: " . $child['age'] . " years old\n";
+         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n";
+-        if (!empty($child['grade'])) $text .= "Grade: " . $child['grade'] . "\n";
+-        if (!empty($child['school'])) $text .= "School: " . $child['school'] . "\n";
+-        if (!empty($child['interests'])) $text .= "Interests: " . $child['interests'] . "\n";
+-        if (!empty($child['wishes'])) $text .= "Wishes: " . $child['wishes'] . "\n";
+-        if (!empty($child['clothing_sizes'])) $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
+-        if (!empty($child['shoe_size'])) $text .= "Shoes: " . $child['shoe_size'] . "\n";
++        if (!empty($child['grade'])) {
++            $text .= "Grade: " . $child['grade'] . "\n";
++        }
++        if (!empty($child['school'])) {
++            $text .= "School: " . $child['school'] . "\n";
++        }
++        if (!empty($child['interests'])) {
++            $text .= "Interests: " . $child['interests'] . "\n";
++        }
++        if (!empty($child['wishes'])) {
++            $text .= "Wishes: " . $child['wishes'] . "\n";
++        }
++        if (!empty($child['clothing_sizes'])) {
++            $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
++        }
++        if (!empty($child['shoe_size'])) {
++            $text .= "Shoes: " . $child['shoe_size'] . "\n";
++        }
+         $text .= "\n";
+     }
+
+@@ @@
+     $text .= "2. Shop for gifts based on each child's wishes and sizes\n";
+     $text .= "3. Wrap gifts separately and label with child ID\n";
+     $text .= "4. Contact us for delivery instructions: " . config('admin_email') . "\n\n";
+-    $text .= "Questions? Contact us at " . config('admin_email') . "\n";
+
+-    return $text;
++    return $text . ("Questions? Contact us at " . config('admin_email') . "\n");
+ }
+
+ /**
+@@ @@
+  * Generate admin notification HTML
+  */
+ function generateAdminNotificationHTML(array $reservation): string {
+-    return '<html><body><h2>New Reservation</h2><p>Sponsor: ' . htmlspecialchars($reservation['sponsor_name']) . ' (' . htmlspecialchars($reservation['sponsor_email']) . ')</p><p>Children: ' . $reservation['total_children'] . '</p><p>Token: ' . htmlspecialchars($reservation['reservation_token']) . '</p></body></html>';
++    return '<html><body><h2>New Reservation</h2><p>Sponsor: ' . htmlspecialchars((string) $reservation['sponsor_name']) . ' (' . htmlspecialchars((string) $reservation['sponsor_email']) . ')</p><p>Children: ' . $reservation['total_children'] . '</p><p>Token: ' . htmlspecialchars((string) $reservation['reservation_token']) . '</p></body></html>';
+ }
+
+ /**
+@@ @@
+
+         error_log("ACCESS LINK: Found " . count($sponsorships) . " sponsorships");
+
+-        if (empty($sponsorships)) {
++        if ($sponsorships === []) {
+             error_log("ACCESS LINK: No sponsorships found");
+             return [
+                 'success' => false,
+@@ @@
+             return null;
+         }
+
+-        list($json, $signature) = explode('|', $decoded, 2);
++        [$json, $signature] = explode('|', $decoded, 2);
+
+         $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
+
+@@ @@
+
+         return $data['email'];
+
+-    } catch (Exception $e) {
++    } catch (Exception) {
+         return null;
+     }
+ }
+@@ @@
+                             <table width="100%" cellpadding="20" style="background-color: #f8f9fa; border-radius: 8px; margin: 20px 0; border: 2px solid #2c5530;">
+                                 <tr>
+                                     <td>
+-                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars($child['display_id']) . '</h2>
++                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars((string) $child['display_id']) . '</h2>
+
+                                         <p style="margin: 8px 0; color: #333;"><strong>Age:</strong> ' . (int)$child['age'] . '</p>
+                                         <p style="margin: 8px 0; color: #333;"><strong>Gender:</strong> ' . ($child['gender'] === 'M' ? 'Male' : 'Female') . '</p>';
+@@ @@
+         if (!empty($child['wishes'])) {
+             $html .= '
+                                         <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">🎁 Gift Wishes:</p>
+-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['wishes']) . '</p>';
++                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['wishes']) . '</p>';
+         }
+
+         if (!empty($child['interests'])) {
+             $html .= '
+                                         <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Interests:</p>
+-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['interests']) . '</p>';
++                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['interests']) . '</p>';
+         }
+
+         $html .= '
+@@ @@
+                             </table>';
+     }
+
+-    $html .= '
++    return $html . ('
+
+                             <p style="font-size: 16px; color: #333; margin: 30px 0 10px 0;"><strong>📋 Shopping Tips:</strong></p>
+                             <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0; padding-left: 20px;">
+@@ @@
+         </tr>
+     </table>
+ </body>
+-</html>';
+-
+-    return $html;
++</html>');
+ }
+
+ /**
+@@ @@
+     $text .= "- Please have gifts delivered or drop them off by the deadline\n\n";
+     $text .= "Need help? Contact us at " . config('admin_email') . "\n\n";
+     $text .= "Christmas for Kids\n";
+-    $text .= "Bringing Christmas joy to local children in need\n";
+
+-    return $text;
++    return $text . "Bringing Christmas joy to local children in need\n";
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SimplifyUselessVariableRector
+ * CompleteMissingIfElseBracketRector
+ * RemoveUnusedVariableAssignRector
+ * RemoveUselessReturnTagRector
+ * ListToArrayDestructRector
+ * RemoveUnusedVariableInCatchRector
+ * NullToStrictStringFuncCallArgRector
+
+
+34) includes/reservation_functions.php:21
+
+    ---------- begin diff ----------
+@@ @@
+ function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array {
+     try {
+         // Validate input
+-        if (empty($sponsorData['name']) || empty($sponsorData['email']) || empty($childrenIds)) {
++        if (empty($sponsorData['name']) || empty($sponsorData['email']) || $childrenIds === []) {
+             return [
+                 'success' => false,
+                 'message' => 'Missing required information: name, email, and at least one child selection.'
+@@ @@
+
+         // Check if any children are already reserved or sponsored
+         $unavailableChildren = checkChildrenAvailability($childrenIds);
+-        if (!empty($unavailableChildren)) {
++        if ($unavailableChildren !== []) {
+             return [
+                 'success' => false,
+                 'message' => 'Some children are no longer available: ' . implode(', ', $unavailableChildren),
+@@ @@
+             ]
+         );
+
+-        if (!$reservationId) {
++        if ($reservationId === 0) {
+             Database::rollback();
+             return [
+                 'success' => false,
+@@ @@
+         // Only rollback if transaction was started
+         try {
+             Database::rollback();
+-        } catch (Exception $rollbackException) {
++        } catch (Exception) {
+             // Transaction might not have been started yet, ignore
+         }
+         error_log('Reservation creation error: ' . $e->getMessage());
+@@ @@
+
+     if ($reservation) {
+         // Decode children IDs
+-        $reservation['children_ids'] = json_decode($reservation['children_ids'], true);
++        $reservation['children_ids'] = json_decode((string) $reservation['children_ids'], true);
+
+         // Check if expired
+-        $reservation['is_expired'] = strtotime($reservation['expires_at']) < time();
++        $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
+
+         // Get children details
+         if (!empty($reservation['children_ids'])) {
+@@ @@
+     } catch (Exception $e) {
+         try {
+             Database::rollback();
+-        } catch (Exception $rollbackException) {
++        } catch (Exception) {
+             // Transaction might not have been started yet, ignore
+         }
+         error_log('Reservation confirmation error: ' . $e->getMessage());
+@@ @@
+     } catch (Exception $e) {
+         try {
+             Database::rollback();
+-        } catch (Exception $rollbackException) {
++        } catch (Exception) {
+             // Transaction might not have been started yet, ignore
+         }
+         error_log('Reservation cancellation error: ' . $e->getMessage());
+@@ @@
+              AND expires_at < NOW()"
+         );
+
+-        if (empty($expiredReservations)) {
++        if ($expiredReservations === []) {
+             return ['expired_count' => 0, 'freed_children' => 0];
+         }
+
+@@ @@
+             );
+
+             // Free up children
+-            $childrenIds = json_decode($reservation['children_ids'], true);
++            $childrenIds = json_decode((string) $reservation['children_ids'], true);
+             foreach ($childrenIds as $childId) {
+                 Database::update(
+                     'children',
+@@ @@
+     } catch (Exception $e) {
+         try {
+             Database::rollback();
+-        } catch (Exception $rollbackException) {
++        } catch (Exception) {
+             // Transaction might not have been started yet, ignore
+         }
+         error_log('Cleanup expired reservations error: ' . $e->getMessage());
+@@ @@
+
+ /**
+  * Generate a unique reservation token
+- *
+- * @return string
+  */
+ function generateReservationToken(): string {
+     return bin2hex(random_bytes(32)); // 64 character hex string
+@@ @@
+
+     // Decode children IDs for each reservation
+     foreach ($reservations as &$reservation) {
+-        $reservation['children_ids'] = json_decode($reservation['children_ids'], true);
+-        $reservation['is_expired'] = strtotime($reservation['expires_at']) < time();
++        $reservation['children_ids'] = json_decode((string) $reservation['children_ids'], true);
++        $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
+     }
+
+     return $reservations;
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * ExplicitBoolCompareRector
+ * RemoveUselessReturnTagRector
+ * RemoveUnusedVariableInCatchRector
+ * NullToStrictStringFuncCallArgRector
+
+
+35) includes/sponsorship_manager.php:434
+
+    ---------- begin diff ----------
+@@ @@
+      * Get user-friendly status message
+      */
+     private static function getStatusMessage(string $status): string {
+-        switch ($status) {
+-            case self::STATUS_PENDING:
+-                return 'This child is currently being processed by another sponsor';
+-            case self::STATUS_SPONSORED:
+-                return 'This child has already been sponsored';
+-            case self::STATUS_COMPLETED:
+-                return 'This child has already received their Christmas gifts';
+-            case self::STATUS_INACTIVE:
+-                return 'This child is not currently available for sponsorship';
+-            default:
+-                return 'This child is not available for sponsorship';
+-        }
++        return match ($status) {
++            self::STATUS_PENDING => 'This child is currently being processed by another sponsor',
++            self::STATUS_SPONSORED => 'This child has already been sponsored',
++            self::STATUS_COMPLETED => 'This child has already received their Christmas gifts',
++            self::STATUS_INACTIVE => 'This child is not currently available for sponsorship',
++            default => 'This child is not available for sponsorship',
++        };
+     }
+     
+     /**
+@@ @@
+      * Verify portal access token (DATABASE VERIFIED)
+      */
+     public static function verifyPortalToken(string $token): array {
+-        if (empty($token)) {
++        if ($token === '' || $token === '0') {
+             return [
+                 'valid' => false,
+                 'message' => 'Access token is required.',
+@@ @@
+
+             // Check token against each hash (constant-time comparison via password_verify)
+             foreach ($recentTokens as $tokenRecord) {
+-                if (password_verify($token, $tokenRecord['token_hash'])) {
++                if (password_verify($token, (string) $tokenRecord['token_hash'])) {
+                     // Check expiration
+-                    if (strtotime($tokenRecord['expires_at']) < time()) {
++                    if (strtotime((string) $tokenRecord['expires_at']) < time()) {
+                         return [
+                             'valid' => false,
+                             'message' => 'Access token has expired. Please request a new access link.',
+@@ @@
+      * Add children to existing sponsorship
+      */
+     public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array {
+-        if (empty($childIds)) {
++        if ($childIds === []) {
+             return [
+                 'success' => false,
+                 'message' => 'No children selected'
+@@ @@
+                 }
+             }
+
+-            if (!empty($addedChildren)) {
++            if ($addedChildren !== []) {
+                 // Send updated email with ALL children
+                 if (class_exists('CFK_Email_Manager')) {
+                     $allSponsorships = self::getSponsorshipsWithDetails($sponsorEmail);
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * ChangeSwitchToMatchRector
+ * NullToStrictStringFuncCallArgRector
+ * DisallowedEmptyRuleFixerRector
+
+
+36) includes/validator.php:14
+
+    ---------- begin diff ----------
+@@ @@
+ class Validator {
+
+     private array $errors = [];
+-    private array $data = [];
+
+-    public function __construct(array $data) {
+-        $this->data = $data;
++    public function __construct(private array $data)
++    {
+     }
+
+     /**
+@@ @@
+     public function required(array $fields): self {
+         foreach ($fields as $field) {
+             $value = $this->data[$field] ?? null;
+-            if ($value === null || $value === '' || (is_array($value) && empty($value))) {
++            if ($value === null || $value === '' || ($value === [])) {
+                 $this->errors[$field][] = ucfirst(str_replace('_', ' ', $field)) . ' is required';
+             }
+         }
+@@ @@
+         if ($value) {
+             // Remove common formatting characters
+             $cleaned = preg_replace('/[\s\-\(\)\.]/', '', (string)$value);
+-            if (!preg_match('/^[\+]?[1]?[0-9]{10,15}$/', $cleaned)) {
++            if (!preg_match('/^[\+]?[1]?\d{10,15}$/', (string) $cleaned)) {
+                 $this->errors[$field][] = 'Must be a valid phone number';
+             }
+         }
+@@ @@
+      * Check if validation passed
+      */
+     public function passes(): bool {
+-        return empty($this->errors);
++        return $this->errors === [];
+     }
+
+     /**
+@@ @@
+      * Check if validation failed
+      */
+     public function fails(): bool {
+-        return !empty($this->errors);
++        return $this->errors !== [];
+     }
+
+     /**
+@@ @@
+      */
+     public function allErrors(): array {
+         $flat = [];
+-        foreach ($this->errors as $field => $messages) {
++        foreach ($this->errors as $messages) {
+             foreach ($messages as $message) {
+                 $flat[] = $message;
+             }
+@@ @@
+     $validator = Validator::make($data);
+
+     foreach ($rules as $field => $ruleString) {
+-        $fieldRules = explode('|', $ruleString);
++        $fieldRules = explode('|', (string) $ruleString);
+
+         foreach ($fieldRules as $rule) {
+             // Parse rule with parameters
+-            if (strpos($rule, ':') !== false) {
++            if (str_contains($rule, ':')) {
+                 [$ruleName, $params] = explode(':', $rule, 2);
+                 $params = explode(',', $params);
+             } else {
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyArrayCheckRector
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * SimplifyRegexPatternRector
+ * RemoveUnusedForeachKeyRector
+ * ClassPropertyAssignToConstructorPromotionRector
+ * StrContainsRector
+ * NullToStrictStringFuncCallArgRector
+
+
+37) pages/child.php:76
+
+    ---------- begin diff ----------
+@@ @@
+                 <div class="status-badge status-<?php echo $child['status']; ?>">
+                     <?php 
+                     global $childStatusOptions;
+-                    echo $childStatusOptions[$child['status']] ?? ucfirst($child['status']);
++                    echo $childStatusOptions[$child['status']] ?? ucfirst((string) $child['status']);
+                     ?>
+                 </div>
+             </div>
+@@ @@
+             <?php endif; ?>
+
+             <!-- Family Information -->
+-            <?php if (!empty($siblings) || !empty($child['family_notes'])): ?>
++            <?php if ($siblings !== [] || !empty($child['family_notes'])): ?>
+                 <section class="detail-section">
+                     <h2>Family Information</h2>
+                     
+-                    <?php if (!empty($siblings)): ?>
++                    <?php if ($siblings !== []): ?>
+                         <div class="siblings-section">
+                             <h3>Siblings Also Needing Sponsorship</h3>
+                             <div class="siblings-grid">
+@@ @@
+                                             <p>ID: <?php echo sanitizeString($sibling['display_id']); ?></p>
+                                             <p><?php echo formatAge($sibling['age']); ?></p>
+                                             <div class="status-badge status-<?php echo $sibling['status']; ?>">
+-                                                <?php echo $childStatusOptions[$sibling['status']] ?? ucfirst($sibling['status']); ?>
++                                                <?php echo $childStatusOptions[$sibling['status']] ?? ucfirst((string) $sibling['status']); ?>
+                                             </div>
+                                             <a href="<?php echo baseUrl('?page=child&id=' . $sibling['id']); ?>" 
+                                                class="btn btn-small btn-secondary">View Profile</a>
+@@ @@
+                         Sponsor This Child
+                     </a>
+                     
+-                    <?php if (!empty($siblings)):
++                    <?php if ($siblings !== []):
+                         // Count available siblings
+-                        $availableSiblings = array_filter($siblings, fn($s) => $s['status'] === 'available');
++                        $availableSiblings = array_filter($siblings, fn($s): bool => $s['status'] === 'available');
+                         $availableCount = count($availableSiblings);
+                     ?>
+                         <p class="family-sponsor-note">
+    ----------- end diff -----------
+
+Applied rules:
+ * SimplifyEmptyCheckOnEmptyArrayRector
+ * NullToStrictStringFuncCallArgRector
+ * AddArrowFunctionReturnTypeRector
+
+
+ [ERROR] Could not process "cron/process_email_queue.php" file, due to:         
+         "Syntax error, unexpected '*', Syntax error, unexpected '/', Syntax    
+         error, unexpected T_LNUMBER". On line: 9                               
+
+Script rector process --dry-run handling the rector event returned with error code 1

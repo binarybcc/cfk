@@ -22,7 +22,7 @@ if (!defined('CFK_APP')) {
 function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array {
     try {
         // Validate input
-        if (empty($sponsorData['name']) || empty($sponsorData['email']) || empty($childrenIds)) {
+        if (empty($sponsorData['name']) || empty($sponsorData['email']) || $childrenIds === []) {
             return [
                 'success' => false,
                 'message' => 'Missing required information: name, email, and at least one child selection.'
@@ -39,7 +39,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
 
         // Check if any children are already reserved or sponsored
         $unavailableChildren = checkChildrenAvailability($childrenIds);
-        if (!empty($unavailableChildren)) {
+        if ($unavailableChildren !== []) {
             return [
                 'success' => false,
                 'message' => 'Some children are no longer available: ' . implode(', ', $unavailableChildren),
@@ -74,7 +74,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
             ]
         );
 
-        if (!$reservationId) {
+        if ($reservationId === 0) {
             Database::rollback();
             return [
                 'success' => false,
@@ -109,7 +109,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
         // Only rollback if transaction was started
         try {
             Database::rollback();
-        } catch (Exception $rollbackException) {
+        } catch (Exception) {
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation creation error: ' . $e->getMessage());
@@ -134,10 +134,10 @@ function getReservation(string $token): ?array {
 
     if ($reservation) {
         // Decode children IDs
-        $reservation['children_ids'] = json_decode($reservation['children_ids'], true);
+        $reservation['children_ids'] = json_decode((string) $reservation['children_ids'], true);
 
         // Check if expired
-        $reservation['is_expired'] = strtotime($reservation['expires_at']) < time();
+        $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
 
         // Get children details
         if (!empty($reservation['children_ids'])) {
@@ -217,7 +217,7 @@ function confirmReservation(string $token): array {
     } catch (Exception $e) {
         try {
             Database::rollback();
-        } catch (Exception $rollbackException) {
+        } catch (Exception) {
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation confirmation error: ' . $e->getMessage());
@@ -287,7 +287,7 @@ function cancelReservation(string $token): array {
     } catch (Exception $e) {
         try {
             Database::rollback();
-        } catch (Exception $rollbackException) {
+        } catch (Exception) {
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation cancellation error: ' . $e->getMessage());
@@ -312,7 +312,7 @@ function cleanupExpiredReservations(): array {
              AND expires_at < NOW()"
         );
 
-        if (empty($expiredReservations)) {
+        if ($expiredReservations === []) {
             return ['expired_count' => 0, 'freed_children' => 0];
         }
 
@@ -330,7 +330,7 @@ function cleanupExpiredReservations(): array {
             );
 
             // Free up children
-            $childrenIds = json_decode($reservation['children_ids'], true);
+            $childrenIds = json_decode((string) $reservation['children_ids'], true);
             foreach ($childrenIds as $childId) {
                 Database::update(
                     'children',
@@ -357,7 +357,7 @@ function cleanupExpiredReservations(): array {
     } catch (Exception $e) {
         try {
             Database::rollback();
-        } catch (Exception $rollbackException) {
+        } catch (Exception) {
             // Transaction might not have been started yet, ignore
         }
         error_log('Cleanup expired reservations error: ' . $e->getMessage());
@@ -388,8 +388,6 @@ function checkChildrenAvailability(array $childrenIds): array {
 
 /**
  * Generate a unique reservation token
- *
- * @return string
  */
 function generateReservationToken(): string {
     return bin2hex(random_bytes(32)); // 64 character hex string
@@ -418,8 +416,8 @@ function getAllReservations(?string $status = null, int $limit = 50): array {
 
     // Decode children IDs for each reservation
     foreach ($reservations as &$reservation) {
-        $reservation['children_ids'] = json_decode($reservation['children_ids'], true);
-        $reservation['is_expired'] = strtotime($reservation['expires_at']) < time();
+        $reservation['children_ids'] = json_decode((string) $reservation['children_ids'], true);
+        $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
     }
 
     return $reservations;

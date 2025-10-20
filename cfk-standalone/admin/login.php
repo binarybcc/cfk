@@ -15,28 +15,7 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/remember_me_tokens.php';
 require_once __DIR__ . '/../includes/magic_link_manager.php';
-
-// Check for remember-me token (auto-login)
-if (!isLoggedIn()) {
-    $rememberToken = RememberMeTokens::getTokenFromCookie();
-    if ($rememberToken) {
-        $user = RememberMeTokens::validateToken($rememberToken);
-        if ($user) {
-            // Auto-login via remember-me token
-            $_SESSION['cfk_admin_id'] = $user['id'];
-            $_SESSION['cfk_admin_username'] = $user['username'];
-            $_SESSION['cfk_admin_role'] = $user['role'];
-
-            header('Location: index.php');
-            exit;
-        } else {
-            // Invalid token - clear cookie
-            RememberMeTokens::clearCookie();
-        }
-    }
-}
 
 // Redirect if already logged in
 if (isLoggedIn()) {
@@ -241,7 +220,7 @@ if (isLoggedIn()) {
         if ($message && $message['type'] === 'success'):
         ?>
             <div class="success-message">
-                <?php echo htmlspecialchars($message['text']); ?>
+                <?php echo htmlspecialchars((string) $message['text']); ?>
             </div>
         <?php endif; ?>
 

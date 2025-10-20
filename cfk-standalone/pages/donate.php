@@ -59,12 +59,20 @@ $pageTitle = 'Donate';
 
         <!-- Zeffy Embedded Form -->
         <div class="zeffy-embed-container">
-            <iframe 
-                src="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids" 
+            <iframe
+                src="https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids"
                 style="width: 100%; height: 900px; border: none;"
                 title="Donation form powered by Zeffy"
-                allowpaymentrequest>
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+                allow="payment"
+                loading="lazy">
             </iframe>
+            <noscript>
+                <p>Please enable JavaScript to view the donation form, or visit
+                <a href="https://www.zeffy.com/donation-form/donate-to-christmas-for-kids" target="_blank" rel="noopener">
+                    our donation page directly
+                </a>.</p>
+            </noscript>
         </div>
     </div>
 </div>

@@ -25,7 +25,7 @@ if ($viewingFamily) {
     $currentPage = 1;
 
     // Get family info for display
-    $familyInfo = !empty($children) ? getFamilyById($familyId) : null;
+    $familyInfo = $children === [] ? null : getFamilyById($familyId);
 
     // No need for eager loading since we're showing one family
     $siblingsByFamily = [$familyId => $children];
@@ -44,7 +44,9 @@ if ($viewingFamily) {
 
     // Pagination (using 'p' parameter to avoid conflict with page routing)
     $currentPage = sanitizeInt($_GET['p'] ?? 1);
-    if ($currentPage < 1) $currentPage = 1;
+    if ($currentPage < 1) {
+        $currentPage = 1;
+    }
     $limit = config('children_per_page');
 
     // Get children and count
@@ -58,11 +60,17 @@ if ($viewingFamily) {
 
 // Build query string for pagination
 $queryParams = [];
-if (!empty($filters['search'])) $queryParams['search'] = $filters['search'];
-if (!empty($filters['age_category'])) $queryParams['age_category'] = $filters['age_category'];
-if (!empty($filters['gender'])) $queryParams['gender'] = $filters['gender'];
+if (!empty($filters['search'])) {
+    $queryParams['search'] = $filters['search'];
+}
+if (!empty($filters['age_category'])) {
+    $queryParams['age_category'] = $filters['age_category'];
+}
+if (!empty($filters['gender'])) {
+    $queryParams['gender'] = $filters['gender'];
+}
 $queryString = http_build_query($queryParams);
-$baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
+$baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '0' ? '&' . $queryString : ''));
 ?>
 
 <div class="children-page">

@@ -26,26 +26,48 @@ if (!isLoggedIn()) {
 $pageTitle = 'Year-End Reset';
 
 // Get current stats
-$currentStats = [
-    'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-    'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-    'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-    'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
-];
+try {
+    $currentStats = [
+        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
+        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
+        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
+        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+    ];
+} catch (Exception $e) {
+    error_log("Failed to get stats: " . $e->getMessage());
+    $currentStats = [
+        'children' => 0,
+        'families' => 0,
+        'sponsorships' => 0,
+        'email_log' => 0
+    ];
+}
 
 // Get available archives
-$archives = CFK_Archive_Manager::getAvailableArchives();
+try {
+    $archives = CFK_Archive_Manager::getAvailableArchives();
+} catch (Exception $e) {
+    error_log("Failed to get archives: " . $e->getMessage());
+    $archives = [];
+}
 
 $errors = [];
 $success = null;
 $resetResult = null;
 
+// Debug: Log all requests
+error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+
 // Handle form submission
-if ($_POST && isset($_POST['perform_reset'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
+    error_log("YEAR_END_RESET: Form submitted. POST data: " . print_r($_POST, true));
+
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        error_log("YEAR_END_RESET: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
+        error_log("YEAR_END_RESET: CSRF token verified successfully");
         $year = sanitizeString($_POST['year'] ?? '');
         $confirmationCode = $_POST['confirmation_code'] ?? '';
 
@@ -55,7 +77,9 @@ if ($_POST && isset($_POST['perform_reset'])) {
             $errors[] = 'Year must be a 4-digit number.';
         } else {
             // Perform reset
+            error_log("YEAR_END_RESET: Calling performYearEndReset for year={$year}, code={$confirmationCode}");
             $resetResult = CFK_Archive_Manager::performYearEndReset($year, $confirmationCode);
+            error_log("YEAR_END_RESET: Result: " . print_r($resetResult, true));
 
             if ($resetResult['success']) {
                 $success = $resetResult['message'];
@@ -80,13 +104,26 @@ if ($_POST && isset($_POST['perform_reset'])) {
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
+<!-- DEBUG BANNER -->
+<div style="background: #fff3cd; border: 3px solid #856404; padding: 15px; margin: 20px; border-radius: 8px; font-family: monospace;">
+    <h3 style="margin: 0 0 10px 0; color: #856404;">🔍 DEBUG INFO</h3>
+    <p style="margin: 5px 0;"><strong>REQUEST_METHOD:</strong> <?php echo $_SERVER['REQUEST_METHOD'] ?? 'NOT SET'; ?></p>
+    <p style="margin: 5px 0;"><strong>POST received:</strong> <?php echo $_POST === [] ? '❌ NO' : '✅ YES'; ?></p>
+    <?php if ($_POST !== []): ?>
+        <p style="margin: 5px 0;"><strong>POST keys:</strong> <?php echo implode(', ', array_keys($_POST)); ?></p>
+        <p style="margin: 5px 0;"><strong>perform_reset present:</strong> <?php echo isset($_POST['perform_reset']) ? '✅ YES' : '❌ NO'; ?></p>
+    <?php endif; ?>
+    <p style="margin: 5px 0;"><strong>Form submitted detected:</strong> <?php echo ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) ? '✅ YES' : '❌ NO'; ?></p>
+</div>
+<!-- END DEBUG BANNER -->
+
 <div class="year-end-reset-page">
     <div class="page-header">
         <h1>⚠️ Year-End Reset</h1>
         <p class="page-subtitle">Archive current data and prepare for new season</p>
     </div>
 
-    <?php if (!empty($errors)): ?>
+    <?php if ($errors !== []): ?>
         <div class="alert alert-error">
             <h3>Errors:</h3>
             <ul>
@@ -181,6 +218,7 @@ include __DIR__ . '/includes/admin_header.php';
 
         <form method="POST" action="" id="resetForm" class="reset-form">
             <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+            <input type="hidden" name="perform_reset" value="1">
 
             <div class="form-group">
                 <label for="year" class="form-label">Year to Archive</label>
@@ -215,7 +253,7 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 
     <!-- Available Archives -->
-    <?php if (!empty($archives)): ?>
+    <?php if ($archives !== []): ?>
         <div class="archives-section">
             <h2>📦 Available Archives</h2>
 
@@ -595,6 +633,9 @@ document.getElementById('resetForm').addEventListener('submit', function(e) {
     // Disable button to prevent double-submit
     document.getElementById('resetButton').disabled = true;
     document.getElementById('resetButton').textContent = '⏳ Processing...';
+
+    // Allow form to submit naturally (don't prevent default)
+    // Form will submit after this event handler completes
 });
 </script>
 

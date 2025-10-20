@@ -29,7 +29,7 @@ if (!isset($child) || !is_array($child)) {
 }
 
 // Default options
-$options = $options ?? [];
+$options ??= [];
 $showWishes = $options['show_wishes'] ?? true;
 $showInterests = $options['show_interests'] ?? false;
 $showId = $options['show_id'] ?? false;
@@ -65,8 +65,8 @@ $showFamilyButton = $options['show_family_button'] ?? false;
         <?php if ($showInterests && !empty($child['interests'])): ?>
             <div class="child-interests">
                 <strong>Likes:</strong>
-                <?php echo sanitizeString(substr($child['interests'], 0, 100)); ?>
-                <?php if (strlen($child['interests']) > 100): ?>...<?php endif; ?>
+                <?php echo sanitizeString(substr((string) $child['interests'], 0, 100)); ?>
+                <?php if (strlen((string) $child['interests']) > 100): ?>...<?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -74,10 +74,10 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             <div class="child-wishes">
                 <?php if ($showInterests): ?>
                     <strong>Wishes for:</strong>
-                    <?php echo sanitizeString(substr($child['wishes'], 0, 100)); ?>
-                    <?php if (strlen($child['wishes']) > 100): ?>...<?php endif; ?>
+                    <?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?>
+                    <?php if (strlen((string) $child['wishes']) > 100): ?>...<?php endif; ?>
                 <?php else: ?>
-                    "<?php echo sanitizeString(substr($child['wishes'], 0, 80)); ?><?php echo strlen($child['wishes']) > 80 ? '...' : ''; ?>"
+                    "<?php echo sanitizeString(substr((string) $child['wishes'], 0, 80)); ?><?php echo strlen((string) $child['wishes']) > 80 ? '...' : ''; ?>"
                 <?php endif; ?>
             </div>
         <?php endif; ?>
@@ -86,9 +86,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             <div class="family-info">
                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
                 <?php
-                $siblingCodes = array_map(function($s) {
-                    return sanitizeString($s['display_id']);
-                }, $siblings);
+                $siblingCodes = array_map(fn($s) => sanitizeString($s['display_id']), $siblings);
                 echo implode(', ', $siblingCodes);
                 ?>
             </div>

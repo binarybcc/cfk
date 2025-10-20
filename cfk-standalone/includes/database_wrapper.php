@@ -37,7 +37,7 @@ class Database {
             );
         } catch (PDOException $e) {
             error_log('Database connection failed: ' . $e->getMessage());
-            throw new RuntimeException('Database connection failed');
+            throw new RuntimeException('Database connection failed', $e->getCode(), $e);
         }
     }
 
@@ -45,7 +45,7 @@ class Database {
      * Get PDO connection (for transaction support)
      */
     public static function getConnection(): PDO {
-        if (self::$connection === null) {
+        if (!self::$connection instanceof PDO) {
             throw new RuntimeException('Database not initialized. Call Database::init() first.');
         }
         return self::$connection;
@@ -144,7 +144,7 @@ class Database {
         $pdo = self::getConnection();
 
         $whereClause = [];
-        foreach ($where as $column => $value) {
+        foreach (array_keys($where) as $column) {
             $whereClause[] = "{$column} = :{$column}";
         }
 

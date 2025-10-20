@@ -1,9 +1,10 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Sponsorship Manager - Single-Sponsor-Per-Child Logic
- * Prevents multiple sponsors from selecting the same child
+ * DEPRECATED: This file is kept for backwards compatibility only.
+ * The actual implementation has moved to src/Sponsorship/Manager.php
+ *
+ * The CFK_Sponsorship_Manager class is automatically available via class_alias()
+ * defined in config/config.php
  */
 
 // Prevent direct access
@@ -12,7 +13,11 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class CFK_Sponsorship_Manager {
+// Exit early - class loaded via Composer autoloader
+return;
+
+// DEPRECATED CODE BELOW
+class CFK_Sponsorship_Manager_DEPRECATED {
     
     const STATUS_AVAILABLE = 'available';
     const STATUS_PENDING = 'pending';
@@ -435,18 +440,13 @@ class CFK_Sponsorship_Manager {
      * Get user-friendly status message
      */
     private static function getStatusMessage(string $status): string {
-        switch ($status) {
-            case self::STATUS_PENDING:
-                return 'This child is currently being processed by another sponsor';
-            case self::STATUS_SPONSORED:
-                return 'This child has already been sponsored';
-            case self::STATUS_COMPLETED:
-                return 'This child has already received their Christmas gifts';
-            case self::STATUS_INACTIVE:
-                return 'This child is not currently available for sponsorship';
-            default:
-                return 'This child is not available for sponsorship';
-        }
+        return match ($status) {
+            self::STATUS_PENDING => 'This child is currently being processed by another sponsor',
+            self::STATUS_SPONSORED => 'This child has already been sponsored',
+            self::STATUS_COMPLETED => 'This child has already received their Christmas gifts',
+            self::STATUS_INACTIVE => 'This child is not currently available for sponsorship',
+            default => 'This child is not available for sponsorship',
+        };
     }
     
     /**
@@ -541,7 +541,7 @@ class CFK_Sponsorship_Manager {
      * Verify portal access token (DATABASE VERIFIED)
      */
     public static function verifyPortalToken(string $token): array {
-        if (empty($token)) {
+        if ($token === '' || $token === '0') {
             return [
                 'valid' => false,
                 'message' => 'Access token is required.',
@@ -562,9 +562,9 @@ class CFK_Sponsorship_Manager {
 
             // Check token against each hash (constant-time comparison via password_verify)
             foreach ($recentTokens as $tokenRecord) {
-                if (password_verify($token, $tokenRecord['token_hash'])) {
+                if (password_verify($token, (string) $tokenRecord['token_hash'])) {
                     // Check expiration
-                    if (strtotime($tokenRecord['expires_at']) < time()) {
+                    if (strtotime((string) $tokenRecord['expires_at']) < time()) {
                         return [
                             'valid' => false,
                             'message' => 'Access token has expired. Please request a new access link.',
@@ -754,7 +754,7 @@ class CFK_Sponsorship_Manager {
      * Add children to existing sponsorship
      */
     public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array {
-        if (empty($childIds)) {
+        if ($childIds === []) {
             return [
                 'success' => false,
                 'message' => 'No children selected'
@@ -775,7 +775,7 @@ class CFK_Sponsorship_Manager {
                 }
             }
 
-            if (!empty($addedChildren)) {
+            if ($addedChildren !== []) {
                 // Send updated email with ALL children
                 if (class_exists('CFK_Email_Manager')) {
                     $allSponsorships = self::getSponsorshipsWithDetails($sponsorEmail);

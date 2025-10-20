@@ -18,7 +18,7 @@ require_once __DIR__ . '/../includes/functions.php';
 
 // Clear remember-me cookie if it exists
 if (isset($_COOKIE['cfk_remember_token'])) {
-    setcookie('cfk_remember_token', '', time() - 3600, '/', '', false, true);
+    setcookie('cfk_remember_token', '', ['expires' => time() - 3600, 'path' => '/', 'domain' => '', 'secure' => false, 'httponly' => true]);
     unset($_COOKIE['cfk_remember_token']);
 }
 
@@ -31,7 +31,7 @@ $_SESSION = [];
 
 // Destroy the session cookie
 if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', time() - 3600, '/');
+    setcookie(session_name(), '', ['expires' => time() - 3600, 'path' => '/']);
 }
 
 // Destroy session

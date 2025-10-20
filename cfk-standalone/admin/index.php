@@ -155,7 +155,7 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 
     <!-- Attention Needed -->
-    <?php if (!empty($childrenNeedingAttention)): ?>
+    <?php if ($childrenNeedingAttention !== []): ?>
     <div class="attention-section">
         <h2>🚨 Children Needing Attention</h2>
         <p>These children have pending sponsorships that may have expired or need follow-up:</p>
@@ -165,7 +165,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="attention-info">
                         <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
                         <span class="attention-date">
-                            Pending since <?php echo date('M j, Y', strtotime($child['request_date'])); ?>
+                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?>
                         </span>
                     </div>
                     <div class="attention-actions">
@@ -181,7 +181,7 @@ include __DIR__ . '/includes/admin_header.php';
     <!-- Recent Activity -->
     <div class="recent-activity">
         <h2>Recent Sponsorship Activity</h2>
-        <?php if (empty($recentSponsorships)): ?>
+        <?php if ($recentSponsorships === []): ?>
             <p>No recent sponsorship activity.</p>
         <?php else: ?>
             <div class="activity-list">
@@ -196,9 +196,9 @@ include __DIR__ . '/includes/admin_header.php';
                             </div>
                             <div class="activity-meta">
                                 Status: <span class="status status-<?php echo $sponsorship['status']; ?>">
-                                    <?php echo ucfirst($sponsorship['status']); ?>
+                                    <?php echo ucfirst((string) $sponsorship['status']); ?>
                                 </span>
-                                • <?php echo date('M j, Y g:i A', strtotime($sponsorship['request_date'])); ?>
+                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date'])); ?>
                             </div>
                         </div>
                         <div class="activity-actions">

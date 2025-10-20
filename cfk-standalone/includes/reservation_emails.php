@@ -79,7 +79,6 @@ function sendReservationConfirmationEmail(array $reservation): array {
  * Send reservation notification to admin
  *
  * @param array $reservation Reservation data
- * @return bool
  */
 function sendAdminReservationNotification(array $reservation): bool {
     try {
@@ -105,7 +104,7 @@ function sendAdminReservationNotification(array $reservation): bool {
  */
 function generateReservationConfirmationHTML(array $reservation): string {
     $children = $reservation['children'] ?? [];
-    $expiresAt = new DateTime($reservation['expires_at']);
+    new DateTime($reservation['expires_at']);
     $createdAt = new DateTime($reservation['created_at']);
 
     $html = '
@@ -135,7 +134,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
                         <td style="padding: 30px; background-color: #fffbea; border-bottom: 3px solid #f5b800;">
                             <h2 style="color: #856404; margin: 0 0 15px 0; font-size: 18px;">📋 Your Reservation Token</h2>
                             <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 2px solid #f5b800;">
-                                <code style="font-family: \'Courier New\', monospace; font-size: 16px; font-weight: bold; color: #2c5530; word-break: break-all;">' . htmlspecialchars($reservation['reservation_token']) . '</code>
+                                <code style="font-family: \'Courier New\', monospace; font-size: 16px; font-weight: bold; color: #2c5530; word-break: break-all;">' . htmlspecialchars((string) $reservation['reservation_token']) . '</code>
                             </div>
                             <p style="color: #856404; margin: 15px 0 0 0; font-size: 14px;">
                                 <strong>Save this token!</strong> You\'ll need it to track your reservation or make changes.
@@ -166,12 +165,12 @@ function generateReservationConfirmationHTML(array $reservation): string {
     foreach ($children as $child) {
         $html .= '
                             <div style="background: #ffffff; border: 2px solid #2c5530; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-                                <h3 style="color: #2c5530; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">' . htmlspecialchars($child['display_id']) . '</h3>
+                                <h3 style="color: #2c5530; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">' . htmlspecialchars((string) $child['display_id']) . '</h3>
 
                                 <table width="100%" cellpadding="5">
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Age:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['age']) . ' years old</td>
+                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['age']) . ' years old</td>
                                     </tr>
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
@@ -182,7 +181,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Grade:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['grade']) . '</td>
+                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['grade']) . '</td>
                                     </tr>';
         }
 
@@ -190,7 +189,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">School:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars($child['school']) . '</td>
+                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['school']) . '</td>
                                     </tr>';
         }
 
@@ -201,7 +200,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #2c5530;">Interests:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars($child['interests'])) . '</p>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['interests'])) . '</p>
                                 </div>';
         }
 
@@ -209,7 +208,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #c41e3a;">🎁 Christmas Wishes:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars($child['wishes'])) . '</p>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['wishes'])) . '</p>
                                 </div>';
         }
 
@@ -217,7 +216,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #2c5530;">👕 Clothing Sizes:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars($child['clothing_sizes']) . '</p>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['clothing_sizes']) . '</p>
                                 </div>';
         }
 
@@ -225,7 +224,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #2c5530;">👟 Shoe Size:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars($child['shoe_size']) . '</p>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['shoe_size']) . '</p>
                                 </div>';
         }
 
@@ -233,7 +232,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
                             </div>';
     }
 
-    $html .= '
+    return $html . ('
                         </td>
                     </tr>
 
@@ -268,9 +267,7 @@ function generateReservationConfirmationHTML(array $reservation): string {
         </tr>
     </table>
 </body>
-</html>';
-
-    return $html;
+</html>');
 }
 
 /**
@@ -287,7 +284,7 @@ function generateReservationConfirmationText(array $reservation): string {
     $text .= "Your sponsorship is now confirmed!\n";
     $text .= "These children are reserved for you.\n";
     $text .= "Only Christmas for Kids admin can cancel this sponsorship.\n";
-    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime($reservation['created_at'])) . "\n\n";
+    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime((string) $reservation['created_at'])) . "\n\n";
     $text .= "YOUR SPONSORED CHILDREN (" . count($children) . ")\n";
     $text .= str_repeat('-', 50) . "\n\n";
 
@@ -295,12 +292,24 @@ function generateReservationConfirmationText(array $reservation): string {
         $text .= $child['display_id'] . "\n";
         $text .= "Age: " . $child['age'] . " years old\n";
         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n";
-        if (!empty($child['grade'])) $text .= "Grade: " . $child['grade'] . "\n";
-        if (!empty($child['school'])) $text .= "School: " . $child['school'] . "\n";
-        if (!empty($child['interests'])) $text .= "Interests: " . $child['interests'] . "\n";
-        if (!empty($child['wishes'])) $text .= "Wishes: " . $child['wishes'] . "\n";
-        if (!empty($child['clothing_sizes'])) $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
-        if (!empty($child['shoe_size'])) $text .= "Shoes: " . $child['shoe_size'] . "\n";
+        if (!empty($child['grade'])) {
+            $text .= "Grade: " . $child['grade'] . "\n";
+        }
+        if (!empty($child['school'])) {
+            $text .= "School: " . $child['school'] . "\n";
+        }
+        if (!empty($child['interests'])) {
+            $text .= "Interests: " . $child['interests'] . "\n";
+        }
+        if (!empty($child['wishes'])) {
+            $text .= "Wishes: " . $child['wishes'] . "\n";
+        }
+        if (!empty($child['clothing_sizes'])) {
+            $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
+        }
+        if (!empty($child['shoe_size'])) {
+            $text .= "Shoes: " . $child['shoe_size'] . "\n";
+        }
         $text .= "\n";
     }
 
@@ -309,16 +318,15 @@ function generateReservationConfirmationText(array $reservation): string {
     $text .= "2. Shop for gifts based on each child's wishes and sizes\n";
     $text .= "3. Wrap gifts separately and label with child ID\n";
     $text .= "4. Contact us for delivery instructions: " . config('admin_email') . "\n\n";
-    $text .= "Questions? Contact us at " . config('admin_email') . "\n";
 
-    return $text;
+    return $text . ("Questions? Contact us at " . config('admin_email') . "\n");
 }
 
 /**
  * Generate admin notification HTML
  */
 function generateAdminNotificationHTML(array $reservation): string {
-    return '<html><body><h2>New Reservation</h2><p>Sponsor: ' . htmlspecialchars($reservation['sponsor_name']) . ' (' . htmlspecialchars($reservation['sponsor_email']) . ')</p><p>Children: ' . $reservation['total_children'] . '</p><p>Token: ' . htmlspecialchars($reservation['reservation_token']) . '</p></body></html>';
+    return '<html><body><h2>New Reservation</h2><p>Sponsor: ' . htmlspecialchars((string) $reservation['sponsor_name']) . ' (' . htmlspecialchars((string) $reservation['sponsor_email']) . ')</p><p>Children: ' . $reservation['total_children'] . '</p><p>Token: ' . htmlspecialchars((string) $reservation['reservation_token']) . '</p></body></html>';
 }
 
 /**
@@ -375,7 +383,7 @@ function sendAccessLinkEmail(string $email): array {
 
         error_log("ACCESS LINK: Found " . count($sponsorships) . " sponsorships");
 
-        if (empty($sponsorships)) {
+        if ($sponsorships === []) {
             error_log("ACCESS LINK: No sponsorships found");
             return [
                 'success' => false,
@@ -471,7 +479,7 @@ function verifyAccessToken(string $token): ?string {
             return null;
         }
 
-        list($json, $signature) = explode('|', $decoded, 2);
+        [$json, $signature] = explode('|', $decoded, 2);
 
         $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
 
@@ -487,7 +495,7 @@ function verifyAccessToken(string $token): ?string {
 
         return $data['email'];
 
-    } catch (Exception $e) {
+    } catch (Exception) {
         return null;
     }
 }
@@ -535,7 +543,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                             <table width="100%" cellpadding="20" style="background-color: #f8f9fa; border-radius: 8px; margin: 20px 0; border: 2px solid #2c5530;">
                                 <tr>
                                     <td>
-                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars($child['display_id']) . '</h2>
+                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars((string) $child['display_id']) . '</h2>
 
                                         <p style="margin: 8px 0; color: #333;"><strong>Age:</strong> ' . (int)$child['age'] . '</p>
                                         <p style="margin: 8px 0; color: #333;"><strong>Gender:</strong> ' . ($child['gender'] === 'M' ? 'Male' : 'Female') . '</p>';
@@ -543,13 +551,13 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
         if (!empty($child['wishes'])) {
             $html .= '
                                         <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">🎁 Gift Wishes:</p>
-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['wishes']) . '</p>';
+                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['wishes']) . '</p>';
         }
 
         if (!empty($child['interests'])) {
             $html .= '
                                         <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Interests:</p>
-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars($child['interests']) . '</p>';
+                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['interests']) . '</p>';
         }
 
         $html .= '
@@ -562,7 +570,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                             </table>';
     }
 
-    $html .= '
+    return $html . ('
 
                             <p style="font-size: 16px; color: #333; margin: 30px 0 10px 0;"><strong>📋 Shopping Tips:</strong></p>
                             <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0; padding-left: 20px;">
@@ -593,9 +601,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
         </tr>
     </table>
 </body>
-</html>';
-
-    return $html;
+</html>');
 }
 
 /**
@@ -640,7 +646,6 @@ function generateAccessLinkText(string $email, string $name, array $sponsorships
     $text .= "- Please have gifts delivered or drop them off by the deadline\n\n";
     $text .= "Need help? Contact us at " . config('admin_email') . "\n\n";
     $text .= "Christmas for Kids\n";
-    $text .= "Bringing Christmas joy to local children in need\n";
 
-    return $text;
+    return $text . "Bringing Christmas joy to local children in need\n";
 }

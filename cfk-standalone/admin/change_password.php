@@ -42,11 +42,11 @@ if ($_POST && isset($_POST['change_password'])) {
         $error = 'Security token invalid. Please try again.';
     } elseif (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
         $error = 'All fields are required.';
-    } elseif (!password_verify($currentPassword, $admin['password_hash'])) {
+    } elseif (!password_verify((string) $currentPassword, (string) $admin['password_hash'])) {
         $error = 'Current password is incorrect.';
     } elseif ($newPassword !== $confirmPassword) {
         $error = 'New passwords do not match.';
-    } elseif (strlen($newPassword) < 8) {
+    } elseif (strlen((string) $newPassword) < 8) {
         $error = 'New password must be at least 8 characters long.';
     } elseif ($currentPassword === $newPassword) {
         $error = 'New password must be different from current password.';
@@ -54,7 +54,7 @@ if ($_POST && isset($_POST['change_password'])) {
         // Update password
         try {
             Database::update('admin_users',
-                ['password_hash' => password_hash($newPassword, PASSWORD_DEFAULT)],
+                ['password_hash' => password_hash((string) $newPassword, PASSWORD_DEFAULT)],
                 ['id' => $_SESSION['cfk_admin_id']]
             );
 
@@ -242,7 +242,7 @@ $isForced = isset($_SESSION['force_password_change']) && $_SESSION['force_passwo
             </div>
         <?php endif; ?>
 
-        <?php if ($error): ?>
+        <?php if ($error !== '' && $error !== '0'): ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
             </div>

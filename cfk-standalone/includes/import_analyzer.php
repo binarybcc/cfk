@@ -61,7 +61,7 @@ class CFK_Import_Analyzer {
                 $oldChild = $currentLookup[$key];
                 $changes = self::detectChanges($oldChild, $newChild);
 
-                if (!empty($changes)) {
+                if ($changes !== []) {
                     $analysis['updated_children'][] = [
                         'old' => $oldChild,
                         'new' => $newChild,
@@ -71,7 +71,7 @@ class CFK_Import_Analyzer {
 
                     // Check for concerning changes
                     $warnings = self::checkForWarnings($oldChild, $newChild, $changes);
-                    if (!empty($warnings)) {
+                    if ($warnings !== []) {
                         $analysis['warnings'] = array_merge($analysis['warnings'], $warnings);
                     }
                 } else {
@@ -129,7 +129,7 @@ class CFK_Import_Analyzer {
     /**
      * Check for concerning changes that need warnings
      */
-    private static function checkForWarnings(array $oldChild, array $newChild, array $changes): array {
+    private static function checkForWarnings(array $oldChild, array $changes): array {
         $warnings = [];
 
         // Check for data becoming blank

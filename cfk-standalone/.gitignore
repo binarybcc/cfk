@@ -46,3 +46,13 @@ archive/
 
 # Generated documentation exports
 docs/exports/
+
+# Composer dependencies
+/vendor/
+composer.lock
+
+# Tool caches
+/.phpunit.cache/
+/.php-cs-fixer.cache
+/.phpcs-cache
+/rector-cache/

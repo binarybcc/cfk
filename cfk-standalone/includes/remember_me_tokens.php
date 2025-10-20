@@ -95,7 +95,6 @@ class RememberMeTokens {
      *
      * @param string $token The token value
      * @param bool $isProduction Whether we're in production (determines Secure flag)
-     * @return void
      */
     public static function setCookie(string $token, bool $isProduction = false): void {
         $expiry = time() + (self::TOKEN_EXPIRY_DAYS * 24 * 60 * 60);
@@ -116,8 +115,6 @@ class RememberMeTokens {
 
     /**
      * Clear remember-me cookie
-     *
-     * @return void
      */
     public static function clearCookie(): void {
         setcookie(

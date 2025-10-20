@@ -76,7 +76,7 @@ if ($_POST && isset($_POST['reset_request'])) {
             $headers .= "Reply-To: " . config('admin_email') . "\r\n";
             $headers .= "X-Mailer: PHP/" . phpversion();
 
-            if (mail($to, $subject, $message, $headers)) {
+            if (mail((string) $to, $subject, $message, $headers)) {
                 $success = true;
                 $message = 'Password reset instructions have been sent to your email address.';
 
@@ -247,7 +247,7 @@ if ($_POST && isset($_POST['reset_request'])) {
             <p>Enter your username and email address to receive password reset instructions.</p>
         </div>
 
-        <?php if ($error): ?>
+        <?php if ($error !== '' && $error !== '0'): ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
             </div>

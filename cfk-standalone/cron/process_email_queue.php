@@ -5,8 +5,9 @@ declare(strict_types=1);
  * Process Email Queue Cron Job
  * Run this every 5-15 minutes via cron
  *
- * Crontab entry example:
- * */5 * * * * /usr/bin/php /path/to/cfk-standalone/cron/process_email_queue.php >> /var/log/cfk_email_queue.log 2>&1
+ * Crontab entry example (every 5 minutes):
+ * [minute] [hour] [day] [month] [weekday] [command]
+ * 5,10,15,20,25,30,35,40,45,50,55,0 * * * * /usr/bin/php /path/to/cfk-standalone/cron/process_email_queue.php >> /var/log/cfk_email_queue.log 2>&1
  */
 
 // Security constant

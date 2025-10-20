@@ -67,7 +67,7 @@ class MagicLinkManager {
             return $token;
         } catch (Exception $e) {
             error_log('Magic link creation failed: ' . $e->getMessage());
-            throw new RuntimeException('Failed to create magic link');
+            throw new RuntimeException('Failed to create magic link', $e->getCode(), $e);
         }
     }
 

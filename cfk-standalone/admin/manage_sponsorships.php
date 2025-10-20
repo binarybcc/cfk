@@ -29,7 +29,7 @@ $message = '';
 $messageType = '';
 
 // Handle actions
-if ($_POST) {
+if ($_POST !== []) {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
@@ -78,7 +78,7 @@ if ($statusFilter !== 'all') {
     $params[] = $statusFilter;
 }
 
-$whereClause = empty($whereConditions) ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
+$whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
 
 // Sort options
 $orderBy = match($sortBy) {
@@ -333,7 +333,7 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
 
         <!-- Children Needing Attention -->
-        <?php if (!empty($childrenNeedingAttention)): ?>
+        <?php if ($childrenNeedingAttention !== []): ?>
             <div class="attention-section">
                 <h3>⚠️ Children Needing Attention (<?php echo count($childrenNeedingAttention); ?>)</h3>
                 <div class="attention-list">
@@ -398,7 +398,7 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if (empty($sponsorships)): ?>
+                    <?php if ($sponsorships === []): ?>
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 3rem; color: #666;">
                                 No sponsorships found for the selected filters.
@@ -410,7 +410,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <td>
                                     <div class="child-info">
                                         <div class="child-avatar">
-                                            <?php echo strtoupper(substr($sponsorship['child_display_id'], 0, 2)); ?>
+                                            <?php echo strtoupper(substr((string) $sponsorship['child_display_id'], 0, 2)); ?>
                                         </div>
                                         <div class="child-details">
                                             <div class="child-id"><?php echo sanitizeString($sponsorship['child_display_id']); ?></div>
@@ -419,7 +419,7 @@ include __DIR__ . '/includes/admin_header.php';
                                                 <?php if (!empty($sponsorship['grade'])): ?>
                                                     • Grade <?php echo sanitizeString($sponsorship['grade']); ?>
                                                 <?php endif; ?>
-                                                • <?php echo ucfirst($sponsorship['gender']); ?>
+                                                • <?php echo ucfirst((string) $sponsorship['gender']); ?>
                                             </div>
                                         </div>
                                     </div>
@@ -448,12 +448,12 @@ include __DIR__ . '/includes/admin_header.php';
                                         'gift_card' => 'Gift Cards',
                                         'cash_donation' => 'Cash Donation'
                                     ];
-                                    echo $preferences[$sponsorship['gift_preference']] ?? ucfirst($sponsorship['gift_preference']);
+                                    echo $preferences[$sponsorship['gift_preference']] ?? ucfirst((string) $sponsorship['gift_preference']);
                                     ?>
                                 </td>
                                 <td>
                                     <span class="status-badge status-<?php echo $sponsorship['status']; ?>">
-                                        <?php echo ucfirst($sponsorship['status']); ?>
+                                        <?php echo ucfirst((string) $sponsorship['status']); ?>
                                     </span>
                                 </td>
                                 <td>

@@ -79,7 +79,7 @@ if ($_POST && isset($_POST['add_children'])) {
 
             if ($addChildrenResult['success']) {
                 // Refresh sponsorships
-                header('Location: ' . baseUrl('?page=sponsor_portal&token=' . urlencode($token)));
+                header('Location: ' . baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token)));
                 exit;
             }
         }
@@ -103,7 +103,7 @@ if ($_POST && isset($_POST['add_children'])) {
         <!-- Display Sponsorships -->
         <div class="sponsorships-container">
             <div class="portal-actions">
-                <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode($token) . '&add_children=1'); ?>" class="btn btn-primary">
+                <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token) . '&add_children=1'); ?>" class="btn btn-primary">
                     ➕ Add More Children
                 </a>
                 <a href="<?php echo baseUrl('?page=sponsor_lookup'); ?>" class="btn btn-secondary">
@@ -116,7 +116,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <p>You are sponsoring <strong><?php echo count($sponsorships); ?></strong> child(ren) across <strong><?php echo count($families); ?></strong> family(ies).</p>
             </div>
 
-            <?php foreach ($families as $familyId => $family): ?>
+            <?php foreach ($families as $family): ?>
                 <div class="family-section">
                     <div class="family-header">
                         <h3>Family <?php echo sanitizeString($family['family_number']); ?></h3>
@@ -128,7 +128,7 @@ if ($_POST && isset($_POST['add_children'])) {
                                 <div class="child-header">
                                     <h4>Child <?php echo sanitizeString($child['child_display_id']); ?></h4>
                                     <span class="status-badge status-<?php echo $child['status']; ?>">
-                                        <?php echo ucfirst($child['status']); ?>
+                                        <?php echo ucfirst((string) $child['status']); ?>
                                     </span>
                                 </div>
 
@@ -176,7 +176,7 @@ if ($_POST && isset($_POST['add_children'])) {
                                 <?php endif; ?>
 
                                 <div class="child-meta">
-                                    <small>Requested: <?php echo date('M j, Y', strtotime($child['request_date'])); ?></small>
+                                    <small>Requested: <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?></small>
                                 </div>
                             </div>
                         <?php endforeach; ?>
@@ -213,7 +213,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 // Get available children
                 $availableChildren = getChildren(['status' => 'available'], 1, 100);
 
-                if (empty($availableChildren)): ?>
+                if ($availableChildren === []): ?>
                     <div class="alert alert-info">
                         <p>There are currently no available children to add. All children have been sponsored!</p>
                     </div>
@@ -241,7 +241,7 @@ if ($_POST && isset($_POST['add_children'])) {
                         <button type="submit" name="add_children" class="btn btn-large btn-primary">
                             Add Selected Children
                         </button>
-                        <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode($token)); ?>" class="btn btn-large btn-secondary">
+                        <a href="<?php echo baseUrl('?page=sponsor_portal&token=' . urlencode((string) $token)); ?>" class="btn btn-large btn-secondary">
                             Cancel
                         </a>
                     </div>

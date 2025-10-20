@@ -77,7 +77,7 @@ $isAvailable = $child['status'] === 'available';
                 <div class="status-badge status-<?php echo $child['status']; ?>">
                     <?php 
                     global $childStatusOptions;
-                    echo $childStatusOptions[$child['status']] ?? ucfirst($child['status']);
+                    echo $childStatusOptions[$child['status']] ?? ucfirst((string) $child['status']);
                     ?>
                 </div>
             </div>
@@ -159,11 +159,11 @@ $isAvailable = $child['status'] === 'available';
             <?php endif; ?>
 
             <!-- Family Information -->
-            <?php if (!empty($siblings) || !empty($child['family_notes'])): ?>
+            <?php if ($siblings !== [] || !empty($child['family_notes'])): ?>
                 <section class="detail-section">
                     <h2>Family Information</h2>
                     
-                    <?php if (!empty($siblings)): ?>
+                    <?php if ($siblings !== []): ?>
                         <div class="siblings-section">
                             <h3>Siblings Also Needing Sponsorship</h3>
                             <div class="siblings-grid">
@@ -178,7 +178,7 @@ $isAvailable = $child['status'] === 'available';
                                             <p>ID: <?php echo sanitizeString($sibling['display_id']); ?></p>
                                             <p><?php echo formatAge($sibling['age']); ?></p>
                                             <div class="status-badge status-<?php echo $sibling['status']; ?>">
-                                                <?php echo $childStatusOptions[$sibling['status']] ?? ucfirst($sibling['status']); ?>
+                                                <?php echo $childStatusOptions[$sibling['status']] ?? ucfirst((string) $sibling['status']); ?>
                                             </div>
                                             <a href="<?php echo baseUrl('?page=child&id=' . $sibling['id']); ?>" 
                                                class="btn btn-small btn-secondary">View Profile</a>
@@ -216,9 +216,9 @@ $isAvailable = $child['status'] === 'available';
                         Sponsor This Child
                     </a>
                     
-                    <?php if (!empty($siblings)):
+                    <?php if ($siblings !== []):
                         // Count available siblings
-                        $availableSiblings = array_filter($siblings, fn($s) => $s['status'] === 'available');
+                        $availableSiblings = array_filter($siblings, fn($s): bool => $s['status'] === 'available');
                         $availableCount = count($availableSiblings);
                     ?>
                         <p class="family-sponsor-note">

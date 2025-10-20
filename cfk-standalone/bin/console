@@ -1,0 +1,38 @@
+#!/usr/bin/env php
+<?php
+declare(strict_types=1);
+
+/**
+ * CFK Console Application
+ *
+ * Provides CLI commands for cron jobs, maintenance, and administrative tasks
+ *
+ * Usage:
+ *   php bin/console list                           # List all commands
+ *   php bin/console cfk:cleanup:reservations       # Run reservation cleanup
+ *   php bin/console cfk:archive:year-end --year=2024
+ */
+
+// Security constant
+define('CFK_APP', true);
+
+// Autoload dependencies
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Load config without initializing database
+// Database will be initialized per-command as needed
+define('SKIP_DB_INIT', true);
+require_once __DIR__ . '/../config/config.php';
+
+use Symfony\Component\Console\Application;
+
+// Create console application
+$application = new Application('CFK Sponsorship System', '1.7.0');
+
+// Register commands here as they are created
+// Example:
+// $application->add(new CFK\Command\CleanupReservationsCommand());
+// $application->add(new CFK\Command\YearEndArchiveCommand());
+
+// Run the application
+$application->run();

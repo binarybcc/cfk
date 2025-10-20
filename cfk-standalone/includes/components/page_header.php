@@ -18,10 +18,10 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-$title = $title ?? '';
-$description = $description ?? '';
-$additionalClasses = $additionalClasses ?? '';
-$additionalContent = $additionalContent ?? '';
+$title ??= '';
+$description ??= '';
+$additionalClasses ??= '';
+$additionalContent ??= '';
 ?>
 
 <div class="page-header <?php echo sanitizeString($additionalClasses); ?>">

@@ -1,9 +1,10 @@
 <?php
-declare(strict_types=1);
-
 /**
- * Archive Manager - Year-End Data Archiving and Reset
- * Handles safe archiving and clearing of data for new seasons
+ * DEPRECATED: This file is kept for backwards compatibility only.
+ * The actual implementation has moved to src/Archive/Manager.php
+ *
+ * The CFK_Archive_Manager class is automatically available via class_alias()
+ * defined in config/config.php
  */
 
 // Prevent direct access
@@ -12,7 +13,11 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class CFK_Archive_Manager {
+// Exit early - class loaded via Composer autoloader
+return;
+
+// DEPRECATED CODE BELOW
+class CFK_Archive_Manager_DEPRECATED {
 
     /**
      * Create full database backup
@@ -144,7 +149,7 @@ class CFK_Archive_Manager {
     private static function writeCSV(string $filename, array $data): void {
         $handle = fopen($filename, 'w');
 
-        if (!empty($data)) {
+        if ($data !== []) {
             // Write headers
             fputcsv($handle, array_keys($data[0]));
 
@@ -195,7 +200,7 @@ class CFK_Archive_Manager {
             $content .= "SPONSORSHIP BREAKDOWN:\n";
             $content .= "----------------------\n";
             foreach ($sponsorshipStats as $stat) {
-                $content .= ucfirst($stat['status']) . ": {$stat['count']}\n";
+                $content .= ucfirst((string) $stat['status']) . ": {$stat['count']}\n";
             }
 
             $content .= "\nARCHIVE CONTENTS:\n";
@@ -374,7 +379,7 @@ class CFK_Archive_Manager {
         }
 
         // Sort by year descending
-        usort($archives, fn($a, $b) => strcmp($b['year'], $a['year']));
+        usort($archives, fn($a, $b): int => strcmp((string) $b['year'], (string) $a['year']));
 
         return $archives;
     }
@@ -383,25 +388,36 @@ class CFK_Archive_Manager {
      * Get directory size recursively
      */
     private static function getDirectorySize(string $dir): int {
-        $size = 0;
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
-        );
+        try {
+            $size = 0;
+            $files = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS)
+            );
 
-        foreach ($files as $file) {
-            $size += $file->getSize();
+            foreach ($files as $file) {
+                $size += $file->getSize();
+            }
+
+            return $size;
+        } catch (Exception $e) {
+            error_log("Failed to get directory size for {$dir}: " . $e->getMessage());
+            return 0;
         }
-
-        return $size;
     }
 
     /**
      * Format bytes to human readable
      */
     public static function formatBytes(int $bytes): string {
-        if ($bytes < 1024) return $bytes . ' B';
-        if ($bytes < 1048576) return round($bytes / 1024, 2) . ' KB';
-        if ($bytes < 1073741824) return round($bytes / 1048576, 2) . ' MB';
+        if ($bytes < 1024) {
+            return $bytes . ' B';
+        }
+        if ($bytes < 1048576) {
+            return round($bytes / 1024, 2) . ' KB';
+        }
+        if ($bytes < 1073741824) {
+            return round($bytes / 1048576, 2) . ' MB';
+        }
         return round($bytes / 1073741824, 2) . ' GB';
     }
 }
