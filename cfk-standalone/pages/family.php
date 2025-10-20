@@ -188,29 +188,32 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     padding: 1rem;
 }
 
-/* Breadcrumb - More Prominent */
+/* Breadcrumb - High Contrast for Visibility */
 .breadcrumb {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .breadcrumb-link {
-    color: white;
-    background: var(--color-primary);
+    color: var(--color-primary);
+    background: white;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1.5rem;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 1rem;
-    transition: background 0.2s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    border: 2px solid var(--color-primary);
 }
 
 .breadcrumb-link:hover {
-    background: var(--color-primary-dark);
+    background: var(--color-primary);
+    color: white;
     text-decoration: none;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
 }
 
 /* Family Header - Reduced Padding for Compact Design */
