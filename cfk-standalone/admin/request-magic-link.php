@@ -10,9 +10,11 @@ define('CFK_APP', true);
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/email_manager.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/magic_link_email_template.php';
+
+use CFK\Auth\MagicLinkManager;
+use CFK\Database\Connection as Database;
 
 header('Content-Type: application/json');
 

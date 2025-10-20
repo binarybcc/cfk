@@ -12,7 +12,9 @@ session_start();
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 require_once __DIR__ . '/../includes/email_manager.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
+
+use CFK\Auth\MagicLinkManager;
+use CFK\Database\Connection as Database;
 
 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';

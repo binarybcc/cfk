@@ -161,6 +161,11 @@ if (!defined('SKIP_DB_INIT')) {
     if (!class_exists('Database')) {
         class_alias('CFK\Database\Connection', 'Database');
     }
+
+    // Create MagicLinkManager alias for legacy code
+    if (!class_exists('MagicLinkManager')) {
+        class_alias('CFK\Auth\MagicLinkManager', 'MagicLinkManager');
+    }
 }
 
 // Helper function to get config values

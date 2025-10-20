@@ -9,7 +9,8 @@ define('CFK_APP', true);
 session_start();
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
+
+use CFK\Auth\MagicLinkManager;
 
 $expirationMinutes = MagicLinkManager::getExpirationMinutes();
 ?>
