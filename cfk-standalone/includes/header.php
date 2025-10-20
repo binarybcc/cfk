@@ -1,6 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php
+    // Set strict Content Security Policy with nonces
+    $cspNonce = $_SESSION['csp_nonce'] ?? base64_encode(random_bytes(16));
+
+    // Build CSP header - allows Zeffy iframe while maintaining security
+    $csp = implode('; ', [
+        "default-src 'self'",
+        "script-src 'self' 'nonce-{$cspNonce}' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/",
+        "style-src 'self' 'unsafe-inline'", // Allow inline styles for simplicity
+        "img-src 'self' data: https:",
+        "font-src 'self' data:",
+        "frame-src https://www.zeffy.com", // Allow Zeffy iframe
+        "connect-src 'self'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "frame-ancestors 'none'", // Prevent site from being iframed (replaces X-Frame-Options)
+        "upgrade-insecure-requests",
+        "block-all-mixed-content"
+    ]);
+
+    header("Content-Security-Policy: {$csp}");
+    header("X-Content-Type-Options: nosniff");
+    header("X-XSS-Protection: 1; mode=block");
+    header("Referrer-Policy: strict-origin-when-cross-origin");
+    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+    ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?><?php echo config('app_name'); ?></title>
@@ -16,12 +42,12 @@
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo baseUrl('assets/images/apple-touch-icon.png'); ?>">
 
     <!-- Alpine.js v1.4 - Progressive Enhancement -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" nonce="<?php echo $cspNonce; ?>"></script>
 
     <!-- Selections System v1.5 -->
-    <script src="<?php echo baseUrl('assets/js/selections.js'); ?>"></script>
+    <script src="<?php echo baseUrl('assets/js/selections.js'); ?>" nonce="<?php echo $cspNonce; ?>"></script>
 
-    <style>
+    <style nonce="<?php echo $cspNonce; ?>">
         /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
         [x-cloak] {
             display: none !important;

@@ -112,6 +112,12 @@ $sponsorshipStatusOptions = [
     'cancelled' => 'Cancelled'
 ];
 
+// Generate CSP nonce for this request
+if (!isset($_SESSION['csp_nonce'])) {
+    $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
+}
+$cspNonce = $_SESSION['csp_nonce'];
+
 // Set timezone
 date_default_timezone_set($appConfig['timezone']);
 

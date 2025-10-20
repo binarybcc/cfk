@@ -51,11 +51,11 @@
     </footer>
 
     <!-- JavaScript -->
-    <script src="<?php echo baseUrl('assets/js/main.js'); ?>"></script>
+    <script src="<?php echo baseUrl('assets/js/main.js'); ?>" nonce="<?php echo $_SESSION['csp_nonce'] ?? ''; ?>"></script>
 
     <!-- Zeffy donation script loaded in header, buttons initialized in main.js -->
 
-    <style>
+    <style nonce="<?php echo $_SESSION['csp_nonce'] ?? ''; ?>">
         /* Footer Logo Styling */
         .footer-brand {
             display: flex;

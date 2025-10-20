@@ -1,0 +1,65 @@
+file,line,url,snippet
+cfk-standalone/.claude/settings.local.json,18,https://cforkids.org/admin/login.php,"ash(curl -s -c /tmp/cookies.txt -b /tmp/cookies.txt -X POST https://cforkids.org/admin/login.php -d \""username=test_automation\"" -d \""password=TestAdmin2025"
+cfk-standalone/.claude/settings.local.json,27,https://claude.com/claude-code,time limits in emails\n\nðŸ¤– Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\
+cfk-standalone/.env,16,http://localhost:8082,BASE_URL=http://localhost:8082
+cfk-standalone/PROJECT-STATUS.md,61,http://localhost:8082,- **Access:** http://localhost:8082
+cfk-standalone/PROJECT-STATUS.md,66,https://cforkids.org,- **URL:** https://cforkids.org
+cfk-standalone/PROJECT-STATUS.md,76,https://github.com/binarybcc/cfk.git`,1. Clone repository: `git clone https://github.com/binarybcc/cfk.git`
+cfk-standalone/PROJECT-STATUS.md,81,http://localhost:8082,6. Access app: http://localhost:8082
+cfk-standalone/PROJECT-STATUS.md,295,http://localhost:8082,- **Local Dev:** http://localhost:8082
+cfk-standalone/PROJECT-STATUS.md,296,http://localhost:8082/admin/,- **Admin Panel:** http://localhost:8082/admin/
+cfk-standalone/PROJECT-STATUS.md,297,https://cforkids.org,- **Production:** https://cforkids.org
+cfk-standalone/PROJECT-STATUS.md,298,https://cforkids.org/admin/,- **Prod Admin:** https://cforkids.org/admin/
+cfk-standalone/QUICK-START.md,11,https://github.com/binarybcc/cfk.git,git clone https://github.com/binarybcc/cfk.git
+cfk-standalone/QUICK-START.md,45,http://localhost:8082,BASE_URL=http://localhost:8082
+cfk-standalone/QUICK-START.md,86,http://localhost:8082,- **Main Site:** http://localhost:8082
+cfk-standalone/QUICK-START.md,87,http://localhost:8082/admin/,- **Admin Panel:** http://localhost:8082/admin/
+cfk-standalone/QUICK-START.md,88,http://localhost:8081,- **phpMyAdmin:** http://localhost:8081
+cfk-standalone/QUICK-START.md,194,http://localhost:8082,- [ ] Access http://localhost:8082
+cfk-standalone/README.md,60,https://yoursite.com/sponsor/`,- Public site: `https://yoursite.com/sponsor/`
+cfk-standalone/README.md,61,https://yoursite.com/sponsor/admin/`,- Admin panel: `https://yoursite.com/sponsor/admin/`
+cfk-standalone/README.md,135,https://yoursite.com/sponsor/,"'base_url' => 'https://yoursite.com/sponsor/',"
+cfk-standalone/api/create_reservation.php,142,https://cforkids.org/?page=my_sponsorships\n\n,"$body .= ""https://cforkids.org/?page=my_sponsorships\n\n"";"
+cfk-standalone/assets/js/main.js,288,"https://www.facebook.com/sharer/sharer.php?u=${url}`,","window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'width=600,height=400');"
+cfk-standalone/config/config.php,47,http://localhost:8082/,"'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',"
+cfk-standalone/config/config.php,47,https://cforkids.org/,"'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',"
+cfk-standalone/config/config.production.php,33,https://cforkids.org/,"'base_url' => 'https://cforkids.org/',"
+cfk-standalone/includes/avatar_manager.php,121,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,148,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,175,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,204,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,231,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,259,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,286,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/avatar_manager.php,314,http://www.w3.org/2000/svg,"<svg width=""300"" height=""300"" viewBox=""0 0 300 300"" xmlns=""http://www.w3.org/2000/svg"">"
+cfk-standalone/includes/functions.php,465,https://www.zeffy.com/embed/donation-form/...,*         'zeffy-form-link' => 'https://www.zeffy.com/embed/donation-form/...'
+cfk-standalone/includes/header.php,19,https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js,"<script defer src=""https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js""></script>"
+cfk-standalone/includes/header.php,120,https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js,"<script src=""https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js""></script>"
+cfk-standalone/pages/donate.php,63,https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids,"src=""https://www.zeffy.com/embed/donation-form/donate-to-christmas-for-kids"""
+cfk-standalone/phpunit.xml,2,http://www.w3.org/2001/XMLSchema-instance,"<phpunit xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"""
+cfk-standalone/phpunit.xml,3,https://schema.phpunit.de/10.0/phpunit.xsd,"xsi:noNamespaceSchemaLocation=""https://schema.phpunit.de/10.0/phpunit.xsd"""
+cfk-standalone/public/.htaccess,19,https://%{HTTP_HOST}%{REQUEST_URI},"# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]"
+cfk-standalone/tests/alpine-test-page.php,26,https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js,"<script defer src=""https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js""></script>"
+cfk-standalone/tests/applescript-browser-tests.sh,8,https://cforkids.org/admin,"ADMIN_URL=""https://cforkids.org/admin"""
+cfk-standalone/tests/applescript-csv-tests.sh,8,https://cforkids.org/admin,"ADMIN_URL=""https://cforkids.org/admin"""
+cfk-standalone/tests/automated-report-tests.sh,108,https://cforkids.org/,"STATUS=$(curl -s -o /dev/null -w ""%{http_code}"" ""https://cforkids.org/"")"
+cfk-standalone/tests/automated-report-tests.sh,111,https://cforkids.org/children,"STATUS=$(curl -s -o /dev/null -w ""%{http_code}"" ""https://cforkids.org/children"")"
+cfk-standalone/tests/automated-report-tests.sh,117,https://cforkids.org/admin/reports.php,"STATUS=$(curl -s -o /dev/null -w ""%{http_code}"" ""https://cforkids.org/admin/reports.php"")"
+cfk-standalone/tests/automated-report-tests.sh,123,https://cforkids.org/,"TIME=$(curl -s -o /dev/null -w ""%{time_total}"" ""https://cforkids.org/"")"
+cfk-standalone/tests/automated-report-tests.sh,127,https://cforkids.org/children,"TIME=$(curl -s -o /dev/null -w ""%{time_total}"" ""https://cforkids.org/children"")"
+cfk-standalone/tests/security-functional-tests.sh,4,http://localhost:8082,# Environment: Docker (http://localhost:8082)
+cfk-standalone/tests/security-functional-tests.sh,16,http://localhost:8082,"BASE_URL=""http://localhost:8082"""
+cfk-standalone/tests/test-sponsor-portal.php,173,http://localhost:8082/?page=sponsor_lookup\n,"echo ""1. Visit: http://localhost:8082/?page=sponsor_lookup\n"";"
+cfk-standalone/tests/test-stage3-reports.md,9,http://localhost:8082/admin/reports.php`,**URL**: `http://localhost:8082/admin/reports.php`
+cfk-standalone/tests/test-stage3-reports.md,24,http://localhost:8082/admin/reports.php?type=sponsor_directory`,**URL**: `http://localhost:8082/admin/reports.php?type=sponsor_directory`
+cfk-standalone/tests/test-stage3-reports.md,43,http://localhost:8082/admin/reports.php?type=child_sponsor`,**URL**: `http://localhost:8082/admin/reports.php?type=child_sponsor`
+cfk-standalone/tests/test-stage3-reports.md,61,http://localhost:8082/admin/reports.php?type=family_report`,**URL**: `http://localhost:8082/admin/reports.php?type=family_report`
+cfk-standalone/tests/test-stage3-reports.md,78,http://localhost:8082/admin/reports.php?type=delivery_tracking`,**URL**: `http://localhost:8082/admin/reports.php?type=delivery_tracking`
+cfk-standalone/tests/test-stage3-reports.md,94,http://localhost:8082/admin/reports.php?type=available_children`,**URL**: `http://localhost:8082/admin/reports.php?type=available_children`
+cfk-standalone/tests/test-stage4-year-end-reset.md,9,http://localhost:8082/admin/year_end_reset.php`,**URL**: `http://localhost:8082/admin/year_end_reset.php`
+cfk-standalone/tests/test-stage6-validation.md,26,http://localhost:8082/?page=children`,**URL**: `http://localhost:8082/?page=children`
+cfk-standalone/tests/test-stage6-validation.md,97,http://localhost:8082/?page=sponsor_lookup`,**URL**: `http://localhost:8082/?page=sponsor_lookup`
+cfk-standalone/tests/test-stage6-validation.md,145,http://localhost:8082/admin/index.php`,**Dashboard**: `http://localhost:8082/admin/index.php`
+cfk-standalone/tests/test-stage6-validation.md,177,http://localhost:8082/admin/reports.php`,**Reports Dashboard**: `http://localhost:8082/admin/reports.php`
+cfk-standalone/tests/test-stage6-validation.md,233,http://localhost:8082/admin/year_end_reset.php`,**URL**: `http://localhost:8082/admin/year_end_reset.php`
+cfk-standalone/tests/test-summary.md,9,http://localhost:8082/?page=sponsor_lookup`,- **URL**: `http://localhost:8082/?page=sponsor_lookup`
