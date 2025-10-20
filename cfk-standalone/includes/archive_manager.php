@@ -29,16 +29,19 @@ class CFK_Archive_Manager {
 
             $backupFile = $archiveDir . '/database_backup_' . $timestamp . '.sql';
 
-            // Get database connection details
-            $config = require __DIR__ . '/../config/database.php';
+            // Get database connection details from environment/config
+            $dbHost = getenv('DB_HOST') ?: config('db_host', 'localhost');
+            $dbName = getenv('DB_NAME') ?: config('db_name', '');
+            $dbUser = getenv('DB_USER') ?: config('db_user', '');
+            $dbPass = getenv('DB_PASSWORD') ?: config('db_password', '');
 
             // Build mysqldump command
             $command = sprintf(
                 'mysqldump -h %s -u %s -p%s %s > %s 2>&1',
-                escapeshellarg($config['host']),
-                escapeshellarg($config['username']),
-                escapeshellarg($config['password']),
-                escapeshellarg($config['database']),
+                escapeshellarg($dbHost),
+                escapeshellarg($dbUser),
+                escapeshellarg($dbPass),
+                escapeshellarg($dbName),
                 escapeshellarg($backupFile)
             );
 
