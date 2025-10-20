@@ -84,20 +84,9 @@ $baseUrl = baseUrl('?page=children' . ($queryString ? '&' . $queryString : ''));
         $title = 'Children Needing Christmas Sponsorship';
         $description = 'Each child represents a family in our community who could use extra support this Christmas season. Browse the children below and select someone to sponsor.';
 
-        // Add results summary as additional content
-        ob_start();
-        if ($totalCount > 0):
-        ?>
-            <div class="results-summary">
-                <p>Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
-                <?php if (!empty($filters['search']) || !empty($filters['age_category']) || !empty($filters['gender'])): ?>
-                    matching your filters
-                <?php endif; ?>
-                </p>
-            </div>
-        <?php
-        endif;
-        $additionalContent = ob_get_clean();
+        // Results summary will be shown by Alpine.js dynamically
+        // No need for server-side static count that doesn't match filtered results
+        $additionalContent = '';
     }
 
     require_once __DIR__ . '/../includes/components/page_header.php';
