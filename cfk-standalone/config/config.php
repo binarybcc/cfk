@@ -144,44 +144,16 @@ if (PHP_SAPI !== 'cli' && session_status() === PHP_SESSION_NONE) {
 
 // Initialize database (unless running in CLI mode where it might not be needed)
 if (!defined('SKIP_DB_INIT')) {
-    // Use new namespaced class if autoloader is loaded
-    if (class_exists('CFK\Database\Connection')) {
-        \CFK\Database\Connection::init($dbConfig);
-
-        // Create backwards compatibility alias
-        if (!class_exists('Database')) {
-            class_alias('CFK\Database\Connection', 'Database');
-        }
-    } else {
-        // Fallback to old class if Composer not loaded
-        require_once __DIR__ . '/../includes/database_wrapper.php';
-        Database::init($dbConfig);
+    // Initialize database with namespaced class
+    if (!class_exists('CFK\Database\Connection')) {
+        die('Composer autoloader not loaded. Run: composer install');
     }
 
-    // Create aliases for migrated classes (backwards compatibility)
-    if (class_exists('CFK\Archive\Manager') && !class_exists('CFK_Archive_Manager')) {
-        class_alias('CFK\Archive\Manager', 'CFK_Archive_Manager');
-    }
-    if (class_exists('CFK\Sponsorship\Manager') && !class_exists('CFK_Sponsorship_Manager')) {
-        class_alias('CFK\Sponsorship\Manager', 'CFK_Sponsorship_Manager');
-    }
-    if (class_exists('CFK\CSV\Handler') && !class_exists('CFK_CSV_Handler')) {
-        class_alias('CFK\CSV\Handler', 'CFK_CSV_Handler');
-    }
-    if (class_exists('CFK\Avatar\Manager') && !class_exists('CFK_Avatar_Manager')) {
-        class_alias('CFK\Avatar\Manager', 'CFK_Avatar_Manager');
-    }
-    if (class_exists('CFK\Report\Manager') && !class_exists('CFK_Report_Manager')) {
-        class_alias('CFK\Report\Manager', 'CFK_Report_Manager');
-    }
-    if (class_exists('CFK\Email\Manager') && !class_exists('CFK_Email_Manager')) {
-        class_alias('CFK\Email\Manager', 'CFK_Email_Manager');
-    }
-    if (class_exists('CFK\Backup\Manager') && !class_exists('CFK_Backup_Manager')) {
-        class_alias('CFK\Backup\Manager', 'CFK_Backup_Manager');
-    }
-    if (class_exists('CFK\Reservation\Manager')) {
-        class_alias('CFK\Reservation\Manager', 'CFK_Reservation_Manager');
+    \CFK\Database\Connection::init($dbConfig);
+
+    // Create Database alias for legacy code that still uses it
+    if (!class_exists('Database')) {
+        class_alias('CFK\Database\Connection', 'Database');
     }
 }
 
