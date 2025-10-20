@@ -43,7 +43,7 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
                     'View Children Needing Sponsorship',
                     baseUrl('?page=children'),
                     'primary',
-                    ['size' => 'large']
+                    ['size' => 'large', 'class' => 'hero-cta-primary']
                 ); ?>
                 <?php echo renderButton(
                     'Make a Donation',

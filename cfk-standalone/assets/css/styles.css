@@ -999,6 +999,24 @@ textarea.input-error:focus {
     white-space: nowrap;
 }
 
+/* Hero CTA Primary - Bright attention-grabbing button */
+.hero-cta-primary {
+    background: linear-gradient(135deg, #E63946 0%, #D62828 100%) !important;
+    color: white !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    padding: 1rem 2rem !important;
+    box-shadow: 0 4px 12px rgba(230, 57, 70, 0.4) !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.hero-cta-primary:hover {
+    background: linear-gradient(135deg, #F26A75 0%, #E63946 100%) !important;
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.5) !important;
+    transform: translateY(-2px) !important;
+}
+
 .hero-image {
     flex: 1;
     max-width: 500px;
@@ -3269,33 +3287,52 @@ tr:hover {
     .hero-inner {
         flex-direction: column;
         text-align: center;
-        gap: var(--spacing-xl);
+        gap: var(--spacing-lg);
+    }
+
+    /* Mobile reordering: Show buttons FIRST, then content */
+    .hero-actions {
+        order: -1;
+        flex-direction: column;
+        min-width: 100%;
+        width: 100%;
+        align-items: center;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .hero-content {
+        order: 1;
     }
 
     .hero h1 {
-        font-size: 2.5rem;
+        font-size: 2rem;
+        margin-bottom: var(--spacing-md);
+    }
+
+    .hero-subtitle {
+        font-size: 1rem;
+        margin-bottom: var(--spacing-md);
     }
 
     .hero-stats {
         justify-content: center;
         flex-direction: column;
         gap: var(--spacing-md);
+        margin: var(--spacing-md) 0;
     }
 
     .hero-stats .stat {
         min-width: 100%;
+        padding: var(--spacing-md);
     }
 
-    .hero-actions {
-        flex-direction: column;
-        min-width: 100%;
-        width: 100%;
-        align-items: center;
-    }
-
-    .hero-actions .btn {
-        width: 100%;
-        max-width: 400px;
+    .stat strong {
+        font-size: 2rem;
     }
 
     .steps {
