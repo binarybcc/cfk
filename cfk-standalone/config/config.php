@@ -166,6 +166,11 @@ if (!defined('SKIP_DB_INIT')) {
     if (!class_exists('MagicLinkManager')) {
         class_alias('CFK\Auth\MagicLinkManager', 'MagicLinkManager');
     }
+
+    // Create CFK_Email_Manager alias for legacy code
+    if (!class_exists('CFK_Email_Manager')) {
+        class_alias('CFK\Email\Manager', 'CFK_Email_Manager');
+    }
 }
 
 // Helper function to get config values
