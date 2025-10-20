@@ -188,48 +188,61 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     padding: 1rem;
 }
 
-/* Breadcrumb */
+/* Breadcrumb - More Prominent */
 .breadcrumb {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .breadcrumb-link {
-    color: var(--color-primary);
+    color: white;
+    background: var(--color-primary);
     text-decoration: none;
     font-weight: 600;
     display: inline-flex;
     align-items: center;
-    padding: 0.5rem 0;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: background 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .breadcrumb-link:hover {
-    text-decoration: underline;
+    background: var(--color-primary-dark);
+    text-decoration: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
 }
 
-/* Family Header */
+/* Family Header - Reduced Padding for Compact Design */
 .family-header {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
     color: white;
-    padding: 1.5rem;
+    padding: 1rem 1.5rem;
     border-radius: 8px;
     margin-bottom: 1.5rem;
 }
 
 .family-header h1 {
-    margin: 0 0 0.75rem 0;
-    font-size: 2rem;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
 }
 
 .family-stats {
     display: flex;
-    gap: 1.5rem;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
+    gap: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.stat-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
 }
 
 .stat-item strong {
-    font-size: 1.25rem;
-    display: block;
+    font-size: 1.5rem;
+    line-height: 1;
 }
 
 .btn-add-all-family {
@@ -300,7 +313,8 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     width: 80px;
     height: 80px;
     border-radius: 8px;
-    object-fit: cover;
+    object-fit: contain;
+    background: var(--color-light);
 }
 
 .member-title {
@@ -414,13 +428,24 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
         grid-template-columns: 1fr;
     }
 
+    .family-header {
+        padding: 1rem;
+    }
+
     .family-header h1 {
         font-size: 1.5rem;
+        margin-bottom: 0.5rem;
     }
 
     .family-stats {
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-bottom: 0.75rem;
+    }
+
+    .stat-item {
         flex-direction: column;
-        gap: 0.5rem;
+        gap: 0.25rem;
     }
 
     .family-footer {
