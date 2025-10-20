@@ -15,7 +15,8 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
+
+use CFK\Auth\MagicLinkManager;
 
 // Redirect if already logged in
 if (isLoggedIn()) {
