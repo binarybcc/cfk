@@ -557,6 +557,14 @@ textarea:focus {
     top: 0;
     z-index: var(--z-dropdown);
     margin-bottom: var(--spacing-xl);
+    transition: transform 0.3s ease-in-out;
+    transform: translateY(0);
+}
+
+/* Header auto-hide on scroll down */
+.main-header.header-hidden {
+    transform: translateY(-100%);
+    box-shadow: none;
 }
 
 .header-content {

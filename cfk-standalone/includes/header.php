@@ -170,6 +170,49 @@
     <!-- ARIA Live Region for Screen Reader Announcements (WCAG 4.1.3) -->
     <div id="a11y-announcements" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
+    <!-- Auto-hide Header on Scroll Script -->
+    <script>
+    (function() {
+        let lastScrollTop = 0;
+        let scrollTimer = null;
+        const header = document.querySelector('.main-header');
+        const scrollThreshold = 100; // Pixels to scroll before hiding
+
+        function handleScroll() {
+            // Clear previous timer
+            if (scrollTimer) {
+                clearTimeout(scrollTimer);
+            }
+
+            // Debounce scroll event for performance
+            scrollTimer = setTimeout(function() {
+                const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                // Don't hide header if near top of page
+                if (scrollTop < scrollThreshold) {
+                    header.classList.remove('header-hidden');
+                    lastScrollTop = scrollTop;
+                    return;
+                }
+
+                // Scrolling down - hide header
+                if (scrollTop > lastScrollTop && scrollTop > scrollThreshold) {
+                    header.classList.add('header-hidden');
+                }
+                // Scrolling up - show header
+                else if (scrollTop < lastScrollTop) {
+                    header.classList.remove('header-hidden');
+                }
+
+                lastScrollTop = scrollTop;
+            }, 10); // 10ms debounce
+        }
+
+        // Listen for scroll events
+        window.addEventListener('scroll', handleScroll, { passive: true });
+    })();
+    </script>
+
     <main id="main-content" class="main-content" tabindex="-1">
         <div class="container">
             <?php
