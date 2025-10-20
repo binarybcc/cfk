@@ -171,6 +171,11 @@ if (!defined('SKIP_DB_INIT')) {
     if (!class_exists('CFK_Email_Manager')) {
         class_alias('CFK\Email\Manager', 'CFK_Email_Manager');
     }
+
+    // Create CFK_Import_Analyzer alias for legacy code
+    if (!class_exists('CFK_Import_Analyzer')) {
+        class_alias('CFK\Import\Analyzer', 'CFK_Import_Analyzer');
+    }
 }
 
 // Helper function to get config values

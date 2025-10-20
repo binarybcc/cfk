@@ -15,11 +15,11 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/import_analyzer.php';
 
 // Use namespaced classes
 use CFK\CSV\Handler as CSVHandler;
 use CFK\Backup\Manager as BackupManager;
+use CFK\Import\Analyzer as ImportAnalyzer;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -127,7 +127,7 @@ function handlePreviewImport(): array {
         }
 
         // Analyze changes
-        $analysis = CFK_Import_Analyzer::analyzeImport($parseResult['children']);
+        $analysis = ImportAnalyzer::analyzeImport($parseResult['children']);
 
         // Store temp file path in session
         $_SESSION['cfk_import_file'] = $tempFile;
@@ -166,7 +166,7 @@ function handleConfirmImport(): array {
         }
 
         // Apply import with sponsorship preservation
-        $result = CFK_Import_Analyzer::applyImportWithPreservation($tempFile, [
+        $result = ImportAnalyzer::applyImportWithPreservation($tempFile, [
             'keep_inactive' => $keepInactive
         ]);
 
