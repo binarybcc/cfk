@@ -544,6 +544,22 @@ function mySponsorshipsApp() {
     margin: 0 auto;
 }
 
+/* Mobile: Use full width */
+@media (max-width: 768px) {
+    .lookup-form-container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    .lookup-form {
+        padding: var(--spacing-lg);
+    }
+
+    .info-box {
+        padding: var(--spacing-md);
+    }
+}
+
 .lookup-form {
     background: var(--color-bg-secondary);
     border-radius: var(--radius-md);
