@@ -176,6 +176,29 @@ if (!defined('SKIP_DB_INIT')) {
     if (!class_exists('CFK_Import_Analyzer')) {
         class_alias('CFK\Import\Analyzer', 'CFK_Import_Analyzer');
     }
+
+    // Create manager class aliases for legacy code
+    if (!class_exists('CFK_Archive_Manager')) {
+        class_alias('CFK\Archive\Manager', 'CFK_Archive_Manager');
+    }
+    if (!class_exists('CFK_Avatar_Manager')) {
+        class_alias('CFK\Avatar\Manager', 'CFK_Avatar_Manager');
+    }
+    if (!class_exists('CFK_Backup_Manager')) {
+        class_alias('CFK\Backup\Manager', 'CFK_Backup_Manager');
+    }
+    if (!class_exists('CFK_CSV_Handler')) {
+        class_alias('CFK\CSV\Handler', 'CFK_CSV_Handler');
+    }
+    if (!class_exists('CFK_Report_Manager')) {
+        class_alias('CFK\Report\Manager', 'CFK_Report_Manager');
+    }
+    if (!class_exists('CFK_Sponsorship_Manager')) {
+        class_alias('CFK\Sponsorship\Manager', 'CFK_Sponsorship_Manager');
+    }
+    if (!class_exists('CFK_Reservation_Manager')) {
+        class_alias('CFK\Reservation\Manager', 'CFK_Reservation_Manager');
+    }
 }
 
 // Helper function to get config values
