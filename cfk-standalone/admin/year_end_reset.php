@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -112,7 +113,7 @@ include __DIR__ . '/includes/admin_header.php';
     <h3 style="margin: 0 0 10px 0; color: #856404;">🔍 DEBUG INFO</h3>
     <p style="margin: 5px 0;"><strong>REQUEST_METHOD:</strong> <?php echo $_SERVER['REQUEST_METHOD'] ?? 'NOT SET'; ?></p>
     <p style="margin: 5px 0;"><strong>POST received:</strong> <?php echo $_POST === [] ? '❌ NO' : '✅ YES'; ?></p>
-    <?php if ($_POST !== []): ?>
+    <?php if ($_POST !== []) : ?>
         <p style="margin: 5px 0;"><strong>POST keys:</strong> <?php echo implode(', ', array_keys($_POST)); ?></p>
         <p style="margin: 5px 0;"><strong>perform_reset present:</strong> <?php echo isset($_POST['perform_reset']) ? '✅ YES' : '❌ NO'; ?></p>
     <?php endif; ?>
@@ -126,23 +127,23 @@ include __DIR__ . '/includes/admin_header.php';
         <p class="page-subtitle">Archive current data and prepare for new season</p>
     </div>
 
-    <?php if ($errors !== []): ?>
+    <?php if ($errors !== []) : ?>
         <div class="alert alert-error">
             <h3>Errors:</h3>
             <ul>
-                <?php foreach ($errors as $error): ?>
+                <?php foreach ($errors as $error) : ?>
                     <li><?php echo sanitizeString($error); ?></li>
                 <?php endforeach; ?>
             </ul>
         </div>
     <?php endif; ?>
 
-    <?php if ($success): ?>
+    <?php if ($success) : ?>
         <div class="alert alert-success">
             <h3>✅ Success!</h3>
             <p><?php echo sanitizeString($success); ?></p>
 
-            <?php if ($resetResult && isset($resetResult['deleted_counts'])): ?>
+            <?php if ($resetResult && isset($resetResult['deleted_counts'])) : ?>
                 <h4>Deleted Records:</h4>
                 <ul>
                     <li>Children: <?php echo $resetResult['deleted_counts']['children']; ?></li>
@@ -256,12 +257,12 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 
     <!-- Available Archives -->
-    <?php if ($archives !== []): ?>
+    <?php if ($archives !== []) : ?>
         <div class="archives-section">
             <h2>📦 Available Archives</h2>
 
             <div class="archives-list">
-                <?php foreach ($archives as $archive): ?>
+                <?php foreach ($archives as $archive) : ?>
                     <div class="archive-card">
                         <div class="archive-header">
                             <h3>Year <?php echo sanitizeString($archive['year']); ?></h3>
@@ -270,7 +271,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <div class="archive-details">
                             <p><strong>Files:</strong> <?php echo $archive['file_count']; ?></p>
                             <p><strong>Location:</strong> <code><?php echo sanitizeString($archive['path']); ?></code></p>
-                            <?php if ($archive['has_summary']): ?>
+                            <?php if ($archive['has_summary']) : ?>
                                 <p class="archive-status">✅ Archive summary available</p>
                             <?php endif; ?>
                         </div>
@@ -283,7 +284,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <?php endforeach; ?>
             </div>
         </div>
-    <?php else: ?>
+    <?php else : ?>
         <div class="archives-section">
             <h2>📦 Available Archives</h2>
             <p class="no-archives">No archives found. Archives will appear here after performing a year-end reset.</p>

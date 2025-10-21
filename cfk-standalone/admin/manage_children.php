@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -33,27 +34,27 @@ if ($_POST && isset($_POST['action'])) {
         $messageType = 'error';
     } else {
         $action = $_POST['action'];
-        
+
         switch ($action) {
             case 'add_child':
                 $result = addChild($_POST);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
-                
+
             case 'edit_child':
                 $result = editChild($_POST);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
-                
+
             case 'delete_child':
                 $childId = sanitizeInt($_POST['child_id'] ?? 0);
                 $result = deleteChild($childId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
-                
+
             case 'toggle_status':
                 $childId = sanitizeInt($_POST['child_id'] ?? 0);
                 $newStatus = sanitizeString($_POST['new_status'] ?? '');
@@ -139,20 +140,21 @@ $children = Database::fetchAll("
 $families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY family_number ASC");
 
 // Functions for CRUD operations
-function addChild($data): array {
+function addChild($data): array
+{
     try {
         // Validate required fields
         $validation = validateChildData($data);
         if (!$validation['valid']) {
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
-        
+
         // Check if family exists
         $family = Database::fetchRow("SELECT id FROM families WHERE id = ?", [$data['family_id']]);
         if (!$family) {
             return ['success' => false, 'message' => 'Selected family does not exist'];
         }
-        
+
         // Check if child_letter is unique within family
         $existing = Database::fetchRow(
             "SELECT id FROM children WHERE family_id = ? AND child_letter = ?",
@@ -161,7 +163,7 @@ function addChild($data): array {
         if ($existing) {
             return ['success' => false, 'message' => 'Child letter already exists in this family'];
         }
-        
+
         $childId = Database::insert('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
@@ -179,34 +181,34 @@ function addChild($data): array {
             'special_needs' => sanitizeString($data['special_needs'] ?? ''),
             'status' => 'available'
         ]);
-        
+
         return ['success' => true, 'message' => 'Child added successfully'];
-        
     } catch (Exception $e) {
         error_log('Failed to add child: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function editChild($data): array {
+function editChild($data): array
+{
     try {
         $childId = sanitizeInt($data['child_id'] ?? 0);
         if (!$childId) {
             return ['success' => false, 'message' => 'Invalid child ID'];
         }
-        
+
         // Validate data
         $validation = validateChildData($data);
         if (!$validation['valid']) {
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
-        
+
         // Check if child exists
         $child = Database::fetchRow("SELECT id, family_id, child_letter FROM children WHERE id = ?", [$childId]);
         if (!$child) {
             return ['success' => false, 'message' => 'Child not found'];
         }
-        
+
         // Check if child_letter is unique within family (if changed)
         if ($child['family_id'] != $data['family_id'] || $child['child_letter'] != $data['child_letter']) {
             $existing = Database::fetchRow(
@@ -217,7 +219,7 @@ function editChild($data): array {
                 return ['success' => false, 'message' => 'Child letter already exists in this family'];
             }
         }
-        
+
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
@@ -234,81 +236,81 @@ function editChild($data): array {
             'wishes' => sanitizeString($data['wishes'] ?? ''),
             'special_needs' => sanitizeString($data['special_needs'] ?? '')
         ], ['id' => $childId]);
-        
+
         return ['success' => true, 'message' => 'Child updated successfully'];
-        
     } catch (Exception $e) {
         error_log('Failed to edit child: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function deleteChild($childId): array {
+function deleteChild($childId): array
+{
     try {
         if (!$childId) {
             return ['success' => false, 'message' => 'Invalid child ID'];
         }
-        
+
         // Check if child has any sponsorships
         $sponsorships = Database::fetchRow(
             "SELECT COUNT(*) as count FROM sponsorships WHERE child_id = ? AND status IN ('pending', 'confirmed')",
             [$childId]
         );
-        
+
         if ($sponsorships['count'] > 0) {
             return ['success' => false, 'message' => 'Cannot delete child with active sponsorships'];
         }
-        
+
         Database::delete('children', ['id' => $childId]);
-        
+
         return ['success' => true, 'message' => 'Child deleted successfully'];
-        
     } catch (Exception $e) {
         error_log('Failed to delete child: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function updateChildStatus($childId, $newStatus): array {
+function updateChildStatus($childId, $newStatus): array
+{
     try {
         if (!$childId || !in_array($newStatus, ['available', 'pending', 'sponsored', 'inactive'])) {
             return ['success' => false, 'message' => 'Invalid parameters'];
         }
-        
+
         Database::update('children', ['status' => $newStatus], ['id' => $childId]);
-        
+
         return ['success' => true, 'message' => 'Child status updated successfully'];
-        
     } catch (Exception $e) {
         error_log('Failed to update child status: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function validateChildData($data): array {
+function validateChildData($data): array
+{
     $errors = [];
-    
+
     if (in_array(trim($data['name'] ?? ''), ['', '0'], true)) {
         $errors[] = 'Name is required';
     }
-    
+
     $age = sanitizeInt($data['age'] ?? 0);
     if ($age < 1 || $age > 18) {
         $errors[] = 'Age must be between 1 and 18';
     }
-    
+
     if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
         $errors[] = 'Valid gender is required';
     }
-    
+
     if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
         $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
     }
-    
+
     if (empty(sanitizeInt($data['family_id'] ?? 0))) {
         $errors[] = 'Family selection is required';
     }
-    
+
     return [
         'valid' => $errors === [],
         'errors' => $errors
@@ -564,7 +566,7 @@ include __DIR__ . '/includes/admin_header.php';
         <div class="stats-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <strong>Total Children: <?php echo $totalCount; ?></strong>
-                <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)): ?>
+                <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)) : ?>
                     (filtered from <?php echo getChildrenCount([]); ?> total)
                 <?php endif; ?>
             </div>
@@ -575,7 +577,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <select id="admin-per-page-select"
                         onchange="updateAdminPerPage(this.value)"
                         style="padding: 0.4rem 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
-                    <?php foreach ($perPageOptions as $option): ?>
+                    <?php foreach ($perPageOptions as $option) : ?>
                         <option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>>
                             <?php echo $option; ?>
                         </option>
@@ -620,7 +622,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <label for="family">Family:</label>
                 <select id="family" name="family" class="auto-submit">
                     <option value="all" <?php echo $familyFilter === 'all' ? 'selected' : ''; ?>>All Families</option>
-                    <?php foreach ($families as $family): ?>
+                    <?php foreach ($families as $family) : ?>
                         <option value="<?php echo $family['family_number']; ?>"
                                 <?php echo $familyFilter === $family['family_number'] ? 'selected' : ''; ?>>
                             Family <?php echo $family['family_number']; ?>
@@ -652,15 +654,15 @@ include __DIR__ . '/includes/admin_header.php';
         </form>
 
         <!-- Children Grid -->
-        <?php if ($children === []): ?>
+        <?php if ($children === []) : ?>
             <div class="empty-state">
                 <h3>No Children Found</h3>
                 <p>No children match the current filters. Try adjusting your search criteria or add a new child.</p>
                 <button id="add-first-child-btn" class="btn btn-primary">Add First Child</button>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <div class="children-grid">
-                <?php foreach ($children as $child): ?>
+                <?php foreach ($children as $child) : ?>
                     <div class="child-card">
                         <div class="child-header">
                             <div class="child-id"><?php echo sanitizeString($child['display_id']); ?></div>
@@ -693,14 +695,14 @@ include __DIR__ . '/includes/admin_header.php';
                             </div>
                             
                             <div class="child-details">
-                                <?php if (!empty($child['interests'])): ?>
+                                <?php if (!empty($child['interests'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Interests</div>
                                         <div class="detail-value"><?php echo sanitizeString($child['interests']); ?></div>
                                     </div>
                                 <?php endif; ?>
                                 
-                                <?php if (!empty($child['wishes'])): ?>
+                                <?php if (!empty($child['wishes'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Christmas Wishes</div>
                                         <div class="detail-value"><?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?><?php echo strlen((string) $child['wishes']) > 100 ? '...' : ''; ?></div>
@@ -712,7 +714,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     <div class="detail-value">Family <?php echo sanitizeString($child['family_number']); ?></div>
                                 </div>
                                 
-                                <?php if ($child['sponsorship_count'] > 0): ?>
+                                <?php if ($child['sponsorship_count'] > 0) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Active Sponsorships</div>
                                         <div class="detail-value"><?php echo $child['sponsorship_count']; ?></div>
@@ -725,7 +727,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     Edit
                                 </button>
                                 
-                                <?php if ($child['status'] === 'available'): ?>
+                                <?php if ($child['status'] === 'available') : ?>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <input type="hidden" name="action" value="toggle_status">
@@ -733,7 +735,7 @@ include __DIR__ . '/includes/admin_header.php';
                                         <input type="hidden" name="new_status" value="inactive">
                                         <button type="submit" class="btn btn-warning btn-small">Deactivate</button>
                                     </form>
-                                <?php elseif ($child['status'] === 'inactive'): ?>
+                                <?php elseif ($child['status'] === 'inactive') : ?>
                                     <form method="POST" style="display: inline;">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <input type="hidden" name="action" value="toggle_status">
@@ -743,7 +745,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     </form>
                                 <?php endif; ?>
                                 
-                                <?php if ($child['sponsorship_count'] == 0): ?>
+                                <?php if ($child['sponsorship_count'] == 0) : ?>
                                     <form method="POST" style="display: inline;" class="delete-child-form">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <input type="hidden" name="action" value="delete_child">
@@ -761,21 +763,21 @@ include __DIR__ . '/includes/admin_header.php';
         <?php endif; ?>
 
         <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
+        <?php if ($totalPages > 1) : ?>
             <div class="pagination">
-                <?php if ($page > 1): ?>
+                <?php if ($page > 1) : ?>
                     <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">← Previous</a>
                 <?php endif; ?>
                 
-                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
-                    <?php if ($i == $page): ?>
+                <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++) : ?>
+                    <?php if ($i == $page) : ?>
                         <span class="current"><?php echo $i; ?></span>
-                    <?php else: ?>
+                    <?php else : ?>
                         <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $i])); ?>"><?php echo $i; ?></a>
                     <?php endif; ?>
                 <?php endfor; ?>
                 
-                <?php if ($page < $totalPages): ?>
+                <?php if ($page < $totalPages) : ?>
                     <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">Next →</a>
                 <?php endif; ?>
             </div>
@@ -824,7 +826,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <label for="childFamily">Family *</label>
                             <select id="childFamily" name="family_id" required>
                                 <option value="">Select Family</option>
-                                <?php foreach ($families as $family): ?>
+                                <?php foreach ($families as $family) : ?>
                                     <option value="<?php echo $family['id']; ?>">
                                         Family <?php echo $family['family_number']; ?>
                                     </option>
@@ -836,7 +838,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <label for="childLetter">Child Letter *</label>
                             <select id="childLetter" name="child_letter" required>
                                 <option value="">Select Letter</option>
-                                <?php for ($i = ord('A'); $i <= ord('Z'); $i++): ?>
+                                <?php for ($i = ord('A'); $i <= ord('Z'); $i++) : ?>
                                     <option value="<?php echo chr($i); ?>"><?php echo chr($i); ?></option>
                                 <?php endfor; ?>
                             </select>

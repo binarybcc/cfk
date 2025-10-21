@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Alpine.js Test & Demonstration Page
  * v1.4 - Progressive Enhancement Verification

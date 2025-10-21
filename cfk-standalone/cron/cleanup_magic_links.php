@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -51,7 +52,6 @@ try {
     if (function_exists('syslog')) {
         syslog(LOG_INFO, "CFK magic link cleanup: deleted {$expiredTokens} tokens, {$oldRateLimits} rate limits, {$oldAuditLogs} audit logs");
     }
-
 } catch (Exception $e) {
     $timestamp = date('Y-m-d H:i:s');
     $error = "[{$timestamp}] ERROR: " . $e->getMessage() . "\n";

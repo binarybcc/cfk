@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -82,7 +83,7 @@ if ($statusFilter !== 'all') {
 $whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $whereConditions);
 
 // Sort options
-$orderBy = match($sortBy) {
+$orderBy = match ($sortBy) {
     'oldest' => 'ORDER BY s.request_date ASC',
     'name' => 'ORDER BY s.sponsor_name ASC',
     'child' => 'ORDER BY f.family_number ASC, c.child_letter ASC',
@@ -334,11 +335,11 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
 
         <!-- Children Needing Attention -->
-        <?php if ($childrenNeedingAttention !== []): ?>
+        <?php if ($childrenNeedingAttention !== []) : ?>
             <div class="attention-section">
                 <h3>⚠️ Children Needing Attention (<?php echo count($childrenNeedingAttention); ?>)</h3>
                 <div class="attention-list">
-                    <?php foreach ($childrenNeedingAttention as $child): ?>
+                    <?php foreach ($childrenNeedingAttention as $child) : ?>
                         <div class="attention-item">
                             <div>
                                 <strong><?php echo sanitizeString($child['display_id']); ?></strong>
@@ -398,14 +399,14 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php if ($sponsorships === []): ?>
+                    <?php if ($sponsorships === []) : ?>
                         <tr>
                             <td colspan="6" style="text-align: center; padding: 3rem; color: #666;">
                                 No sponsorships found for the selected filters.
                             </td>
                         </tr>
-                    <?php else: ?>
-                        <?php foreach ($sponsorships as $sponsorship): ?>
+                    <?php else : ?>
+                        <?php foreach ($sponsorships as $sponsorship) : ?>
                             <tr>
                                 <td>
                                     <div class="child-info">
@@ -416,7 +417,7 @@ include __DIR__ . '/includes/admin_header.php';
                                             <div class="child-id"><?php echo sanitizeString($sponsorship['child_display_id']); ?></div>
                                             <div class="child-meta">
                                                 <?php echo formatAge($sponsorship['age']); ?>
-                                                <?php if (!empty($sponsorship['grade'])): ?>
+                                                <?php if (!empty($sponsorship['grade'])) : ?>
                                                     • Grade <?php echo sanitizeString($sponsorship['grade']); ?>
                                                 <?php endif; ?>
                                                 • <?php echo ucfirst((string) $sponsorship['gender']); ?>
@@ -430,19 +431,19 @@ include __DIR__ . '/includes/admin_header.php';
                                         <a href="mailto:<?php echo sanitizeString($sponsorship['sponsor_email']); ?>">
                                             <?php echo sanitizeString($sponsorship['sponsor_email']); ?>
                                         </a>
-                                        <?php if (!empty($sponsorship['sponsor_phone'])): ?>
+                                        <?php if (!empty($sponsorship['sponsor_phone'])) : ?>
                                             <br><small><?php echo sanitizeString($sponsorship['sponsor_phone']); ?></small>
                                         <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
                                     <?php echo formatDateTime($sponsorship['request_date']); ?>
-                                    <?php if ($sponsorship['confirmation_date']): ?>
+                                    <?php if ($sponsorship['confirmation_date']) : ?>
                                         <br><small>Confirmed: <?php echo formatDate($sponsorship['confirmation_date']); ?></small>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php 
+                                    <?php
                                     $preferences = [
                                         'shopping' => 'Shopping',
                                         'gift_card' => 'Gift Cards',
@@ -458,7 +459,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 </td>
                                 <td>
                                     <div class="actions">
-                                        <?php if ($sponsorship['status'] === 'confirmed'): ?>
+                                        <?php if ($sponsorship['status'] === 'confirmed') : ?>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                 <input type="hidden" name="action" value="complete">
@@ -467,7 +468,7 @@ include __DIR__ . '/includes/admin_header.php';
                                             </form>
                                         <?php endif; ?>
 
-                                        <?php if (in_array($sponsorship['status'], ['pending', 'confirmed'])): ?>
+                                        <?php if (in_array($sponsorship['status'], ['pending', 'confirmed'])) : ?>
                                             <button class="btn btn-danger btn-small btn-cancel-sponsorship"
                                                     data-sponsorship-id="<?php echo $sponsorship['id']; ?>"
                                                     data-child-id="<?php echo sanitizeString($sponsorship['child_display_id']); ?>"
@@ -476,7 +477,7 @@ include __DIR__ . '/includes/admin_header.php';
                                             </button>
                                         <?php endif; ?>
 
-                                        <?php if (!empty($sponsorship['special_message'])): ?>
+                                        <?php if (!empty($sponsorship['special_message'])) : ?>
                                             <button class="btn btn-warning btn-small btn-view-message"
                                                     data-message="<?php echo htmlspecialchars((string) $sponsorship['special_message'], ENT_QUOTES, 'UTF-8'); ?>">
                                                 View Message

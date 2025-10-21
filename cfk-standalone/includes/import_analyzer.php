@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED: This file is kept for backwards compatibility only.
  * The actual implementation has moved to src/Import/Analyzer.php
@@ -21,7 +22,8 @@ return; // Exit early - nothing to do here
 
 // DEPRECATED CODE BELOW - DO NOT USE
 // ====================================
-class CFK_Import_Analyzer_DEPRECATED {
+class CFK_Import_Analyzer_DEPRECATED
+{
     // All functionality moved to CFK\Import\Analyzer
     // This class exists only for reference and should not be used
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -129,7 +130,6 @@ try {
         'success' => true,
         'message' => 'If your email is registered, you will receive a magic link'
     ]);
-
 } catch (Exception $e) {
     error_log('Magic link request error: ' . $e->getMessage());
 
@@ -148,7 +148,8 @@ try {
  * Ensure constant-time response to prevent timing attacks
  * Minimum execution time: 800ms (typical SMTP send duration)
  */
-function ensureConstantTime(float $startTime): void {
+function ensureConstantTime(float $startTime): void
+{
     $executionTimeMs = (microtime(true) - $startTime) * 1000;
     $targetTimeMs = 800; // Target 800ms minimum (typical email send time)
 

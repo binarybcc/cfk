@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED: This file is kept for backwards compatibility only.
  * The actual implementation has moved to src/Auth/MagicLinkManager.php
@@ -21,7 +22,8 @@ return; // Exit early - nothing to do here
 
 // DEPRECATED CODE BELOW - DO NOT USE
 // ====================================
-class MagicLinkManager_DEPRECATED {
+class MagicLinkManager_DEPRECATED
+{
     // All functionality moved to CFK\Auth\MagicLinkManager
     // This class exists only for reference and should not be used
 }

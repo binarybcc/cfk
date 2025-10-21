@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -19,7 +20,8 @@ require_once __DIR__ . '/email_manager.php';
  * @param array $reservation Reservation data from database
  * @return array ['success' => bool, 'message' => string]
  */
-function sendReservationConfirmationEmail(array $reservation): array {
+function sendReservationConfirmationEmail(array $reservation): array
+{
     try {
         $mailer = CFK_Email_Manager::getMailer();
 
@@ -55,7 +57,6 @@ function sendReservationConfirmationEmail(array $reservation): array {
         } else {
             throw new Exception('Failed to send email');
         }
-
     } catch (Exception $e) {
         error_log('Reservation email error: ' . $e->getMessage());
 
@@ -80,7 +81,8 @@ function sendReservationConfirmationEmail(array $reservation): array {
  *
  * @param array $reservation Reservation data
  */
-function sendAdminReservationNotification(array $reservation): bool {
+function sendAdminReservationNotification(array $reservation): bool
+{
     try {
         $mailer = CFK_Email_Manager::getMailer();
 
@@ -92,7 +94,6 @@ function sendAdminReservationNotification(array $reservation): bool {
         $mailer->AltBody = generateAdminNotificationText($reservation);
 
         return $mailer->send();
-
     } catch (Exception $e) {
         error_log('Admin notification error: ' . $e->getMessage());
         return false;
@@ -102,7 +103,8 @@ function sendAdminReservationNotification(array $reservation): bool {
 /**
  * Generate HTML email for reservation confirmation
  */
-function generateReservationConfirmationHTML(array $reservation): string {
+function generateReservationConfirmationHTML(array $reservation): string
+{
     $children = $reservation['children'] ?? [];
     new DateTime($reservation['expires_at']);
     $createdAt = new DateTime($reservation['created_at']);
@@ -273,7 +275,8 @@ function generateReservationConfirmationHTML(array $reservation): string {
 /**
  * Generate plain text version of confirmation email
  */
-function generateReservationConfirmationText(array $reservation): string {
+function generateReservationConfirmationText(array $reservation): string
+{
     $children = $reservation['children'] ?? [];
     $text = "RESERVATION CONFIRMED!\n\n";
     $text .= "Thank you for sponsoring " . count($children) . " " . (count($children) === 1 ? 'child' : 'children') . " this Christmas!\n\n";
@@ -325,21 +328,24 @@ function generateReservationConfirmationText(array $reservation): string {
 /**
  * Generate admin notification HTML
  */
-function generateAdminNotificationHTML(array $reservation): string {
+function generateAdminNotificationHTML(array $reservation): string
+{
     return '<html><body><h2>New Reservation</h2><p>Sponsor: ' . htmlspecialchars((string) $reservation['sponsor_name']) . ' (' . htmlspecialchars((string) $reservation['sponsor_email']) . ')</p><p>Children: ' . $reservation['total_children'] . '</p><p>Token: ' . htmlspecialchars((string) $reservation['reservation_token']) . '</p></body></html>';
 }
 
 /**
  * Generate admin notification text
  */
-function generateAdminNotificationText(array $reservation): string {
+function generateAdminNotificationText(array $reservation): string
+{
     return "New Reservation\nSponsor: " . $reservation['sponsor_name'] . " (" . $reservation['sponsor_email'] . ")\nChildren: " . $reservation['total_children'] . "\nToken: " . $reservation['reservation_token'];
 }
 
 /**
  * Log email to database
  */
-function logReservationEmail(int $reservationId, string $email, string $type, string $status, string $error = ''): void {
+function logReservationEmail(int $reservationId, string $email, string $type, string $status, string $error = ''): void
+{
     try {
         Database::insert('email_log', [
             'recipient_email' => $email,
@@ -361,7 +367,8 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
  * @param string $email Sponsor email address
  * @return array ['success' => bool, 'message' => string]
  */
-function sendAccessLinkEmail(string $email): array {
+function sendAccessLinkEmail(string $email): array
+{
     error_log("ACCESS LINK: Function called for email: " . $email);
     try {
         // Get sponsorships for this email with full child details
@@ -434,7 +441,6 @@ function sendAccessLinkEmail(string $email): array {
         } else {
             throw new Exception('Failed to send email');
         }
-
     } catch (Exception $e) {
         error_log('Access link email error: ' . $e->getMessage());
 
@@ -457,7 +463,8 @@ function sendAccessLinkEmail(string $email): array {
 /**
  * Generate access token for secure link
  */
-function generateAccessToken(string $email): string {
+function generateAccessToken(string $email): string
+{
     $data = [
         'email' => $email,
         'expires' => time() + (24 * 60 * 60) // 24 hours
@@ -472,7 +479,8 @@ function generateAccessToken(string $email): string {
 /**
  * Verify access token
  */
-function verifyAccessToken(string $token): ?string {
+function verifyAccessToken(string $token): ?string
+{
     try {
         $decoded = base64_decode($token);
         if (!str_contains($decoded, '|')) {
@@ -494,7 +502,6 @@ function verifyAccessToken(string $token): ?string {
         }
 
         return $data['email'];
-
     } catch (Exception) {
         return null;
     }
@@ -503,7 +510,8 @@ function verifyAccessToken(string $token): ?string {
 /**
  * Generate HTML email for access link
  */
-function generateAccessLinkHTML(string $email, string $name, array $sponsorships): string {
+function generateAccessLinkHTML(string $email, string $name, array $sponsorships): string
+{
     $childCount = count($sponsorships);
 
     $html = '
@@ -607,7 +615,8 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
 /**
  * Generate plain text version of access link email
  */
-function generateAccessLinkText(string $email, string $name, array $sponsorships): string {
+function generateAccessLinkText(string $email, string $name, array $sponsorships): string
+{
     $childCount = count($sponsorships);
 
     $text = "CHRISTMAS FOR KIDS - YOUR SPONSORSHIPS\n";

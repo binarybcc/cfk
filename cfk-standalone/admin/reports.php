@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -106,7 +107,7 @@ include __DIR__ . '/includes/admin_header.php';
 
     <!-- Report Content -->
     <div class="report-content">
-        <?php if ($reportType === 'dashboard'): ?>
+        <?php if ($reportType === 'dashboard') : ?>
             <?php $stats = ReportManager::getStatisticsSummary(); ?>
 
             <div class="stats-dashboard">
@@ -159,7 +160,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
 
-        <?php elseif ($reportType === 'sponsor_directory'): ?>
+        <?php elseif ($reportType === 'sponsor_directory') : ?>
             <?php
             $sponsors = ReportManager::getSponsorDirectoryReport();
 
@@ -186,21 +187,21 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
 
             <div class="sponsor-directory">
-                <?php if ($groupedSponsors === []): ?>
+                <?php if ($groupedSponsors === []) : ?>
                     <div class="empty-state">
                         <h3>No Sponsors Found</h3>
                         <p>There are currently no sponsorships in the system.</p>
                     </div>
-                <?php else: ?>
-                    <?php foreach ($groupedSponsors as $sponsor): ?>
+                <?php else : ?>
+                    <?php foreach ($groupedSponsors as $sponsor) : ?>
                         <div class="sponsor-card">
                         <div class="sponsor-info">
                             <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
-                            <?php if (!empty($sponsor['phone'])): ?>
+                            <?php if (!empty($sponsor['phone'])) : ?>
                                 <p><strong>Phone:</strong> <?php echo sanitizeString($sponsor['phone']); ?></p>
                             <?php endif; ?>
-                            <?php if (!empty($sponsor['address'])): ?>
+                            <?php if (!empty($sponsor['address'])) : ?>
                                 <p><strong>Address:</strong> <?php echo sanitizeString($sponsor['address']); ?></p>
                             <?php endif; ?>
                         </div>
@@ -219,7 +220,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($sponsor['children'] as $child): ?>
+                                    <?php foreach ($sponsor['children'] as $child) : ?>
                                         <tr>
                                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                                             <td><?php echo sanitizeString($child['child_name']); ?></td>
@@ -241,7 +242,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <?php endif; ?>
             </div>
 
-        <?php elseif ($reportType === 'child_sponsor'): ?>
+        <?php elseif ($reportType === 'child_sponsor') : ?>
             <?php
             $searchTerm = $_GET['search'] ?? '';
             $children = ReportManager::getChildSponsorLookup($searchTerm);
@@ -259,12 +260,12 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
 
-            <?php if ($children === []): ?>
+            <?php if ($children === []) : ?>
                 <div class="empty-state">
                     <h3>No Children Found</h3>
                     <p><?php echo $searchTerm ? 'No children match your search criteria.' : 'There are currently no children in the system.'; ?></p>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -278,7 +279,7 @@ include __DIR__ . '/includes/admin_header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($children as $child): ?>
+                        <?php foreach ($children as $child) : ?>
                         <tr>
                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                             <td><?php echo sanitizeString($child['child_name']); ?></td>
@@ -286,31 +287,31 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst((string) $child['child_status']); ?></span></td>
                             <td><?php echo $child['sponsor_name'] ? sanitizeString($child['sponsor_name']) : '-'; ?></td>
                             <td>
-                                <?php if ($child['sponsor_email']): ?>
+                                <?php if ($child['sponsor_email']) : ?>
                                     <a href="mailto:<?php echo $child['sponsor_email']; ?>"><?php echo $child['sponsor_email']; ?></a><br>
-                                    <?php if ($child['sponsor_phone']): ?>
+                                    <?php if ($child['sponsor_phone']) : ?>
                                         <?php echo sanitizeString($child['sponsor_phone']); ?>
                                     <?php endif; ?>
-                                <?php else: ?>
+                                <?php else : ?>
                                     -
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($child['sponsorship_status']): ?>
+                                <?php if ($child['sponsorship_status']) : ?>
                                     <span class="status-badge status-<?php echo $child['sponsorship_status']; ?>">
                                         <?php echo ucfirst((string) $child['sponsorship_status']); ?>
                                     </span>
-                                <?php else: ?>
+                                <?php else : ?>
                                     -
                                 <?php endif; ?>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
                 </tbody>
             </table>
             <?php endif; ?>
 
-        <?php elseif ($reportType === 'family_report'): ?>
+        <?php elseif ($reportType === 'family_report') : ?>
             <?php $families = ReportManager::getFamilySponsorshipReport(); ?>
 
             <div class="report-header">
@@ -318,12 +319,12 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=family_report&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
-            <?php if ($families === []): ?>
+            <?php if ($families === []) : ?>
                 <div class="empty-state">
                     <h3>No Families Found</h3>
                     <p>There are currently no families in the system.</p>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -336,7 +337,7 @@ include __DIR__ . '/includes/admin_header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($families as $family): ?>
+                        <?php foreach ($families as $family) : ?>
                         <tr>
                             <td><?php echo sanitizeString($family['family_number']); ?></td>
                             <td><?php echo $family['total_children']; ?></td>
@@ -344,21 +345,21 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><?php echo $family['pending_count']; ?></td>
                             <td><?php echo $family['sponsored_count']; ?></td>
                             <td>
-                                <?php if ($family['sponsored_count'] == $family['total_children']): ?>
+                                <?php if ($family['sponsored_count'] == $family['total_children']) : ?>
                                     <span class="status-badge status-confirmed">Complete</span>
-                                <?php elseif ($family['sponsored_count'] > 0): ?>
+                                <?php elseif ($family['sponsored_count'] > 0) : ?>
                                     <span class="status-badge status-pending">Partial</span>
-                                <?php else: ?>
+                                <?php else : ?>
                                     <span class="status-badge status-available">None</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
                 </tbody>
             </table>
             <?php endif; ?>
 
-        <?php elseif ($reportType === 'available_children'): ?>
+        <?php elseif ($reportType === 'available_children') : ?>
             <?php
             $filters = [
                 'age_min' => $_GET['age_min'] ?? '',
@@ -387,12 +388,12 @@ include __DIR__ . '/includes/admin_header.php';
                 </form>
             </div>
 
-            <?php if ($availableChildren === []): ?>
+            <?php if ($availableChildren === []) : ?>
                 <div class="empty-state">
                     <h3>No Available Children</h3>
                     <p>There are currently no children available for sponsorship.</p>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <table class="data-table">
                     <thead>
                         <tr>
@@ -407,7 +408,7 @@ include __DIR__ . '/includes/admin_header.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($availableChildren as $child): ?>
+                        <?php foreach ($availableChildren as $child) : ?>
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
                             <td><?php echo sanitizeString($child['name']); ?></td>
@@ -418,12 +419,12 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><?php echo $child['available_siblings']; ?> available</td>
                             <td><?php echo sanitizeString(substr($child['wishes'] ?? '', 0, 50)) . '...'; ?></td>
                         </tr>
-                    <?php endforeach; ?>
+                        <?php endforeach; ?>
                 </tbody>
             </table>
             <?php endif; ?>
 
-        <?php elseif ($reportType === 'complete_export'): ?>
+        <?php elseif ($reportType === 'complete_export') : ?>
             <?php
             $filters = [];
             $completeData = ReportManager::getCompleteChildSponsorReport($filters);
@@ -476,7 +477,7 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($completeData as $row): ?>
+                    <?php foreach ($completeData as $row) : ?>
                         <tr>
                             <td><?php echo sanitizeString($row['child_id']); ?></td>
                             <td><?php echo sanitizeString($row['child_name']); ?></td>
@@ -486,19 +487,19 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst((string) $row['child_status']); ?></span></td>
                             <td><?php echo $row['sponsor_name'] ? sanitizeString($row['sponsor_name']) : '-'; ?></td>
                             <td>
-                                <?php if ($row['sponsor_email']): ?>
+                                <?php if ($row['sponsor_email']) : ?>
                                     <a href="mailto:<?php echo $row['sponsor_email']; ?>"><?php echo $row['sponsor_email']; ?></a>
-                                    <?php if ($row['sponsor_phone']): ?>
+                                    <?php if ($row['sponsor_phone']) : ?>
                                         <br><?php echo sanitizeString($row['sponsor_phone']); ?>
                                     <?php endif; ?>
-                                <?php else: ?>
+                                <?php else : ?>
                                     -
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <?php if ($row['sponsorship_date']): ?>
+                                <?php if ($row['sponsorship_date']) : ?>
                                     <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date'])); ?>
-                                <?php else: ?>
+                                <?php else : ?>
                                     -
                                 <?php endif; ?>
                             </td>

@@ -25,7 +25,7 @@
                     <li><a href="manage_children.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_children.php' ? 'class="active"' : ''; ?>>Children</a></li>
                     <li><a href="manage_sponsorships.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_sponsorships.php' ? 'class="active"' : ''; ?>>Sponsorships</a></li>
                     <li><a href="reports.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'reports.php' ? 'class="active"' : ''; ?>>Reports</a></li>
-                    <?php if ($_SESSION['cfk_admin_role'] === 'admin'): ?>
+                    <?php if ($_SESSION['cfk_admin_role'] === 'admin') : ?>
                     <li><a href="manage_admins.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'manage_admins.php' ? 'class="active"' : ''; ?>>Administrators</a></li>
                     <?php endif; ?>
                     <li><a href="year_end_reset.php" <?php echo basename((string) $_SERVER['PHP_SELF']) === 'year_end_reset.php' ? 'class="active"' : ''; ?> style="color: #dc3545;">Year-End Reset</a></li>
@@ -55,7 +55,7 @@
                 'type' => $messageType ?? 'success'
             ];
         }
-        if ($displayMessage): ?>
+        if ($displayMessage) : ?>
             <div class="alert alert-<?php echo $displayMessage['type']; ?>">
                 <?php echo sanitizeString($displayMessage['text']); ?>
             </div>

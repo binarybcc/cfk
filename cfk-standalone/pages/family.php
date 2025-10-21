@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Family View Page
  * Displays all members of a family for sponsorship consideration
@@ -69,7 +70,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
             </span>
         </div>
 
-        <?php if ($available_count > 0): ?>
+        <?php if ($available_count > 0) : ?>
             <button class="btn btn-large btn-primary btn-add-all-family"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All <?php echo $available_count; ?> Available Member<?php echo $available_count > 1 ? 's' : ''; ?>
@@ -77,7 +78,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
         <?php endif; ?>
     </div>
 
-    <?php if (!empty($family['background_info'])): ?>
+    <?php if (!empty($family['background_info'])) : ?>
         <div class="family-background">
             <h2>About the Family</h2>
             <p><?php echo nl2br(sanitizeString($family['background_info'])); ?></p>
@@ -86,7 +87,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
     <!-- Family Members Grid -->
     <div class="family-members-grid">
-        <?php foreach ($family_members as $member): ?>
+        <?php foreach ($family_members as $member) : ?>
             <div class="family-member-card <?php echo $member['status'] !== 'available' ? 'member-sponsored' : ''; ?>">
                 <!-- Card Header -->
                 <div class="member-card-header">
@@ -106,35 +107,35 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                 <div class="member-basic-info">
                     <span class="info-chip"><strong>Age:</strong> <?php echo sanitizeInt($member['age']); ?></span>
                     <span class="info-chip"><strong>Gender:</strong> <?php echo $member['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
-                    <?php if (!empty($member['grade'])): ?>
+                    <?php if (!empty($member['grade'])) : ?>
                         <span class="info-chip"><strong>Grade:</strong> <?php echo sanitizeString($member['grade']); ?></span>
                     <?php endif; ?>
                 </div>
 
                 <!-- Detailed Info (Collapsible sections) -->
                 <div class="member-details">
-                    <?php if (!empty($member['clothing_sizes'])): ?>
+                    <?php if (!empty($member['clothing_sizes'])) : ?>
                         <div class="detail-row">
                             <strong>Sizes:</strong>
                             <span><?php echo sanitizeString($member['clothing_sizes']); ?></span>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($member['interests'])): ?>
+                    <?php if (!empty($member['interests'])) : ?>
                         <div class="detail-row">
                             <strong>Interests:</strong>
                             <span><?php echo sanitizeString($member['interests']); ?></span>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($member['wishes'])): ?>
+                    <?php if (!empty($member['wishes'])) : ?>
                         <div class="detail-row">
                             <strong>Wishes:</strong>
                             <span><?php echo sanitizeString($member['wishes']); ?></span>
                         </div>
                     <?php endif; ?>
 
-                    <?php if (!empty($member['special_needs'])): ?>
+                    <?php if (!empty($member['special_needs'])) : ?>
                         <div class="detail-row special-needs">
                             <strong>⚠️ Special Notes:</strong>
                             <span><?php echo sanitizeString($member['special_needs']); ?></span>
@@ -143,7 +144,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                 </div>
 
                 <!-- Actions -->
-                <?php if ($member['status'] === 'available'): ?>
+                <?php if ($member['status'] === 'available') : ?>
                     <div class="member-actions">
                         <button class="btn btn-primary btn-block btn-sponsor-child"
                                 data-child-id="<?php echo $member['id']; ?>"
@@ -152,7 +153,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                             Sponsor This Child
                         </button>
                     </div>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="member-actions">
                         <p class="sponsored-message" role="status" aria-live="polite">This child is already sponsored</p>
                     </div>
@@ -168,7 +169,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
            aria-label="Go back to browse all children">
             ← Back to Children
         </a>
-        <?php if ($available_count > 0): ?>
+        <?php if ($available_count > 0) : ?>
             <button class="btn btn-primary btn-add-all-family"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All Available (<?php echo $available_count; ?>)

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -172,7 +173,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Redirect to admin dashboard
         header('Location: ' . baseUrl('admin/'));
         exit;
-
     } catch (Exception $e) {
         error_log('Magic link verification error: ' . $e->getMessage());
         MagicLinkManager::logEvent($adminUser['id'] ?? null, 'magic_link_verification_error', $ipAddress, $userAgent, 'failed');
@@ -191,7 +191,8 @@ exit;
 /**
  * Send login notification email to admin
  */
-function sendLoginNotificationEmail(string $email, string $ipAddress, string $userAgent): void {
+function sendLoginNotificationEmail(string $email, string $ipAddress, string $userAgent): void
+{
     try {
         // Get IP geolocation (simple approach)
         $location = getLocationFromIp($ipAddress);
@@ -270,7 +271,8 @@ TEXT;
 /**
  * Get approximate location from IP address
  */
-function getLocationFromIp(string $ip): string {
+function getLocationFromIp(string $ip): string
+{
     // Simple implementation - just return IP for now
     // In production, could use a geolocation service
     return $ip;
@@ -279,7 +281,8 @@ function getLocationFromIp(string $ip): string {
 /**
  * Parse user agent for device info
  */
-function parseUserAgent(string $userAgent): string {
+function parseUserAgent(string $userAgent): string
+{
     if (str_contains($userAgent, 'Windows')) {
         return 'Windows';
     } elseif (str_contains($userAgent, 'Mac')) {

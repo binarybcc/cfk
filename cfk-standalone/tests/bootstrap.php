@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHPUnit Bootstrap File
  * Sets up testing environment

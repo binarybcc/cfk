@@ -1,20 +1,23 @@
 <?php
+
 /**
  * DEPRECATED: Moved to src/Report/Manager.php
  * Class available via class_alias() in config.php
  */
+
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 return;
 
-class CFK_Report_Manager_DEPRECATED {
-
+class CFK_Report_Manager_DEPRECATED
+{
     /**
      * Get sponsor directory report
      */
-    public static function getSponsorDirectoryReport(array $filters = []): array {
+    public static function getSponsorDirectoryReport(array $filters = []): array
+    {
         $sql = "
             SELECT
                 s.id,
@@ -65,7 +68,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Get child-sponsor lookup
      */
-    public static function getChildSponsorLookup(string $childId = ''): array {
+    public static function getChildSponsorLookup(string $childId = ''): array
+    {
         $sql = "
             SELECT
                 c.id as child_id,
@@ -102,7 +106,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Get family sponsorship report
      */
-    public static function getFamilySponsorshipReport(): array {
+    public static function getFamilySponsorshipReport(): array
+    {
         return Database::fetchAll("
             SELECT
                 f.id as family_id,
@@ -126,7 +131,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Get gift delivery tracking report
      */
-    public static function getGiftDeliveryReport(array $filters = []): array {
+    public static function getGiftDeliveryReport(array $filters = []): array
+    {
         $sql = "
             SELECT
                 s.id,
@@ -163,7 +169,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Get available children report
      */
-    public static function getAvailableChildrenReport(array $filters = []): array {
+    public static function getAvailableChildrenReport(array $filters = []): array
+    {
         $sql = "
             SELECT
                 c.id,
@@ -211,7 +218,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Export data to CSV
      */
-    public static function exportToCSV(array $data, array $headers, string $filename): void {
+    public static function exportToCSV(array $data, array $headers, string $filename): void
+    {
         // Set headers for CSV download
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -240,7 +248,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Generate shopping list for sponsor
      */
-    public static function generateShoppingList(string $sponsorEmail): array {
+    public static function generateShoppingList(string $sponsorEmail): array
+    {
         return Database::fetchAll("
             SELECT
                 s.sponsor_name,
@@ -270,7 +279,8 @@ class CFK_Report_Manager_DEPRECATED {
      * Get complete children and sponsor report
      * Includes all child information and sponsor details (if sponsored)
      */
-    public static function getCompleteChildSponsorReport(array $filters = []): array {
+    public static function getCompleteChildSponsorReport(array $filters = []): array
+    {
         $sql = "
             SELECT
                 -- Child Information
@@ -327,7 +337,8 @@ class CFK_Report_Manager_DEPRECATED {
     /**
      * Get statistics summary
      */
-    public static function getStatisticsSummary(): array {
+    public static function getStatisticsSummary(): array
+    {
         $stats = [];
 
         // Children stats

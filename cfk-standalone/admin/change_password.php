@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -53,7 +54,8 @@ if ($_POST && isset($_POST['change_password'])) {
     } else {
         // Update password
         try {
-            Database::update('admin_users',
+            Database::update(
+                'admin_users',
                 ['password_hash' => password_hash((string) $newPassword, PASSWORD_DEFAULT)],
                 ['id' => $_SESSION['cfk_admin_id']]
             );
@@ -235,14 +237,14 @@ $isForced = isset($_SESSION['force_password_change']) && $_SESSION['force_passwo
             <p><?php echo $isForced ? 'For security, you must change your password' : 'Update your admin password'; ?></p>
         </div>
 
-        <?php if ($isForced): ?>
+        <?php if ($isForced) : ?>
             <div class="warning-notice">
                 <h3>⚠️ Default Password Detected</h3>
                 <p>You are currently using the default password. For security reasons, you must set a new, unique password before accessing the admin panel.</p>
             </div>
         <?php endif; ?>
 
-        <?php if ($error !== '' && $error !== '0'): ?>
+        <?php if ($error !== '' && $error !== '0') : ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
             </div>
@@ -297,7 +299,7 @@ $isForced = isset($_SESSION['force_password_change']) && $_SESSION['force_passwo
                 Change Password
             </button>
 
-            <?php if (!$isForced): ?>
+            <?php if (!$isForced) : ?>
                 <a href="index.php" class="btn-secondary">Cancel</a>
             <?php endif; ?>
         </form>

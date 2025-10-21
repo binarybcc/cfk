@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,7 +12,8 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class RateLimiter {
+class RateLimiter
+{
     // Production Rate Limits (balanced for security + usability)
     // Accounts for: multiple admins on same IP, browser switching, email retries
     private const EMAIL_RATE_PER_WINDOW = 4; // 4 requests per 5 minutes
@@ -24,7 +26,8 @@ class RateLimiter {
      * Check if a request is rate limited
      * Returns: true if rate limited (block request), false if allowed
      */
-    public static function isRateLimited(string $email, string $ipAddress): bool {
+    public static function isRateLimited(string $email, string $ipAddress): bool
+    {
         // Check email rate limiting
         if (self::checkEmailLimit($email)) {
             return true;
@@ -44,7 +47,8 @@ class RateLimiter {
     /**
      * Check email-based rate limiting
      */
-    private static function checkEmailLimit(string $email): bool {
+    private static function checkEmailLimit(string $email): bool
+    {
         try {
             $now = time();
             $windowStart = date('Y-m-d H:i:s', $now - (self::WINDOW_MINUTES * 60));
@@ -96,7 +100,8 @@ class RateLimiter {
     /**
      * Check IP-based rate limiting
      */
-    private static function checkIpLimit(string $ipAddress): bool {
+    private static function checkIpLimit(string $ipAddress): bool
+    {
         try {
             $now = time();
             $windowStart = date('Y-m-d H:i:s', $now - (self::WINDOW_MINUTES * 60));
@@ -148,7 +153,8 @@ class RateLimiter {
     /**
      * Record a request for rate limiting
      */
-    private static function recordRequest(string $email, string $ipAddress): void {
+    private static function recordRequest(string $email, string $ipAddress): void
+    {
         try {
             $now = new DateTime();
             $windowStart = $now->format('Y-m-d H:i:00'); // Round to minute
@@ -174,7 +180,8 @@ class RateLimiter {
     /**
      * Clean up old rate limit records
      */
-    public static function cleanup(): int {
+    public static function cleanup(): int
+    {
         try {
             $sql = "DELETE FROM rate_limit_tracking WHERE window_start < NOW() - INTERVAL 1 HOUR";
             return Database::execute($sql, []);

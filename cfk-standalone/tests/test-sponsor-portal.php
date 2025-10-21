@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Test Script for Sponsor Portal Functionality
  * Run from command line to test the portal features

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sponsorship Success Page
  * Shows confirmation after immediate sponsorship

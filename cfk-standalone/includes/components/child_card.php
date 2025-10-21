@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Child Card Component
  * Reusable component for displaying child profile cards
@@ -50,7 +51,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
     <div class="child-info">
         <h3 class="child-name">Family Code: <?php echo sanitizeString($child['display_id']); ?></h3>
 
-        <?php if ($showId && !empty($child['display_id'])): ?>
+        <?php if ($showId && !empty($child['display_id'])) : ?>
             <p class="child-id">ID: <?php echo sanitizeString($child['display_id']); ?></p>
         <?php endif; ?>
 
@@ -62,27 +63,31 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             <?php echo formatAge($child['age']); ?>
         </p>
 
-        <?php if ($showInterests && !empty($child['interests'])): ?>
+        <?php if ($showInterests && !empty($child['interests'])) : ?>
             <div class="child-interests">
                 <strong>Likes:</strong>
                 <?php echo sanitizeString(substr((string) $child['interests'], 0, 100)); ?>
-                <?php if (strlen((string) $child['interests']) > 100): ?>...<?php endif; ?>
+                <?php if (strlen((string) $child['interests']) > 100) :
+                    ?>...<?php
+                endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($showWishes && !empty($child['wishes'])): ?>
+        <?php if ($showWishes && !empty($child['wishes'])) : ?>
             <div class="child-wishes">
-                <?php if ($showInterests): ?>
+                <?php if ($showInterests) : ?>
                     <strong>Wishes for:</strong>
                     <?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?>
-                    <?php if (strlen((string) $child['wishes']) > 100): ?>...<?php endif; ?>
-                <?php else: ?>
+                    <?php if (strlen((string) $child['wishes']) > 100) :
+                        ?>...<?php
+                    endif; ?>
+                <?php else : ?>
                     "<?php echo sanitizeString(substr((string) $child['wishes'], 0, 80)); ?><?php echo strlen((string) $child['wishes']) > 80 ? '...' : ''; ?>"
                 <?php endif; ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($showSiblings && !empty($siblings)): ?>
+        <?php if ($showSiblings && !empty($siblings)) : ?>
             <div class="family-info">
                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
                 <?php
@@ -92,7 +97,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             </div>
         <?php endif; ?>
 
-        <?php if (!$showActions): ?>
+        <?php if (!$showActions) : ?>
             <?php echo renderButton(
                 $buttonText,
                 baseUrl('?page=child&id=' . $child['id']),
@@ -101,7 +106,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
         <?php endif; ?>
     </div>
 
-    <?php if ($showActions): ?>
+    <?php if ($showActions) : ?>
         <div class="child-actions">
             <?php echo renderButton(
                 $buttonText,
@@ -109,7 +114,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
                 'primary'
             ); ?>
 
-            <?php if ($showFamilyButton && !empty($siblings)): ?>
+            <?php if ($showFamilyButton && !empty($siblings)) : ?>
                 <?php echo renderButton(
                     'View Family',
                     baseUrl('?page=children&family_id=' . $child['family_id']),

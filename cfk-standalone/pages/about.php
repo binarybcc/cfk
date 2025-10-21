@@ -1,4 +1,5 @@
 <?php
+
 /**
  * About Page
  * Information about the Christmas for Kids program
@@ -105,7 +106,7 @@ $pageTitle = 'About Us';
                     <div class="stat-label">Children Helped This Year</div>
                 </div>
                 <div class="impact-stat">
-                    <div class="stat-number"><?php 
+                    <div class="stat-number"><?php
                     $familyCount = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0;
                     echo $familyCount;
                     ?></div>

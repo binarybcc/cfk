@@ -1,38 +1,42 @@
 <?php
+
 /**
  * DEPRECATED: Moved to src/Avatar/Manager.php
  * Class available via class_alias() in config.php
  */
+
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 return;
 
-class CFK_Avatar_Manager_DEPRECATED {
-    
+class CFK_Avatar_Manager_DEPRECATED
+{
     const CATEGORIES = [
         'infant' => 'Infant (0-2)',
-        'male_toddler' => 'Male Toddler (3-5)', 
+        'male_toddler' => 'Male Toddler (3-5)',
         'female_toddler' => 'Female Toddler (3-5)',
         'male_child' => 'Male Child (6-10)',
         'female_child' => 'Female Child (6-10)',
         'male_teen' => 'Male Teen (11-18)',
         'female_teen' => 'Female Teen (11-18)'
     ];
-    
+
     /**
      * Get avatar for a child based on age and gender
      */
-    public static function getAvatarForChild(array $child): string {
+    public static function getAvatarForChild(array $child): string
+    {
         $category = self::determineAvatarCategory($child['age'], $child['gender']);
         return self::getAvatarImagePath($category);
     }
-    
+
     /**
      * Determine avatar category based on age and gender
      */
-    private static function determineAvatarCategory(int $age, string $gender): string {
+    private static function determineAvatarCategory(int $age, string $gender): string
+    {
         // Infant/Toddler (0-4)
         if ($age <= 4) {
             return $gender === 'M' ? 'male_toddler' : 'female_toddler';
@@ -55,7 +59,8 @@ class CFK_Avatar_Manager_DEPRECATED {
     /**
      * Get avatar image path from PNG files
      */
-    private static function getAvatarImagePath(string $category): string {
+    private static function getAvatarImagePath(string $category): string
+    {
         // Map categories to image files
         $imageMap = [
             'male_toddler' => 'b-4boysm.png',           // Boys 0-4
@@ -74,22 +79,24 @@ class CFK_Avatar_Manager_DEPRECATED {
         // Return full URL using baseUrl helper
         return baseUrl('assets/images/' . $filename);
     }
-    
+
     /**
      * Generate silhouetted avatar SVG
      */
-    private static function generateSilhouettedAvatar(string $category): string {
+    private static function generateSilhouettedAvatar(string $category): string
+    {
         $svgData = self::getSvgData($category);
         return 'data:image/svg+xml;base64,' . base64_encode($svgData);
     }
-    
+
     /**
      * Get SVG data for each avatar category
      */
-    private static function getSvgData(string $category): string {
+    private static function getSvgData(string $category): string
+    {
         $baseColor = '#2c5530'; // Christmas green silhouette
         $bgColor = '#f8f9fa';   // Light background
-        
+
         return match ($category) {
             'infant' => self::getInfantSvg($baseColor, $bgColor),
             'male_toddler' => self::getMaleToddlerSvg($baseColor, $bgColor),
@@ -101,11 +108,12 @@ class CFK_Avatar_Manager_DEPRECATED {
             default => self::getDefaultSvg($baseColor, $bgColor),
         };
     }
-    
+
     /**
      * Infant avatar (0-2 years) - gender neutral
      */
-    private static function getInfantSvg(string $color, string $bg): string {
+    private static function getInfantSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -128,11 +136,12 @@ class CFK_Avatar_Manager_DEPRECATED {
 </svg>
 SVG;
     }
-    
+
     /**
      * Male toddler avatar (3-5 years)
      */
-    private static function getMaleToddlerSvg(string $color, string $bg): string {
+    private static function getMaleToddlerSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -155,11 +164,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Female toddler avatar (3-5 years)
      */
-    private static function getFemaleToddlerSvg(string $color, string $bg): string {
+    private static function getFemaleToddlerSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -184,11 +194,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Male child avatar (6-10 years)
      */
-    private static function getMaleChildSvg(string $color, string $bg): string {
+    private static function getMaleChildSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -211,11 +222,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Female child avatar (6-10 years)
      */
-    private static function getFemaleChildSvg(string $color, string $bg): string {
+    private static function getFemaleChildSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -239,11 +251,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Male teen avatar (11-18 years)
      */
-    private static function getMaleTeenSvg(string $color, string $bg): string {
+    private static function getMaleTeenSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -266,11 +279,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Female teen avatar (11-18 years)
      */
-    private static function getFemaleTeenSvg(string $color, string $bg): string {
+    private static function getFemaleTeenSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -294,11 +308,12 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Default/fallback avatar
      */
-    private static function getDefaultSvg(string $color, string $bg): string {
+    private static function getDefaultSvg(string $color, string $bg): string
+    {
         return <<<SVG
 <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
     <rect width="100%" height="100%" fill="{$bg}" rx="8"/>
@@ -315,18 +330,20 @@ SVG;
 </svg>
 SVG;
     }
-    
+
     /**
      * Get all available avatar categories
      */
-    public static function getAvailableCategories(): array {
+    public static function getAvailableCategories(): array
+    {
         return self::CATEGORIES;
     }
-    
+
     /**
      * Test function to generate all avatar types
      */
-    public static function generateTestAvatars(): array {
+    public static function generateTestAvatars(): array
+    {
         $avatars = [];
         foreach (array_keys(self::CATEGORIES) as $category) {
             $avatars[$category] = self::generateSilhouettedAvatar($category);

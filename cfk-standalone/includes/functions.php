@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -19,10 +20,11 @@ if (!defined('CFK_APP')) {
 /**
  * Get children with optional filtering and pagination
  */
-function getChildren(array $filters = [], int $page = 1, int $limit = null): array {
+function getChildren(array $filters = [], int $page = 1, int $limit = null): array
+{
     $limit = $limit ?? config('children_per_page', 12);
     $offset = ($page - 1) * $limit;
-    
+
     // Base query
     $sql = "
         SELECT c.*, f.family_number,
@@ -31,9 +33,9 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         JOIN families f ON c.family_id = f.id
         WHERE 1=1
     ";
-    
+
     $params = [];
-    
+
     // Apply filters
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
@@ -42,7 +44,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
     }
-    
+
     if (!empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
@@ -52,27 +54,27 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
             $params['max_age'] = $category['max'];
         }
     }
-    
+
     if (!empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
-    
+
     if (!empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
-    
+
     if (!empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
-    
+
     // Default to available children only
     if (!isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
-    
+
     // Order by family, then by child letter
     $sql .= " ORDER BY f.family_number, c.child_letter";
     // Note: Using literal values for LIMIT/OFFSET to avoid PDO binding issues
@@ -84,16 +86,17 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
 /**
  * Get total count of children matching filters
  */
-function getChildrenCount(array $filters = []): int {
+function getChildrenCount(array $filters = []): int
+{
     $sql = "
         SELECT COUNT(*) as total
         FROM children c 
         JOIN families f ON c.family_id = f.id 
         WHERE 1=1
     ";
-    
+
     $params = [];
-    
+
     // Apply same filters as getChildren()
     if (!empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
@@ -102,7 +105,7 @@ function getChildrenCount(array $filters = []): int {
         $params['search2'] = $searchValue;
         $params['search3'] = $searchValue;
     }
-    
+
     if (!empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
@@ -112,27 +115,27 @@ function getChildrenCount(array $filters = []): int {
             $params['max_age'] = $category['max'];
         }
     }
-    
+
     if (!empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
-    
+
     if (!empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
-    
+
     if (!empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
-    
+
     // Default to available children only
     if (!isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
-    
+
     $result = Database::fetchRow($sql, $params);
     return (int) $result['total'];
 }
@@ -140,7 +143,8 @@ function getChildrenCount(array $filters = []): int {
 /**
  * Get single child by ID with family information
  */
-function getChildById(int $childId): ?array {
+function getChildById(int $childId): ?array
+{
     $sql = "
         SELECT c.*, f.family_number, f.notes as family_notes,
                CONCAT(f.family_number, c.child_letter) as display_id
@@ -155,7 +159,8 @@ function getChildById(int $childId): ?array {
 /**
  * Get family members (siblings) for a child
  */
-function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
+function getFamilyMembers(int $familyId, int $excludeChildId = null): array
+{
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
@@ -178,7 +183,8 @@ function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
 /**
  * Get count of available siblings in a family
  */
-function getSiblingCount(int $familyId): int {
+function getSiblingCount(int $familyId): int
+{
     $sql = "
         SELECT COUNT(*) as count
         FROM children
@@ -192,7 +198,8 @@ function getSiblingCount(int $familyId): int {
 /**
  * Get age/gender-appropriate placeholder avatar image path
  */
-function getPlaceholderImage(int $age, string $gender): string {
+function getPlaceholderImage(int $age, string $gender): string
+{
     $baseUrl = baseUrl('assets/images/');
 
     // Age categories
@@ -210,7 +217,8 @@ function getPlaceholderImage(int $age, string $gender): string {
 /**
  * Get family information by family ID
  */
-function getFamilyById(int $familyId): ?array {
+function getFamilyById(int $familyId): ?array
+{
     $sql = "SELECT * FROM families WHERE id = :family_id";
     return Database::fetchRow($sql, ['family_id' => $familyId]);
 }
@@ -218,7 +226,8 @@ function getFamilyById(int $familyId): ?array {
 /**
  * Get family information by family number (user-facing ID like 201, 202, etc.)
  */
-function getFamilyByNumber(string $familyNumber): ?array {
+function getFamilyByNumber(string $familyNumber): ?array
+{
     $sql = "SELECT * FROM families WHERE family_number = :family_number";
     return Database::fetchRow($sql, ['family_number' => $familyNumber]);
 }
@@ -226,7 +235,8 @@ function getFamilyByNumber(string $familyNumber): ?array {
 /**
  * Get all family members by family number
  */
-function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array {
+function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array
+{
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
         FROM children c
@@ -250,7 +260,8 @@ function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = nu
  * Eager load family members for multiple children (prevents N+1 queries)
  * Returns array indexed by family_id containing arrays of siblings
  */
-function eagerLoadFamilyMembers(array $children): array {
+function eagerLoadFamilyMembers(array $children): array
+{
     if (empty($children)) {
         return [];
     }
@@ -300,10 +311,11 @@ function eagerLoadFamilyMembers(array $children): array {
 /**
  * Create a sponsorship request
  */
-function createSponsorship(int $childId, array $sponsorData): int {
+function createSponsorship(int $childId, array $sponsorData): int
+{
     // First, mark child as pending
     Database::update('children', ['status' => 'pending'], ['id' => $childId]);
-    
+
     // Create sponsorship record
     $sponsorshipData = [
         'child_id' => $childId,
@@ -315,14 +327,15 @@ function createSponsorship(int $childId, array $sponsorData): int {
         'special_message' => sanitizeString($sponsorData['message'] ?? ''),
         'status' => 'pending'
     ];
-    
+
     return Database::insert('sponsorships', $sponsorshipData);
 }
 
 /**
  * Get sponsorship by ID
  */
-function getSponsorshipById(int $sponsorshipId): ?array {
+function getSponsorshipById(int $sponsorshipId): ?array
+{
     $sql = "
         SELECT s.*, CONCAT(f.family_number, c.child_letter) as child_name,
                CONCAT(f.family_number, c.child_letter) as child_display_id
@@ -331,7 +344,7 @@ function getSponsorshipById(int $sponsorshipId): ?array {
         JOIN families f ON c.family_id = f.id
         WHERE s.id = :id
     ";
-    
+
     return Database::fetchRow($sql, ['id' => $sponsorshipId]);
 }
 
@@ -342,22 +355,24 @@ function getSponsorshipById(int $sponsorshipId): ?array {
 /**
  * Format age display
  */
-function formatAge(int $age): string {
+function formatAge(int $age): string
+{
     return $age . ' year' . ($age !== 1 ? 's' : '') . ' old';
 }
 
 /**
  * Get age category for a given age
  */
-function getAgeCategory(int $age): string {
+function getAgeCategory(int $age): string
+{
     global $ageCategories;
-    
+
     foreach ($ageCategories as $key => $category) {
         if ($age >= $category['min'] && $age <= $category['max']) {
             return $category['label'];
         }
     }
-    
+
     return 'Other';
 }
 
@@ -365,8 +380,11 @@ function getAgeCategory(int $age): string {
  * Generate pagination HTML
  * Note: Uses 'p' parameter for page number to avoid conflict with 'page' routing parameter
  */
-function generatePagination(int $currentPage, int $totalPages, string $baseUrl): string {
-    if ($totalPages <= 1) return '';
+function generatePagination(int $currentPage, int $totalPages, string $baseUrl): string
+{
+    if ($totalPages <= 1) {
+        return '';
+    }
 
     $html = '<nav class="pagination"><ul>';
 
@@ -381,7 +399,9 @@ function generatePagination(int $currentPage, int $totalPages, string $baseUrl):
 
     if ($start > 1) {
         $html .= '<li><a href="' . $baseUrl . '&p=1">1</a></li>';
-        if ($start > 2) $html .= '<li><span>...</span></li>';
+        if ($start > 2) {
+            $html .= '<li><span>...</span></li>';
+        }
     }
 
     for ($i = $start; $i <= $end; $i++) {
@@ -390,7 +410,9 @@ function generatePagination(int $currentPage, int $totalPages, string $baseUrl):
     }
 
     if ($end < $totalPages) {
-        if ($end < $totalPages - 1) $html .= '<li><span>...</span></li>';
+        if ($end < $totalPages - 1) {
+            $html .= '<li><span>...</span></li>';
+        }
         $html .= '<li><a href="' . $baseUrl . '&p=' . $totalPages . '">' . $totalPages . '</a></li>';
     }
 
@@ -407,11 +429,13 @@ function generatePagination(int $currentPage, int $totalPages, string $baseUrl):
 /**
  * Simple success/error message system
  */
-function setMessage(string $message, string $type = 'success'): void {
+function setMessage(string $message, string $type = 'success'): void
+{
     $_SESSION['cfk_message'] = ['text' => $message, 'type' => $type];
 }
 
-function getMessage(): ?array {
+function getMessage(): ?array
+{
     if (isset($_SESSION['cfk_message'])) {
         $message = $_SESSION['cfk_message'];
         unset($_SESSION['cfk_message']);
@@ -423,7 +447,8 @@ function getMessage(): ?array {
 /**
  * Photo handling - Uses avatar system instead of real photos for privacy
  */
-function getPhotoUrl(string $filename = null, array $child = null): string {
+function getPhotoUrl(string $filename = null, array $child = null): string
+{
     // ALWAYS use avatars - no real photos for privacy protection
     if ($child && isset($child['age']) && isset($child['gender'])) {
         require_once __DIR__ . '/avatar_manager.php';
@@ -441,7 +466,8 @@ function getPhotoUrl(string $filename = null, array $child = null): string {
 /**
  * Regenerate session ID periodically (prevents session fixation)
  */
-function regenerateSessionIfNeeded(): void {
+function regenerateSessionIfNeeded(): void
+{
     if (session_status() === PHP_SESSION_ACTIVE) {
         // Regenerate every 30 minutes
         $regenerateInterval = 1800; // 30 minutes
@@ -455,12 +481,14 @@ function regenerateSessionIfNeeded(): void {
     }
 }
 
-function isLoggedIn(): bool {
+function isLoggedIn(): bool
+{
     regenerateSessionIfNeeded();
     return isset($_SESSION['cfk_admin_id']) && !empty($_SESSION['cfk_admin_id']);
 }
 
-function requireLogin(): void {
+function requireLogin(): void
+{
     if (!isLoggedIn()) {
         header('Location: ' . baseUrl('admin/login.php'));
         exit;
@@ -470,11 +498,13 @@ function requireLogin(): void {
 /**
  * Simple validation functions
  */
-function validateEmail(string $email): bool {
+function validateEmail(string $email): bool
+{
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
-function validateRequired(array $data, array $requiredFields): array {
+function validateRequired(array $data, array $requiredFields): array
+{
     $errors = [];
     foreach ($requiredFields as $field) {
         if (empty($data[$field])) {
@@ -529,7 +559,8 @@ function validateRequired(array $data, array $requiredFields): array {
  *     ]
  * ]);
  */
-function renderButton(string $text, ?string $url = null, string $type = 'primary', array $options = []): string {
+function renderButton(string $text, ?string $url = null, string $type = 'primary', array $options = []): string
+{
     // Sanitize text
     $text = sanitizeString($text);
 
@@ -628,7 +659,8 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
 /**
  * Format a datetime string for display
  */
-function formatDateTime(?string $datetime): string {
+function formatDateTime(?string $datetime): string
+{
     if (empty($datetime)) {
         return "";
     }
@@ -643,7 +675,8 @@ function formatDateTime(?string $datetime): string {
 /**
  * Format a date string for display
  */
-function formatDate(?string $date): string {
+function formatDate(?string $date): string
+{
     if (empty($date)) {
         return "";
     }
@@ -654,4 +687,3 @@ function formatDate(?string $date): string {
         return $date;
     }
 }
-

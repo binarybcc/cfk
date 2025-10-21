@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -76,19 +77,19 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="debug-box">
         <h3>1. Request Information</h3>
         <pre><?php
-echo "REQUEST_METHOD: " . ($_SERVER['REQUEST_METHOD'] ?? 'NOT SET') . "\n";
-echo "CONTENT_TYPE: " . ($_SERVER['CONTENT_TYPE'] ?? 'NOT SET') . "\n";
-echo "HTTP_HOST: " . ($_SERVER['HTTP_HOST'] ?? 'NOT SET') . "\n";
-echo "REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'NOT SET') . "\n";
+        echo "REQUEST_METHOD: " . ($_SERVER['REQUEST_METHOD'] ?? 'NOT SET') . "\n";
+        echo "CONTENT_TYPE: " . ($_SERVER['CONTENT_TYPE'] ?? 'NOT SET') . "\n";
+        echo "HTTP_HOST: " . ($_SERVER['HTTP_HOST'] ?? 'NOT SET') . "\n";
+        echo "REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'NOT SET') . "\n";
         ?></pre>
     </div>
 
     <div class="debug-box">
         <h3>2. POST Data</h3>
-        <?php if ($_SERVER['REQUEST_METHOD'] === 'POST'): ?>
+        <?php if ($_SERVER['REQUEST_METHOD'] === 'POST') : ?>
             <p class="success">✓ POST request detected</p>
             <pre><?php print_r($_POST); ?></pre>
-        <?php else: ?>
+        <?php else : ?>
             <p class="error">✗ Not a POST request (GET)</p>
             <pre>$_POST is empty (GET request)</pre>
         <?php endif; ?>
@@ -96,15 +97,15 @@ echo "REQUEST_URI: " . ($_SERVER['REQUEST_URI'] ?? 'NOT SET') . "\n";
 
     <div class="debug-box">
         <h3>3. Form Submission Test</h3>
-        <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_submit'])): ?>
+        <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_submit'])) : ?>
             <p class="success">✓ Form submission detected!</p>
             <pre><?php
-echo "Year: " . ($_POST['year'] ?? 'NOT SET') . "\n";
-echo "Code: " . ($_POST['confirmation_code'] ?? 'NOT SET') . "\n";
-echo "CSRF Token: " . (isset($_POST['csrf_token']) ? 'PRESENT' : 'MISSING') . "\n";
-echo "Submit button: " . (isset($_POST['test_submit']) ? 'PRESENT' : 'MISSING') . "\n";
+            echo "Year: " . ($_POST['year'] ?? 'NOT SET') . "\n";
+            echo "Code: " . ($_POST['confirmation_code'] ?? 'NOT SET') . "\n";
+            echo "CSRF Token: " . (isset($_POST['csrf_token']) ? 'PRESENT' : 'MISSING') . "\n";
+            echo "Submit button: " . (isset($_POST['test_submit']) ? 'PRESENT' : 'MISSING') . "\n";
             ?></pre>
-        <?php else: ?>
+        <?php else : ?>
             <p>Fill out and submit the form below to test:</p>
         <?php endif; ?>
     </div>

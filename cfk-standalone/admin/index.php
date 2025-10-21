@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -155,12 +156,12 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 
     <!-- Attention Needed -->
-    <?php if ($childrenNeedingAttention !== []): ?>
+    <?php if ($childrenNeedingAttention !== []) : ?>
     <div class="attention-section">
         <h2>🚨 Children Needing Attention</h2>
         <p>These children have pending sponsorships that may have expired or need follow-up:</p>
         <div class="attention-list">
-            <?php foreach ($childrenNeedingAttention as $child): ?>
+            <?php foreach ($childrenNeedingAttention as $child) : ?>
                 <div class="attention-item">
                     <div class="attention-info">
                         <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
@@ -181,11 +182,11 @@ include __DIR__ . '/includes/admin_header.php';
     <!-- Recent Activity -->
     <div class="recent-activity">
         <h2>Recent Sponsorship Activity</h2>
-        <?php if ($recentSponsorships === []): ?>
+        <?php if ($recentSponsorships === []) : ?>
             <p>No recent sponsorship activity.</p>
-        <?php else: ?>
+        <?php else : ?>
             <div class="activity-list">
-                <?php foreach ($recentSponsorships as $sponsorship): ?>
+                <?php foreach ($recentSponsorships as $sponsorship) : ?>
                     <div class="activity-item">
                         <div class="activity-info">
                             <div class="activity-main">

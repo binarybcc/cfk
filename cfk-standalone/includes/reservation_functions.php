@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -19,7 +20,8 @@ if (!defined('CFK_APP')) {
  * @param int $expirationHours Number of hours until expiration (default: 48)
  * @return array ['success' => bool, 'token' => string, 'message' => string, 'reservation_id' => int]
  */
-function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array {
+function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array
+{
     try {
         // Validate input
         if (empty($sponsorData['name']) || empty($sponsorData['email']) || $childrenIds === []) {
@@ -104,7 +106,6 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
             'expires_at' => $expiresAt,
             'message' => 'Reservation created successfully!'
         ];
-
     } catch (Exception $e) {
         // Only rollback if transaction was started
         try {
@@ -126,7 +127,8 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
  * @param string $token Reservation token
  * @return array|null Reservation data or null if not found
  */
-function getReservation(string $token): ?array {
+function getReservation(string $token): ?array
+{
     $reservation = Database::fetchRow(
         'SELECT * FROM reservations WHERE reservation_token = :token',
         ['token' => $token]
@@ -158,7 +160,8 @@ function getReservation(string $token): ?array {
  * @param string $token Reservation token
  * @return array ['success' => bool, 'message' => string]
  */
-function confirmReservation(string $token): array {
+function confirmReservation(string $token): array
+{
     try {
         $reservation = getReservation($token);
 
@@ -213,7 +216,6 @@ function confirmReservation(string $token): array {
             'success' => true,
             'message' => 'Reservation confirmed successfully!'
         ];
-
     } catch (Exception $e) {
         try {
             Database::rollback();
@@ -234,7 +236,8 @@ function confirmReservation(string $token): array {
  * @param string $token Reservation token
  * @return array ['success' => bool, 'message' => string]
  */
-function cancelReservation(string $token): array {
+function cancelReservation(string $token): array
+{
     try {
         $reservation = getReservation($token);
 
@@ -283,7 +286,6 @@ function cancelReservation(string $token): array {
             'success' => true,
             'message' => 'Reservation cancelled successfully.'
         ];
-
     } catch (Exception $e) {
         try {
             Database::rollback();
@@ -303,7 +305,8 @@ function cancelReservation(string $token): array {
  *
  * @return array ['expired_count' => int, 'freed_children' => int]
  */
-function cleanupExpiredReservations(): array {
+function cleanupExpiredReservations(): array
+{
     try {
         // Find expired reservations
         $expiredReservations = Database::fetchAll(
@@ -353,7 +356,6 @@ function cleanupExpiredReservations(): array {
             'expired_count' => $expiredCount,
             'freed_children' => $freedChildren
         ];
-
     } catch (Exception $e) {
         try {
             Database::rollback();
@@ -371,7 +373,8 @@ function cleanupExpiredReservations(): array {
  * @param array $childrenIds Array of child IDs
  * @return array Array of unavailable child display IDs
  */
-function checkChildrenAvailability(array $childrenIds): array {
+function checkChildrenAvailability(array $childrenIds): array
+{
     $placeholders = implode(',', array_fill(0, count($childrenIds), '?'));
 
     $unavailable = Database::fetchAll(
@@ -389,7 +392,8 @@ function checkChildrenAvailability(array $childrenIds): array {
 /**
  * Generate a unique reservation token
  */
-function generateReservationToken(): string {
+function generateReservationToken(): string
+{
     return bin2hex(random_bytes(32)); // 64 character hex string
 }
 
@@ -400,7 +404,8 @@ function generateReservationToken(): string {
  * @param int $limit Number of results (default: 50)
  * @return array Array of reservations
  */
-function getAllReservations(?string $status = null, int $limit = 50): array {
+function getAllReservations(?string $status = null, int $limit = 50): array
+{
     $sql = "SELECT * FROM reservations";
     $params = [];
 

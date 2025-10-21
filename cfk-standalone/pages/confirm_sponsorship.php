@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Confirm Sponsorship - Sponsor Information Form
  * Step 1: Collect sponsor details before creating reservation

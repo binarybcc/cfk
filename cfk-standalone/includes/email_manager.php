@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED: This file is kept for backwards compatibility only.
  * The actual implementation has moved to src/Email/Manager.php
@@ -21,14 +22,15 @@ return; // Exit early - nothing to do here
 
 // DEPRECATED CODE BELOW - DO NOT USE
 // ====================================
-class CFK_Email_Manager_DEPRECATED {
-
+class CFK_Email_Manager_DEPRECATED
+{
     private static ?PHPMailer $mailer = null;
 
     /**
      * Initialize PHPMailer instance (public for email queue access)
      */
-    public static function getMailer(): object {
+    public static function getMailer(): object
+    {
         if (!self::$mailer instanceof PHPMailer) {
             // Auto-load PHPMailer if available via Composer
             if (file_exists(__DIR__ . '/../vendor/autoload.php')) {
@@ -70,7 +72,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Fallback mailer for basic PHP mail() function
      */
-    private static function getFallbackMailer(): object {
+    private static function getFallbackMailer(): object
+    {
         return new class {
             public $Subject = '';
             public $Body = '';
@@ -78,19 +81,23 @@ class CFK_Email_Manager_DEPRECATED {
             private array $to = [];
             private array $from = ['email' => '', 'name' => ''];
 
-            public function addAddress(string $email, string $name = ''): void {
+            public function addAddress(string $email, string $name = ''): void
+            {
                 $this->to[] = ['email' => $email, 'name' => $name];
             }
 
-            public function clearAddresses(): void {
+            public function clearAddresses(): void
+            {
                 $this->to = [];
             }
 
-            public function setFrom(string $email, string $name = ''): void {
+            public function setFrom(string $email, string $name = ''): void
+            {
                 $this->from = ['email' => $email, 'name' => $name];
             }
 
-            public function send(): bool {
+            public function send(): bool
+            {
                 $headers = "From: " . ($this->from['name'] ? $this->from['name'] . ' <' . $this->from['email'] . '>' : $this->from['email']) . "\r\n";
                 $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
@@ -104,14 +111,17 @@ class CFK_Email_Manager_DEPRECATED {
                 return true;
             }
 
-            public function isHTML(bool $html): void {}
+            public function isHTML(bool $html): void
+            {
+            }
         };
     }
 
     /**
      * Send sponsorship confirmation email to sponsor
      */
-    public static function sendSponsorConfirmation(array $sponsorship): bool {
+    public static function sendSponsorConfirmation(array $sponsorship): bool
+    {
         try {
             $mailer = self::getMailer();
 
@@ -131,7 +141,6 @@ class CFK_Email_Manager_DEPRECATED {
             );
 
             return $success;
-
         } catch (Exception $e) {
             error_log('Failed to send sponsor confirmation email: ' . $e->getMessage());
             self::logEmail(
@@ -148,7 +157,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Send admin notification email
      */
-    public static function sendAdminNotification(string $subject, string $message, array $sponsorship = []): bool {
+    public static function sendAdminNotification(string $subject, string $message, array $sponsorship = []): bool
+    {
         try {
             $mailer = self::getMailer();
 
@@ -168,7 +178,6 @@ class CFK_Email_Manager_DEPRECATED {
             );
 
             return $success;
-
         } catch (Exception $e) {
             error_log('Failed to send admin notification email: ' . $e->getMessage());
             return false;
@@ -178,7 +187,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Get sponsor confirmation email template (public for email queue access)
      */
-    public static function getSponsorConfirmationTemplate(array $sponsorship): string {
+    public static function getSponsorConfirmationTemplate(array $sponsorship): string
+    {
         $childDisplayId = sanitizeString($sponsorship['child_display_id'] ?? 'Unknown');
         $childName = sanitizeString($sponsorship['child_name'] ?? 'Child');
         $childAge = sanitizeInt($sponsorship['child_age'] ?? 0);
@@ -304,7 +314,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Get admin notification email template (public for email queue access)
      */
-    public static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship = []): string {
+    public static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship = []): string
+    {
         $content = "<html><body style='font-family: Arial, sans-serif;'>";
         $content .= "<h2>CFK Admin Notification</h2>";
         $content .= "<p><strong>Subject:</strong> $subject</p>";
@@ -333,7 +344,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Log email for audit trail
      */
-    private static function logEmail(string $recipient, string $type, string $status, int $sponsorshipId = 0, string $error = ''): void {
+    private static function logEmail(string $recipient, string $type, string $status, int $sponsorshipId = 0, string $error = ''): void
+    {
         try {
             Database::insert('email_log', [
                 'recipient' => $recipient,
@@ -351,7 +363,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Test email configuration
      */
-    public static function testEmailConfig(): array {
+    public static function testEmailConfig(): array
+    {
         try {
             $testEmail = config('admin_email');
             $mailer = self::getMailer();
@@ -366,7 +379,6 @@ class CFK_Email_Manager_DEPRECATED {
                 'success' => $success,
                 'message' => $success ? 'Test email sent successfully' : 'Failed to send test email'
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -378,7 +390,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Send multi-child sponsorship email (when sponsor adds more children)
      */
-    public static function sendMultiChildSponsorshipEmail(string $sponsorEmail, array $sponsorships): bool {
+    public static function sendMultiChildSponsorshipEmail(string $sponsorEmail, array $sponsorships): bool
+    {
         if ($sponsorships === []) {
             return false;
         }
@@ -402,7 +415,6 @@ class CFK_Email_Manager_DEPRECATED {
             );
 
             return $success;
-
         } catch (Exception $e) {
             error_log('Failed to send multi-child sponsorship email: ' . $e->getMessage());
             return false;
@@ -412,7 +424,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Get multi-child sponsorship email template
      */
-    private static function getMultiChildSponsorshipTemplate(string $sponsorName, array $sponsorships): string {
+    private static function getMultiChildSponsorshipTemplate(string $sponsorName, array $sponsorships): string
+    {
         $childCount = count($sponsorships);
 
         // Group by family
@@ -569,7 +582,8 @@ class CFK_Email_Manager_DEPRECATED {
      * Send access link email to sponsor
      * Allows sponsor to view their sponsorships via secure link
      */
-    public static function sendAccessLink(string $email): bool {
+    public static function sendAccessLink(string $email): bool
+    {
         try {
             // Get sponsorships for this email
             $sponsorships = Database::fetchAll(
@@ -618,7 +632,6 @@ class CFK_Email_Manager_DEPRECATED {
             );
 
             return $success;
-
         } catch (Exception $e) {
             error_log('Failed to send access link email: ' . $e->getMessage());
             self::logEmail(
@@ -635,7 +648,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Generate secure access token for sponsor
      */
-    private static function generateAccessToken(string $email): string {
+    private static function generateAccessToken(string $email): string
+    {
         // Create a token that expires in 24 hours
         $data = [
             'email' => $email,
@@ -651,7 +665,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Verify access token
      */
-    public static function verifyAccessToken(string $token): ?string {
+    public static function verifyAccessToken(string $token): ?string
+    {
         try {
             $decoded = base64_decode($token);
             [$json, $signature] = explode('|', $decoded, 2);
@@ -669,7 +684,6 @@ class CFK_Email_Manager_DEPRECATED {
             }
 
             return $data['email'];
-
         } catch (Exception) {
             return null;
         }
@@ -678,7 +692,8 @@ class CFK_Email_Manager_DEPRECATED {
     /**
      * Get access link email template
      */
-    private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string {
+    private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string
+    {
         return "
         <!DOCTYPE html>
         <html>

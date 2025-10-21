@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,13 +12,15 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class Database {
+class Database
+{
     private static ?PDO $connection = null;
 
     /**
      * Initialize database connection
      */
-    public static function init(array $config): void {
+    public static function init(array $config): void
+    {
         try {
             $dsn = sprintf(
                 'mysql:host=%s;dbname=%s;charset=utf8mb4',
@@ -44,7 +47,8 @@ class Database {
     /**
      * Get PDO connection (for transaction support)
      */
-    public static function getConnection(): PDO {
+    public static function getConnection(): PDO
+    {
         if (!self::$connection instanceof PDO) {
             throw new RuntimeException('Database not initialized. Call Database::init() first.');
         }
@@ -54,7 +58,8 @@ class Database {
     /**
      * Execute a query and fetch all results
      */
-    public static function fetchAll(string $sql, array $params = []): array {
+    public static function fetchAll(string $sql, array $params = []): array
+    {
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -64,7 +69,8 @@ class Database {
     /**
      * Execute a query and fetch a single row
      */
-    public static function fetchRow(string $sql, array $params = []): ?array {
+    public static function fetchRow(string $sql, array $params = []): ?array
+    {
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -75,7 +81,8 @@ class Database {
     /**
      * Execute a query and return number of affected rows
      */
-    public static function execute(string $sql, array $params = []): int {
+    public static function execute(string $sql, array $params = []): int
+    {
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
@@ -85,7 +92,8 @@ class Database {
     /**
      * Insert data into a table
      */
-    public static function insert(string $table, array $data): int {
+    public static function insert(string $table, array $data): int
+    {
         $pdo = self::getConnection();
 
         $columns = array_keys($data);
@@ -101,7 +109,8 @@ class Database {
     /**
      * Update data in a table
      */
-    public static function update(string $table, array $data, array $where): int {
+    public static function update(string $table, array $data, array $where): int
+    {
         $pdo = self::getConnection();
 
         $setClause = [];
@@ -140,7 +149,8 @@ class Database {
     /**
      * Delete data from a table
      */
-    public static function delete(string $table, array $where): int {
+    public static function delete(string $table, array $where): int
+    {
         $pdo = self::getConnection();
 
         $whereClause = [];
@@ -159,21 +169,24 @@ class Database {
     /**
      * Begin database transaction
      */
-    public static function beginTransaction(): void {
+    public static function beginTransaction(): void
+    {
         self::getConnection()->beginTransaction();
     }
 
     /**
      * Commit database transaction
      */
-    public static function commit(): void {
+    public static function commit(): void
+    {
         self::getConnection()->commit();
     }
 
     /**
      * Rollback database transaction
      */
-    public static function rollback(): void {
+    public static function rollback(): void
+    {
         self::getConnection()->rollBack();
     }
 }

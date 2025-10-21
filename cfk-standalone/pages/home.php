@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Home Page
  * Welcome page with overview and quick access to children

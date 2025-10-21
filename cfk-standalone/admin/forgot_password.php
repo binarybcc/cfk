@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -49,7 +50,8 @@ if ($_POST && isset($_POST['reset_request'])) {
             $resetExpiry = gmdate('Y-m-d H:i:s', time() + 3600); // 1 hour from now in UTC
 
             // Store token in database
-            Database::update('admin_users',
+            Database::update(
+                'admin_users',
                 [
                     'reset_token' => password_hash($resetToken, PASSWORD_DEFAULT),
                     'reset_token_expiry' => $resetExpiry
@@ -247,13 +249,13 @@ if ($_POST && isset($_POST['reset_request'])) {
             <p>Enter your username and email address to receive password reset instructions.</p>
         </div>
 
-        <?php if ($error !== '' && $error !== '0'): ?>
+        <?php if ($error !== '' && $error !== '0') : ?>
             <div class="error-message">
                 <?php echo htmlspecialchars($error); ?>
             </div>
         <?php endif; ?>
 
-        <?php if ($success): ?>
+        <?php if ($success) : ?>
             <div class="success-message">
                 <?php echo htmlspecialchars($message); ?>
             </div>
@@ -261,7 +263,7 @@ if ($_POST && isset($_POST['reset_request'])) {
             <div class="reset-footer">
                 <a href="login.php">← Back to Login</a>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <div class="info-box">
                 💡 <strong>Note:</strong> You must have an email address associated with your admin account to reset your password.
             </div>

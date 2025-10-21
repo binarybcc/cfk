@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -11,11 +12,13 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class MagicLinkEmailTemplate {
+class MagicLinkEmailTemplate
+{
     /**
      * Get HTML email template
      */
-    public static function getHtmlTemplate(string $loginLink, int $expirationMinutes): string {
+    public static function getHtmlTemplate(string $loginLink, int $expirationMinutes): string
+    {
         $appName = config('app_name', 'Christmas for Kids');
         $expirationTime = date('g:i A', time() + ($expirationMinutes * 60));
 
@@ -173,7 +176,8 @@ HTML;
     /**
      * Get plain text email template
      */
-    public static function getPlainTextTemplate(string $loginLink, int $expirationMinutes): string {
+    public static function getPlainTextTemplate(string $loginLink, int $expirationMinutes): string
+    {
         $appName = config('app_name', 'Christmas for Kids');
         $expirationTime = date('g:i A', time() + ($expirationMinutes * 60));
 

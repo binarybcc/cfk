@@ -1,4 +1,5 @@
 <?php
+
 /**
  * How to Apply Page
  * Information for families applying for Christmas assistance
@@ -25,11 +26,11 @@ if (!defined('CFK_APP')) {
             <div class="dates-grid">
                 <div class="date-card highlight">
                     <h3>First Day to Apply</h3>
-                    <p class="big-text">Tuesday, October 25</p>
+                    <p class="big-text">Tuesday, October 28</p>
                 </div>
                 <div class="date-card deadline">
                     <h3>Applications End</h3>
-                    <p class="big-text">November 28</p>
+                    <p class="big-text">November 25</p>
                 </div>
             </div>
 

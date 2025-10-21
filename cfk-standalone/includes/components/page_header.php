@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Page Header Component
  * Reusable page header with gradient background and optional description
@@ -26,10 +27,10 @@ $additionalContent ??= '';
 
 <div class="page-header <?php echo sanitizeString($additionalClasses); ?>">
     <h1><?php echo sanitizeString($title); ?></h1>
-    <?php if ($description): ?>
+    <?php if ($description) : ?>
         <p class="page-description"><?php echo sanitizeString($description); ?></p>
     <?php endif; ?>
-    <?php if ($additionalContent): ?>
+    <?php if ($additionalContent) : ?>
         <?php echo $additionalContent; ?>
     <?php endif; ?>
 </div>

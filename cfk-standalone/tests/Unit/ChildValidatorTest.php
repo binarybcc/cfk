@@ -260,8 +260,11 @@ class ChildValidatorTest extends TestCase
         foreach ($testCases as $case) {
             $data = ['gender' => $case['input']];
             $sanitized = ChildValidator::sanitize($data);
-            $this->assertEquals($case['expected'], $sanitized['gender'],
-                "Failed to normalize gender: {$case['input']}");
+            $this->assertEquals(
+                $case['expected'],
+                $sanitized['gender'],
+                "Failed to normalize gender: {$case['input']}"
+            );
         }
     }
 

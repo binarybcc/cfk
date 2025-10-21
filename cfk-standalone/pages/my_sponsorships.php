@@ -1,4 +1,5 @@
 <?php
+
 /**
  * My Sponsorships - Unified Page
  * Combines pending selections + confirmed sponsorship lookup
@@ -193,7 +194,7 @@ $pageTitle = 'My Sponsorships';
                 Already sponsored children? Enter your email to view your sponsorships.
             </p>
 
-            <?php if ($emailSent && $sponsorships === []): ?>
+            <?php if ($emailSent && $sponsorships === []) : ?>
                 <!-- Email Sent Confirmation -->
                 <div class="email-sent-confirmation">
                     <div class="alert alert-success">
@@ -215,7 +216,7 @@ $pageTitle = 'My Sponsorships';
                     </div>
                 </div>
 
-            <?php elseif ($success && $sponsorships !== []): ?>
+            <?php elseif ($success && $sponsorships !== []) : ?>
                 <!-- Sponsorship Results -->
                 <div class="sponsorships-found">
                     <div class="alert alert-success">
@@ -228,7 +229,7 @@ $pageTitle = 'My Sponsorships';
                     <!-- Sponsored Children List -->
                     <div class="sponsored-children-list">
                         <h3>Your Sponsored Children:</h3>
-                        <?php foreach ($sponsorships as $sponsorship): ?>
+                        <?php foreach ($sponsorships as $sponsorship) : ?>
                             <div class="sponsored-child-card">
                                 <div class="child-card-header">
                                     <h4><?php echo sanitizeString($sponsorship['display_id']); ?></h4>
@@ -244,7 +245,7 @@ $pageTitle = 'My Sponsorships';
                                         <strong>Gender:</strong>
                                         <span><?php echo $sponsorship['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
                                     </div>
-                                    <?php if (!empty($sponsorship['grade'])): ?>
+                                    <?php if (!empty($sponsorship['grade'])) : ?>
                                         <div class="info-item">
                                             <strong>Grade:</strong>
                                             <span>Grade <?php echo (int)$sponsorship['grade']; ?></span>
@@ -256,19 +257,19 @@ $pageTitle = 'My Sponsorships';
                                     </div>
                                 </div>
 
-                                <?php if (!empty($sponsorship['wishes'])): ?>
+                                <?php if (!empty($sponsorship['wishes'])) : ?>
                                     <div class="child-wishes">
                                         <strong>Wishes:</strong>
                                         <p><?php echo nl2br(sanitizeString($sponsorship['wishes'])); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($sponsorship['clothing_sizes']) || !empty($sponsorship['shoe_size'])): ?>
+                                <?php if (!empty($sponsorship['clothing_sizes']) || !empty($sponsorship['shoe_size'])) : ?>
                                     <div class="child-sizes">
-                                        <?php if (!empty($sponsorship['clothing_sizes'])): ?>
+                                        <?php if (!empty($sponsorship['clothing_sizes'])) : ?>
                                             <span><strong>Clothing:</strong> <?php echo sanitizeString($sponsorship['clothing_sizes']); ?></span>
                                         <?php endif; ?>
-                                        <?php if (!empty($sponsorship['shoe_size'])): ?>
+                                        <?php if (!empty($sponsorship['shoe_size'])) : ?>
                                             <span><strong>Shoes:</strong> <?php echo sanitizeString($sponsorship['shoe_size']); ?></span>
                                         <?php endif; ?>
                                     </div>
@@ -279,7 +280,7 @@ $pageTitle = 'My Sponsorships';
 
                     <!-- Actions -->
                     <div class="sponsorship-actions">
-                        <?php if ($emailSent): ?>
+                        <?php if ($emailSent) : ?>
                             <div class="alert alert-info">
                                 ✓ Confirmation email sent to <?php echo sanitizeString($lookupEmail); ?>
                             </div>
@@ -308,7 +309,7 @@ $pageTitle = 'My Sponsorships';
                     </div>
                 </div>
 
-            <?php else: ?>
+            <?php else : ?>
                 <!-- Lookup Form -->
                 <div class="lookup-form-container">
                     <div class="info-box">
@@ -328,11 +329,11 @@ $pageTitle = 'My Sponsorships';
                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                         <input type="hidden" name="lookup_email" value="1">
 
-                        <?php if ($errors !== []): ?>
+                        <?php if ($errors !== []) : ?>
                             <div class="alert alert-error" role="alert" aria-live="polite">
                                 <strong>Error:</strong>
                                 <ul id="sponsorship-form-errors">
-                                    <?php foreach ($errors as $error): ?>
+                                    <?php foreach ($errors as $error) : ?>
                                         <li><?php echo sanitizeString($error); ?></li>
                                     <?php endforeach; ?>
                                 </ul>

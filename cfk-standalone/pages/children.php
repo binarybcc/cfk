@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Children Listing Page
  * Display all available children with filtering and pagination
@@ -107,7 +108,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
     ?>
 
     <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
-    <?php if (!$viewingFamily): ?>
+    <?php if (!$viewingFamily) : ?>
     <script nonce="<?php echo $cspNonce; ?>">
     // Define children data for Alpine.js
     window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
@@ -251,7 +252,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <p style="margin: 0; font-weight: 600; color: #2c5530;">
                 Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
-                <?php if (!empty($filters)): ?>
+                <?php if (!empty($filters)) : ?>
                     <span style="color: #666; font-weight: normal;">(filtered)</span>
                 <?php endif; ?>
             </p>
@@ -262,7 +263,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 <select id="per-page-select"
                         onchange="window.location.href = updateQueryParam('per_page', this.value)"
                         style="padding: 0.4rem 0.8rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem;">
-                    <?php foreach ($perPageOptions as $option): ?>
+                    <?php foreach ($perPageOptions as $option) : ?>
                         <option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>>
                             <?php echo $option; ?>
                         </option>
@@ -284,15 +285,15 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
         <!-- Children Grid with Server-Side Rendering -->
         <div class="children-grid">
-            <?php if ($children === []): ?>
+            <?php if ($children === []) : ?>
                 <!-- No Results Message -->
                 <div class="no-results">
                     <h2>No Children Found</h2>
                     <p>No children match your current filters. Try adjusting your search criteria.</p>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <!-- Children Cards -->
-                <?php foreach ($children as $child): ?>
+                <?php foreach ($children as $child) : ?>
                     <?php
                     $siblingCount = getSiblingCount($child['family_id']);
                     ?>
@@ -316,7 +317,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                 <div class="child-meta-item">
                                     <strong></strong> <span><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
                                 </div>
-                                <?php if (!empty($child['grade'])): ?>
+                                <?php if (!empty($child['grade'])) : ?>
                                     <div class="child-meta-item">
                                         <strong>Age Group:</strong> <span><?php echo htmlspecialchars((string) $child['grade']); ?></span>
                                     </div>
@@ -327,14 +328,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                         <!-- Middle Section: Details -->
                         <div class="child-info">
                             <!-- Interests & Wishes -->
-                            <?php if (!empty($child['interests'])): ?>
+                            <?php if (!empty($child['interests'])) : ?>
                                 <div style="margin-bottom: 15px;">
                                     <strong style="color: #2c5530;">Interests:</strong>
                                     <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['interests']); ?></p>
                                 </div>
                             <?php endif; ?>
 
-                            <?php if (!empty($child['wishes'])): ?>
+                            <?php if (!empty($child['wishes'])) : ?>
                                 <div style="margin-bottom: 15px;">
                                     <strong style="color: #c41e3a;">Wishes:</strong>
                                     <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['wishes']); ?></p>
@@ -369,7 +370,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         </div>
 
         <!-- Pagination -->
-        <?php if ($totalPages > 1): ?>
+        <?php if ($totalPages > 1) : ?>
             <div class="pagination" style="margin-top: 2rem; text-align: center;">
                 <?php
                 // Preserve all query params except 'p' (page number)
@@ -379,7 +380,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
                 ?>
 
-                <?php if ($currentPage > 1): ?>
+                <?php if ($currentPage > 1) : ?>
                     <a href="?p=<?php echo $currentPage - 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">« Previous</a>
                 <?php endif; ?>
 
@@ -387,7 +388,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                     Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
                 </span>
 
-                <?php if ($currentPage < $totalPages): ?>
+                <?php if ($currentPage < $totalPages) : ?>
                     <a href="?p=<?php echo $currentPage + 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">Next »</a>
                 <?php endif; ?>
             </div>

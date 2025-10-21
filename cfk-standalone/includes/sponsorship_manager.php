@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED: This file is kept for backwards compatibility only.
  * The actual implementation has moved to src/Sponsorship/Manager.php
@@ -17,8 +18,8 @@ if (!defined('CFK_APP')) {
 return;
 
 // DEPRECATED CODE BELOW
-class CFK_Sponsorship_Manager_DEPRECATED {
-    
+class CFK_Sponsorship_Manager_DEPRECATED
+{
     const STATUS_AVAILABLE = 'available';
     const STATUS_PENDING = 'pending';
     const STATUS_SPONSORED = 'confirmed';  // Match database enum
@@ -26,11 +27,12 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     const STATUS_INACTIVE = 'inactive';
 
     const PENDING_TIMEOUT_HOURS = 2; // Hours before pending expires (shopping cart timeout)
-    
+
     /**
      * Check if a child is available for sponsorship
      */
-    public static function isChildAvailable(int $childId): array {
+    public static function isChildAvailable(int $childId): array
+    {
         $child = Database::fetchRow(
             "SELECT c.id, CONCAT(f.family_number, c.child_letter) as name, c.status,
                     CONCAT(f.family_number, c.child_letter) as display_id
@@ -39,7 +41,7 @@ class CFK_Sponsorship_Manager_DEPRECATED {
              WHERE c.id = ?",
             [$childId]
         );
-        
+
         if (!$child) {
             return [
                 'available' => false,
@@ -47,7 +49,7 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                 'child' => null
             ];
         }
-        
+
         // Check current status
         if ($child['status'] !== self::STATUS_AVAILABLE) {
             return [
@@ -56,21 +58,22 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                 'child' => $child
             ];
         }
-        
+
         return [
             'available' => true,
             'reason' => 'Child is available for sponsorship',
             'child' => $child
         ];
     }
-    
+
     /**
      * Reserve a child for sponsorship (sets to pending)
      */
-    public static function reserveChild(int $childId): array {
+    public static function reserveChild(int $childId): array
+    {
         // Start transaction to prevent race conditions
         Database::getConnection()->beginTransaction();
-        
+
         try {
             // Double-check availability within transaction
             $availability = self::isChildAvailable($childId);
@@ -82,13 +85,14 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                     'child' => $availability['child']
                 ];
             }
-            
+
             // Reserve the child (set to pending)
-            $updated = Database::update('children', 
-                ['status' => self::STATUS_PENDING], 
+            $updated = Database::update(
+                'children',
+                ['status' => self::STATUS_PENDING],
                 ['id' => $childId, 'status' => self::STATUS_AVAILABLE]
             );
-            
+
             if ($updated === 0) {
                 // Another process got there first
                 Database::getConnection()->rollback();
@@ -98,19 +102,18 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                     'child' => $availability['child']
                 ];
             }
-            
+
             Database::getConnection()->commit();
-            
+
             return [
                 'success' => true,
                 'message' => 'Child reserved successfully',
                 'child' => $availability['child']
             ];
-            
         } catch (Exception $e) {
             Database::getConnection()->rollback();
             error_log('Failed to reserve child ' . $childId . ': ' . $e->getMessage());
-            
+
             return [
                 'success' => false,
                 'message' => 'System error occurred. Please try again.',
@@ -118,17 +121,18 @@ class CFK_Sponsorship_Manager_DEPRECATED {
             ];
         }
     }
-    
+
     /**
      * Create sponsorship request
      */
-    public static function createSponsorshipRequest(int $childId, array $sponsorData): array {
+    public static function createSponsorshipRequest(int $childId, array $sponsorData): array
+    {
         // First reserve the child
         $reservation = self::reserveChild($childId);
         if (!$reservation['success']) {
             return $reservation;
         }
-        
+
         // Validate sponsor data
         $validation = self::validateSponsorData($sponsorData);
         if (!$validation['valid']) {
@@ -140,7 +144,7 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                 'child' => $reservation['child']
             ];
         }
-        
+
         try {
             // Create sponsorship record
             $sponsorshipId = Database::insert('sponsorships', [
@@ -153,7 +157,7 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                 'special_message' => sanitizeString($sponsorData['message'] ?? ''),
                 'status' => self::STATUS_PENDING
             ]);
-            
+
             // Send email notifications if email manager is available
             if (class_exists('CFK_Email_Manager')) {
                 // Get full sponsorship data for emails (includes ALL child details for shopping)
@@ -177,11 +181,11 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                      WHERE s.id = ?",
                     [$sponsorshipId]
                 );
-                
+
                 if ($fullSponsorship) {
                     // Send confirmation email to sponsor
                     CFK_Email_Manager::sendSponsorConfirmation($fullSponsorship);
-                    
+
                     // Send notification to admin
                     CFK_Email_Manager::sendAdminNotification(
                         'New Sponsorship Request',
@@ -190,19 +194,18 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                     );
                 }
             }
-            
+
             return [
                 'success' => true,
                 'message' => 'Sponsorship request submitted successfully! You will receive confirmation within 24 hours.',
                 'sponsorship_id' => $sponsorshipId,
                 'child' => $reservation['child']
             ];
-            
         } catch (Exception $e) {
             // Release the child reservation on error
             self::releaseChild($childId);
             error_log('Failed to create sponsorship for child ' . $childId . ': ' . $e->getMessage());
-            
+
             return [
                 'success' => false,
                 'message' => 'System error occurred. Please try again.',
@@ -210,14 +213,16 @@ class CFK_Sponsorship_Manager_DEPRECATED {
             ];
         }
     }
-    
+
     /**
      * Release child (set back to available) - used for timeouts or errors
      */
-    public static function releaseChild(int $childId): bool {
+    public static function releaseChild(int $childId): bool
+    {
         try {
-            $updated = Database::update('children', 
-                ['status' => self::STATUS_AVAILABLE], 
+            $updated = Database::update(
+                'children',
+                ['status' => self::STATUS_AVAILABLE],
                 ['id' => $childId]
             );
             return $updated > 0;
@@ -226,14 +231,15 @@ class CFK_Sponsorship_Manager_DEPRECATED {
             return false;
         }
     }
-    
+
     /**
      * Confirm sponsorship (admin action)
      */
-    public static function confirmSponsorship(int $sponsorshipId): array {
+    public static function confirmSponsorship(int $sponsorshipId): array
+    {
         try {
             Database::getConnection()->beginTransaction();
-            
+
             // Get sponsorship details
             $sponsorship = Database::fetchRow(
                 "SELECT s.*, c.id as child_id, c.status 
@@ -242,110 +248,116 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                  WHERE s.id = ?",
                 [$sponsorshipId]
             );
-            
+
             if (!$sponsorship) {
                 Database::getConnection()->rollback();
                 return ['success' => false, 'message' => 'Sponsorship not found'];
             }
-            
+
             // Update sponsorship status
-            Database::update('sponsorships', 
-                ['status' => 'confirmed', 'confirmation_date' => date('Y-m-d H:i:s')], 
+            Database::update(
+                'sponsorships',
+                ['status' => 'confirmed', 'confirmation_date' => date('Y-m-d H:i:s')],
                 ['id' => $sponsorshipId]
             );
-            
+
             // Update child status
-            Database::update('children', 
-                ['status' => 'sponsored'], 
+            Database::update(
+                'children',
+                ['status' => 'sponsored'],
                 ['id' => $sponsorship['child_id']]
             );
-            
+
             Database::getConnection()->commit();
-            
+
             return [
                 'success' => true,
                 'message' => 'Sponsorship confirmed successfully',
                 'sponsorship' => $sponsorship
             ];
-            
         } catch (Exception $e) {
             Database::getConnection()->rollback();
             error_log('Failed to confirm sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
-    
+
     /**
      * Complete sponsorship (gifts delivered)
      */
-    public static function completeSponsorship(int $sponsorshipId): array {
+    public static function completeSponsorship(int $sponsorshipId): array
+    {
         try {
             Database::getConnection()->beginTransaction();
-            
+
             // Update sponsorship
-            Database::update('sponsorships', 
-                ['status' => 'completed', 'completion_date' => date('Y-m-d H:i:s')], 
+            Database::update(
+                'sponsorships',
+                ['status' => 'completed', 'completion_date' => date('Y-m-d H:i:s')],
                 ['id' => $sponsorshipId]
             );
-            
+
             // Update child - children table doesn't have 'completed' status, use 'sponsored'
             $sponsorship = Database::fetchRow("SELECT child_id FROM sponsorships WHERE id = ?", [$sponsorshipId]);
             if ($sponsorship) {
-                Database::update('children', 
-                    ['status' => 'sponsored'], 
+                Database::update(
+                    'children',
+                    ['status' => 'sponsored'],
                     ['id' => $sponsorship['child_id']]
                 );
             }
-            
+
             Database::getConnection()->commit();
             return ['success' => true, 'message' => 'Sponsorship marked as completed'];
-            
         } catch (Exception $e) {
             Database::getConnection()->rollback();
             error_log('Failed to complete sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
-    
+
     /**
      * Cancel sponsorship
      */
-    public static function cancelSponsorship(int $sponsorshipId, string $reason = ''): array {
+    public static function cancelSponsorship(int $sponsorshipId, string $reason = ''): array
+    {
         try {
             Database::getConnection()->beginTransaction();
-            
+
             $sponsorship = Database::fetchRow("SELECT child_id FROM sponsorships WHERE id = ?", [$sponsorshipId]);
-            
+
             if ($sponsorship) {
                 // Cancel sponsorship
-                Database::update('sponsorships', 
-                    ['status' => 'cancelled', 'notes' => $reason], 
+                Database::update(
+                    'sponsorships',
+                    ['status' => 'cancelled', 'notes' => $reason],
                     ['id' => $sponsorshipId]
                 );
-                
+
                 // Release child back to available
-                Database::update('children', 
-                    ['status' => self::STATUS_AVAILABLE], 
+                Database::update(
+                    'children',
+                    ['status' => self::STATUS_AVAILABLE],
                     ['id' => $sponsorship['child_id']]
                 );
             }
-            
+
             Database::getConnection()->commit();
             return ['success' => true, 'message' => 'Sponsorship cancelled successfully'];
-            
         } catch (Exception $e) {
             Database::getConnection()->rollback();
             error_log('Failed to cancel sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
-    
+
     /**
      * Clean up expired pending sponsorships
      */
-    public static function cleanupExpiredPendingSponsorships(): int {
+    public static function cleanupExpiredPendingSponsorships(): int
+    {
         $cutoffTime = date('Y-m-d H:i:s', strtotime('-' . self::PENDING_TIMEOUT_HOURS . ' hours'));
-        
+
         try {
             // Get expired sponsorships
             $expiredSponsorships = Database::fetchAll(
@@ -354,68 +366,71 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                  WHERE s.status = 'pending' AND s.request_date < ?",
                 [$cutoffTime]
             );
-            
+
             $cleaned = 0;
-            
+
             foreach ($expiredSponsorships as $sponsorship) {
                 // Cancel the sponsorship
-                Database::update('sponsorships', 
-                    ['status' => 'cancelled', 'notes' => 'Automatically cancelled due to timeout'], 
+                Database::update(
+                    'sponsorships',
+                    ['status' => 'cancelled', 'notes' => 'Automatically cancelled due to timeout'],
                     ['id' => $sponsorship['id']]
                 );
-                
+
                 // Release the child
-                Database::update('children', 
-                    ['status' => self::STATUS_AVAILABLE], 
+                Database::update(
+                    'children',
+                    ['status' => self::STATUS_AVAILABLE],
                     ['id' => $sponsorship['child_id']]
                 );
-                
+
                 $cleaned++;
             }
-            
+
             if ($cleaned > 0) {
                 error_log("CFK: Cleaned up $cleaned expired pending sponsorships");
             }
-            
+
             return $cleaned;
-            
         } catch (Exception $e) {
             error_log('Failed to cleanup expired sponsorships: ' . $e->getMessage());
             return 0;
         }
     }
-    
+
     /**
      * Get sponsorship statistics
      */
-    public static function getStats(): array {
+    public static function getStats(): array
+    {
         $stats = [];
-        
+
         // Children by status
         $statusCounts = Database::fetchAll(
             "SELECT status, COUNT(*) as count FROM children GROUP BY status"
         );
-        
+
         foreach ($statusCounts as $row) {
             $stats['children'][$row['status']] = (int)$row['count'];
         }
-        
+
         // Sponsorship by status
         $sponsorshipCounts = Database::fetchAll(
             "SELECT status, COUNT(*) as count FROM sponsorships GROUP BY status"
         );
-        
+
         foreach ($sponsorshipCounts as $row) {
             $stats['sponsorships'][$row['status']] = (int)$row['count'];
         }
-        
+
         return $stats;
     }
-    
+
     /**
      * Validate sponsor data using centralized validator
      */
-    private static function validateSponsorData(array $data): array {
+    private static function validateSponsorData(array $data): array
+    {
         // Load validator if not already included
         if (!class_exists('Validator')) {
             require_once __DIR__ . '/validator.php';
@@ -435,11 +450,12 @@ class CFK_Sponsorship_Manager_DEPRECATED {
             'errors' => $validator->allErrors()
         ];
     }
-    
+
     /**
      * Get user-friendly status message
      */
-    private static function getStatusMessage(string $status): string {
+    private static function getStatusMessage(string $status): string
+    {
         return match ($status) {
             self::STATUS_PENDING => 'This child is currently being processed by another sponsor',
             self::STATUS_SPONSORED => 'This child has already been sponsored',
@@ -448,11 +464,12 @@ class CFK_Sponsorship_Manager_DEPRECATED {
             default => 'This child is not available for sponsorship',
         };
     }
-    
+
     /**
      * Get children needing admin attention (stuck in pending, etc.)
      */
-    public static function getChildrenNeedingAttention(): array {
+    public static function getChildrenNeedingAttention(): array
+    {
         $cutoffTime = date('Y-m-d H:i:s', strtotime('-' . (self::PENDING_TIMEOUT_HOURS - 6) . ' hours'));
 
         return Database::fetchAll("
@@ -470,7 +487,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Get all sponsorships for an email address
      */
-    public static function getSponsorshipsByEmail(string $email): array {
+    public static function getSponsorshipsByEmail(string $email): array
+    {
         return Database::fetchAll(
             "SELECT * FROM sponsorships
              WHERE sponsor_email = ?
@@ -483,7 +501,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Get sponsorships with full child and family details
      */
-    public static function getSponsorshipsWithDetails(string $email): array {
+    public static function getSponsorshipsWithDetails(string $email): array
+    {
         return Database::fetchAll(
             "SELECT s.*,
                     c.id as child_id,
@@ -516,7 +535,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Generate portal access token for sponsor email (DATABASE STORED)
      */
-    public static function generatePortalToken(string $email): string {
+    public static function generatePortalToken(string $email): string
+    {
         $token = bin2hex(random_bytes(32));
         $tokenHash = password_hash($token, PASSWORD_DEFAULT);
         $expiresAt = date('Y-m-d H:i:s', strtotime('+30 minutes'));
@@ -540,7 +560,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Verify portal access token (DATABASE VERIFIED)
      */
-    public static function verifyPortalToken(string $token): array {
+    public static function verifyPortalToken(string $token): array
+    {
         if ($token === '' || $token === '0') {
             return [
                 'valid' => false,
@@ -573,7 +594,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                     }
 
                     // Mark as used
-                    Database::update('portal_access_tokens',
+                    Database::update(
+                        'portal_access_tokens',
                         ['used_at' => date('Y-m-d H:i:s')],
                         ['id' => $tokenRecord['id']]
                     );
@@ -604,7 +626,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Revoke all portal access tokens for an email address
      */
-    public static function revokePortalTokens(string $email): bool {
+    public static function revokePortalTokens(string $email): bool
+    {
         try {
             $updated = Database::execute(
                 "UPDATE portal_access_tokens SET revoked_at = NOW()
@@ -626,7 +649,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Send portal access email to sponsor
      */
-    public static function sendPortalAccessEmail(string $email): array {
+    public static function sendPortalAccessEmail(string $email): array
+    {
         try {
             // Generate token
             $token = self::generatePortalToken($email);
@@ -664,7 +688,6 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                 'success' => false,
                 'message' => 'Email service unavailable. Please contact support.'
             ];
-
         } catch (Exception $e) {
             error_log('Failed to send portal access email: ' . $e->getMessage());
             return [
@@ -677,7 +700,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Get portal access email template
      */
-    private static function getPortalAccessEmailTemplate(string $sponsorName, string $portalUrl): string {
+    private static function getPortalAccessEmailTemplate(string $sponsorName, string $portalUrl): string
+    {
         return "
         <html>
         <head>
@@ -753,7 +777,8 @@ class CFK_Sponsorship_Manager_DEPRECATED {
     /**
      * Add children to existing sponsorship
      */
-    public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array {
+    public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array
+    {
         if ($childIds === []) {
             return [
                 'success' => false,
@@ -794,7 +819,6 @@ class CFK_Sponsorship_Manager_DEPRECATED {
                     'message' => 'Failed to add children: ' . implode(', ', $errors)
                 ];
             }
-
         } catch (Exception $e) {
             error_log('Failed to add children to sponsorship: ' . $e->getMessage());
             return [

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sponsor Lookup Portal - Email-Based Access
  * Allows sponsors to view their sponsorships by entering their email
@@ -60,7 +61,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
     ?>
 
     <div class="lookup-container">
-        <?php if ($emailSent): ?>
+        <?php if ($emailSent) : ?>
             <!-- Success Message -->
             <div class="alert alert-success">
                 <h2>✉️ Check Your Email!</h2>
@@ -74,7 +75,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
                     <li>Contact us at <a href="mailto:<?php echo config('admin_email'); ?>"><?php echo config('admin_email'); ?></a> if problems persist</li>
                 </ul>
             </div>
-        <?php else: ?>
+        <?php else : ?>
             <!-- Lookup Form -->
             <div class="lookup-form-container">
                 <div class="info-section">
@@ -95,11 +96,11 @@ if ($_POST && isset($_POST['lookup_email'])) {
                 <form method="POST" action="" class="lookup-form" id="lookupForm">
                     <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
-                    <?php if ($errors !== []): ?>
+                    <?php if ($errors !== []) : ?>
                         <div class="alert alert-error" role="alert" aria-live="polite">
                             <strong>Error:</strong>
                             <ul id="form-errors">
-                                <?php foreach ($errors as $error): ?>
+                                <?php foreach ($errors as $error) : ?>
                                     <li><?php echo sanitizeString($error); ?></li>
                                 <?php endforeach; ?>
                             </ul>

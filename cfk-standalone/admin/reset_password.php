@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -64,17 +65,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
             $error = 'Password must be at least 8 characters long.';
         } else {
         // Update password and clear reset token
-        $passwordHash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
+            $passwordHash = password_hash((string) $newPassword, PASSWORD_DEFAULT);
 
-        $updated = Database::update('admin_users',
-            [
+            $updated = Database::update(
+                'admin_users',
+                [
                 'password_hash' => $passwordHash,
                 'reset_token' => null,
                 'reset_token_expiry' => null,
                 'updated_at' => gmdate('Y-m-d H:i:s')
-            ],
-            ['id' => $user['id']]
-        );
+                ],
+                ['id' => $user['id']]
+            );
 
             if ($updated !== false) {
                 $success = true;
@@ -278,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
 </head>
 <body>
     <div class="reset-container">
-        <?php if ($success): ?>
+        <?php if ($success) : ?>
             <div class="reset-header">
                 <h1>✓ Password Reset Successful</h1>
             </div>
@@ -292,7 +294,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                 <a href="login.php">Continue to Login →</a>
             </div>
 
-        <?php elseif (!$validToken): ?>
+        <?php elseif (!$validToken) : ?>
             <div class="reset-header">
                 <h1>Invalid Reset Link</h1>
             </div>
@@ -305,13 +307,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
                 <a href="forgot_password.php">Request New Reset Link</a>
             </div>
 
-        <?php else: ?>
+        <?php else : ?>
             <div class="reset-header">
                 <h1>Set New Password</h1>
                 <p>Choose a strong password for your admin account.</p>
             </div>
 
-            <?php if ($error !== '' && $error !== '0'): ?>
+            <?php if ($error !== '' && $error !== '0') : ?>
                 <div class="error-message">
                     <?php echo htmlspecialchars($error); ?>
                 </div>

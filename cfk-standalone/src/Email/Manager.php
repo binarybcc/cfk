@@ -113,7 +113,9 @@ class Manager
                 return true;
             }
 
-            public function isHTML(bool $html): void {}
+            public function isHTML(bool $html): void
+            {
+            }
         };
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -35,7 +36,6 @@ try {
     echo "  Total: {$queueStats['total']}\n";
 
     echo "[" . date('Y-m-d H:i:s') . "] Email Cleanup Completed\n\n";
-
 } catch (Exception $e) {
     echo "ERROR: " . $e->getMessage() . "\n";
     echo $e->getTraceAsString() . "\n";

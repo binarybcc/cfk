@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -216,8 +217,8 @@ if (isLoggedIn()) {
         <?php
         // Display success messages (e.g., after logout)
         $message = getMessage();
-        if ($message && $message['type'] === 'success'):
-        ?>
+        if ($message && $message['type'] === 'success') :
+            ?>
             <div class="success-message">
                 <?php echo htmlspecialchars((string) $message['text']); ?>
             </div>

@@ -90,7 +90,8 @@ class Manager
             }
 
             // Reserve the child (set to pending)
-            $updated = Connection::update('children',
+            $updated = Connection::update(
+                'children',
                 ['status' => self::STATUS_PENDING],
                 ['id' => $childId, 'status' => self::STATUS_AVAILABLE]
             );
@@ -229,7 +230,8 @@ class Manager
     public static function releaseChild(int $childId): bool
     {
         try {
-            $updated = Connection::update('children',
+            $updated = Connection::update(
+                'children',
                 ['status' => self::STATUS_AVAILABLE],
                 ['id' => $childId]
             );
@@ -266,13 +268,15 @@ class Manager
             }
 
             // Update sponsorship status
-            Connection::update('sponsorships',
+            Connection::update(
+                'sponsorships',
                 ['status' => 'confirmed', 'confirmation_date' => date('Y-m-d H:i:s')],
                 ['id' => $sponsorshipId]
             );
 
             // Update child status
-            Connection::update('children',
+            Connection::update(
+                'children',
                 ['status' => 'sponsored'],
                 ['id' => $sponsorship['child_id']]
             );
@@ -303,7 +307,8 @@ class Manager
             Connection::beginTransaction();
 
             // Update sponsorship
-            Connection::update('sponsorships',
+            Connection::update(
+                'sponsorships',
                 ['status' => 'completed', 'completion_date' => date('Y-m-d H:i:s')],
                 ['id' => $sponsorshipId]
             );
@@ -311,7 +316,8 @@ class Manager
             // Update child - children table doesn't have 'completed' status, use 'sponsored'
             $sponsorship = Connection::fetchRow("SELECT child_id FROM sponsorships WHERE id = ?", [$sponsorshipId]);
             if ($sponsorship) {
-                Connection::update('children',
+                Connection::update(
+                    'children',
                     ['status' => 'sponsored'],
                     ['id' => $sponsorship['child_id']]
                 );
@@ -342,13 +348,15 @@ class Manager
 
             if ($sponsorship) {
                 // Cancel sponsorship
-                Connection::update('sponsorships',
+                Connection::update(
+                    'sponsorships',
                     ['status' => 'cancelled', 'notes' => $reason],
                     ['id' => $sponsorshipId]
                 );
 
                 // Release child back to available
-                Connection::update('children',
+                Connection::update(
+                    'children',
                     ['status' => self::STATUS_AVAILABLE],
                     ['id' => $sponsorship['child_id']]
                 );
@@ -385,13 +393,15 @@ class Manager
 
             foreach ($expiredSponsorships as $sponsorship) {
                 // Cancel the sponsorship
-                Connection::update('sponsorships',
+                Connection::update(
+                    'sponsorships',
                     ['status' => 'cancelled', 'notes' => 'Automatically cancelled due to timeout'],
                     ['id' => $sponsorship['id']]
                 );
 
                 // Release the child
-                Connection::update('children',
+                Connection::update(
+                    'children',
                     ['status' => self::STATUS_AVAILABLE],
                     ['id' => $sponsorship['child_id']]
                 );
@@ -583,7 +593,8 @@ class Manager
                     }
 
                     // Mark as used
-                    Connection::update('portal_access_tokens',
+                    Connection::update(
+                        'portal_access_tokens',
                         ['used_at' => date('Y-m-d H:i:s')],
                         ['id' => $tokenRecord['id']]
                     );

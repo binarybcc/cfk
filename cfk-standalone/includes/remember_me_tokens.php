@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -12,8 +13,8 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class RememberMeTokens {
-
+class RememberMeTokens
+{
     const TOKEN_LENGTH = 32; // 256 bits
     const TOKEN_EXPIRY_DAYS = 30;
     const COOKIE_NAME = 'cfk_remember_token';
@@ -24,7 +25,8 @@ class RememberMeTokens {
      * @param int $userId The admin user ID
      * @return string The token (to be set in cookie)
      */
-    public static function generateToken(int $userId): string {
+    public static function generateToken(int $userId): string
+    {
         // Generate cryptographically secure random token
         $token = bin2hex(random_bytes(self::TOKEN_LENGTH));
 
@@ -52,7 +54,8 @@ class RememberMeTokens {
      * @param string $token The token from cookie
      * @return array|null User data if valid, null if invalid
      */
-    public static function validateToken(string $token): ?array {
+    public static function validateToken(string $token): ?array
+    {
         // Hash the provided token
         $tokenHash = hash('sha256', $token);
 
@@ -70,13 +73,15 @@ class RememberMeTokens {
         }
 
         // Update last_used_at timestamp
-        Database::update('admin_remember_tokens',
+        Database::update(
+            'admin_remember_tokens',
             ['last_used_at' => date('Y-m-d H:i:s')],
             ['id' => $tokenRecord['id']]
         );
 
         // Update user's last_login
-        Database::update('admin_users',
+        Database::update(
+            'admin_users',
             ['last_login' => date('Y-m-d H:i:s')],
             ['id' => $tokenRecord['user_id']]
         );
@@ -96,7 +101,8 @@ class RememberMeTokens {
      * @param string $token The token value
      * @param bool $isProduction Whether we're in production (determines Secure flag)
      */
-    public static function setCookie(string $token, bool $isProduction = false): void {
+    public static function setCookie(string $token, bool $isProduction = false): void
+    {
         $expiry = time() + (self::TOKEN_EXPIRY_DAYS * 24 * 60 * 60);
 
         setcookie(
@@ -116,7 +122,8 @@ class RememberMeTokens {
     /**
      * Clear remember-me cookie
      */
-    public static function clearCookie(): void {
+    public static function clearCookie(): void
+    {
         setcookie(
             self::COOKIE_NAME,
             '',
@@ -134,7 +141,8 @@ class RememberMeTokens {
      * @param string $token The token to revoke
      * @return bool Whether revocation was successful
      */
-    public static function revokeToken(string $token): bool {
+    public static function revokeToken(string $token): bool
+    {
         $tokenHash = hash('sha256', $token);
 
         $deleted = Database::delete('admin_remember_tokens', [
@@ -150,7 +158,8 @@ class RememberMeTokens {
      * @param int $userId The user ID
      * @return int Number of tokens revoked
      */
-    public static function revokeAllUserTokens(int $userId): int {
+    public static function revokeAllUserTokens(int $userId): int
+    {
         return Database::delete('admin_remember_tokens', [
             'user_id' => $userId
         ]);
@@ -161,7 +170,8 @@ class RememberMeTokens {
      *
      * @return string|null Token if exists, null otherwise
      */
-    public static function getTokenFromCookie(): ?string {
+    public static function getTokenFromCookie(): ?string
+    {
         return $_COOKIE[self::COOKIE_NAME] ?? null;
     }
 
@@ -170,7 +180,8 @@ class RememberMeTokens {
      *
      * @return int Number of tokens deleted
      */
-    public static function cleanupExpiredTokens(): int {
+    public static function cleanupExpiredTokens(): int
+    {
         $sql = "DELETE FROM admin_remember_tokens WHERE expires_at < NOW()";
         return Database::execute($sql);
     }
@@ -181,7 +192,8 @@ class RememberMeTokens {
      * @param int $userId The user ID
      * @return array List of active tokens with metadata
      */
-    public static function getUserTokens(int $userId): array {
+    public static function getUserTokens(int $userId): array
+    {
         return Database::fetchAll(
             "SELECT id, created_at, last_used_at, expires_at, ip_address, user_agent
              FROM admin_remember_tokens

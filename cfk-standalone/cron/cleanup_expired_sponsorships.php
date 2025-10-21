@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -20,13 +21,12 @@ error_log('CFK Cleanup: Starting expired sponsorship cleanup');
 try {
     // Clean up expired sponsorships
     $cleaned = CFK_Sponsorship_Manager::cleanupExpiredPendingSponsorships();
-    
+
     if ($cleaned > 0) {
         error_log("CFK Cleanup: Successfully cleaned up $cleaned expired sponsorships");
     } else {
         error_log('CFK Cleanup: No expired sponsorships found');
     }
-    
 } catch (Exception $e) {
     error_log('CFK Cleanup Error: ' . $e->getMessage());
 }

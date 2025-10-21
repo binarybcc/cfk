@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Reservation Review Page
  * Step 2: Review all information before final confirmation

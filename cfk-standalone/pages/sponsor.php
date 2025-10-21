@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sponsorship Request Form
  * Handles child sponsorship requests with single-sponsor logic
@@ -71,7 +72,7 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
             'gift_preference' => $_POST['gift_preference'] ?? 'shopping',
             'message' => $_POST['special_message'] ?? ''
         ];
-        
+
         // Attempt to create sponsorship(s)
         if ($isFamilySponsorship) {
             // Create sponsorships for all children in family
@@ -132,19 +133,19 @@ if (!$isFamilySponsorship) {
 
 <div class="sponsor-page">
     <div class="page-header">
-        <?php if ($isFamilySponsorship): ?>
+        <?php if ($isFamilySponsorship) : ?>
             <h1>🎁 Sponsor Family <?php echo sanitizeString($child['family_number']); ?></h1>
             <p class="family-sponsor-subtitle">
                 You're sponsoring <?php echo count($childrenToSponsor); ?> children together!
             </p>
-        <?php else: ?>
+        <?php else : ?>
             <h1>Sponsor Child <?php echo sanitizeString($child['display_id']); ?></h1>
         <?php endif; ?>
 
         <nav class="breadcrumb">
             <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a>
             <span>&raquo;</span>
-            <?php if (!$isFamilySponsorship): ?>
+            <?php if (!$isFamilySponsorship) : ?>
                 <a href="<?php echo baseUrl('?page=child&id=' . $childId); ?>">View Profile</a>
                 <span>&raquo;</span>
             <?php endif; ?>
@@ -152,7 +153,7 @@ if (!$isFamilySponsorship) {
         </nav>
     </div>
 
-    <?php if (!$isAvailable): ?>
+    <?php if (!$isAvailable) : ?>
         <!-- Child Not Available -->
         <div class="unavailable-notice">
             <div class="alert alert-warning">
@@ -171,7 +172,7 @@ if (!$isFamilySponsorship) {
                         <a href="<?php echo baseUrl('?page=children'); ?>" class="btn btn-primary">
                             Browse Other Children
                         </a>
-                        <?php if ($siblings !== []): ?>
+                        <?php if ($siblings !== []) : ?>
                             <a href="<?php echo baseUrl('?page=children&family_id=' . $fullChild['family_id']); ?>" class="btn btn-secondary">
                                 View This Child's Family
                             </a>
@@ -184,15 +185,15 @@ if (!$isFamilySponsorship) {
             </div>
         </div>
 
-    <?php else: ?>
+    <?php else : ?>
         <!-- Sponsorship Form -->
         <div class="sponsor-form-container">
-            <?php if ($isFamilySponsorship): ?>
+            <?php if ($isFamilySponsorship) : ?>
                 <!-- Family Children Summary -->
                 <div class="family-children-summary">
                     <h3>You are sponsoring these family members:</h3>
                     <div class="family-children-grid">
-                        <?php foreach ($childrenToSponsor as $childToSponsor): ?>
+                        <?php foreach ($childrenToSponsor as $childToSponsor) : ?>
                             <div class="family-child-card">
                                 <div class="family-child-photo">
                                     <img src="<?php echo getPhotoUrl($childToSponsor['photo_filename'], $childToSponsor); ?>"
@@ -207,7 +208,7 @@ if (!$isFamilySponsorship) {
                         <?php endforeach; ?>
                     </div>
                 </div>
-            <?php else: ?>
+            <?php else : ?>
                 <!-- Single Child Summary -->
                 <div class="child-summary">
                     <div class="child-photo">
@@ -217,18 +218,18 @@ if (!$isFamilySponsorship) {
                     <div class="child-info">
                         <h3>Child <?php echo sanitizeString($fullChild['display_id']); ?></h3>
                         <p><strong>Age:</strong> <?php echo formatAge($fullChild['age']); ?></p>
-                        <?php if (!empty($fullChild['grade'])): ?>
+                        <?php if (!empty($fullChild['grade'])) : ?>
                             <p><strong>Grade:</strong> <?php echo sanitizeString($fullChild['grade']); ?></p>
                         <?php endif; ?>
 
-                        <?php if (!empty($fullChild['interests'])): ?>
+                        <?php if (!empty($fullChild['interests'])) : ?>
                             <div class="summary-section">
                                 <strong>Interests:</strong>
                                 <p><?php echo sanitizeString($fullChild['interests']); ?></p>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($fullChild['wishes'])): ?>
+                        <?php if (!empty($fullChild['wishes'])) : ?>
                             <div class="summary-section">
                                 <strong>Christmas Wishes:</strong>
                                 <p><?php echo sanitizeString($fullChild['wishes']); ?></p>
@@ -244,10 +245,10 @@ if (!$isFamilySponsorship) {
                 
                 <h2>Your Sponsorship Information</h2>
                 
-                <?php if ($errors !== []): ?>
+                <?php if ($errors !== []) : ?>
                     <div class="alert alert-error">
                         <ul>
-                            <?php foreach ($errors as $error): ?>
+                            <?php foreach ($errors as $error) : ?>
                                 <li><?php echo sanitizeString($error); ?></li>
                             <?php endforeach; ?>
                         </ul>

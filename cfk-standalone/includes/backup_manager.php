@@ -1,23 +1,26 @@
 <?php
+
 /**
  * DEPRECATED: Moved to src/Backup/Manager.php
  * Class available via class_alias() in config.php
  */
+
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 return;
 
-class CFK_Backup_Manager_DEPRECATED {
-
+class CFK_Backup_Manager_DEPRECATED
+{
     private const BACKUP_DIR = __DIR__ . '/../backups/';
     private const MAX_BACKUPS = 2;
 
     /**
      * Create automatic backup before import
      */
-    public static function createAutoBackup(string $reason = 'csv_import'): array {
+    public static function createAutoBackup(string $reason = 'csv_import'): array
+    {
         try {
             // Ensure backup directory exists
             if (!file_exists(self::BACKUP_DIR)) {
@@ -68,7 +71,6 @@ class CFK_Backup_Manager_DEPRECATED {
                 'filepath' => $filepath,
                 'metadata' => $metadata
             ];
-
         } catch (Exception $e) {
             error_log('Backup creation failed: ' . $e->getMessage());
             return [
@@ -81,7 +83,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * List available backups
      */
-    public static function listBackups(): array {
+    public static function listBackups(): array
+    {
         if (!file_exists(self::BACKUP_DIR)) {
             return [];
         }
@@ -111,7 +114,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Restore from backup
      */
-    public static function restoreFromBackup(string $filename, bool $clearExisting = true): array {
+    public static function restoreFromBackup(string $filename, bool $clearExisting = true): array
+    {
         $filepath = self::BACKUP_DIR . $filename;
 
         if (!file_exists($filepath)) {
@@ -151,7 +155,6 @@ class CFK_Backup_Manager_DEPRECATED {
                 'imported' => $result['imported'],
                 'pre_restore_backup' => $preRestoreBackup['filename'] ?? null
             ];
-
         } catch (Exception $e) {
             error_log('Restore failed: ' . $e->getMessage());
             return [
@@ -164,7 +167,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Clean up old backups (keep only last MAX_BACKUPS)
      */
-    private static function cleanupOldBackups(): void {
+    private static function cleanupOldBackups(): void
+    {
         $files = glob(self::BACKUP_DIR . 'children_backup_*.csv');
         rsort($files); // Most recent first
 
@@ -180,7 +184,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Get current children count
      */
-    private static function getChildrenCount(): int {
+    private static function getChildrenCount(): int
+    {
         $result = Database::fetchRow('SELECT COUNT(*) as count FROM children');
         return (int) ($result['count'] ?? 0);
     }
@@ -188,7 +193,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Get current families count
      */
-    private static function getFamiliesCount(): int {
+    private static function getFamiliesCount(): int
+    {
         $result = Database::fetchRow('SELECT COUNT(*) as count FROM families');
         return (int) ($result['count'] ?? 0);
     }
@@ -196,7 +202,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Download backup file
      */
-    public static function downloadBackup(string $filename): void {
+    public static function downloadBackup(string $filename): void
+    {
         $filepath = self::BACKUP_DIR . $filename;
 
         if (!file_exists($filepath)) {
@@ -214,7 +221,8 @@ class CFK_Backup_Manager_DEPRECATED {
     /**
      * Get backup statistics
      */
-    public static function getBackupStats(): array {
+    public static function getBackupStats(): array
+    {
         $backups = self::listBackups();
 
         return [

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -12,8 +13,8 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-class CFK_Email_Queue {
-
+class CFK_Email_Queue
+{
     const STATUS_QUEUED = 'queued';
     const STATUS_PROCESSING = 'processing';
     const STATUS_SENT = 'sent';
@@ -59,7 +60,8 @@ class CFK_Email_Queue {
     /**
      * Process queued emails (called by cron)
      */
-    public static function processQueue(int $limit = 10): array {
+    public static function processQueue(int $limit = 10): array
+    {
         $stats = [
             'processed' => 0,
             'sent' => 0,
@@ -89,7 +91,6 @@ class CFK_Email_Queue {
                     $stats['errors'][] = "Email #{$email['id']}: {$result['error']}";
                 }
             }
-
         } catch (Exception $e) {
             error_log('Email queue processing error: ' . $e->getMessage());
             $stats['errors'][] = $e->getMessage();
@@ -101,7 +102,8 @@ class CFK_Email_Queue {
     /**
      * Get emails ready to process
      */
-    private static function getEmailsToProcess(int $limit): array {
+    private static function getEmailsToProcess(int $limit): array
+    {
         $sql = "
             SELECT *
             FROM email_queue
@@ -123,8 +125,10 @@ class CFK_Email_Queue {
     /**
      * Mark email as processing
      */
-    private static function markAsProcessing(int $id): void {
-        Database::update('email_queue',
+    private static function markAsProcessing(int $id): void
+    {
+        Database::update(
+            'email_queue',
             ['status' => self::STATUS_PROCESSING],
             ['id' => $id]
         );
@@ -133,7 +137,8 @@ class CFK_Email_Queue {
     /**
      * Mark email as sent
      */
-    private static function markAsSent(int $id): void {
+    private static function markAsSent(int $id): void
+    {
         Database::update('email_queue', [
             'status' => self::STATUS_SENT,
             'sent_at' => date('Y-m-d H:i:s')
@@ -143,7 +148,8 @@ class CFK_Email_Queue {
     /**
      * Handle email sending failure
      */
-    private static function handleFailure(int $id, string $error): void {
+    private static function handleFailure(int $id, string $error): void
+    {
         // Get current attempt count
         $email = Database::fetchRow("SELECT attempts, max_attempts FROM email_queue WHERE id = ?", [$id]);
         $newAttempts = $email['attempts'] + 1;
@@ -172,7 +178,8 @@ class CFK_Email_Queue {
     /**
      * Send individual email
      */
-    private static function sendEmail(array $email): array {
+    private static function sendEmail(array $email): array
+    {
         try {
             // Load email manager
             if (!class_exists('CFK_Email_Manager')) {
@@ -210,7 +217,6 @@ class CFK_Email_Queue {
                 'success' => $success,
                 'error' => $success ? null : 'Failed to send email'
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -222,7 +228,8 @@ class CFK_Email_Queue {
     /**
      * Get queue statistics
      */
-    public static function getStats(): array {
+    public static function getStats(): array
+    {
         $sql = "
             SELECT
                 status,
@@ -253,7 +260,8 @@ class CFK_Email_Queue {
     /**
      * Retry failed emails
      */
-    public static function retryFailed(int $limit = 10): int {
+    public static function retryFailed(int $limit = 10): int
+    {
         return Database::query("
             UPDATE email_queue
             SET status = :queued,
@@ -272,7 +280,8 @@ class CFK_Email_Queue {
     /**
      * Clean old sent/failed emails
      */
-    public static function cleanup(int $daysOld = 30): int {
+    public static function cleanup(int $daysOld = 30): int
+    {
         $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
 
         return Database::query("
@@ -285,7 +294,8 @@ class CFK_Email_Queue {
     /**
      * Quick helper to queue sponsor confirmation
      */
-    public static function queueSponsorConfirmation(array $sponsorship): int {
+    public static function queueSponsorConfirmation(array $sponsorship): int
+    {
         if (!class_exists('CFK_Email_Manager')) {
             require_once __DIR__ . '/email_manager.php';
         }
@@ -306,7 +316,8 @@ class CFK_Email_Queue {
     /**
      * Quick helper to queue admin notification
      */
-    public static function queueAdminNotification(string $subject, string $message, array $data = []): int {
+    public static function queueAdminNotification(string $subject, string $message, array $data = []): int
+    {
         if (!class_exists('CFK_Email_Manager')) {
             require_once __DIR__ . '/email_manager.php';
         }

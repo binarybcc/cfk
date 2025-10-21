@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -40,7 +41,7 @@ if ($_POST && isset($_POST['action'])) {
         $messageType = 'error';
     } else {
         $action = $_POST['action'];
-        
+
         switch ($action) {
             case 'preview_import':
                 $result = handlePreviewImport();
@@ -84,7 +85,8 @@ if ($_POST && isset($_POST['action'])) {
     }
 }
 
-function handlePreviewImport(): array {
+function handlePreviewImport(): array
+{
     try {
         // Check if file was uploaded
         if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
@@ -142,14 +144,14 @@ function handlePreviewImport(): array {
                 'parse_warnings' => $parseResult['warnings'] ?? []
             ]
         ];
-
     } catch (Exception $e) {
         error_log('CSV preview error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred during preview. Please try again.'];
     }
 }
 
-function handleConfirmImport(): array {
+function handleConfirmImport(): array
+{
     try {
         // Check if we have a file in session
         if (!isset($_SESSION['cfk_import_file']) || !file_exists($_SESSION['cfk_import_file'])) {
@@ -191,34 +193,34 @@ function handleConfirmImport(): array {
                 'message' => $result['message'] ?? 'Import failed'
             ];
         }
-
     } catch (Exception $e) {
         error_log('CSV confirm import error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred during import. Please try again.'];
     }
 }
 
-function handleDeleteAllChildren(): array {
+function handleDeleteAllChildren(): array
+{
     try {
         // Require confirmation
         if (!isset($_POST['confirm_delete']) || $_POST['confirm_delete'] !== 'DELETE') {
             return ['success' => false, 'message' => 'Please type "DELETE" in the confirmation box to proceed.'];
         }
-        
+
         // Get count before deletion for confirmation
         $countResult = Database::fetchRow("SELECT COUNT(*) as total FROM children");
         $count = $countResult['total'] ?? 0;
-        
+
         if ($count == 0) {
             return ['success' => false, 'message' => 'No children records found to delete.'];
         }
-        
+
         // Delete all children records
         Database::query("DELETE FROM children");
-        
+
         // Also delete related family records if they exist
         Database::query("DELETE FROM families");
-        
+
         // Delete related sponsorships if table exists
         try {
             Database::query("DELETE FROM cfk_sponsorships");
@@ -226,19 +228,19 @@ function handleDeleteAllChildren(): array {
             // Table might not exist, continue without error
             error_log('cfk_sponsorships table not found during delete: ' . $e->getMessage());
         }
-        
+
         return [
-            'success' => true, 
+            'success' => true,
             'message' => "Successfully deleted {$count} children records and all related data."
         ];
-        
     } catch (Exception $e) {
         error_log('Delete all children error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred during deletion. Please try again.'];
     }
 }
 
-function handleRestoreBackup(): array {
+function handleRestoreBackup(): array
+{
     try {
         $filename = $_POST['backup_filename'] ?? '';
         if (empty($filename)) {
@@ -248,14 +250,14 @@ function handleRestoreBackup(): array {
         $clearExisting = isset($_POST['clear_existing']);
 
         return BackupManager::restoreFromBackup($filename, $clearExisting);
-
     } catch (Exception $e) {
         error_log('Restore backup error: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred during restore. Please try again.'];
     }
 }
 
-function handleDownloadBackup(): void {
+function handleDownloadBackup(): void
+{
     $filename = $_POST['backup_filename'] ?? $_GET['file'] ?? '';
     if (empty($filename)) {
         http_response_code(400);
@@ -265,7 +267,8 @@ function handleDownloadBackup(): void {
     BackupManager::downloadBackup($filename);
 }
 
-function downloadTemplate(): void {
+function downloadTemplate(): void
+{
     $filename = 'cfk-import-template.csv';
     $templatePath = __DIR__ . '/../templates/' . $filename;
 
@@ -826,7 +829,7 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
 
         <!-- Backup Management Section -->
-        <?php if ($backupStats['total_backups'] > 0): ?>
+        <?php if ($backupStats['total_backups'] > 0) : ?>
         <div class="backup-section section">
             <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
                 💾 Automatic Backups (Last <?php echo $backupStats['max_backups']; ?> Versions)
@@ -837,7 +840,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
 
                 <div class="backup-list">
-                    <?php foreach ($backupStats['backups'] as $backup): ?>
+                    <?php foreach ($backupStats['backups'] as $backup) : ?>
                         <?php
                         $metadata = $backup['metadata'];
                         $created = date('F j, Y g:i A', $backup['created']);
@@ -879,7 +882,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </div>
             </div>
         </div>
-        <?php else: ?>
+        <?php else : ?>
         <div class="backup-section section">
             <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
                 💾 Automatic Backups
@@ -1114,7 +1117,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
         </div>
 
         <!-- Preview Results -->
-        <?php if ($previewData): ?>
+        <?php if ($previewData) : ?>
             <div class="preview-section section">
                 <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
                     🔍 Preview: What Will Change
@@ -1145,14 +1148,14 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                     </div>
 
                     <!-- Warnings -->
-                    <?php if (!empty($previewData['analysis']['warnings'])): ?>
+                    <?php if (!empty($previewData['analysis']['warnings'])) : ?>
                         <div class="alert alert-warning" style="margin-top: 1.5rem;">
                             <h4 style="margin-bottom: 1rem;">⚠️ Important Changes Detected:</h4>
                             <ul style="margin: 0; padding-left: 1.5rem;">
-                                <?php foreach ($previewData['analysis']['warnings'] as $warning): ?>
+                                <?php foreach ($previewData['analysis']['warnings'] as $warning) : ?>
                                     <li style="margin-bottom: 0.5rem;">
                                         <strong><?php echo htmlspecialchars((string) $warning['message']); ?></strong>
-                                        <?php if ($warning['type'] === 'sponsored_child_removed'): ?>
+                                        <?php if ($warning['type'] === 'sponsored_child_removed') : ?>
                                             <br><small style="color: #856404;">This child has an active sponsorship. You can choose to keep them as inactive below.</small>
                                         <?php endif; ?>
                                     </li>
@@ -1168,7 +1171,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
 
                         <h4 style="margin-bottom: 1rem;">🎯 Ready to Import?</h4>
 
-                        <?php if ($previewData['analysis']['stats']['total_removed'] > 0): ?>
+                        <?php if ($previewData['analysis']['stats']['total_removed'] > 0) : ?>
                             <div class="checkbox-item" style="margin-bottom: 1rem;">
                                 <input type="checkbox" id="keep_inactive_children" name="keep_inactive_children" checked>
                                 <label for="keep_inactive_children">
@@ -1201,7 +1204,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
         <?php endif; ?>
 
         <!-- Import Success Results -->
-        <?php if ($importResults): ?>
+        <?php if ($importResults) : ?>
             <div class="results-section section">
                 <div class="section-header" style="background-color: #d4edda; color: #155724;">
                     ✅ Import Complete!
@@ -1217,7 +1220,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                             <div class="result-number"><?php echo $importResults['imported'] ?? 0; ?></div>
                             <div class="result-label">Children Imported</div>
                         </div>
-                        <?php if (isset($importResults['sponsorships_preserved']) && $importResults['sponsorships_preserved'] > 0): ?>
+                        <?php if (isset($importResults['sponsorships_preserved']) && $importResults['sponsorships_preserved'] > 0) : ?>
                             <div class="result-card" style="border-left: 4px solid #17a2b8;">
                                 <div class="result-number"><?php echo $importResults['sponsorships_preserved']; ?></div>
                                 <div class="result-label">Sponsorships Preserved</div>

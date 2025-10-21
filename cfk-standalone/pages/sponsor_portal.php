@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Sponsor Portal - View and Manage Sponsorships
  * Displays all sponsorships for a verified email address
@@ -99,7 +100,7 @@ if ($_POST && isset($_POST['add_children'])) {
     require_once __DIR__ . '/../includes/components/page_header.php';
     ?>
 
-    <?php if (!$showAddChildren): ?>
+    <?php if (!$showAddChildren) : ?>
         <!-- Display Sponsorships -->
         <div class="sponsorships-container">
             <div class="portal-actions">
@@ -116,14 +117,14 @@ if ($_POST && isset($_POST['add_children'])) {
                 <p>You are sponsoring <strong><?php echo count($sponsorships); ?></strong> child(ren) across <strong><?php echo count($families); ?></strong> family(ies).</p>
             </div>
 
-            <?php foreach ($families as $family): ?>
+            <?php foreach ($families as $family) : ?>
                 <div class="family-section">
                     <div class="family-header">
                         <h3>Family <?php echo sanitizeString($family['family_number']); ?></h3>
                     </div>
 
                     <div class="children-grid">
-                        <?php foreach ($family['children'] as $child): ?>
+                        <?php foreach ($family['children'] as $child) : ?>
                             <div class="child-card">
                                 <div class="child-header">
                                     <h4>Child <?php echo sanitizeString($child['child_display_id']); ?></h4>
@@ -154,21 +155,21 @@ if ($_POST && isset($_POST['add_children'])) {
                                     </div>
                                 </div>
 
-                                <?php if (!empty($child['interests'])): ?>
+                                <?php if (!empty($child['interests'])) : ?>
                                     <div class="child-section">
                                         <h5>Interests:</h5>
                                         <p><?php echo sanitizeString($child['interests']); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['wishes'])): ?>
+                                <?php if (!empty($child['wishes'])) : ?>
                                     <div class="child-section wishes">
                                         <h5>🎁 Christmas Wishes:</h5>
                                         <p><?php echo sanitizeString($child['wishes']); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['special_needs'])): ?>
+                                <?php if (!empty($child['special_needs'])) : ?>
                                     <div class="child-section special-needs">
                                         <h5>⚠️ Special Notes:</h5>
                                         <p><?php echo sanitizeString($child['special_needs']); ?></p>
@@ -192,7 +193,7 @@ if ($_POST && isset($_POST['add_children'])) {
             </div>
         </div>
 
-    <?php else: ?>
+    <?php else : ?>
         <!-- Add Children Form -->
         <div class="add-children-container">
             <div class="form-header">
@@ -200,7 +201,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <p>Select additional children you'd like to sponsor. They'll be added to your existing sponsorship.</p>
             </div>
 
-            <?php if ($addChildrenResult && !$addChildrenResult['success']): ?>
+            <?php if ($addChildrenResult && !$addChildrenResult['success']) : ?>
                 <div class="alert alert-error">
                     <?php echo sanitizeString($addChildrenResult['message']); ?>
                 </div>
@@ -213,13 +214,13 @@ if ($_POST && isset($_POST['add_children'])) {
                 // Get available children
                 $availableChildren = getChildren(['status' => 'available'], 1, 100);
 
-                if ($availableChildren === []): ?>
+                if ($availableChildren === []) : ?>
                     <div class="alert alert-info">
                         <p>There are currently no available children to add. All children have been sponsored!</p>
                     </div>
-                <?php else: ?>
+                <?php else : ?>
                     <div class="available-children-grid">
-                        <?php foreach ($availableChildren as $child): ?>
+                        <?php foreach ($availableChildren as $child) : ?>
                             <label class="child-checkbox-card">
                                 <input type="checkbox" name="child_ids[]" value="<?php echo $child['id']; ?>">
                                 <div class="checkbox-card-content">

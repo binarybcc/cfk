@@ -1,4 +1,5 @@
 <?php
+
 /**
  * DEPRECATED: This file is kept for backwards compatibility only.
  * The actual implementation has moved to src/Archive/Manager.php
@@ -17,12 +18,13 @@ if (!defined('CFK_APP')) {
 return;
 
 // DEPRECATED CODE BELOW
-class CFK_Archive_Manager_DEPRECATED {
-
+class CFK_Archive_Manager_DEPRECATED
+{
     /**
      * Create full database backup
      */
-    public static function createDatabaseBackup(string $year): array {
+    public static function createDatabaseBackup(string $year): array
+    {
         try {
             $timestamp = date('Y-m-d_H-i-s');
             $archiveDir = __DIR__ . '/../archives/' . $year;
@@ -66,7 +68,6 @@ class CFK_Archive_Manager_DEPRECATED {
                     'message' => 'Database backup failed: ' . implode("\n", $output)
                 ];
             }
-
         } catch (Exception $e) {
             error_log('Database backup failed: ' . $e->getMessage());
             return [
@@ -79,7 +80,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Export all data to CSV files
      */
-    public static function exportAllDataToCSV(string $year): array {
+    public static function exportAllDataToCSV(string $year): array
+    {
         try {
             $timestamp = date('Y-m-d_H-i-s');
             $archiveDir = __DIR__ . '/../archives/' . $year;
@@ -133,7 +135,6 @@ class CFK_Archive_Manager_DEPRECATED {
                 'message' => 'All data exported successfully',
                 'files' => $exports
             ];
-
         } catch (Exception $e) {
             error_log('CSV export failed: ' . $e->getMessage());
             return [
@@ -146,7 +147,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Write data to CSV file
      */
-    private static function writeCSV(string $filename, array $data): void {
+    private static function writeCSV(string $filename, array $data): void
+    {
         $handle = fopen($filename, 'w');
 
         if ($data !== []) {
@@ -165,7 +167,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Create archive summary document
      */
-    public static function createArchiveSummary(string $year): array {
+    public static function createArchiveSummary(string $year): array
+    {
         try {
             $archiveDir = __DIR__ . '/../archives/' . $year;
             $summaryFile = $archiveDir . '/ARCHIVE_SUMMARY.txt';
@@ -230,7 +233,6 @@ class CFK_Archive_Manager_DEPRECATED {
                 'message' => 'Archive summary created',
                 'file' => $summaryFile
             ];
-
         } catch (Exception $e) {
             error_log('Archive summary creation failed: ' . $e->getMessage());
             return [
@@ -243,7 +245,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Clear all seasonal data (DESTRUCTIVE - use with caution!)
      */
-    public static function clearSeasonalData(): array {
+    public static function clearSeasonalData(): array
+    {
         try {
             Database::getConnection()->beginTransaction();
 
@@ -274,7 +277,6 @@ class CFK_Archive_Manager_DEPRECATED {
                 'message' => 'Seasonal data cleared successfully',
                 'deleted' => $beforeCounts
             ];
-
         } catch (Exception $e) {
             Database::getConnection()->rollback();
             error_log('Data clearing failed: ' . $e->getMessage());
@@ -288,7 +290,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Perform complete year-end reset with archiving
      */
-    public static function performYearEndReset(string $year, string $confirmationCode): array {
+    public static function performYearEndReset(string $year, string $confirmationCode): array
+    {
         // Validate confirmation code
         $expectedCode = 'RESET ' . $year;
         if ($confirmationCode !== $expectedCode) {
@@ -355,7 +358,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Get list of available archives
      */
-    public static function getAvailableArchives(): array {
+    public static function getAvailableArchives(): array
+    {
         $archivesDir = __DIR__ . '/../archives';
 
         if (!file_exists($archivesDir)) {
@@ -387,7 +391,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Get directory size recursively
      */
-    private static function getDirectorySize(string $dir): int {
+    private static function getDirectorySize(string $dir): int
+    {
         try {
             $size = 0;
             $files = new RecursiveIteratorIterator(
@@ -408,7 +413,8 @@ class CFK_Archive_Manager_DEPRECATED {
     /**
      * Format bytes to human readable
      */
-    public static function formatBytes(int $bytes): string {
+    public static function formatBytes(int $bytes): string
+    {
         if ($bytes < 1024) {
             return $bytes . ' B';
         }

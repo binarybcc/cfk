@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Donation Page
  * Information about Zeffy and embedded donation form

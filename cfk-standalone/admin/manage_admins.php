@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -147,13 +148,13 @@ include __DIR__ . '/includes/admin_header.php';
         <p class="subtitle">Manage administrator accounts and permissions</p>
     </div>
 
-    <?php if ($message !== '' && $message !== '0'): ?>
+    <?php if ($message !== '' && $message !== '0') : ?>
         <div class="alert alert-success">
             ✓ <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
 
-    <?php if ($error !== '' && $error !== '0'): ?>
+    <?php if ($error !== '' && $error !== '0') : ?>
         <div class="alert alert-error">
             ✗ <?php echo htmlspecialchars($error); ?>
         </div>
@@ -258,9 +259,9 @@ include __DIR__ . '/includes/admin_header.php';
     <div class="data-table-container">
         <h2>Current Administrators</h2>
 
-        <?php if ($admins === []): ?>
+        <?php if ($admins === []) : ?>
             <p class="no-data">No administrators found.</p>
-        <?php else: ?>
+        <?php else : ?>
             <table class="data-table">
                 <thead>
                     <tr>
@@ -274,11 +275,11 @@ include __DIR__ . '/includes/admin_header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($admins as $admin): ?>
+                    <?php foreach ($admins as $admin) : ?>
                         <tr>
                             <td>
                                 <strong><?php echo htmlspecialchars((string) $admin['username']); ?></strong>
-                                <?php if ($admin['id'] == $_SESSION['cfk_admin_id']): ?>
+                                <?php if ($admin['id'] == $_SESSION['cfk_admin_id']) : ?>
                                     <span class="badge badge-primary">You</span>
                                 <?php endif; ?>
                             </td>
@@ -297,7 +298,7 @@ include __DIR__ . '/includes/admin_header.php';
                                         title="Edit">
                                     ✏️ Edit
                                 </button>
-                                <?php if ($admin['id'] != $_SESSION['cfk_admin_id']): ?>
+                                <?php if ($admin['id'] != $_SESSION['cfk_admin_id']) : ?>
                                     <button class="btn btn-sm btn-delete btn-delete-admin"
                                             data-admin-id="<?php echo $admin['id']; ?>"
                                             data-username="<?php echo htmlspecialchars((string) $admin['username'], ENT_QUOTES); ?>"

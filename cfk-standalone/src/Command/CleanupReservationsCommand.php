@@ -127,7 +127,6 @@ class CleanupReservationsCommand extends Command
 
             return Command::SUCCESS;
             */
-
         } catch (\Exception $e) {
             $io->error('Cleanup failed: ' . $e->getMessage());
             return Command::FAILURE;
