@@ -601,7 +601,7 @@ include __DIR__ . '/includes/admin_header.php';
 }
 </style>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 // Form validation
 document.getElementById('resetForm').addEventListener('submit', function(e) {
     const year = document.getElementById('year').value.trim();

@@ -12,7 +12,6 @@ if (!defined('CFK_APP')) {
 
 // Use namespaced classes
 use CFK\Sponsorship\Manager as SponsorshipManager;
-use CFK\Email\Manager as EmailManager;
 
 // Check for verification token
 $token = $_GET['token'] ?? '';

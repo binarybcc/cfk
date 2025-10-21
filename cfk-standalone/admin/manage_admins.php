@@ -677,7 +677,7 @@ include __DIR__ . '/includes/admin_header.php';
 }
 </style>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 function showAddAdminForm() {
     document.getElementById('addAdminForm').style.display = 'block';
     document.getElementById('username').focus();

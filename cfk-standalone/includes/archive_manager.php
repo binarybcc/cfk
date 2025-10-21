@@ -379,7 +379,7 @@ class CFK_Archive_Manager_DEPRECATED {
         }
 
         // Sort by year descending
-        usort($archives, fn($a, $b): int => strcmp((string) $b['year'], (string) $a['year']));
+        usort($archives, fn($a, $b): int => strcmp($b['year'], $a['year']));
 
         return $archives;
     }

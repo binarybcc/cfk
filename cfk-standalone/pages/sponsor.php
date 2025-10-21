@@ -12,7 +12,6 @@ if (!defined('CFK_APP')) {
 
 // Use namespaced classes
 use CFK\Sponsorship\Manager as SponsorshipManager;
-use CFK\Email\Manager as EmailManager;
 
 // Get child ID or family ID
 $childId = sanitizeInt($_GET['child_id'] ?? 0);

@@ -284,7 +284,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
         <!-- Children Grid with Server-Side Rendering -->
         <div class="children-grid">
-            <?php if (empty($children)): ?>
+            <?php if ($children === []): ?>
                 <!-- No Results Message -->
                 <div class="no-results">
                     <h2>No Children Found</h2>
@@ -302,13 +302,13 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                             <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
                             <div class="child-photo-compact">
                                 <img src="<?php echo getPlaceholderImage($child['age'], $child['gender']); ?>"
-                                     alt="Child <?php echo htmlspecialchars($child['display_id']); ?>">
+                                     alt="Child <?php echo htmlspecialchars((string) $child['display_id']); ?>">
                             </div>
 
                             <!-- Metadata beside image -->
                             <div class="child-header-meta">
                                 <div class="child-meta-item">
-                                    <strong>Child:</strong> <span><?php echo htmlspecialchars($child['display_id']); ?></span>
+                                    <strong>Child:</strong> <span><?php echo htmlspecialchars((string) $child['display_id']); ?></span>
                                 </div>
                                 <div class="child-meta-item">
                                     <strong>Age:</strong> <span><?php echo (int)$child['age']; ?></span>
@@ -318,7 +318,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                 </div>
                                 <?php if (!empty($child['grade'])): ?>
                                     <div class="child-meta-item">
-                                        <strong>Age Group:</strong> <span><?php echo htmlspecialchars($child['grade']); ?></span>
+                                        <strong>Age Group:</strong> <span><?php echo htmlspecialchars((string) $child['grade']); ?></span>
                                     </div>
                                 <?php endif; ?>
                             </div>
@@ -330,14 +330,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                             <?php if (!empty($child['interests'])): ?>
                                 <div style="margin-bottom: 15px;">
                                     <strong style="color: #2c5530;">Interests:</strong>
-                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars($child['interests']); ?></p>
+                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['interests']); ?></p>
                                 </div>
                             <?php endif; ?>
 
                             <?php if (!empty($child['wishes'])): ?>
                                 <div style="margin-bottom: 15px;">
                                     <strong style="color: #c41e3a;">Wishes:</strong>
-                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars($child['wishes']); ?></p>
+                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['wishes']); ?></p>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -351,7 +351,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
                             <!-- Action Buttons -->
                             <div class="action-buttons">
-                                <a href="<?php echo baseUrl('?page=family&family_number=' . urlencode($child['family_number'])); ?>"
+                                <a href="<?php echo baseUrl('?page=family&family_number=' . urlencode((string) $child['family_number'])); ?>"
                                    class="btn btn-secondary btn-view-family <?php echo $siblingCount === 0 ? 'btn-disabled' : ''; ?>"
                                    <?php echo $siblingCount === 0 ? 'aria-disabled="true"' : ''; ?>>
                                     View Family
@@ -376,7 +376,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 $queryParams = $_GET;
                 unset($queryParams['p']);
                 $baseQuery = http_build_query($queryParams);
-                $baseQuery = $baseQuery ? '&' . $baseQuery : '';
+                $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
                 ?>
 
                 <?php if ($currentPage > 1): ?>

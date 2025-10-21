@@ -18,7 +18,6 @@ require_once __DIR__ . '/../includes/functions.php';
 
 // Use namespaced classes
 use CFK\Sponsorship\Manager as SponsorshipManager;
-use CFK\Email\Manager as EmailManager;
 
 // Check if user is logged in
 if (!isLoggedIn()) {
