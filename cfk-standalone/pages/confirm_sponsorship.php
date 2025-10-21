@@ -176,12 +176,29 @@ function confirmSponsorshipApp() {
         isSubmitting: false,
 
         init() {
-            this.loadSelections();
+            // Wait for SelectionsManager to be ready
+            if (typeof SelectionsManager !== 'undefined') {
+                this.loadSelections();
+            } else {
+                // Retry after a short delay
+                setTimeout(() => this.init(), 100);
+                return;
+            }
+
+            // Listen for selection changes
+            window.addEventListener('selectionsUpdated', () => {
+                this.loadSelections();
+            });
         },
 
         loadSelections() {
-            this.selections = SelectionsManager.getSelections();
-            this.selectionCount = this.selections.length;
+            if (typeof SelectionsManager !== 'undefined') {
+                this.selections = SelectionsManager.getSelections();
+                this.selectionCount = this.selections.length;
+                console.log('[CONFIRM] Loaded selections:', this.selectionCount, this.selections);
+            } else {
+                console.warn('[CONFIRM] SelectionsManager not available');
+            }
         },
 
         validateForm() {
