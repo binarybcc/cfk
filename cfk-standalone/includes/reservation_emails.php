@@ -15,6 +15,19 @@ if (!defined('CFK_APP')) {
 require_once __DIR__ . '/email_manager.php';
 
 /**
+ * Clean up wishes text - remove .Wishlist: prefix if present
+ *
+ * @param string $wishes Raw wishes text from database
+ * @return string Cleaned wishes text
+ */
+function cleanWishesText(string $wishes): string
+{
+    // Remove .Wishlist: or Wishlist: prefix (case-insensitive, with or without dot)
+    $cleaned = preg_replace('/^\.?\s*wish\s*list\s*:\s*/i', '', trim($wishes));
+    return $cleaned;
+}
+
+/**
  * Send reservation confirmation email to sponsor
  *
  * @param array $reservation Reservation data from database
@@ -210,7 +223,7 @@ function generateReservationConfirmationHTML(array $reservation): string
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #c41e3a;">🎁 Christmas Wishes:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['wishes'])) . '</p>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars(cleanWishesText((string) $child['wishes']))) . '</p>
                                 </div>';
         }
 
@@ -305,7 +318,7 @@ function generateReservationConfirmationText(array $reservation): string
             $text .= "Interests: " . $child['interests'] . "\n";
         }
         if (!empty($child['wishes'])) {
-            $text .= "Wishes: " . $child['wishes'] . "\n";
+            $text .= "Wishes: " . cleanWishesText($child['wishes']) . "\n";
         }
         if (!empty($child['clothing_sizes'])) {
             $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
@@ -559,7 +572,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
         if (!empty($child['wishes'])) {
             $html .= '
                                         <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">🎁 Gift Wishes:</p>
-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['wishes']) . '</p>';
+                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars(cleanWishesText((string) $child['wishes'])) . '</p>';
         }
 
         if (!empty($child['interests'])) {
@@ -634,7 +647,7 @@ function generateAccessLinkText(string $email, string $name, array $sponsorships
 
         if (!empty($child['wishes'])) {
             $text .= "GIFT WISHES:\n";
-            $text .= $child['wishes'] . "\n\n";
+            $text .= cleanWishesText($child['wishes']) . "\n\n";
         }
 
         if (!empty($child['interests'])) {

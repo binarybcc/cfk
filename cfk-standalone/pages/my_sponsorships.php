@@ -198,17 +198,17 @@ $pageTitle = 'My Sponsorships';
                 <!-- Email Sent Confirmation -->
                 <div class="email-sent-confirmation">
                     <div class="alert alert-success">
-                        <h3>✓ Access Link Sent!</h3>
-                        <p>We've sent a secure access link to <strong><?php echo sanitizeString($lookupEmail); ?></strong></p>
-                        <p>Check your email and click the link to view your sponsorships.</p>
+                        <h3>✓ Sponsorship Details Sent!</h3>
+                        <p>We've sent your sponsorship information to <strong><?php echo sanitizeString($lookupEmail); ?></strong></p>
+                        <p>Check your email to view complete details about the children you've sponsored.</p>
                     </div>
 
                     <div class="info-box">
                         <h4>What to do next:</h4>
                         <ul class="feature-list">
                             <li>Check your email inbox (and spam folder)</li>
-                            <li>Click the "View My Sponsorships" button in the email</li>
-                            <li>The link will expire in 24 hours for security</li>
+                            <li>Review the children's wishes, sizes, and interests</li>
+                            <li>Use the information to shop for gifts</li>
                         </ul>
                         <div class="security-note">
                             <strong>Didn't receive it?</strong> Check your spam folder or <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>">try again</a> with the correct email address.
