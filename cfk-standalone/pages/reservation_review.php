@@ -134,7 +134,7 @@ $pageTitle = 'Review Your Sponsorship';
     </template>
 </div>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 function reservationReviewApp() {
     return {
         selections: [],

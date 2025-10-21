@@ -77,7 +77,7 @@ $pageTitle = 'Sponsorship Confirmed!';
     </div>
 </div>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 function sponsorshipSuccessApp() {
     return {
         sponsorEmail: '',

@@ -160,7 +160,7 @@ $pageTitle = 'Confirm Your Sponsorship';
     </template>
 </div>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 function confirmSponsorshipApp() {
     return {
         selections: [],
