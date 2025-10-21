@@ -18,6 +18,14 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
 ?>
 
 <div class="home-page">
+    <!-- TEST DATA BANNER -->
+    <div style="background: #ff6b6b; color: white; padding: 1.5rem; text-align: center; font-weight: bold; font-size: 1.2rem; border-bottom: 4px solid #c92a2a; margin-bottom: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ⚠️ NOTICE: These are TEST children only - Not real sponsorship data ⚠️
+        <div style="font-size: 0.9rem; font-weight: normal; margin-top: 0.5rem;">
+            We are currently testing the system. All children displayed are sample data for demonstration purposes.
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-inner">
