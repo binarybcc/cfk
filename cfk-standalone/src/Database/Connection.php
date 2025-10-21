@@ -263,6 +263,10 @@ class Connection
      */
     public static function query(string $sql): PDOStatement
     {
-        return self::getConnection()->query($sql);
+        $statement = self::getConnection()->query($sql);
+        if ($statement === false) {
+            throw new RuntimeException('Query execution failed: ' . $sql);
+        }
+        return $statement;
     }
 }

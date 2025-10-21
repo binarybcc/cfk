@@ -249,14 +249,14 @@ class Analyzer
         foreach ($sponsorshipLookup as $key => $status) {
             [$familyId, $childLetter] = explode('_', $key);
 
-            $updated = Connection::query("
+            $affectedRows = Connection::execute("
                 UPDATE children c
                 JOIN families f ON c.family_id = f.id
                 SET c.status = ?
                 WHERE f.family_number = ? AND c.child_letter = ?
             ", [$status, $familyId, $childLetter]);
 
-            if ($updated) {
+            if ($affectedRows > 0) {
                 $restored++;
             }
         }

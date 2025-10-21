@@ -77,7 +77,12 @@ class CleanupReservationsCommand extends Command
 
         try {
             // Calculate expiration time
-            $expirationTime = date('Y-m-d H:i:s', strtotime("-{$timeout} minutes"));
+            $timestamp = strtotime("-{$timeout} minutes");
+            if ($timestamp === false) {
+                $io->error('Failed to calculate expiration time');
+                return Command::FAILURE;
+            }
+            $expirationTime = date('Y-m-d H:i:s', $timestamp);
 
             $io->info("Finding reservations older than {$timeout} minutes (before {$expirationTime})");
 
@@ -89,30 +94,31 @@ class CleanupReservationsCommand extends Command
             //     [$expirationTime]
             // );
 
-            // Simulated for now
+            // Simulated for now - returns empty array until Database migration complete
             $expiredReservations = [];
 
-            if (empty($expiredReservations)) {
+            if ($expiredReservations === []) {
                 $io->success('No expired reservations found');
                 return Command::SUCCESS;
             }
 
+            // TODO: Uncomment when Connection::fetchAll() is integrated for reservations
+            /*
             $count = count($expiredReservations);
             $io->info("Found {$count} expired reservation(s)");
 
             if (!$dryRun) {
-                // TODO: Implement actual cleanup after migration
-                // foreach ($expiredReservations as $reservation) {
-                //     Database::execute(
-                //         "DELETE FROM reservations WHERE id = ?",
-                //         [$reservation['id']]
-                //     );
-                //
-                //     Database::execute(
-                //         "UPDATE children SET status = 'available' WHERE id = ?",
-                //         [$reservation['child_id']]
-                //     );
-                // }
+                foreach ($expiredReservations as $reservation) {
+                    Connection::execute(
+                        "DELETE FROM reservations WHERE id = ?",
+                        [$reservation['id']]
+                    );
+
+                    Connection::execute(
+                        "UPDATE children SET status = 'available' WHERE id = ?",
+                        [$reservation['child_id']]
+                    );
+                }
 
                 $io->success("Released {$count} expired reservation(s)");
             } else {
@@ -120,6 +126,7 @@ class CleanupReservationsCommand extends Command
             }
 
             return Command::SUCCESS;
+            */
 
         } catch (\Exception $e) {
             $io->error('Cleanup failed: ' . $e->getMessage());

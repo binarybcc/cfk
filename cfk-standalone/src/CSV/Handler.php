@@ -295,7 +295,7 @@ class Handler
         }
 
         $row = array_combine($headers, $data);
-        if ($row === false) {
+        if (!is_array($row)) {
             $this->errors[] = "Row $rowNumber: Failed to combine headers and data";
             return null;
         }
