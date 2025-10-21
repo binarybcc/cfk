@@ -414,6 +414,11 @@ class Handler
             $this->warnings[] = "Row $rowNumber: Age {$row['age']} and grade '{$row['grade']}' may not match";
         }
 
+        // Shoe size date conversion check (common Excel error)
+        if (!empty($row['shoe_size']) && preg_match('/\d+-[A-Z][a-z]{2}/', (string) $row['shoe_size'])) {
+            $this->warnings[] = "Row $rowNumber: Shoe size '{$row['shoe_size']}' looks like a date (Excel auto-conversion). Import CSV as 'Text' format to prevent this.";
+        }
+
         return $valid;
     }
 
