@@ -161,7 +161,7 @@ include __DIR__ . '/includes/admin_header.php';
 
     <!-- Add New Admin Button -->
     <div class="action-bar">
-        <button onclick="showAddAdminForm()" class="btn btn-primary">
+        <button id="show-add-admin-btn" class="btn btn-primary">
             ➕ Add New Administrator
         </button>
     </div>
@@ -170,7 +170,7 @@ include __DIR__ . '/includes/admin_header.php';
     <div id="addAdminForm" class="form-panel" style="display: none;">
         <div class="panel-header">
             <h2>Add New Administrator</h2>
-            <button onclick="hideAddAdminForm()" class="btn-close">✕</button>
+            <button id="hide-add-admin-x" class="btn-close">✕</button>
         </div>
 
         <form method="POST" action="" class="admin-form">
@@ -247,7 +247,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <button type="submit" name="add_admin" class="btn btn-primary">
                     Create Administrator
                 </button>
-                <button type="button" onclick="hideAddAdminForm()" class="btn btn-secondary">
+                <button type="button" id="cancel-add-admin-btn" class="btn btn-secondary">
                     Cancel
                 </button>
             </div>
@@ -292,14 +292,15 @@ include __DIR__ . '/includes/admin_header.php';
                             <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime((string) $admin['last_login'])) : 'Never'; ?></td>
                             <td><?php echo date('M j, Y', strtotime((string) $admin['created_at'])); ?></td>
                             <td class="actions">
-                                <button onclick="editAdmin(<?php echo $admin['id']; ?>)"
-                                        class="btn btn-sm btn-edit"
+                                <button class="btn btn-sm btn-edit btn-edit-admin"
+                                        data-admin-id="<?php echo $admin['id']; ?>"
                                         title="Edit">
                                     ✏️ Edit
                                 </button>
                                 <?php if ($admin['id'] != $_SESSION['cfk_admin_id']): ?>
-                                    <button onclick="deleteAdmin(<?php echo $admin['id']; ?>, '<?php echo htmlspecialchars((string) $admin['username'], ENT_QUOTES); ?>')"
-                                            class="btn btn-sm btn-delete"
+                                    <button class="btn btn-sm btn-delete btn-delete-admin"
+                                            data-admin-id="<?php echo $admin['id']; ?>"
+                                            data-username="<?php echo htmlspecialchars((string) $admin['username'], ENT_QUOTES); ?>"
                                             title="Delete">
                                         🗑️ Delete
                                     </button>
@@ -364,7 +365,7 @@ include __DIR__ . '/includes/admin_header.php';
                                         <button type="submit" name="edit_admin" class="btn btn-primary">
                                             Save Changes
                                         </button>
-                                        <button type="button" onclick="cancelEdit(<?php echo $admin['id']; ?>)" class="btn btn-secondary">
+                                        <button type="button" class="btn btn-secondary btn-cancel-edit" data-admin-id="<?php echo $admin['id']; ?>">
                                             Cancel
                                         </button>
                                     </div>
@@ -678,57 +679,123 @@ include __DIR__ . '/includes/admin_header.php';
 </style>
 
 <script nonce="<?php echo $cspNonce; ?>">
-function showAddAdminForm() {
-    document.getElementById('addAdminForm').style.display = 'block';
-    document.getElementById('username').focus();
-}
+// CSP-compliant event listeners for manage_admins.php
+document.addEventListener('DOMContentLoaded', function() {
+    const addAdminForm = document.getElementById('addAdminForm');
+    const usernameInput = document.getElementById('username');
+    const deleteForm = document.getElementById('deleteForm');
+    const deleteAdminId = document.getElementById('deleteAdminId');
 
-function hideAddAdminForm() {
-    document.getElementById('addAdminForm').style.display = 'none';
-    // Reset form
-    document.querySelector('#addAdminForm form').reset();
-}
+    // Helper function to show add admin form
+    function showAddAdminForm() {
+        addAdminForm.style.display = 'block';
+        usernameInput.focus();
+    }
 
-function editAdmin(adminId) {
-    // Hide all other edit forms
-    document.querySelectorAll('.edit-row').forEach(row => {
-        row.style.display = 'none';
+    // Helper function to hide add admin form
+    function hideAddAdminForm() {
+        addAdminForm.style.display = 'none';
+        // Reset form
+        const form = addAdminForm.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+    }
+
+    // Helper function to edit admin
+    function editAdmin(adminId) {
+        // Hide all other edit forms
+        document.querySelectorAll('.edit-row').forEach(row => {
+            row.style.display = 'none';
+        });
+
+        // Show this edit form
+        const editRow = document.getElementById('editForm' + adminId);
+        if (editRow) {
+            editRow.style.display = 'table-row';
+
+            // Scroll to form
+            editRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    // Helper function to cancel edit
+    function cancelEdit(adminId) {
+        const editForm = document.getElementById('editForm' + adminId);
+        if (editForm) {
+            editForm.style.display = 'none';
+        }
+    }
+
+    // Helper function to delete admin
+    function deleteAdmin(adminId, username) {
+        if (confirm(`Are you sure you want to delete administrator "${username}"?\n\nThis action cannot be undone.`)) {
+            deleteAdminId.value = adminId;
+            deleteForm.submit();
+        }
+    }
+
+    // Show Add Admin Form button
+    const showAddBtn = document.getElementById('show-add-admin-btn');
+    if (showAddBtn) {
+        showAddBtn.addEventListener('click', showAddAdminForm);
+    }
+
+    // Hide Add Admin Form buttons
+    const hideAddX = document.getElementById('hide-add-admin-x');
+    if (hideAddX) {
+        hideAddX.addEventListener('click', hideAddAdminForm);
+    }
+
+    const cancelAddBtn = document.getElementById('cancel-add-admin-btn');
+    if (cancelAddBtn) {
+        cancelAddBtn.addEventListener('click', hideAddAdminForm);
+    }
+
+    // Edit admin buttons (event delegation)
+    document.querySelectorAll('.btn-edit-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+            editAdmin(adminId);
+        });
     });
 
-    // Show this edit form
-    const editRow = document.getElementById('editForm' + adminId);
-    editRow.style.display = 'table-row';
+    // Cancel edit buttons (event delegation)
+    document.querySelectorAll('.btn-cancel-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+            cancelEdit(adminId);
+        });
+    });
 
-    // Scroll to form
-    editRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
+    // Delete admin buttons (event delegation)
+    document.querySelectorAll('.btn-delete-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+            const username = this.getAttribute('data-username');
+            deleteAdmin(adminId, username);
+        });
+    });
 
-function cancelEdit(adminId) {
-    document.getElementById('editForm' + adminId).style.display = 'none';
-}
+    // Form validation
+    const addForm = addAdminForm.querySelector('form');
+    if (addForm) {
+        addForm.addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
 
-function deleteAdmin(adminId, username) {
-    if (confirm(`Are you sure you want to delete administrator "${username}"?\n\nThis action cannot be undone.`)) {
-        document.getElementById('deleteAdminId').value = adminId;
-        document.getElementById('deleteForm').submit();
-    }
-}
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                e.preventDefault();
+                return false;
+            }
 
-// Form validation
-document.querySelector('#addAdminForm form')?.addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm_password').value;
-
-    if (password !== confirmPassword) {
-        alert('Passwords do not match!');
-        e.preventDefault();
-        return false;
-    }
-
-    if (password.length < 8) {
-        alert('Password must be at least 8 characters long!');
-        e.preventDefault();
-        return false;
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                e.preventDefault();
+                return false;
+            }
+        });
     }
 });
 </script>
