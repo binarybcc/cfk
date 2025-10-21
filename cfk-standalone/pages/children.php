@@ -196,71 +196,18 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         }, 3000);
     };
     </script>
-    <div class="filters-section" x-data="{
-        search: '',
-        genderFilter: '',
-        ageCategoryFilter: '',
-        allChildren: [],
-        isLoading: true,
-        async init() {
-            // Load ALL available children from database
-            const apiUrl = '<?php echo baseUrl('api/get_all_children.php'); ?>';
-            console.log('Loading all children from:', apiUrl);
+    <div class="filters-section">
+        <!-- Server-Side Filter Form -->
+        <form method="get" action="" class="filters-form">
+            <input type="hidden" name="page" value="children">
 
-            try {
-                const response = await fetch(apiUrl);
-                console.log('Response status:', response.status);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                const data = await response.json();
-                console.log('API returned:', data.count, 'children');
-
-                if (data.success && data.children) {
-                    this.allChildren = data.children;
-                    // Also update the window variables for other functions
-                    window.childrenData = data.children;
-                    window.siblingsByFamily = data.siblings || {};
-                    console.log('Successfully loaded', this.allChildren.length, 'children');
-                } else {
-                    console.warn('API response not successful:', data);
-                    // Fallback to page data
-                    this.allChildren = window.childrenData || [];
-                }
-            } catch (error) {
-                console.error('Error loading children:', error);
-                console.error('Error details:', error.message);
-                // Fallback to page data
-                this.allChildren = window.childrenData || [];
-                console.log('Falling back to page data:', this.allChildren.length, 'children');
-            } finally {
-                this.isLoading = false;
-            }
-        },
-        get filteredChildren() {
-            return this.allChildren.filter(child => {
-                const searchLower = this.search.toLowerCase();
-                const matchesSearch = !this.search ||
-                    (child.display_id && child.display_id.toLowerCase().includes(searchLower)) ||
-                    (child.interests && child.interests.toLowerCase().includes(searchLower)) ||
-                    (child.wishes && child.wishes.toLowerCase().includes(searchLower)) ||
-                    child.age.toString().includes(searchLower);
-                const matchesGender = !this.genderFilter || child.gender === this.genderFilter;
-                const matchesAgeCategory = !this.ageCategoryFilter ||
-                    window.getAgeCategory(child.age) === this.ageCategoryFilter;
-                return matchesSearch && matchesGender && matchesAgeCategory;
-            });
-        }
-    }">
-        <div class="filters-form">
             <div class="filter-group filter-group-search">
                 <label for="child-search-input">Search:</label>
                 <div class="search-input-wrapper">
                     <input type="text"
                            id="child-search-input"
-                           x-model="search"
+                           name="search"
+                           value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
                            placeholder="Family code, interests, wishes, age...">
                     <small class="search-help-text">
                         Try: "123A", "bike", "doll", "boy 6", etc.
@@ -270,123 +217,149 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
             <div class="filter-group">
                 <label for="child-gender-filter">Gender:</label>
-                <select id="child-gender-filter" x-model="genderFilter">
+                <select id="child-gender-filter" name="gender">
                     <option value="">Both</option>
-                    <option value="M">Boys</option>
-                    <option value="F">Girls</option>
+                    <option value="M" <?php echo ($_GET['gender'] ?? '') === 'M' ? 'selected' : ''; ?>>Boys</option>
+                    <option value="F" <?php echo ($_GET['gender'] ?? '') === 'F' ? 'selected' : ''; ?>>Girls</option>
                 </select>
             </div>
 
             <div class="filter-group">
                 <label for="child-age-category-filter">Age Group:</label>
-                <select id="child-age-category-filter" x-model="ageCategoryFilter">
+                <select id="child-age-category-filter" name="age_category">
                     <option value="">All Age Groups</option>
-                    <option value="birth_to_4">Birth to 4 Years</option>
-                    <option value="elementary">Elementary (5-10)</option>
-                    <option value="middle_school">Middle School (11-13)</option>
-                    <option value="high_school">High School (14-18)</option>
+                    <option value="birth_to_4" <?php echo ($_GET['age_category'] ?? '') === 'birth_to_4' ? 'selected' : ''; ?>>Birth to 4 Years</option>
+                    <option value="elementary" <?php echo ($_GET['age_category'] ?? '') === 'elementary' ? 'selected' : ''; ?>>Elementary (5-10)</option>
+                    <option value="middle_school" <?php echo ($_GET['age_category'] ?? '') === 'middle_school' ? 'selected' : ''; ?>>Middle School (11-13)</option>
+                    <option value="high_school" <?php echo ($_GET['age_category'] ?? '') === 'high_school' ? 'selected' : ''; ?>>High School (14-18)</option>
                 </select>
             </div>
 
             <div class="filter-actions">
-                <button @click="search = ''; genderFilter = ''; ageCategoryFilter = '';" class="btn btn-secondary">
-                    Clear Filters
-                </button>
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="?page=children" class="btn btn-secondary">Clear Filters</a>
             </div>
-        </div>
+        </form>
 
         <!-- Results Counter -->
         <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
             <p style="margin: 0; font-weight: 600; color: #2c5530;">
-                <span x-show="isLoading">Loading children...</span>
-                <span x-show="!isLoading">
-                    Showing <span x-text="filteredChildren.length"></span> of <span x-text="allChildren.length"></span> children
-                    <span x-show="search || genderFilter || ageCategoryFilter" style="color: #666; font-weight: normal;">
-                        (filtered)
-                    </span>
-                </span>
+                Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
+                <?php if (!empty($filters)): ?>
+                    <span style="color: #666; font-weight: normal;">(filtered)</span>
+                <?php endif; ?>
             </p>
         </div>
 
-        <!-- Children Grid with Alpine.js Instant Filtering -->
+        <!-- Children Grid with Server-Side Rendering -->
         <div class="children-grid">
-            <!-- No Results Message -->
-            <div x-show="filteredChildren.length === 0" x-transition class="no-results">
-                <h2>No Children Found</h2>
-                <p>No children match your current filters. Try adjusting your search criteria.</p>
-            </div>
-
-            <!-- Filtered Children Cards -->
-            <template x-for="child in filteredChildren" :key="child.id">
-                <div class="child-card child-card-v2"
-                     x-data="{
-                         siblingCount: window.getSiblingCount(child.family_id)
-                     }"
-                     x-transition>
-                    <!-- Top Section: Image + Metadata Side by Side -->
-                    <div class="child-top-section">
-                        <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
-                        <div class="child-photo-compact">
-                            <img :src="window.getPlaceholderImage(child.age, child.gender)"
-                                 :alt="'Child ' + child.display_id">
-                        </div>
-
-                        <!-- Metadata beside image -->
-                        <div class="child-header-meta">
-                            <div class="child-meta-item">
-                                <strong>Child:</strong> <span x-text="child.display_id"></span>
-                            </div>
-                            <div class="child-meta-item">
-                                <strong>Age:</strong> <span x-text="child.age"></span>
-                            </div>
-                            <div class="child-meta-item">
-                                <strong></strong> <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
-                            </div>
-                            <div class="child-meta-item" x-show="child.grade">
-                                <strong>Age Group:</strong> <span x-text="child.grade || 'N/A'"></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Middle Section: Details -->
-                    <div class="child-info">
-                        <!-- Interests & Wishes -->
-                        <div x-show="child.interests" style="margin-bottom: 15px;">
-                            <strong style="color: #2c5530;">Interests:</strong>
-                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.interests"></p>
-                        </div>
-
-                        <div x-show="child.wishes" style="margin-bottom: 15px;">
-                            <strong style="color: #c41e3a;">Wishes:</strong>
-                            <p style="margin: 5px 0 0 0; color: #666;" x-text="child.wishes"></p>
-                        </div>
-                    </div>
-
-                    <!-- Bottom Section: Sibling Info + Actions (Blue Border Area) -->
-                    <div class="child-action-section">
-                        <!-- Sibling Count -->
-                        <div class="sibling-info">
-                            <span class="sibling-text">Number of Siblings available: <strong x-text="siblingCount"></strong></span>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="action-buttons">
-                            <a :href="'<?php echo baseUrl('?page=family&family_number='); ?>' + child.family_number"
-                               class="btn btn-secondary btn-view-family"
-                               :class="siblingCount === 0 ? 'btn-disabled' : ''"
-                               :aria-disabled="siblingCount === 0 ? 'true' : 'false'">
-                                View Family
-                            </a>
-                            <button @click="addToSelections(child)"
-                                    class="btn btn-primary btn-sponsor">
-                                SPONSOR
-                            </button>
-                        </div>
-                    </div>
-
+            <?php if (empty($children)): ?>
+                <!-- No Results Message -->
+                <div class="no-results">
+                    <h2>No Children Found</h2>
+                    <p>No children match your current filters. Try adjusting your search criteria.</p>
                 </div>
-            </template>
+            <?php else: ?>
+                <!-- Children Cards -->
+                <?php foreach ($children as $child): ?>
+                    <?php
+                    $siblingCount = getSiblingCount($child['family_id']);
+                    ?>
+                    <div class="child-card child-card-v2">
+                        <!-- Top Section: Image + Metadata Side by Side -->
+                        <div class="child-top-section">
+                            <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
+                            <div class="child-photo-compact">
+                                <img src="<?php echo getPlaceholderImage($child['age'], $child['gender']); ?>"
+                                     alt="Child <?php echo htmlspecialchars($child['display_id']); ?>">
+                            </div>
+
+                            <!-- Metadata beside image -->
+                            <div class="child-header-meta">
+                                <div class="child-meta-item">
+                                    <strong>Child:</strong> <span><?php echo htmlspecialchars($child['display_id']); ?></span>
+                                </div>
+                                <div class="child-meta-item">
+                                    <strong>Age:</strong> <span><?php echo (int)$child['age']; ?></span>
+                                </div>
+                                <div class="child-meta-item">
+                                    <strong></strong> <span><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
+                                </div>
+                                <?php if (!empty($child['grade'])): ?>
+                                    <div class="child-meta-item">
+                                        <strong>Age Group:</strong> <span><?php echo htmlspecialchars($child['grade']); ?></span>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+
+                        <!-- Middle Section: Details -->
+                        <div class="child-info">
+                            <!-- Interests & Wishes -->
+                            <?php if (!empty($child['interests'])): ?>
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #2c5530;">Interests:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars($child['interests']); ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if (!empty($child['wishes'])): ?>
+                                <div style="margin-bottom: 15px;">
+                                    <strong style="color: #c41e3a;">Wishes:</strong>
+                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars($child['wishes']); ?></p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Bottom Section: Sibling Info + Actions (Blue Border Area) -->
+                        <div class="child-action-section">
+                            <!-- Sibling Count -->
+                            <div class="sibling-info">
+                                <span class="sibling-text">Number of Siblings available: <strong><?php echo $siblingCount; ?></strong></span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="action-buttons">
+                                <a href="<?php echo baseUrl('?page=family&family_number=' . urlencode($child['family_number'])); ?>"
+                                   class="btn btn-secondary btn-view-family <?php echo $siblingCount === 0 ? 'btn-disabled' : ''; ?>"
+                                   <?php echo $siblingCount === 0 ? 'aria-disabled="true"' : ''; ?>>
+                                    View Family
+                                </a>
+                                <button onclick="addToSelections(<?php echo htmlspecialchars(json_encode($child)); ?>)"
+                                        class="btn btn-primary btn-sponsor">
+                                    SPONSOR
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
+
+        <!-- Pagination -->
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination" style="margin-top: 2rem; text-align: center;">
+                <?php
+                $queryParams = $_GET;
+                unset($queryParams['p']); // Remove page param
+                $baseQuery = http_build_query($queryParams);
+                $baseQuery = $baseQuery ? '&' . $baseQuery : '';
+                ?>
+
+                <?php if ($currentPage > 1): ?>
+                    <a href="?p=<?php echo $currentPage - 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">« Previous</a>
+                <?php endif; ?>
+
+                <span style="margin: 0 1rem; font-weight: 600;">
+                    Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
+                </span>
+
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="?p=<?php echo $currentPage + 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">Next »</a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 
