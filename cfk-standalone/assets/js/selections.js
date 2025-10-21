@@ -240,3 +240,159 @@ if (document.readyState === 'loading') {
 
 // Export for use in other scripts
 window.SelectionsManager = SelectionsManager;
+
+/**
+ * Toast Notification Manager
+ * Shows temporary notifications for user actions
+ */
+const ToastManager = {
+    activeToast: null,
+
+    /**
+     * Show a toast notification
+     * @param {Object} options - Toast configuration
+     */
+    show(options) {
+        // Remove existing toast if present
+        if (this.activeToast) {
+            this.hide();
+        }
+
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'toast-notification';
+        toast.innerHTML = `
+            <p class="toast-message">${options.message}</p>
+            <div class="toast-actions">
+                <a href="${options.actionUrl}" class="toast-btn toast-btn-primary">
+                    ${options.actionText || 'View Cart'}
+                </a>
+                <button class="toast-btn toast-btn-secondary" data-toast-dismiss>
+                    ${options.dismissText || 'Keep Browsing'}
+                </button>
+            </div>
+        `;
+
+        // Add to page
+        document.body.appendChild(toast);
+        this.activeToast = toast;
+
+        // Dismiss button handler
+        const dismissBtn = toast.querySelector('[data-toast-dismiss]');
+        dismissBtn.addEventListener('click', () => this.hide());
+
+        // Auto-hide after duration
+        const duration = options.duration || 5000;
+        setTimeout(() => this.hide(), duration);
+    },
+
+    /**
+     * Hide active toast
+     */
+    hide() {
+        if (!this.activeToast) return;
+
+        this.activeToast.classList.add('hiding');
+        setTimeout(() => {
+            if (this.activeToast && this.activeToast.parentNode) {
+                this.activeToast.parentNode.removeChild(this.activeToast);
+            }
+            this.activeToast = null;
+        }, 300); // Match animation duration
+    }
+};
+
+window.ToastManager = ToastManager;
+
+/**
+ * Sticky Bar Manager
+ * Shows persistent cart reminder at bottom of screen
+ */
+const StickyBarManager = {
+    bar: null,
+    baseUrl: '',
+
+    /**
+     * Initialize sticky bar
+     */
+    init(baseUrl = '') {
+        this.baseUrl = baseUrl;
+
+        // Create sticky bar element
+        this.bar = document.createElement('div');
+        this.bar.className = 'selections-sticky-bar';
+        this.bar.innerHTML = `
+            <div class="sticky-bar-content">
+                <div class="sticky-bar-info">
+                    <span class="sticky-bar-icon">🛒</span>
+                    <span class="sticky-bar-text">
+                        <span class="sticky-bar-count">0</span>
+                        <span class="sticky-bar-label">children selected</span>
+                    </span>
+                </div>
+                <div class="sticky-bar-actions">
+                    <a href="${this.baseUrl}?page=my_sponsorships" class="btn btn-outline btn-small">
+                        Review Selections
+                    </a>
+                    <a href="${this.baseUrl}?page=confirm_sponsorship" class="btn btn-success btn-small">
+                        Complete Sponsorship →
+                    </a>
+                </div>
+            </div>
+        `;
+
+        // Add to page
+        document.body.appendChild(this.bar);
+
+        // Listen for selection changes
+        window.addEventListener('selectionsUpdated', () => this.update());
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'cfk_selections') {
+                this.update();
+            }
+        });
+
+        // Initial update
+        this.update();
+    },
+
+    /**
+     * Update sticky bar visibility and content
+     */
+    update() {
+        if (!this.bar) return;
+
+        const count = SelectionsManager.getCount();
+        const countBadge = this.bar.querySelector('.sticky-bar-count');
+        const label = this.bar.querySelector('.sticky-bar-label');
+
+        if (count > 0) {
+            // Show bar with animation
+            this.bar.classList.add('visible');
+
+            // Update count
+            if (countBadge) {
+                countBadge.textContent = count;
+            }
+
+            // Update label (singular/plural)
+            if (label) {
+                label.textContent = count === 1 ? 'child selected' : 'children selected';
+            }
+        } else {
+            // Hide bar
+            this.bar.classList.remove('visible');
+        }
+    },
+
+    /**
+     * Manually hide the bar
+     */
+    hide() {
+        if (this.bar) {
+            this.bar.classList.remove('visible');
+        }
+    }
+};
+
+window.StickyBarManager = StickyBarManager;

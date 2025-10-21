@@ -55,6 +55,14 @@
 
     <!-- Zeffy donation script loaded in header, buttons initialized in main.js -->
 
+    <!-- Initialize Sticky Cart Bar -->
+    <script nonce="<?php echo $_SESSION['csp_nonce'] ?? ''; ?>">
+    // Initialize sticky bar on page load
+    if (typeof StickyBarManager !== 'undefined') {
+        StickyBarManager.init('<?php echo baseUrl(); ?>');
+    }
+    </script>
+
     <style nonce="<?php echo $_SESSION['csp_nonce'] ?? ''; ?>">
         /* Footer Logo Styling */
         .footer-brand {

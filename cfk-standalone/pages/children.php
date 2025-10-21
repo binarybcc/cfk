@@ -471,6 +471,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
                         // Trigger custom event so other listeners can update
                         window.dispatchEvent(new Event('selectionsUpdated'));
+
+                        // Show toast notification
+                        if (typeof ToastManager !== 'undefined') {
+                            ToastManager.show({
+                                message: `✓ Child ${childData.display_id} added to your cart`,
+                                actionUrl: '<?php echo baseUrl('?page=my_sponsorships'); ?>',
+                                actionText: 'View Cart',
+                                dismissText: 'Keep Browsing',
+                                duration: 5000
+                            });
+                        }
                     }, 500);
                 } else {
                     // Already in selections - show feedback
