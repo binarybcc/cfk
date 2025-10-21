@@ -145,7 +145,7 @@ $pageTitle = 'Confirm Your Sponsorship';
 
                     <!-- Submit Button -->
                     <div class="form-actions">
-                        <a href="<?php echo baseUrl('?page=selections'); ?>" class="btn btn-secondary">
+                        <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" class="btn btn-secondary">
                             ← Back to Selections
                         </a>
                         <button
