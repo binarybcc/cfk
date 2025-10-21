@@ -346,12 +346,11 @@ include __DIR__ . '/includes/admin_header.php';
                                 <br>
                                 <small>Sponsor: <?php echo sanitizeString($child['sponsor_name']); ?> (<?php echo sanitizeString($child['sponsor_email']); ?>)</small>
                             </div>
-                            <form method="POST" style="display: inline;">
+                            <form method="POST" style="display: inline;" class="release-child-form">
                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                 <input type="hidden" name="action" value="release_child">
                                 <input type="hidden" name="child_id" value="<?php echo $child['id']; ?>">
-                                <button type="submit" class="btn btn-warning btn-small" 
-                                        onclick="return confirm('Release this child back to available status?')">
+                                <button type="submit" class="btn btn-warning btn-small btn-release-child">
                                     Release Child
                                 </button>
                             </form>
@@ -365,7 +364,7 @@ include __DIR__ . '/includes/admin_header.php';
         <div class="filters">
             <div class="filter-group">
                 <label for="status-filter">Status:</label>
-                <select id="status-filter" onchange="filterSponsorships()">
+                <select id="status-filter" class="auto-filter">
                     <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Statuses</option>
                     <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
                     <option value="sponsored" <?php echo $statusFilter === 'sponsored' ? 'selected' : ''; ?>>Confirmed</option>
@@ -373,10 +372,10 @@ include __DIR__ . '/includes/admin_header.php';
                     <option value="cancelled" <?php echo $statusFilter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                 </select>
             </div>
-            
+
             <div class="filter-group">
                 <label for="sort-filter">Sort by:</label>
-                <select id="sort-filter" onchange="filterSponsorships()">
+                <select id="sort-filter" class="auto-filter">
                     <option value="newest" <?php echo $sortBy === 'newest' ? 'selected' : ''; ?>>Newest First</option>
                     <option value="oldest" <?php echo $sortBy === 'oldest' ? 'selected' : ''; ?>>Oldest First</option>
                     <option value="name" <?php echo $sortBy === 'name' ? 'selected' : ''; ?>>Sponsor Name</option>
@@ -469,13 +468,19 @@ include __DIR__ . '/includes/admin_header.php';
                                         <?php endif; ?>
 
                                         <?php if (in_array($sponsorship['status'], ['pending', 'confirmed'])): ?>
-                                            <button onclick="showCancelModal(<?php echo $sponsorship['id']; ?>, '<?php echo sanitizeString($sponsorship['child_display_id']); ?>', '<?php echo sanitizeString($sponsorship['sponsor_name']); ?>')" 
-                                                    class="btn btn-danger btn-small">Cancel</button>
+                                            <button class="btn btn-danger btn-small btn-cancel-sponsorship"
+                                                    data-sponsorship-id="<?php echo $sponsorship['id']; ?>"
+                                                    data-child-id="<?php echo sanitizeString($sponsorship['child_display_id']); ?>"
+                                                    data-sponsor-name="<?php echo sanitizeString($sponsorship['sponsor_name']); ?>">
+                                                Cancel
+                                            </button>
                                         <?php endif; ?>
-                                        
+
                                         <?php if (!empty($sponsorship['special_message'])): ?>
-                                            <button onclick="showMessage('<?php echo addslashes(sanitizeString($sponsorship['special_message'])); ?>')" 
-                                                    class="btn btn-warning btn-small">View Message</button>
+                                            <button class="btn btn-warning btn-small btn-view-message"
+                                                    data-message="<?php echo htmlspecialchars((string) $sponsorship['special_message'], ENT_QUOTES, 'UTF-8'); ?>">
+                                                View Message
+                                            </button>
                                         <?php endif; ?>
                                     </div>
                                 </td>
@@ -490,7 +495,7 @@ include __DIR__ . '/includes/admin_header.php';
     <!-- Cancel Modal -->
     <div id="cancelModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="hideCancelModal()">&times;</span>
+            <span class="close" id="close-cancel-modal-x">&times;</span>
             <div class="modal-header">
                 <h3>Cancel Sponsorship</h3>
             </div>
@@ -499,15 +504,15 @@ include __DIR__ . '/includes/admin_header.php';
                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                 <input type="hidden" name="action" value="cancel">
                 <input type="hidden" name="sponsorship_id" id="cancelSponsorshipId">
-                
+
                 <div class="form-group">
                     <label for="reason">Reason for cancellation:</label>
                     <textarea name="reason" id="reason" required placeholder="Please provide a reason for cancelling this sponsorship..."></textarea>
                 </div>
-                
+
                 <div class="actions">
                     <button type="submit" class="btn btn-danger">Cancel Sponsorship</button>
-                    <button type="button" onclick="hideCancelModal()" class="btn btn-secondary">Close</button>
+                    <button type="button" id="close-cancel-modal-btn" class="btn btn-secondary">Close</button>
                 </div>
             </form>
         </div>
@@ -516,68 +521,135 @@ include __DIR__ . '/includes/admin_header.php';
     <!-- Message Modal -->
     <div id="messageModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="hideMessageModal()">&times;</span>
+            <span class="close" id="close-message-modal-x">&times;</span>
             <div class="modal-header">
                 <h3>Special Message from Sponsor</h3>
             </div>
             <p id="messageText" style="white-space: pre-wrap; line-height: 1.5;"></p>
             <div class="actions">
-                <button type="button" onclick="hideMessageModal()" class="btn btn-primary">Close</button>
+                <button type="button" id="close-message-modal-btn" class="btn btn-primary">Close</button>
             </div>
         </div>
     </div>
 
-    <script>
-        function filterSponsorships() {
-            const status = document.getElementById('status-filter').value;
-            const sort = document.getElementById('sort-filter').value;
-            
-            const url = new URL(window.location);
-            url.searchParams.set('status', status);
-            url.searchParams.set('sort', sort);
-            window.location = url;
-        }
-
-        function showCancelModal(sponsorshipId, childId, sponsorName) {
-            document.getElementById('cancelSponsorshipId').value = sponsorshipId;
-            document.getElementById('cancelText').textContent = 
-                `Are you sure you want to cancel the sponsorship of Child ${childId} by ${sponsorName}? This action will release the child back to available status.`;
-            document.getElementById('cancelModal').style.display = 'block';
-        }
-
-        function hideCancelModal() {
-            document.getElementById('cancelModal').style.display = 'none';
-            document.getElementById('reason').value = '';
-        }
-
-        function showMessage(message) {
-            document.getElementById('messageText').textContent = message;
-            document.getElementById('messageModal').style.display = 'block';
-        }
-
-        function hideMessageModal() {
-            document.getElementById('messageModal').style.display = 'none';
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
+    <script nonce="<?php echo $cspNonce; ?>">
+        // CSP-compliant event listeners for manage_sponsorships.php
+        document.addEventListener('DOMContentLoaded', function() {
             const cancelModal = document.getElementById('cancelModal');
             const messageModal = document.getElementById('messageModal');
-            
-            if (event.target === cancelModal) {
-                hideCancelModal();
-            }
-            if (event.target === messageModal) {
-                hideMessageModal();
-            }
-        }
+            const cancelSponsorshipId = document.getElementById('cancelSponsorshipId');
+            const cancelText = document.getElementById('cancelText');
+            const messageText = document.getElementById('messageText');
+            const reasonTextarea = document.getElementById('reason');
 
-        // Auto-refresh for pending sponsorships
-        if (window.location.search.includes('status=pending') || window.location.search.includes('status=all') || !window.location.search.includes('status=')) {
-            setTimeout(() => {
-                window.location.reload();
-            }, 60000); // Refresh every minute
-        }
+            // Helper function to show cancel modal
+            function showCancelModal(sponsorshipId, childId, sponsorName) {
+                cancelSponsorshipId.value = sponsorshipId;
+                cancelText.textContent =
+                    `Are you sure you want to cancel the sponsorship of Child ${childId} by ${sponsorName}? This action will release the child back to available status.`;
+                cancelModal.style.display = 'block';
+            }
+
+            // Helper function to hide cancel modal
+            function hideCancelModal() {
+                cancelModal.style.display = 'none';
+                reasonTextarea.value = '';
+            }
+
+            // Helper function to show message modal
+            function showMessage(message) {
+                messageText.textContent = message;
+                messageModal.style.display = 'block';
+            }
+
+            // Helper function to hide message modal
+            function hideMessageModal() {
+                messageModal.style.display = 'none';
+            }
+
+            // Helper function to filter sponsorships
+            function filterSponsorships() {
+                const status = document.getElementById('status-filter').value;
+                const sort = document.getElementById('sort-filter').value;
+
+                const url = new URL(window.location);
+                url.searchParams.set('status', status);
+                url.searchParams.set('sort', sort);
+                window.location = url;
+            }
+
+            // Release child confirmation (event delegation)
+            document.querySelectorAll('.release-child-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Release this child back to available status?')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            });
+
+            // Cancel sponsorship buttons (event delegation)
+            document.querySelectorAll('.btn-cancel-sponsorship').forEach(button => {
+                button.addEventListener('click', function() {
+                    const sponsorshipId = this.getAttribute('data-sponsorship-id');
+                    const childId = this.getAttribute('data-child-id');
+                    const sponsorName = this.getAttribute('data-sponsor-name');
+                    showCancelModal(sponsorshipId, childId, sponsorName);
+                });
+            });
+
+            // View message buttons (event delegation)
+            document.querySelectorAll('.btn-view-message').forEach(button => {
+                button.addEventListener('click', function() {
+                    const message = this.getAttribute('data-message');
+                    showMessage(message);
+                });
+            });
+
+            // Close cancel modal buttons
+            const closeCancelX = document.getElementById('close-cancel-modal-x');
+            if (closeCancelX) {
+                closeCancelX.addEventListener('click', hideCancelModal);
+            }
+
+            const closeCancelBtn = document.getElementById('close-cancel-modal-btn');
+            if (closeCancelBtn) {
+                closeCancelBtn.addEventListener('click', hideCancelModal);
+            }
+
+            // Close message modal buttons
+            const closeMessageX = document.getElementById('close-message-modal-x');
+            if (closeMessageX) {
+                closeMessageX.addEventListener('click', hideMessageModal);
+            }
+
+            const closeMessageBtn = document.getElementById('close-message-modal-btn');
+            if (closeMessageBtn) {
+                closeMessageBtn.addEventListener('click', hideMessageModal);
+            }
+
+            // Auto-filter on change
+            document.querySelectorAll('.auto-filter').forEach(element => {
+                element.addEventListener('change', filterSponsorships);
+            });
+
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === cancelModal) {
+                    hideCancelModal();
+                }
+                if (event.target === messageModal) {
+                    hideMessageModal();
+                }
+            });
+
+            // Auto-refresh for pending sponsorships
+            if (window.location.search.includes('status=pending') || window.location.search.includes('status=all') || !window.location.search.includes('status=')) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 60000); // Refresh every minute
+            }
+        });
     </script>
 
 <?php include __DIR__ . '/includes/admin_footer.php'; ?>
