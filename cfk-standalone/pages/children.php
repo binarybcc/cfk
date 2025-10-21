@@ -417,6 +417,38 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 <!-- Event Listeners for Sponsor Buttons (CSP-compliant) -->
 <script nonce="<?php echo $cspNonce; ?>">
 document.addEventListener('DOMContentLoaded', function() {
+    // Check which children are already in selections and mark their buttons
+    function updateButtonStates() {
+        if (typeof SelectionsManager !== 'undefined') {
+            const selections = SelectionsManager.getSelections();
+            const selectedIds = selections.map(c => c.id);
+
+            document.querySelectorAll('.btn-sponsor').forEach(button => {
+                const childData = JSON.parse(button.getAttribute('data-child'));
+                if (selectedIds.includes(childData.id)) {
+                    button.textContent = '✓ ADDED';
+                    button.disabled = true;
+                    button.classList.add('btn-success');
+                    button.classList.remove('btn-primary');
+                    button.setAttribute('aria-label', `Child ${childData.display_id} already in selections`);
+                }
+            });
+        }
+    }
+
+    // Update button states on page load
+    updateButtonStates();
+
+    // Listen for selection changes from other tabs/windows
+    window.addEventListener('storage', function(e) {
+        if (e.key === 'cfk_selections') {
+            updateButtonStates();
+        }
+    });
+
+    // Also listen for custom event from SelectionsManager
+    window.addEventListener('selectionsUpdated', updateButtonStates);
+
     // Attach event listeners to all SPONSOR buttons
     document.querySelectorAll('.btn-sponsor').forEach(button => {
         button.addEventListener('click', function(event) {
@@ -427,20 +459,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 const success = SelectionsManager.addChild(childData);
 
                 if (success) {
-                    // Visual feedback - "Adding..." then "✓ Added" then back to "SPONSOR"
+                    // Visual feedback - "Adding..." then "✓ ADDED" (permanent)
                     event.target.textContent = 'Adding...';
                     event.target.disabled = true;
 
                     setTimeout(() => {
-                        event.target.textContent = '✓ Added';
+                        event.target.textContent = '✓ ADDED';
+                        event.target.classList.add('btn-success');
+                        event.target.classList.remove('btn-primary');
                         event.target.setAttribute('aria-label', `Child ${childData.display_id} added to selections`);
 
-                        setTimeout(() => {
-                            event.target.textContent = 'SPONSOR';
-                            event.target.disabled = false;
-                            event.target.setAttribute('aria-label', `Sponsor child ${childData.display_id}`);
-                        }, 1500);
+                        // Trigger custom event so other listeners can update
+                        window.dispatchEvent(new Event('selectionsUpdated'));
                     }, 500);
+                } else {
+                    // Already in selections - show feedback
+                    const originalText = event.target.textContent;
+                    event.target.textContent = '✓ Already Added';
+                    event.target.classList.add('btn-success');
+                    event.target.classList.remove('btn-primary');
+                    event.target.disabled = true;
                 }
             }
         });

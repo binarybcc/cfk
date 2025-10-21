@@ -468,6 +468,44 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 <script nonce="<?php echo $cspNonce; ?>">
 // CSP-compliant event listeners for family sponsorship (v1.5)
 document.addEventListener('DOMContentLoaded', function() {
+    // Check which children are already in selections and mark their buttons
+    function updateButtonStates() {
+        if (typeof SelectionsManager !== 'undefined') {
+            const selections = SelectionsManager.getSelections();
+            const selectedIds = selections.map(c => c.id);
+
+            document.querySelectorAll('.btn-sponsor-child').forEach(button => {
+                const childId = parseInt(button.getAttribute('data-child-id'));
+                if (selectedIds.includes(childId)) {
+                    button.textContent = '✓ ADDED';
+                    button.disabled = true;
+                    button.classList.add('btn-success');
+                    button.classList.remove('btn-primary');
+                    const displayId = button.getAttribute('data-display-id');
+                    button.setAttribute('aria-label', `Child ${displayId} already in selections`);
+                }
+            });
+
+            // Update "Sponsor All" button if all children are already selected
+            const allButtons = document.querySelectorAll('.btn-sponsor-child');
+            const allAdded = Array.from(allButtons).every(btn => selectedIds.includes(parseInt(btn.getAttribute('data-child-id'))));
+            document.querySelectorAll('.btn-add-all-family').forEach(familyBtn => {
+                if (allAdded && allButtons.length > 0) {
+                    familyBtn.textContent = '✓ All Added';
+                    familyBtn.disabled = true;
+                    familyBtn.classList.add('btn-success');
+                    familyBtn.classList.remove('btn-primary');
+                }
+            });
+        }
+    }
+
+    // Update button states on page load
+    updateButtonStates();
+
+    // Listen for custom event from SelectionsManager
+    window.addEventListener('selectionsUpdated', updateButtonStates);
+
     // Individual child sponsor buttons
     document.querySelectorAll('.btn-sponsor-child').forEach(button => {
         button.addEventListener('click', function(event) {
@@ -494,20 +532,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 const success = SelectionsManager.addChild(childData);
 
                 if (success) {
-                    // Visual feedback
+                    // Visual feedback - permanent "ADDED" state
                     event.target.textContent = 'Adding...';
                     event.target.disabled = true;
 
                     setTimeout(() => {
-                        event.target.textContent = '✓ Added';
+                        event.target.textContent = '✓ ADDED';
+                        event.target.classList.add('btn-success');
+                        event.target.classList.remove('btn-primary');
                         event.target.setAttribute('aria-label', `Child ${displayId} added to selections`);
 
-                        setTimeout(() => {
-                            event.target.textContent = 'Sponsor This Child';
-                            event.target.disabled = false;
-                            event.target.setAttribute('aria-label', `Sponsor child ${displayId}`);
-                        }, 1500);
+                        // Trigger custom event
+                        window.dispatchEvent(new Event('selectionsUpdated'));
                     }, 500);
+                } else {
+                    // Already in selections
+                    event.target.textContent = '✓ Already Added';
+                    event.target.classList.add('btn-success');
+                    event.target.classList.remove('btn-primary');
+                    event.target.disabled = true;
                 }
             }
         });
