@@ -338,7 +338,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                             <?php if (!empty($child['wishes'])) : ?>
                                 <div style="margin-bottom: 15px;">
                                     <strong style="color: #c41e3a;">Wishes:</strong>
-                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['wishes']); ?></p>
+                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars(cleanWishesText((string) $child['wishes'])); ?></p>
                                 </div>
                             <?php endif; ?>
                         </div>

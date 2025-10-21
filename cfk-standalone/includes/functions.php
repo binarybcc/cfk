@@ -14,6 +14,23 @@ if (!defined('CFK_APP')) {
 }
 
 /**
+ * Text Cleaning Functions
+ */
+
+/**
+ * Clean up wishes text - remove .Wishlist: prefix if present
+ *
+ * @param string $wishes Raw wishes text from database
+ * @return string Cleaned wishes text
+ */
+function cleanWishesText(string $wishes): string
+{
+    // Remove .Wishlist: or Wishlist: prefix (case-insensitive, with or without dot)
+    $cleaned = preg_replace('/^\.?\s*wish\s*list\s*:\s*/i', '', trim($wishes));
+    return $cleaned;
+}
+
+/**
  * Children Management Functions
  */
 

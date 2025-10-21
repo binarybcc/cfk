@@ -53,7 +53,7 @@ $pageTitle = 'Confirm Your Sponsorship';
                         </li>
                     </template>
                 </ul>
-                <a href="<?php echo baseUrl('?page=selections'); ?>" class="btn btn-outline btn-small">
+                <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" class="btn btn-outline btn-small">
                     ← Review Selections
                 </a>
             </div>

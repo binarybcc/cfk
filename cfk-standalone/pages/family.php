@@ -131,7 +131,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <?php if (!empty($member['wishes'])) : ?>
                         <div class="detail-row">
                             <strong>Wishes:</strong>
-                            <span><?php echo sanitizeString($member['wishes']); ?></span>
+                            <span><?php echo sanitizeString(cleanWishesText($member['wishes'])); ?></span>
                         </div>
                     <?php endif; ?>
 
