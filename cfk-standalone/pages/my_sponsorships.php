@@ -123,10 +123,18 @@ $pageTitle = 'My Sponsorships';
         <div style="margin-top: 1rem; padding: 1rem; background: #fffbea; border: 2px solid #f5b800; border-radius: 8px;">
             <strong style="color: #856404;">🔧 Troubleshooting:</strong>
             <p style="margin: 0.5rem 0; font-size: 0.9rem;">If you see "pending selections" but no children appear, click below to force clear your browser's saved data:</p>
-            <button onclick="localStorage.clear(); window.location.reload();" class="btn btn-secondary" style="margin-top: 0.5rem;">
+            <button id="force-clear-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">
                 Force Clear All Data & Reload
             </button>
         </div>
+        <script nonce="<?php echo $cspNonce; ?>">
+        document.getElementById('force-clear-btn').addEventListener('click', function() {
+            console.log('Force clear button clicked');
+            localStorage.clear();
+            console.log('localStorage cleared');
+            window.location.reload();
+        });
+        </script>
     </div>
 
     <!-- Pending Selections Section (only shows if there are selections) -->
