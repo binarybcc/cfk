@@ -402,17 +402,34 @@ function mySponsorshipsApp() {
 
         clearAllSelections() {
             if (confirm(`Remove all ${this.selectionCount} children from your selections?`)) {
-                console.log('Clearing all selections...');
+                console.log('=== CLEAR ALL CLICKED ===');
+                console.log('Before clear - selectionCount:', this.selectionCount);
+                console.log('Before clear - selections:', this.selections);
 
+                // Check localStorage before clear
+                const beforeClear = localStorage.getItem('cfk_selections');
+                console.log('localStorage BEFORE clear:', beforeClear);
+
+                // Clear via SelectionsManager
                 if (typeof SelectionsManager !== 'undefined') {
                     SelectionsManager.clearAll();
                     console.log('SelectionsManager.clearAll() called');
+                } else {
+                    // Fallback: clear localStorage directly
+                    console.warn('SelectionsManager not found, clearing localStorage directly');
+                    localStorage.removeItem('cfk_selections');
                 }
+
+                // Check localStorage after clear
+                const afterClear = localStorage.getItem('cfk_selections');
+                console.log('localStorage AFTER clear:', afterClear);
 
                 // Force immediate UI update
                 this.selections = [];
                 this.selectionCount = 0;
-                console.log('UI state cleared:', this.selectionCount);
+                console.log('After clear - selectionCount:', this.selectionCount);
+                console.log('After clear - selections:', this.selections);
+                console.log('=== CLEAR COMPLETE ===');
 
                 if (typeof window.showNotification === 'function') {
                     window.showNotification('All selections cleared', 'info');
