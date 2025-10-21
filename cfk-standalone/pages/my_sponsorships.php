@@ -293,9 +293,14 @@ $pageTitle = 'My Sponsorships';
                             </button>
                         </form>
 
-                        <button onclick="window.print()" class="btn btn-outline">
+                        <button id="print-details-btn" class="btn btn-outline">
                             🖨️ Print Details
                         </button>
+                        <script nonce="<?php echo $cspNonce; ?>">
+                        document.getElementById('print-details-btn').addEventListener('click', function() {
+                            window.print();
+                        });
+                        </script>
 
                         <a href="<?php echo baseUrl('?page=my_sponsorships'); ?>" class="btn btn-secondary">
                             ← Look Up Different Email
