@@ -69,7 +69,7 @@ const SelectionsManager = {
 
         // Check if already selected
         if (selections.some(c => c.id === child.id)) {
-            this.announce(`Child ${child.display_id} is already in your selections.`);
+            this.announce(`Child ${child.display_id} is already in your selections`);
             return false;
         }
 

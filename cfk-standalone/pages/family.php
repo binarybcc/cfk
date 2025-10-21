@@ -478,26 +478,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const success = SelectionsManager.addChild(childData);
 
                 if (success) {
-                    // ARIA announcement for screen readers
-                    if (typeof window.announce === 'function') {
-                        window.announce(`Added child ${displayId} to your cart`);
-                    }
-
                     // Visual feedback
-                    event.target.textContent = '✓ Added to Cart';
+                    event.target.textContent = 'Adding...';
                     event.target.disabled = true;
-                    event.target.setAttribute('aria-label', `Child ${displayId} added to cart`);
 
                     setTimeout(() => {
-                        event.target.textContent = 'Sponsor This Child';
-                        event.target.disabled = false;
-                        event.target.setAttribute('aria-label', `Sponsor child ${displayId}`);
-                    }, 2000);
-                } else {
-                    // Already in cart
-                    if (typeof window.announce === 'function') {
-                        window.announce(`Child ${displayId} is already in your cart`);
-                    }
+                        event.target.textContent = '✓ Added';
+                        event.target.setAttribute('aria-label', `Child ${displayId} added to selections`);
+
+                        setTimeout(() => {
+                            event.target.textContent = 'Sponsor This Child';
+                            event.target.disabled = false;
+                            event.target.setAttribute('aria-label', `Sponsor child ${displayId}`);
+                        }, 1500);
+                    }, 500);
                 }
             }
         });

@@ -381,8 +381,13 @@ function mySponsorshipsApp() {
         clearAllSelections() {
             if (confirm(`Remove all ${this.selectionCount} children from your selections?`)) {
                 SelectionsManager.clearAll();
-                this.loadSelections();
-                window.showNotification('All selections cleared', 'info');
+                // Force reload selections to update UI
+                this.selections = [];
+                this.selectionCount = 0;
+
+                if (typeof window.showNotification === 'function') {
+                    window.showNotification('All selections cleared', 'info');
+                }
             }
         }
     }

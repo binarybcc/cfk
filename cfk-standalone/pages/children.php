@@ -418,16 +418,28 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 document.addEventListener('DOMContentLoaded', function() {
     // Attach event listeners to all SPONSOR buttons
     document.querySelectorAll('.btn-sponsor').forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(event) {
             const childData = JSON.parse(this.getAttribute('data-child'));
-            if (typeof window.addToSelections === 'function') {
-                window.addToSelections(childData);
-            } else if (typeof SelectionsManager !== 'undefined') {
-                // Fallback to direct SelectionsManager call
-                if (SelectionsManager.addChild(childData)) {
-                    if (typeof window.showNotification === 'function') {
-                        window.showNotification(`Added ${childData.display_id} to your selections!`, 'success');
-                    }
+
+            // Use SelectionsManager directly
+            if (typeof SelectionsManager !== 'undefined') {
+                const success = SelectionsManager.addChild(childData);
+
+                if (success) {
+                    // Visual feedback - "Adding..." then "✓ Added" then back to "SPONSOR"
+                    event.target.textContent = 'Adding...';
+                    event.target.disabled = true;
+
+                    setTimeout(() => {
+                        event.target.textContent = '✓ Added';
+                        event.target.setAttribute('aria-label', `Child ${childData.display_id} added to selections`);
+
+                        setTimeout(() => {
+                            event.target.textContent = 'SPONSOR';
+                            event.target.disabled = false;
+                            event.target.setAttribute('aria-label', `Sponsor child ${childData.display_id}`);
+                        }, 1500);
+                    }, 500);
                 }
             }
         });
