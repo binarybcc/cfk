@@ -108,7 +108,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
     <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
     <?php if (!$viewingFamily): ?>
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
     // Define children data for Alpine.js
     window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 

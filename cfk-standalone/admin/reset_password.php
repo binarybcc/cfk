@@ -367,7 +367,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['new_password'])) {
         <?php endif; ?>
     </div>
 
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         const newPassword = document.getElementById('new_password');
         const confirmPassword = document.getElementById('confirm_password');
         const strengthBar = document.getElementById('strengthBar');

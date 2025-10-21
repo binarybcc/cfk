@@ -1234,7 +1234,7 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
         <?php endif; ?>
     </div>
 
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         // File input handling
         document.getElementById('csv_file').addEventListener('change', function() {
             const fileInput = document.getElementById('fileInput');

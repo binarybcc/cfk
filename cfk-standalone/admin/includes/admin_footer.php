@@ -11,7 +11,7 @@
     </footer>
 
     <!-- JavaScript (inline - no external admin.js needed) -->
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         // Simple confirmation for delete actions
         document.addEventListener('DOMContentLoaded', function() {
             const deleteLinks = document.querySelectorAll('.delete-action, .btn-danger[href*="delete"]');

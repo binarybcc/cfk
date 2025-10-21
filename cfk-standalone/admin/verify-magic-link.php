@@ -94,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
                 <button type="submit">Complete Login</button>
             </form>
 
-            <script>
+            <script nonce="<?php echo $cspNonce; ?>">
                 // Auto-submit form on page load (POST-based token submission)
                 document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('magic-link-form').submit();

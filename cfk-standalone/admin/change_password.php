@@ -303,7 +303,7 @@ $isForced = isset($_SESSION['force_password_change']) && $_SESSION['force_passwo
         </form>
     </div>
 
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         // Client-side validation
         document.getElementById('passwordForm').addEventListener('submit', function(e) {
             const currentPassword = document.getElementById('current_password').value;

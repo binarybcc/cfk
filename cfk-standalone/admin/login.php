@@ -265,7 +265,7 @@ if (isLoggedIn()) {
         </div>
     </div>
 
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         // Magic Link form handling
         document.getElementById('magicLinkForm').addEventListener('submit', function(e) {
             e.preventDefault();

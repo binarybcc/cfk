@@ -305,7 +305,7 @@ if ($_POST && isset($_POST['reset_request'])) {
         <?php endif; ?>
     </div>
 
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
         // Simple client-side validation
         document.getElementById('resetForm')?.addEventListener('submit', function(e) {
             const username = document.getElementById('username').value.trim();
