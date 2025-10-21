@@ -7,8 +7,9 @@ RewriteEngine On
 # HTTPS ENFORCEMENT (CRITICAL SECURITY)
 # ============================================
 # Force HTTPS on all requests
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# NOTE: Commented out - hosting provider handles HTTPS redirect at proxy level
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # ============================================
 # SECURITY HEADERS
