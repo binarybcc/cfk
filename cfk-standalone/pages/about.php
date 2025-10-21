@@ -145,8 +145,8 @@ $pageTitle = 'About Us';
                     <h3>Spread the Word</h3>
                     <p>Help us reach more families in need and more potential sponsors by sharing our mission with friends and family.</p>
                     <div class="social-sharing">
-                        <button onclick="shareOnFacebook()" class="btn btn-secondary">Share on Facebook</button>
-                        <button onclick="shareByEmail()" class="btn btn-secondary">Share by Email</button>
+                        <button id="share-facebook-btn" class="btn btn-secondary">Share on Facebook</button>
+                        <button id="share-email-btn" class="btn btn-secondary">Share by Email</button>
                     </div>
                 </div>
             </div>
@@ -171,5 +171,47 @@ $pageTitle = 'About Us';
         </section>
     </div>
 </div>
+
+<script nonce="<?php echo $cspNonce; ?>">
+// CSP-compliant social sharing functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Facebook Share Button
+    const facebookBtn = document.getElementById('share-facebook-btn');
+    if (facebookBtn) {
+        facebookBtn.addEventListener('click', function() {
+            const shareUrl = encodeURIComponent(window.location.origin);
+            const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`;
+            window.open(facebookUrl, 'facebook-share', 'width=600,height=400,toolbar=0,status=0');
+
+            // ARIA announcement
+            if (typeof window.announce === 'function') {
+                window.announce('Opening Facebook share dialog');
+            }
+        });
+    }
+
+    // Email Share Button
+    const emailBtn = document.getElementById('share-email-btn');
+    if (emailBtn) {
+        emailBtn.addEventListener('click', function() {
+            const subject = encodeURIComponent('Christmas for Kids - Help Sponsor a Child');
+            const body = encodeURIComponent(
+                'I wanted to share this amazing organization with you!\n\n' +
+                'Christmas for Kids connects generous community members with local families who need support during the holidays.\n\n' +
+                'You can browse children and sponsor someone to make their Christmas magical.\n\n' +
+                'Learn more: ' + window.location.origin + '\n\n' +
+                'Every child deserves Christmas morning joy!'
+            );
+            const mailtoUrl = `mailto:?subject=${subject}&body=${body}`;
+            window.location.href = mailtoUrl;
+
+            // ARIA announcement
+            if (typeof window.announce === 'function') {
+                window.announce('Opening email client to share Christmas for Kids');
+            }
+        });
+    }
+});
+</script>
 
 
