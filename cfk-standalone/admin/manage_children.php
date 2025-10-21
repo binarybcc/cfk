@@ -71,7 +71,12 @@ $familyFilter = $_GET['family'] ?? 'all';
 $ageFilter = $_GET['age'] ?? 'all';
 $searchQuery = $_GET['search'] ?? '';
 $page = max(1, sanitizeInt($_GET['page'] ?? 1));
-$perPage = 20;
+
+// Per-page selector for admin - allow admins to choose how many children to display
+$perPageOptions = [25, 50, 100];
+$perPage = isset($_GET['per_page']) && in_array((int)$_GET['per_page'], $perPageOptions, true)
+    ? (int)$_GET['per_page']
+    : 25;
 
 // Build query based on filters
 $whereConditions = [];
@@ -555,13 +560,39 @@ include __DIR__ . '/includes/admin_header.php';
 }
 </style>
 
-<!-- Summary Stats -->
-        <div class="stats-summary">
-            <strong>Total Children: <?php echo $totalCount; ?></strong>
-            <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)): ?>
-                (filtered from <?php echo getChildrenCount([]); ?> total)
-            <?php endif; ?>
+<!-- Summary Stats with Per-Page Selector -->
+        <div class="stats-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <strong>Total Children: <?php echo $totalCount; ?></strong>
+                <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)): ?>
+                    (filtered from <?php echo getChildrenCount([]); ?> total)
+                <?php endif; ?>
+            </div>
+
+            <!-- Per-Page Selector -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label for="admin-per-page-select" style="margin: 0; font-weight: 500;">Show:</label>
+                <select id="admin-per-page-select"
+                        onchange="updateAdminPerPage(this.value)"
+                        style="padding: 0.4rem 0.8rem; border: 1px solid #ccc; border-radius: 4px;">
+                    <?php foreach ($perPageOptions as $option): ?>
+                        <option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>>
+                            <?php echo $option; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span>per page</span>
+            </div>
         </div>
+
+        <script nonce="<?php echo $cspNonce; ?>">
+        function updateAdminPerPage(value) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('per_page', value);
+            url.searchParams.delete('page'); // Reset to page 1
+            window.location.href = url.toString();
+        }
+        </script>
 
         <!-- Top Actions -->
         <div class="top-actions">

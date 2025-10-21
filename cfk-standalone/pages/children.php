@@ -47,7 +47,13 @@ if ($viewingFamily) {
     if ($currentPage < 1) {
         $currentPage = 1;
     }
-    $limit = config('children_per_page');
+
+    // Per-page selector - allow users to choose how many children to display
+    $perPageOptions = [12, 24, 48];
+    $perPage = isset($_GET['per_page']) && in_array((int)$_GET['per_page'], $perPageOptions, true)
+        ? (int)$_GET['per_page']
+        : config('children_per_page', 12);
+    $limit = $perPage;
 
     // Get children and count
     $children = getChildren($filters, $currentPage, $limit);
@@ -241,15 +247,40 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
             </div>
         </form>
 
-        <!-- Results Counter -->
-        <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+        <!-- Results Counter with Per-Page Selector -->
+        <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <p style="margin: 0; font-weight: 600; color: #2c5530;">
                 Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
                 <?php if (!empty($filters)): ?>
                     <span style="color: #666; font-weight: normal;">(filtered)</span>
                 <?php endif; ?>
             </p>
+
+            <!-- Per-Page Selector -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <label for="per-page-select" style="margin: 0; font-weight: 500; color: #2c5530;">Show:</label>
+                <select id="per-page-select"
+                        onchange="window.location.href = updateQueryParam('per_page', this.value)"
+                        style="padding: 0.4rem 0.8rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.95rem;">
+                    <?php foreach ($perPageOptions as $option): ?>
+                        <option value="<?php echo $option; ?>" <?php echo $perPage === $option ? 'selected' : ''; ?>>
+                            <?php echo $option; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span style="color: #666;">per page</span>
+            </div>
         </div>
+
+        <script nonce="<?php echo $cspNonce; ?>">
+        // Helper function to update query parameter while preserving others
+        function updateQueryParam(key, value) {
+            const url = new URL(window.location.href);
+            url.searchParams.set(key, value);
+            url.searchParams.delete('p'); // Reset to page 1 when changing per-page
+            return url.toString();
+        }
+        </script>
 
         <!-- Children Grid with Server-Side Rendering -->
         <div class="children-grid">
@@ -341,8 +372,9 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         <?php if ($totalPages > 1): ?>
             <div class="pagination" style="margin-top: 2rem; text-align: center;">
                 <?php
+                // Preserve all query params except 'p' (page number)
                 $queryParams = $_GET;
-                unset($queryParams['p']); // Remove page param
+                unset($queryParams['p']);
                 $baseQuery = http_build_query($queryParams);
                 $baseQuery = $baseQuery ? '&' . $baseQuery : '';
                 ?>
