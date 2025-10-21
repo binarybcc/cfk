@@ -596,7 +596,7 @@ include __DIR__ . '/includes/admin_header.php';
 
         <!-- Top Actions -->
         <div class="top-actions">
-            <button onclick="showAddModal()" class="btn btn-primary btn-large">
+            <button id="add-child-btn" class="btn btn-primary btn-large">
                 ➕ Add New Child
             </button>
         </div>
@@ -607,7 +607,7 @@ include __DIR__ . '/includes/admin_header.php';
             
             <div class="filter-group">
                 <label for="status">Status:</label>
-                <select id="status" name="status" onchange="document.getElementById('filterForm').submit()">
+                <select id="status" name="status" class="auto-submit">
                     <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Statuses</option>
                     <option value="available" <?php echo $statusFilter === 'available' ? 'selected' : ''; ?>>Available</option>
                     <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
@@ -615,10 +615,10 @@ include __DIR__ . '/includes/admin_header.php';
                     <option value="inactive" <?php echo $statusFilter === 'inactive' ? 'selected' : ''; ?>>Inactive</option>
                 </select>
             </div>
-            
+
             <div class="filter-group">
                 <label for="family">Family:</label>
-                <select id="family" name="family" onchange="document.getElementById('filterForm').submit()">
+                <select id="family" name="family" class="auto-submit">
                     <option value="all" <?php echo $familyFilter === 'all' ? 'selected' : ''; ?>>All Families</option>
                     <?php foreach ($families as $family): ?>
                         <option value="<?php echo $family['family_number']; ?>"
@@ -628,10 +628,10 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php endforeach; ?>
                 </select>
             </div>
-            
+
             <div class="filter-group">
                 <label for="age">Age Group:</label>
-                <select id="age" name="age" onchange="document.getElementById('filterForm').submit()">
+                <select id="age" name="age" class="auto-submit">
                     <option value="all" <?php echo $ageFilter === 'all' ? 'selected' : ''; ?>>All Ages</option>
                     <option value="birth-4" <?php echo $ageFilter === 'birth-4' ? 'selected' : ''; ?>>Birth to 4 Years</option>
                     <option value="elementary" <?php echo $ageFilter === 'elementary' ? 'selected' : ''; ?>>Elementary (5-10)</option>
@@ -639,15 +639,15 @@ include __DIR__ . '/includes/admin_header.php';
                     <option value="high" <?php echo $ageFilter === 'high' ? 'selected' : ''; ?>>High School (14-18)</option>
                 </select>
             </div>
-            
+
             <div class="filter-group">
                 <label for="search">Search:</label>
-                <input type="text" 
-                       id="search" 
-                       name="search" 
+                <input type="text"
+                       id="search"
+                       name="search"
                        value="<?php echo sanitizeString($searchQuery); ?>"
                        placeholder="Name, interests, wishes..."
-                       onchange="document.getElementById('filterForm').submit()">
+                       class="auto-submit">
             </div>
         </form>
 
@@ -656,7 +656,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="empty-state">
                 <h3>No Children Found</h3>
                 <p>No children match the current filters. Try adjusting your search criteria or add a new child.</p>
-                <button onclick="showAddModal()" class="btn btn-primary">Add First Child</button>
+                <button id="add-first-child-btn" class="btn btn-primary">Add First Child</button>
             </div>
         <?php else: ?>
             <div class="children-grid">
@@ -721,7 +721,7 @@ include __DIR__ . '/includes/admin_header.php';
                             </div>
                             
                             <div class="child-actions">
-                                <button onclick="showEditModal(<?php echo $child['id']; ?>)" class="btn btn-primary btn-small">
+                                <button class="btn btn-primary btn-small btn-edit-child" data-child-id="<?php echo $child['id']; ?>">
                                     Edit
                                 </button>
                                 
@@ -744,13 +744,11 @@ include __DIR__ . '/includes/admin_header.php';
                                 <?php endif; ?>
                                 
                                 <?php if ($child['sponsorship_count'] == 0): ?>
-                                    <form method="POST" style="display: inline;">
+                                    <form method="POST" style="display: inline;" class="delete-child-form">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                         <input type="hidden" name="action" value="delete_child">
                                         <input type="hidden" name="child_id" value="<?php echo $child['id']; ?>">
-                                        <button type="submit" 
-                                                class="btn btn-danger btn-small"
-                                                onclick="return confirm('Are you sure you want to delete this child? This action cannot be undone.')">
+                                        <button type="submit" class="btn btn-danger btn-small btn-delete-child">
                                             Delete
                                         </button>
                                     </form>
@@ -789,7 +787,7 @@ include __DIR__ . '/includes/admin_header.php';
         <div class="modal-content">
             <div class="modal-header">
                 <h3 id="modalTitle">Add New Child</h3>
-                <button class="close" onclick="hideChildModal()">&times;</button>
+                <button class="close" id="close-modal-x">&times;</button>
             </div>
             <div class="modal-body">
                 <form method="POST" id="childForm">
@@ -884,9 +882,9 @@ include __DIR__ . '/includes/admin_header.php';
                             <textarea id="specialNeeds" name="special_needs" placeholder="Any special considerations, allergies, or needs"></textarea>
                         </div>
                     </div>
-                    
+
                     <div style="text-align: right; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
-                        <button type="button" onclick="hideChildModal()" class="btn btn-secondary">Cancel</button>
+                        <button type="button" id="cancel-modal-btn" class="btn btn-secondary">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submitBtn">Add Child</button>
                     </div>
                 </form>
@@ -894,63 +892,124 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
     </div>
 
-    <script>
-        function showAddModal() {
-            document.getElementById('modalTitle').textContent = 'Add New Child';
-            document.getElementById('formAction').value = 'add_child';
-            document.getElementById('childId').value = '';
-            document.getElementById('submitBtn').textContent = 'Add Child';
-            document.getElementById('childForm').reset();
-            document.getElementById('childModal').style.display = 'block';
-        }
-
-        function showEditModal(childId) {
-            // This would normally fetch child data via AJAX
-            // For now, we'll implement a basic version
-            document.getElementById('modalTitle').textContent = 'Edit Child';
-            document.getElementById('formAction').value = 'edit_child';
-            document.getElementById('childId').value = childId;
-            document.getElementById('submitBtn').textContent = 'Update Child';
-            
-            // In a full implementation, you would fetch the child data here
-            // and populate the form fields
-            
-            document.getElementById('childModal').style.display = 'block';
-        }
-
-        function hideChildModal() {
-            document.getElementById('childModal').style.display = 'none';
-        }
-
-        // Close modal when clicking outside
-        window.onclick = function(event) {
+    <script nonce="<?php echo $cspNonce; ?>">
+        // CSP-compliant event listeners for manage_children.php
+        document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('childModal');
-            if (event.target === modal) {
-                hideChildModal();
-            }
-        }
+            const modalTitle = document.getElementById('modalTitle');
+            const formAction = document.getElementById('formAction');
+            const childId = document.getElementById('childId');
+            const submitBtn = document.getElementById('submitBtn');
+            const childForm = document.getElementById('childForm');
 
-        // Form validation
-        document.getElementById('childForm').addEventListener('submit', function(e) {
-            const name = document.getElementById('childName').value.trim();
-            const age = document.getElementById('childAge').value;
-            const gender = document.getElementById('childGender').value;
-            const family = document.getElementById('childFamily').value;
-            const letter = document.getElementById('childLetter').value;
-            
-            if (!name || !age || !gender || !family || !letter) {
-                alert('Please fill in all required fields (marked with *)');
-                e.preventDefault();
-                return false;
+            // Helper function to show add modal
+            function showAddModal() {
+                modalTitle.textContent = 'Add New Child';
+                formAction.value = 'add_child';
+                childId.value = '';
+                submitBtn.textContent = 'Add Child';
+                childForm.reset();
+                modal.style.display = 'block';
             }
-            
-            if (age < 1 || age > 18) {
-                alert('Age must be between 1 and 18');
-                e.preventDefault();
-                return false;
+
+            // Helper function to show edit modal
+            function showEditModal(childIdValue) {
+                // This would normally fetch child data via AJAX
+                // For now, we'll implement a basic version
+                modalTitle.textContent = 'Edit Child';
+                formAction.value = 'edit_child';
+                childId.value = childIdValue;
+                submitBtn.textContent = 'Update Child';
+
+                // In a full implementation, you would fetch the child data here
+                // and populate the form fields
+
+                modal.style.display = 'block';
             }
-            
-            return true;
+
+            // Helper function to hide modal
+            function hideChildModal() {
+                modal.style.display = 'none';
+            }
+
+            // Add Child button (top action)
+            const addChildBtn = document.getElementById('add-child-btn');
+            if (addChildBtn) {
+                addChildBtn.addEventListener('click', showAddModal);
+            }
+
+            // Add First Child button (empty state)
+            const addFirstChildBtn = document.getElementById('add-first-child-btn');
+            if (addFirstChildBtn) {
+                addFirstChildBtn.addEventListener('click', showAddModal);
+            }
+
+            // Edit buttons (event delegation for dynamic content)
+            document.querySelectorAll('.btn-edit-child').forEach(button => {
+                button.addEventListener('click', function() {
+                    const childIdValue = parseInt(this.getAttribute('data-child-id'));
+                    showEditModal(childIdValue);
+                });
+            });
+
+            // Delete confirmation (event delegation)
+            document.querySelectorAll('.delete-child-form').forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (!confirm('Are you sure you want to delete this child? This action cannot be undone.')) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
+            });
+
+            // Close modal buttons
+            const closeModalX = document.getElementById('close-modal-x');
+            if (closeModalX) {
+                closeModalX.addEventListener('click', hideChildModal);
+            }
+
+            const cancelModalBtn = document.getElementById('cancel-modal-btn');
+            if (cancelModalBtn) {
+                cancelModalBtn.addEventListener('click', hideChildModal);
+            }
+
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    hideChildModal();
+                }
+            });
+
+            // Auto-submit filters (event delegation)
+            const filterForm = document.getElementById('filterForm');
+            document.querySelectorAll('.auto-submit').forEach(element => {
+                element.addEventListener('change', function() {
+                    filterForm.submit();
+                });
+            });
+
+            // Form validation
+            childForm.addEventListener('submit', function(e) {
+                const name = document.getElementById('childName').value.trim();
+                const age = document.getElementById('childAge').value;
+                const gender = document.getElementById('childGender').value;
+                const family = document.getElementById('childFamily').value;
+                const letter = document.getElementById('childLetter').value;
+
+                if (!name || !age || !gender || !family || !letter) {
+                    alert('Please fill in all required fields (marked with *)');
+                    e.preventDefault();
+                    return false;
+                }
+
+                if (age < 1 || age > 18) {
+                    alert('Age must be between 1 and 18');
+                    e.preventDefault();
+                    return false;
+                }
+
+                return true;
+            });
         });
     </script>
 
