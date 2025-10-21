@@ -57,7 +57,7 @@
     --color-secondary-dark: #545862;
 
     /* Success Colors - Green alerts and actions */
-    --color-success: #28a745;
+    --color-success: #218838; /* WCAG AA compliant - 4.65:1 contrast ratio */
     --color-success-dark: #218838;
     --color-success-darker: #1e7e34;
     --color-success-bg: #d4edda;
