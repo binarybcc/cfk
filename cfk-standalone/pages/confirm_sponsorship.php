@@ -176,19 +176,23 @@ function confirmSponsorshipApp() {
         isSubmitting: false,
 
         init() {
+            console.log('[CONFIRM] Initializing confirmSponsorshipApp');
+            console.log('[CONFIRM] SelectionsManager available:', typeof SelectionsManager !== 'undefined');
+
             // Wait for SelectionsManager to be ready
             if (typeof SelectionsManager !== 'undefined') {
                 this.loadSelections();
+
+                // Listen for selection changes
+                window.addEventListener('selectionsUpdated', () => {
+                    console.log('[CONFIRM] Selections updated event received');
+                    this.loadSelections();
+                });
             } else {
                 // Retry after a short delay
+                console.warn('[CONFIRM] SelectionsManager not ready, retrying in 100ms');
                 setTimeout(() => this.init(), 100);
-                return;
             }
-
-            // Listen for selection changes
-            window.addEventListener('selectionsUpdated', () => {
-                this.loadSelections();
-            });
         },
 
         loadSelections() {
