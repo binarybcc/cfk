@@ -350,40 +350,69 @@ $pageTitle = 'My Sponsorships';
     </div>
 </div>
 
-<script>
+<script nonce="<?php echo $cspNonce; ?>">
 function mySponsorshipsApp() {
     return {
         selections: [],
         selectionCount: 0,
 
         init() {
-            this.loadSelections();
+            // Wait for SelectionsManager to be ready
+            if (typeof SelectionsManager !== 'undefined') {
+                this.loadSelections();
+            } else {
+                // Retry after a short delay
+                setTimeout(() => this.init(), 100);
+                return;
+            }
 
             // Listen for selection changes
             window.addEventListener('selectionsUpdated', () => {
                 this.loadSelections();
             });
+
+            // Listen for storage changes (cross-tab sync)
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'cfk_selections') {
+                    this.loadSelections();
+                }
+            });
         },
 
         loadSelections() {
-            this.selections = SelectionsManager.getSelections();
-            this.selectionCount = this.selections.length;
+            if (typeof SelectionsManager !== 'undefined') {
+                this.selections = SelectionsManager.getSelections();
+                this.selectionCount = this.selections.length;
+                console.log('Loaded selections:', this.selectionCount, this.selections);
+            }
         },
 
         removeSelection(childId) {
             if (confirm('Remove this child from your selections?')) {
-                SelectionsManager.removeChild(childId);
-                this.loadSelections();
-                window.showNotification('Child removed from selections', 'info');
+                if (typeof SelectionsManager !== 'undefined') {
+                    SelectionsManager.removeChild(childId);
+                    this.loadSelections();
+
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification('Child removed from selections', 'info');
+                    }
+                }
             }
         },
 
         clearAllSelections() {
             if (confirm(`Remove all ${this.selectionCount} children from your selections?`)) {
-                SelectionsManager.clearAll();
-                // Force reload selections to update UI
+                console.log('Clearing all selections...');
+
+                if (typeof SelectionsManager !== 'undefined') {
+                    SelectionsManager.clearAll();
+                    console.log('SelectionsManager.clearAll() called');
+                }
+
+                // Force immediate UI update
                 this.selections = [];
                 this.selectionCount = 0;
+                console.log('UI state cleared:', this.selectionCount);
 
                 if (typeof window.showNotification === 'function') {
                     window.showNotification('All selections cleared', 'info');
