@@ -70,8 +70,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
         </div>
 
         <?php if ($available_count > 0): ?>
-            <button onclick="addEntireFamily()"
-                    class="btn btn-large btn-primary btn-add-all-family"
+            <button class="btn btn-large btn-primary btn-add-all-family"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All <?php echo $available_count; ?> Available Member<?php echo $available_count > 1 ? 's' : ''; ?>
             </button>
@@ -146,8 +145,9 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                 <!-- Actions -->
                 <?php if ($member['status'] === 'available'): ?>
                     <div class="member-actions">
-                        <button onclick="addChildToCart(<?php echo $member['id']; ?>, '<?php echo sanitizeString($member['display_id']); ?>')"
-                                class="btn btn-primary btn-block"
+                        <button class="btn btn-primary btn-block btn-sponsor-child"
+                                data-child-id="<?php echo $member['id']; ?>"
+                                data-display-id="<?php echo sanitizeString($member['display_id']); ?>"
                                 aria-label="Sponsor child <?php echo sanitizeString($member['display_id']); ?>, age <?php echo sanitizeInt($member['age']); ?>">
                             Sponsor This Child
                         </button>
@@ -169,8 +169,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
             ← Back to Children
         </a>
         <?php if ($available_count > 0): ?>
-            <button onclick="addEntireFamily()"
-                    class="btn btn-primary"
+            <button class="btn btn-primary btn-add-all-family"
                     aria-label="Sponsor all <?php echo $available_count; ?> available family member<?php echo $available_count > 1 ? 's' : ''; ?> from family <?php echo sanitizeString($family['family_number']); ?>">
                 Sponsor All Available (<?php echo $available_count; ?>)
             </button>
@@ -460,83 +459,97 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 }
 </style>
 
-<script>
-// Add child to cart (selections)
-function addChildToCart(childId, displayId) {
-    // Get child data from the page
-    const childData = {
-        id: childId,
-        display_id: displayId
-    };
+<script nonce="<?php echo $cspNonce; ?>">
+// CSP-compliant event listeners for family sponsorship (v1.5)
+document.addEventListener('DOMContentLoaded', function() {
+    // Individual child sponsor buttons
+    document.querySelectorAll('.btn-sponsor-child').forEach(button => {
+        button.addEventListener('click', function(event) {
+            const childId = parseInt(this.getAttribute('data-child-id'));
+            const displayId = this.getAttribute('data-display-id');
 
-    // Use existing SelectionsManager
-    const success = window.SelectionsManager.addChild(childData);
+            const childData = {
+                id: childId,
+                display_id: displayId
+            };
 
-    if (success) {
-        // ARIA announcement for screen readers
-        if (typeof window.announce === 'function') {
-            window.announce(`Added child ${displayId} to your cart`);
-        }
+            // Use existing SelectionsManager
+            if (typeof SelectionsManager !== 'undefined') {
+                const success = SelectionsManager.addChild(childData);
 
-        // Visual feedback
-        event.target.textContent = '✓ Added to Cart';
-        event.target.disabled = true;
-        event.target.setAttribute('aria-label', `Child ${displayId} added to cart`);
+                if (success) {
+                    // ARIA announcement for screen readers
+                    if (typeof window.announce === 'function') {
+                        window.announce(`Added child ${displayId} to your cart`);
+                    }
 
-        setTimeout(() => {
-            event.target.textContent = 'Sponsor This Child';
-            event.target.disabled = false;
-            event.target.setAttribute('aria-label', `Sponsor child ${displayId}`);
-        }, 2000);
-    } else {
-        // Already in cart
-        if (typeof window.announce === 'function') {
-            window.announce(`Child ${displayId} is already in your cart`);
-        }
-    }
-}
+                    // Visual feedback
+                    event.target.textContent = '✓ Added to Cart';
+                    event.target.disabled = true;
+                    event.target.setAttribute('aria-label', `Child ${displayId} added to cart`);
 
-// Add entire family
-function addEntireFamily() {
-    // Get all available children
-    const availableChildren = document.querySelectorAll('.family-member-card:not(.member-sponsored)');
-
-    if (availableChildren.length === 0) {
-        if (typeof window.announce === 'function') {
-            window.announce('No family members available to sponsor');
-        }
-        return;
-    }
-
-    let addedCount = 0;
-    let childIds = [];
-
-    availableChildren.forEach(card => {
-        const button = card.querySelector('button[onclick*="addChildToCart"]');
-        if (button) {
-            // Extract displayId from button's onclick attribute
-            const onclickAttr = button.getAttribute('onclick');
-            const displayIdMatch = onclickAttr.match(/'([^']+)'/);
-            if (displayIdMatch) {
-                childIds.push(displayIdMatch[1]);
+                    setTimeout(() => {
+                        event.target.textContent = 'Sponsor This Child';
+                        event.target.disabled = false;
+                        event.target.setAttribute('aria-label', `Sponsor child ${displayId}`);
+                    }, 2000);
+                } else {
+                    // Already in cart
+                    if (typeof window.announce === 'function') {
+                        window.announce(`Child ${displayId} is already in your cart`);
+                    }
+                }
             }
-            button.click();
-            addedCount++;
-        }
+        });
     });
 
-    if (addedCount > 0) {
-        // ARIA announcement for screen readers
-        if (typeof window.announce === 'function') {
-            const childList = childIds.slice(0, 3).join(', ');
-            const more = childIds.length > 3 ? ` and ${childIds.length - 3} more` : '';
-            window.announce(`Added ${addedCount} family members to your cart: ${childList}${more}. Redirecting to your cart.`);
-        }
+    // Sponsor all family buttons
+    document.querySelectorAll('.btn-add-all-family').forEach(button => {
+        button.addEventListener('click', function() {
+            // Get all available child buttons
+            const availableButtons = document.querySelectorAll('.btn-sponsor-child');
 
-        // Redirect to cart after brief delay
-        setTimeout(() => {
-            window.location.href = '<?php echo baseUrl('?page=my_sponsorships'); ?>';
-        }, 1500);
-    }
-}
+            if (availableButtons.length === 0) {
+                if (typeof window.announce === 'function') {
+                    window.announce('No family members available to sponsor');
+                }
+                return;
+            }
+
+            let addedCount = 0;
+            let childIds = [];
+
+            availableButtons.forEach(childButton => {
+                const childId = parseInt(childButton.getAttribute('data-child-id'));
+                const displayId = childButton.getAttribute('data-display-id');
+
+                const childData = {
+                    id: childId,
+                    display_id: displayId
+                };
+
+                if (typeof SelectionsManager !== 'undefined') {
+                    if (SelectionsManager.addChild(childData)) {
+                        addedCount++;
+                        childIds.push(displayId);
+                    }
+                }
+            });
+
+            if (addedCount > 0) {
+                // ARIA announcement for screen readers
+                if (typeof window.announce === 'function') {
+                    const childList = childIds.slice(0, 3).join(', ');
+                    const more = childIds.length > 3 ? ` and ${childIds.length - 3} more` : '';
+                    window.announce(`Added ${addedCount} family members to your cart: ${childList}${more}. Redirecting to your cart.`);
+                }
+
+                // Redirect to cart after brief delay
+                setTimeout(() => {
+                    window.location.href = '<?php echo baseUrl('?page=my_sponsorships'); ?>';
+                }, 1500);
+            }
+        });
+    });
+});
 </script>

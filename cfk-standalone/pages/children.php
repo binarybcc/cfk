@@ -356,8 +356,8 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                    <?php echo $siblingCount === 0 ? 'aria-disabled="true"' : ''; ?>>
                                     View Family
                                 </a>
-                                <button onclick="addToSelections(<?php echo htmlspecialchars(json_encode($child)); ?>)"
-                                        class="btn btn-primary btn-sponsor">
+                                <button class="btn btn-primary btn-sponsor"
+                                        data-child='<?php echo htmlspecialchars(json_encode($child)); ?>'>
                                     SPONSOR
                                 </button>
                             </div>
@@ -412,4 +412,26 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         </div>
     </div>
 </div>
+
+<!-- Event Listeners for Sponsor Buttons (CSP-compliant) -->
+<script nonce="<?php echo $cspNonce; ?>">
+document.addEventListener('DOMContentLoaded', function() {
+    // Attach event listeners to all SPONSOR buttons
+    document.querySelectorAll('.btn-sponsor').forEach(button => {
+        button.addEventListener('click', function() {
+            const childData = JSON.parse(this.getAttribute('data-child'));
+            if (typeof window.addToSelections === 'function') {
+                window.addToSelections(childData);
+            } else if (typeof SelectionsManager !== 'undefined') {
+                // Fallback to direct SelectionsManager call
+                if (SelectionsManager.addChild(childData)) {
+                    if (typeof window.showNotification === 'function') {
+                        window.showNotification(`Added ${childData.display_id} to your selections!`, 'success');
+                    }
+                }
+            }
+        });
+    });
+});
+</script>
 
