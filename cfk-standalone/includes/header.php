@@ -197,7 +197,7 @@
     <div id="a11y-announcements" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Auto-hide Header on Scroll Script -->
-    <script>
+    <script nonce="<?php echo $cspNonce; ?>">
     (function() {
         let lastScrollTop = 0;
         let scrollTimer = null;
