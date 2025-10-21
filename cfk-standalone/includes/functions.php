@@ -176,6 +176,38 @@ function getFamilyMembers(int $familyId, int $excludeChildId = null): array {
 }
 
 /**
+ * Get count of available siblings in a family
+ */
+function getSiblingCount(int $familyId): int {
+    $sql = "
+        SELECT COUNT(*) as count
+        FROM children
+        WHERE family_id = :family_id AND status = 'available'
+    ";
+
+    $result = Database::fetchRow($sql, ['family_id' => $familyId]);
+    return (int) ($result['count'] ?? 0);
+}
+
+/**
+ * Get age/gender-appropriate placeholder avatar image path
+ */
+function getPlaceholderImage(int $age, string $gender): string {
+    $baseUrl = baseUrl('assets/images/');
+
+    // Age categories
+    if ($age <= 5) {
+        return $baseUrl . ($gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
+    } elseif ($age <= 11) {
+        return $baseUrl . ($gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
+    } elseif ($age <= 14) {
+        return $baseUrl . ($gender === 'M' ? 'middleboysm.png' : 'middlegirlsm.png');
+    } else {
+        return $baseUrl . ($gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
+    }
+}
+
+/**
  * Get family information by family ID
  */
 function getFamilyById(int $familyId): ?array {
