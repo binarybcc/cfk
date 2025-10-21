@@ -34,7 +34,7 @@
     <meta name="description" content="<?php echo config('site_description', 'Connect with local children who need Christmas support'); ?>">
     
     <!-- CSS -->
-    <link rel="stylesheet" href="<?php echo baseUrl('assets/css/styles.css'); ?>">
+    <link rel="stylesheet" href="<?php echo baseUrl('assets/css/styles.css?v=' . filemtime(__DIR__ . '/../assets/css/styles.css')); ?>">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?php echo baseUrl('assets/images/favicon.ico'); ?>">

@@ -4637,7 +4637,7 @@ a svg {
 }
 
 .toast-btn-primary:hover {
-    background: var(--color-light);
+    background: var(--color-bg-primary);
     transform: translateY(-1px);
 }
 
@@ -4657,7 +4657,8 @@ a svg {
     bottom: 0;
     left: 0;
     right: 0;
-    background: var(--color-light);
+    background: var(--color-white) !important;
+    background-color: #ffffff !important;
     border-top: 3px solid var(--color-primary);
     padding: 15px 20px;
     z-index: 9998;
