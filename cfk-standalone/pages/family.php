@@ -149,6 +149,11 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                         <button class="btn btn-primary btn-block btn-sponsor-child"
                                 data-child-id="<?php echo $member['id']; ?>"
                                 data-display-id="<?php echo sanitizeString($member['display_id']); ?>"
+                                data-family-id="<?php echo $member['family_id']; ?>"
+                                data-age="<?php echo sanitizeInt($member['age']); ?>"
+                                data-gender="<?php echo sanitizeString($member['gender']); ?>"
+                                data-grade="<?php echo sanitizeString($member['grade'] ?? ''); ?>"
+                                data-school="<?php echo sanitizeString($member['school'] ?? ''); ?>"
                                 aria-label="Sponsor child <?php echo sanitizeString($member['display_id']); ?>, age <?php echo sanitizeInt($member['age']); ?>">
                             Sponsor This Child
                         </button>
@@ -468,10 +473,20 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(event) {
             const childId = parseInt(this.getAttribute('data-child-id'));
             const displayId = this.getAttribute('data-display-id');
+            const familyId = parseInt(this.getAttribute('data-family-id'));
+            const age = parseInt(this.getAttribute('data-age'));
+            const gender = this.getAttribute('data-gender');
+            const grade = this.getAttribute('data-grade') || '';
+            const school = this.getAttribute('data-school') || '';
 
             const childData = {
                 id: childId,
-                display_id: displayId
+                display_id: displayId,
+                family_id: familyId,
+                age: age,
+                gender: gender,
+                grade: grade,
+                school: school
             };
 
             // Use existing SelectionsManager
@@ -517,10 +532,20 @@ document.addEventListener('DOMContentLoaded', function() {
             availableButtons.forEach(childButton => {
                 const childId = parseInt(childButton.getAttribute('data-child-id'));
                 const displayId = childButton.getAttribute('data-display-id');
+                const familyId = parseInt(childButton.getAttribute('data-family-id'));
+                const age = parseInt(childButton.getAttribute('data-age'));
+                const gender = childButton.getAttribute('data-gender');
+                const grade = childButton.getAttribute('data-grade') || '';
+                const school = childButton.getAttribute('data-school') || '';
 
                 const childData = {
                     id: childId,
-                    display_id: displayId
+                    display_id: displayId,
+                    family_id: familyId,
+                    age: age,
+                    gender: gender,
+                    grade: grade,
+                    school: school
                 };
 
                 if (typeof SelectionsManager !== 'undefined') {
