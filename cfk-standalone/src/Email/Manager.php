@@ -389,13 +389,22 @@ class Manager
                 <div class='important-box'>
                     <h3>📋 IMPORTANT - Save This Email!</h3>
                     <p><strong>This email contains all the information you need to shop for your sponsored child.</strong></p>
-                    <p><strong>What to do:</strong></p>
-                    <ol>
-                        <li><strong>Shop for gifts</strong> using the details below</li>
-                        <li><strong>Keep gifts UNWRAPPED</strong> (parents will wrap them)</li>
-                        <li><strong>Deliver to CFK office</strong> by [DATE TBD]</li>
-                        <li><strong>Contact us</strong> if you have questions: " . config('admin_email') . "</li>
-                    </ol>
+
+                    <p>You do not need to buy everything on a child's Wish List. Typically a package includes 1 outfit, undergarments, socks, shoes, and 5 or 6 other wish list items.</p>
+
+                    <p>If you cannot get everything mentioned above it is ok. Anything you can do is wonderful and appreciated. We can add some items to complete the package.</p>
+
+                    <p><strong>Please no gift cards except for those related to video games.</strong> All gifts must be new — please do not wrap. If desired, you may include gift wrap for the parents.</p>
+
+                    <p><strong>Please place all gifts in a large black bag, marked with that Child's Number.</strong></p>
+
+                    <p><strong>All Gifts must be received by Friday, Dec. 5.</strong></p>
+
+                    <p>Gifts can be dropped off weekdays 8 a.m.-5 p.m. at <strong>The Journal, 210 W North 1st Street in Seneca</strong>.</p>
+
+                    <p style='font-size: 11px; margin-top: 10px;'><em>CFK Inc is a recognized 501(c)(3) not-for-profit organization; EIN: 82-3083435. This number may be used for tax deduction purposes.</em></p>
+
+                    <p style='margin-top: 15px;'><strong>Questions?</strong> Contact us at " . config('admin_email') . "</p>
                 </div>
 
                 <div class='child-info'>
