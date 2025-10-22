@@ -20,6 +20,7 @@ class Manager
     public const STATUS_AVAILABLE = 'available';
     public const STATUS_PENDING = 'pending';
     public const STATUS_SPONSORED = 'confirmed';  // Match database enum
+    public const STATUS_LOGGED = 'logged';        // Logged in external system
     public const STATUS_COMPLETED = 'completed';
     public const STATUS_INACTIVE = 'inactive';
 
@@ -329,6 +330,141 @@ class Manager
             Connection::rollback();
             error_log('Failed to complete sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
             return ['success' => false, 'message' => 'System error occurred'];
+        }
+    }
+
+    /**
+     * Mark a confirmed sponsorship as logged in external system
+     * This is an admin-only status for tracking external spreadsheet logging
+     * Sponsors maintain access to "My Sponsorships" page in this status
+     *
+     * @param int $sponsorshipId The sponsorship ID to log
+     * @return array<string, mixed> Result with success status and message
+     */
+    public static function logSponsorship(int $sponsorshipId): array
+    {
+        try {
+            Connection::beginTransaction();
+
+            // Verify sponsorship exists and is in confirmed status
+            $sponsorship = Connection::fetchRow(
+                'SELECT * FROM sponsorships WHERE id = ?',
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                Connection::rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Sponsorship not found'
+                ];
+            }
+
+            // Only allow transition from CONFIRMED to LOGGED
+            if ($sponsorship['status'] !== self::STATUS_SPONSORED) {
+                Connection::rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Can only log confirmed sponsorships. Current status: ' . $sponsorship['status']
+                ];
+            }
+
+            // Update sponsorship status to logged
+            Connection::update(
+                'sponsorships',
+                [
+                    'status' => self::STATUS_LOGGED,
+                    'logged_date' => date('Y-m-d H:i:s')
+                ],
+                ['id' => $sponsorshipId]
+            );
+
+            Connection::commit();
+
+            // Log the action
+            error_log(sprintf(
+                'Sponsorship #%d marked as logged in external system',
+                $sponsorshipId
+            ));
+
+            return [
+                'success' => true,
+                'message' => 'Sponsorship marked as logged successfully'
+            ];
+
+        } catch (Exception $e) {
+            Connection::rollback();
+            error_log('Error logging sponsorship: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to log sponsorship: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Mark a logged sponsorship back to confirmed (undo logging)
+     * Allows staff to undo if they logged something by mistake
+     *
+     * @param int $sponsorshipId The sponsorship ID to unlog
+     * @return array<string, mixed> Result with success status and message
+     */
+    public static function unlogSponsorship(int $sponsorshipId): array
+    {
+        try {
+            Connection::beginTransaction();
+
+            $sponsorship = Connection::fetchRow(
+                'SELECT * FROM sponsorships WHERE id = ?',
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                Connection::rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Sponsorship not found'
+                ];
+            }
+
+            // Only allow transition from LOGGED back to CONFIRMED
+            if ($sponsorship['status'] !== self::STATUS_LOGGED) {
+                Connection::rollback();
+                return [
+                    'success' => false,
+                    'message' => 'Can only unlog sponsorships in logged status. Current status: ' . $sponsorship['status']
+                ];
+            }
+
+            // Revert to confirmed status
+            Connection::update(
+                'sponsorships',
+                [
+                    'status' => self::STATUS_SPONSORED,
+                    'logged_date' => null
+                ],
+                ['id' => $sponsorshipId]
+            );
+
+            Connection::commit();
+
+            error_log(sprintf(
+                'Sponsorship #%d unmarked from logged status',
+                $sponsorshipId
+            ));
+
+            return [
+                'success' => true,
+                'message' => 'Sponsorship unmarked from logged status'
+            ];
+
+        } catch (Exception $e) {
+            Connection::rollback();
+            error_log('Error unlogging sponsorship: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to unlog sponsorship: ' . $e->getMessage()
+            ];
         }
     }
 

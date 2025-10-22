@@ -46,6 +46,18 @@ if ($_POST !== []) {
                 $messageType = $result['success'] ? 'success' : 'error';
                 break;
 
+            case 'log':
+                $result = SponsorshipManager::logSponsorship($sponsorshipId);
+                $message = $result['message'];
+                $messageType = $result['success'] ? 'success' : 'error';
+                break;
+
+            case 'unlog':
+                $result = SponsorshipManager::unlogSponsorship($sponsorshipId);
+                $message = $result['message'];
+                $messageType = $result['success'] ? 'success' : 'error';
+                break;
+
             case 'cancel':
                 $reason = sanitizeString($_POST['reason'] ?? 'Cancelled by admin');
                 $result = SponsorshipManager::cancelSponsorship($sponsorshipId, $reason);
@@ -321,6 +333,10 @@ include __DIR__ . '/includes/admin_header.php';
                 <div class="stat-label">Active Sponsorships</div>
             </div>
             <div class="stat-card">
+                <span class="stat-number"><?php echo $stats['sponsorships']['logged'] ?? 0; ?></span>
+                <div class="stat-label">Logged Externally</div>
+            </div>
+            <div class="stat-card">
                 <span class="stat-number"><?php echo $stats['sponsorships']['completed'] ?? 0; ?></span>
                 <div class="stat-label">Gifts Delivered</div>
             </div>
@@ -329,7 +345,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <div class="stat-label">Available Children</div>
             </div>
             <div class="stat-card">
-                <span class="stat-number"><?php echo ($stats['sponsorships']['confirmed'] ?? 0) + ($stats['sponsorships']['completed'] ?? 0); ?></span>
+                <span class="stat-number"><?php echo ($stats['sponsorships']['confirmed'] ?? 0) + ($stats['sponsorships']['logged'] ?? 0) + ($stats['sponsorships']['completed'] ?? 0); ?></span>
                 <div class="stat-label">Total Sponsored</div>
             </div>
         </div>
@@ -369,6 +385,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Statuses</option>
                     <option value="pending" <?php echo $statusFilter === 'pending' ? 'selected' : ''; ?>>Pending</option>
                     <option value="sponsored" <?php echo $statusFilter === 'sponsored' ? 'selected' : ''; ?>>Confirmed</option>
+                    <option value="logged" <?php echo $statusFilter === 'logged' ? 'selected' : ''; ?>>Logged in External System</option>
                     <option value="completed" <?php echo $statusFilter === 'completed' ? 'selected' : ''; ?>>Completed</option>
                     <option value="cancelled" <?php echo $statusFilter === 'cancelled' ? 'selected' : ''; ?>>Cancelled</option>
                 </select>
@@ -462,13 +479,34 @@ include __DIR__ . '/includes/admin_header.php';
                                         <?php if ($sponsorship['status'] === 'confirmed') : ?>
                                             <form method="POST" style="display: inline;">
                                                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                                <input type="hidden" name="action" value="log">
+                                                <input type="hidden" name="sponsorship_id" value="<?php echo $sponsorship['id']; ?>">
+                                                <button type="submit" class="btn btn-info btn-small" title="Mark as logged in external spreadsheet">📋 Mark Logged</button>
+                                            </form>
+                                            <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
                                                 <input type="hidden" name="action" value="complete">
                                                 <input type="hidden" name="sponsorship_id" value="<?php echo $sponsorship['id']; ?>">
-                                                <button type="submit" class="btn btn-primary btn-small">Mark Complete</button>
+                                                <button type="submit" class="btn btn-primary btn-small" title="Mark as complete (gifts delivered)">✓ Mark Complete</button>
                                             </form>
                                         <?php endif; ?>
 
-                                        <?php if (in_array($sponsorship['status'], ['pending', 'confirmed'])) : ?>
+                                        <?php if ($sponsorship['status'] === 'logged') : ?>
+                                            <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                                <input type="hidden" name="action" value="unlog">
+                                                <input type="hidden" name="sponsorship_id" value="<?php echo $sponsorship['id']; ?>">
+                                                <button type="submit" class="btn btn-warning btn-small" title="Unmark from logged status">↩ Unlog</button>
+                                            </form>
+                                            <form method="POST" style="display: inline;">
+                                                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                                <input type="hidden" name="action" value="complete">
+                                                <input type="hidden" name="sponsorship_id" value="<?php echo $sponsorship['id']; ?>">
+                                                <button type="submit" class="btn btn-primary btn-small" title="Mark as complete (gifts delivered)">✓ Mark Complete</button>
+                                            </form>
+                                        <?php endif; ?>
+
+                                        <?php if (in_array($sponsorship['status'], ['pending', 'confirmed', 'logged'])) : ?>
                                             <button class="btn btn-danger btn-small btn-cancel-sponsorship"
                                                     data-sponsorship-id="<?php echo $sponsorship['id']; ?>"
                                                     data-child-id="<?php echo sanitizeString($sponsorship['child_display_id']); ?>"

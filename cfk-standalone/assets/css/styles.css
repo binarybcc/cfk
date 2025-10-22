@@ -895,6 +895,11 @@ textarea.input-error:focus {
     color: var(--color-success-text);
 }
 
+.status-logged {
+    background: #17a2b8;
+    color: white;
+}
+
 .status-sponsored {
     background: var(--color-info-bg-alt);
     color: var(--color-info-text);
