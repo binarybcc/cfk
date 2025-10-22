@@ -37,7 +37,7 @@ The CFK project uses a **minimal MCP configuration** optimized for performance a
 
 ---
 
-## 🗑️ Removed MCP Servers (3)
+## 🗑️ Removed MCP Servers (5)
 
 ### 1. **sequential-thinking** ❌ REMOVED
 **Reason:** Sonnet 4.5 has strong native reasoning capabilities
@@ -65,7 +65,7 @@ The CFK project uses a **minimal MCP configuration** optimized for performance a
 
 ---
 
-### 3. **claude-flow** ❌ REMOVED
+### 3. **claude-flow** ❌ REMOVED (2025-10-22)
 **Reason:** Overkill for CFK project scope
 **Previous purpose:** AI orchestration, swarm coordination, task management
 **Why removed:**
@@ -78,17 +78,41 @@ The CFK project uses a **minimal MCP configuration** optimized for performance a
 
 ---
 
+### 4. **ruv-swarm** ❌ REMOVED (2025-10-22)
+**Reason:** Unused and redundant with other tools
+**Previous purpose:** Alternative swarm coordination system
+**Why removed:**
+- Never used in CFK development
+- Overlapping functionality with claude-flow
+- Adds unnecessary MCP overhead
+
+**Impact:** None - Feature was not utilized
+
+---
+
+### 5. **flow-nexus** ❌ REMOVED (2025-10-22)
+**Reason:** Unused orchestration layer
+**Previous purpose:** Multi-agent workflow coordination
+**Why removed:**
+- Never used in CFK development
+- Claude Code's Task tool sufficient for agent spawning
+- Adds unnecessary complexity
+
+**Impact:** None - Feature was not utilized
+
+---
+
 ## 📊 Performance Improvements
 
-### Before (5 MCP Servers)
+### Before (7 MCP Servers)
 - Connection time: ~3-5 seconds on startup
-- Memory overhead: ~100MB
+- Memory overhead: ~150MB
 - Maintenance complexity: High
-- Unused tools: 3/5 (60%)
+- Unused tools: 5/7 (71%)
 
 ### After (2 MCP Servers)
-- Connection time: ~1-2 seconds on startup ⚡ **50% faster**
-- Memory overhead: ~40MB 💾 **60% reduction**
+- Connection time: ~1-2 seconds on startup ⚡ **60% faster**
+- Memory overhead: ~40MB 💾 **73% reduction**
 - Maintenance complexity: Low
 - Unused tools: 0/2 (0%) ✅ **All tools actively used**
 
