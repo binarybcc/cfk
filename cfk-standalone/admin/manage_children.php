@@ -697,7 +697,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <div class="child-details">
                                 <?php if (!empty($child['interests'])) : ?>
                                     <div class="detail-section">
-                                        <div class="detail-label">Interests</div>
+                                        <div class="detail-label">Essential Needs</div>
                                         <div class="detail-value"><?php echo sanitizeString($child['interests']); ?></div>
                                     </div>
                                 <?php endif; ?>
@@ -870,8 +870,8 @@ include __DIR__ . '/includes/admin_header.php';
                         </div>
                         
                         <div class="form-group form-group-full">
-                            <label for="interests">Interests</label>
-                            <textarea id="interests" name="interests" placeholder="Sports, crafts, music, reading, etc."></textarea>
+                            <label for="interests">Essential Needs</label>
+                            <textarea id="interests" name="interests" placeholder="Basic necessities, clothing needs, school supplies, etc."></textarea>
                         </div>
                         
                         <div class="form-group form-group-full">

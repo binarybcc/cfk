@@ -327,10 +327,10 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
                         <!-- Middle Section: Details -->
                         <div class="child-info">
-                            <!-- Interests & Wishes -->
+                            <!-- Essential Needs & Wishes -->
                             <?php if (!empty($child['interests'])) : ?>
                                 <div style="margin-bottom: 15px;">
-                                    <strong style="color: #2c5530;">Interests:</strong>
+                                    <strong style="color: #2c5530;">Essential Needs:</strong>
                                     <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['interests']); ?></p>
                                 </div>
                             <?php endif; ?>

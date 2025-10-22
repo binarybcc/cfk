@@ -224,7 +224,7 @@ if (!$isFamilySponsorship) {
 
                         <?php if (!empty($fullChild['interests'])) : ?>
                             <div class="summary-section">
-                                <strong>Interests:</strong>
+                                <strong>Essential Needs:</strong>
                                 <p><?php echo sanitizeString($fullChild['interests']); ?></p>
                             </div>
                         <?php endif; ?>

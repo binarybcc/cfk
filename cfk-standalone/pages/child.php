@@ -135,10 +135,10 @@ $isAvailable = $child['status'] === 'available';
                 </section>
             <?php endif; ?>
 
-            <!-- Interests -->
+            <!-- Essential Needs -->
             <?php if (!empty($child['interests'])) : ?>
                 <section class="detail-section">
-                    <h2>Interests & Hobbies</h2>
+                    <h2>Essential Needs</h2>
                     <p class="interests-text"><?php echo nl2br(sanitizeString($child['interests'])); ?></p>
                 </section>
             <?php endif; ?>

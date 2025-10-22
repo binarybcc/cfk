@@ -123,7 +123,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
                     <?php if (!empty($member['interests'])) : ?>
                         <div class="detail-row">
-                            <strong>Interests:</strong>
+                            <strong>Essential Needs:</strong>
                             <span><?php echo sanitizeString($member['interests']); ?></span>
                         </div>
                     <?php endif; ?>

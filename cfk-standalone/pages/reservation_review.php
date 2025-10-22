@@ -69,7 +69,7 @@ $pageTitle = 'Review Your Sponsorship';
                             <div class="card-details">
                                 <div x-show="child.grade"><strong>Grade:</strong> <span x-text="child.grade"></span></div>
                                 <div x-show="child.school"><strong>School:</strong> <span x-text="child.school"></span></div>
-                                <div x-show="child.interests"><strong>Interests:</strong> <span x-text="child.interests"></span></div>
+                                <div x-show="child.interests"><strong>Essential Needs:</strong> <span x-text="child.interests"></span></div>
                                 <div x-show="child.wishes"><strong>Wishes:</strong> <span x-text="child.wishes"></span></div>
                                 <div x-show="child.clothing_sizes"><strong>Clothing:</strong> <span x-text="child.clothing_sizes"></span></div>
                                 <div x-show="child.shoe_size"><strong>Shoes:</strong> <span x-text="child.shoe_size"></span></div>

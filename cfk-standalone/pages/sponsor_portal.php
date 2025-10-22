@@ -157,7 +157,7 @@ if ($_POST && isset($_POST['add_children'])) {
 
                                 <?php if (!empty($child['interests'])) : ?>
                                     <div class="child-section">
-                                        <h5>Interests:</h5>
+                                        <h5>Essential Needs:</h5>
                                         <p><?php echo sanitizeString($child['interests']); ?></p>
                                     </div>
                                 <?php endif; ?>

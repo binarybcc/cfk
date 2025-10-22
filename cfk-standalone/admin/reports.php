@@ -64,7 +64,7 @@ if ($exportFormat === 'csv') {
             $headers = [
                 'Child ID', 'Child Name', 'Age', 'Gender', 'Grade', 'School',
                 'Shirt Size', 'Pant Size', 'Shoe Size', 'Jacket Size',
-                'Interests', 'Wishes', 'Special Needs', 'Child Status',
+                'Essential Needs', 'Wishes', 'Special Needs', 'Child Status',
                 'Family Number',
                 'Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Sponsor Address',
                 'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date'
@@ -455,7 +455,7 @@ include __DIR__ . '/includes/admin_header.php';
                 </ul>
                 <p><strong>Data Included:</strong></p>
                 <ul>
-                    <li>Child Information: ID, Name, Age, Gender, Grade, School, Clothing Sizes, Interests, Wishes, Special Needs</li>
+                    <li>Child Information: ID, Name, Age, Gender, Grade, School, Clothing Sizes, Essential Needs, Wishes, Special Needs</li>
                     <li>Family Information: Family Number</li>
                     <li>Sponsor Information: Name, Email, Phone, Address (if child is sponsored)</li>
                     <li>Sponsorship Details: Status, Request Date, Confirmation Date, Completion Date (if applicable)</li>

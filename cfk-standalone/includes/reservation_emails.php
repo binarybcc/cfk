@@ -202,7 +202,7 @@ function generateReservationConfirmationHTML(array $reservation): string
         if (!empty($child['interests'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
-                                    <strong style="color: #2c5530;">Interests:</strong>
+                                    <strong style="color: #2c5530;">Essential Needs:</strong>
                                     <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['interests'])) . '</p>
                                 </div>';
         }
@@ -303,7 +303,7 @@ function generateReservationConfirmationText(array $reservation): string
             $text .= "School: " . $child['school'] . "\n";
         }
         if (!empty($child['interests'])) {
-            $text .= "Interests: " . $child['interests'] . "\n";
+            $text .= "Essential Needs: " . $child['interests'] . "\n";
         }
         if (!empty($child['wishes'])) {
             $text .= "Wishes: " . cleanWishesText($child['wishes']) . "\n";
@@ -565,7 +565,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
 
         if (!empty($child['interests'])) {
             $html .= '
-                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Interests:</p>
+                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Essential Needs:</p>
                                         <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['interests']) . '</p>';
         }
 

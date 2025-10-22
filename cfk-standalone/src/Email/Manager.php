@@ -427,7 +427,7 @@ class Manager
                     </div>
 
                     <div class='info-section'>
-                        <h3>🎨 Interests & Hobbies</h3>
+                        <h3>🎨 Essential Needs</h3>
                         <p style='background: #f9f9f9; padding: 10px; border-radius: 4px;'>{$interests}</p>
                     </div>
 
@@ -614,7 +614,7 @@ class Manager
                         </div>
 
                         <div style='margin: 15px 0;'>
-                            <h4 style='color: #2c5530;'>🎨 Interests & Hobbies</h4>
+                            <h4 style='color: #2c5530;'>🎨 Essential Needs</h4>
                             <p style='background: #f9f9f9; padding: 10px; border-radius: 4px;'>{$interests}</p>
                         </div>
 
