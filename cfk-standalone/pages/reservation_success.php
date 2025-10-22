@@ -162,6 +162,7 @@ function sponsorshipSuccessApp() {
 .success-header h1 {
     margin: 0 0 var(--spacing-md) 0;
     font-size: var(--font-size-3xl);
+    color: var(--color-white);
 }
 
 .success-subtitle {
