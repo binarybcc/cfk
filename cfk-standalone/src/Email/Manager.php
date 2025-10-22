@@ -404,7 +404,7 @@ class Manager
 
                     <p style='font-size: 11px; margin-top: 10px;'><em>CFK Inc is a recognized 501(c)(3) not-for-profit organization; EIN: 82-3083435. This number may be used for tax deduction purposes.</em></p>
 
-                    <p style='margin-top: 15px;'><strong>Questions?</strong> Contact us at " . config('admin_email') . "</p>
+                    <p style='margin-top: 15px;'><strong>Questions?</strong> Contact us at <a href='mailto:" . config('admin_email') . "'>" . config('admin_email') . "</a></p>
                 </div>
 
                 <div class='child-info'>
