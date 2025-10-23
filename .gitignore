@@ -9,3 +9,8 @@
 
 # Backups
 *.backup
+
+# SSH credentials (should be in ~/ outside repo, but block just in case)
+cfkssh.txt
+*ssh*.txt
+ssh_password*
