@@ -1308,6 +1308,195 @@ document.addEventListener('DOMContentLoaded', function() {
             hideMessageModal();
         }
     });
+
+    // ===== AJAX Form Submission - FULLY DYNAMIC (NO PAGE RELOAD) =====
+    // Intercept all action forms and submit via AJAX
+    const actionForms = document.querySelectorAll('form[method="POST"]');
+    actionForms.forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            // Only intercept non-bulk action forms
+            if (!form.closest('#bulk-actions-form') && form.querySelector('input[name="action"]')) {
+                e.preventDefault(); // STOP page reload
+
+                const formData = new FormData(form);
+                const button = form.querySelector('button[type="submit"]');
+                const originalText = button ? button.textContent : '';
+                const action = form.querySelector('input[name="action"]').value;
+
+                // Show loading state
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Processing...';
+                }
+
+                // Submit via AJAX
+                fetch('ajax_handler.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Show toast notification
+                    if (typeof showToast === 'function') {
+                        showToast(data.message, data.success ? 'success' : 'error');
+                    }
+
+                    if (data.success) {
+                        // UPDATE UI DYNAMICALLY (NO PAGE RELOAD)
+                        updateButtonStatesAfterAction(button, action, form);
+                        updateStatsAfterAction(action);
+                    } else {
+                        // Re-enable button on error
+                        if (button) {
+                            button.disabled = false;
+                            button.textContent = originalText;
+                        }
+                    }
+                })
+                .catch(error => {
+                    if (typeof showToast === 'function') {
+                        showToast('An error occurred. Please try again.', 'error');
+                    }
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+            }
+        });
+    });
+
+    // Dynamic UI Update: Change button states without page reload
+    function updateButtonStatesAfterAction(clickedButton, action, form) {
+        const row = form.closest('tr');
+        if (!row) return;
+
+        // Find all action buttons in this row
+        const actionsCell = row.querySelector('.actions');
+        if (!actionsCell) return;
+
+        // Clear existing buttons
+        actionsCell.innerHTML = '';
+
+        // Create new buttons based on action
+        if (action === 'log') {
+            // confirmed → logged: Show Unlog (blue) and Mark Complete (gray) buttons
+            actionsCell.innerHTML = `
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="action" value="unlog">
+                    <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
+                    <button type="submit" class="btn-action btn-unlog" title="Remove from logged status">
+                        ↻ Unlog
+                    </button>
+                </form>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="action" value="complete">
+                    <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
+                    <button type="submit" class="btn-action btn-complete-logged" title="Mark as complete (gifts delivered)">
+                        Mark Complete
+                    </button>
+                </form>
+            `;
+        } else if (action === 'unlog') {
+            // logged → confirmed: Show Mark Logged (gray) and Mark Complete (gray) buttons
+            actionsCell.innerHTML = `
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="action" value="log">
+                    <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
+                    <button type="submit" class="btn-action btn-log-pending" title="Mark as logged in external spreadsheet">
+                        Mark Logged
+                    </button>
+                </form>
+                <form method="POST" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="action" value="complete">
+                    <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
+                    <button type="submit" class="btn-action btn-complete-pending" title="Mark as complete (gifts delivered)">
+                        Mark Complete
+                    </button>
+                </form>
+            `;
+        } else if (action === 'complete') {
+            // Any → completed: Show green "Completed" badge
+            actionsCell.innerHTML = `
+                <button class="btn-action btn-completed" disabled title="Sponsorship completed">
+                    ✓ Completed
+                </button>
+            `;
+        }
+
+        // Re-attach event listeners to new forms
+        const newForms = actionsCell.querySelectorAll('form');
+        newForms.forEach(attachFormListener);
+    }
+
+    // Re-attach listener to dynamically created forms
+    function attachFormListener(form) {
+        form.addEventListener('submit', function(e) {
+            if (form.querySelector('input[name="action"]')) {
+                e.preventDefault();
+
+                const formData = new FormData(form);
+                const button = form.querySelector('button[type="submit"]');
+                const originalText = button ? button.textContent : '';
+                const action = form.querySelector('input[name="action"]').value;
+
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Processing...';
+                }
+
+                fetch('ajax_handler.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (typeof showToast === 'function') {
+                        showToast(data.message, data.success ? 'success' : 'error');
+                    }
+                    if (data.success) {
+                        updateButtonStatesAfterAction(button, action, form);
+                        updateStatsAfterAction(action);
+                    } else {
+                        if (button) {
+                            button.disabled = false;
+                            button.textContent = originalText;
+                        }
+                    }
+                })
+                .catch(error => {
+                    if (typeof showToast === 'function') {
+                        showToast('An error occurred.', 'error');
+                    }
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = originalText;
+                    }
+                });
+            }
+        });
+    }
+
+    // Dynamic Stats Update: Change counters without page reload
+    function updateStatsAfterAction(action) {
+        const activeStatEl = document.querySelector('.stat-number');
+        if (!activeStatEl) return;
+
+        const currentActive = parseInt(activeStatEl.textContent);
+
+        // Update based on action
+        if (action === 'complete') {
+            // completed reduces active count
+            activeStatEl.textContent = Math.max(0, currentActive - 1);
+            // Animate
+            activeStatEl.style.transform = 'scale(1.2)';
+            setTimeout(() => activeStatEl.style.transform = 'scale(1)', 200);
+        }
+    }
 });
 </script>
 

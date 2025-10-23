@@ -4,12 +4,27 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?>CFK Admin</title>
-    
+
     <!-- CSS -->
     <link rel="stylesheet" href="<?php echo baseUrl('assets/css/styles.css'); ?>">
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?php echo baseUrl('assets/images/favicon.ico'); ?>">
+
+    <!-- Scroll Position Preservation - Execute BEFORE page renders -->
+    <script>
+        // Restore scroll position immediately (before any rendering)
+        (function() {
+            var savedScroll = sessionStorage.getItem('cfk_admin_scroll');
+            if (savedScroll) {
+                // Restore on DOMContentLoaded (most reliable timing)
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.scrollTo(0, parseInt(savedScroll));
+                    sessionStorage.removeItem('cfk_admin_scroll');
+                });
+            }
+        })();
+    </script>
 </head>
 <body class="admin-body">
     <header class="admin-header">
@@ -56,10 +71,47 @@
             ];
         }
         if ($displayMessage) : ?>
-            <div class="alert alert-<?php echo $displayMessage['type']; ?>">
-                <?php echo sanitizeString($displayMessage['text']); ?>
-            </div>
+            <script>
+                // Show toast notification without disrupting page
+                (function() {
+                    var toast = document.createElement('div');
+                    toast.className = 'cfk-toast cfk-toast-<?php echo $displayMessage['type']; ?>';
+                    toast.innerHTML = '<span class="cfk-toast-icon"><?php
+                        if ($displayMessage['type'] === 'success') echo '✓';
+                        if ($displayMessage['type'] === 'error') echo '✕';
+                        if ($displayMessage['type'] === 'warning') echo '⚠';
+                    ?></span><span class="cfk-toast-text"><?php echo addslashes(sanitizeString($displayMessage['text'])); ?></span>';
+
+                    document.body.appendChild(toast);
+
+                    // Auto-dismiss after 1.5 seconds
+                    setTimeout(function() {
+                        toast.classList.add('cfk-toast-hiding');
+                        setTimeout(function() { toast.remove(); }, 300);
+                    }, 1500);
+                })();
+            </script>
         <?php endif; ?>
+
+        <script>
+            // Save scroll position before ANY page navigation
+            (function() {
+                // Save before page unloads
+                window.addEventListener('beforeunload', function() {
+                    sessionStorage.setItem('cfk_admin_scroll', window.scrollY.toString());
+                });
+
+                // Also save on form submit (backup)
+                document.addEventListener('DOMContentLoaded', function() {
+                    var forms = document.querySelectorAll('form');
+                    forms.forEach(function(form) {
+                        form.addEventListener('submit', function() {
+                            sessionStorage.setItem('cfk_admin_scroll', window.scrollY.toString());
+                        });
+                    });
+                });
+            })();
+        </script>
 
 <style>
 .admin-body {
@@ -181,15 +233,105 @@
         flex-direction: column;
         gap: 0.25rem;
     }
-    
+
     .admin-nav a {
         text-align: center;
     }
-    
+
     .user-actions {
         flex-direction: column;
         width: 100%;
         max-width: 200px;
+    }
+}
+
+/* Compact Toast Notification - Bottom of Screen */
+.cfk-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 999999;
+    animation: slideUpIn 0.3s ease-out;
+    max-width: 400px;
+    border-left: 4px solid;
+}
+
+.cfk-toast-success {
+    border-left-color: #28a745;
+}
+
+.cfk-toast-error {
+    border-left-color: #dc3545;
+}
+
+.cfk-toast-warning {
+    border-left-color: #ffc107;
+}
+
+.cfk-toast-icon {
+    font-size: 1.25rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
+.cfk-toast-success .cfk-toast-icon {
+    color: #28a745;
+}
+
+.cfk-toast-error .cfk-toast-icon {
+    color: #dc3545;
+}
+
+.cfk-toast-warning .cfk-toast-icon {
+    color: #ffc107;
+}
+
+.cfk-toast-text {
+    color: #333;
+    font-size: 0.95rem;
+    line-height: 1.4;
+}
+
+.cfk-toast-hiding {
+    animation: slideDownOut 0.3s ease-out;
+}
+
+@keyframes slideUpIn {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideDownOut {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+}
+
+/* Mobile responsive toast */
+@media (max-width: 600px) {
+    .cfk-toast {
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        max-width: none;
     }
 }
 </style>

@@ -728,26 +728,29 @@ include __DIR__ . '/includes/admin_header.php';
                                 </button>
                                 
                                 <?php if ($child['status'] === 'available') : ?>
-                                    <form method="POST" style="display: inline;">
+                                    <form data-ajax="true" data-ajax-endpoint="ajax_handler.php" data-ajax-onsuccess="handleChildActionSuccess" style="display: inline;">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                        <input type="hidden" name="action_type" value="child">
                                         <input type="hidden" name="action" value="toggle_status">
                                         <input type="hidden" name="child_id" value="<?php echo $child['id']; ?>">
                                         <input type="hidden" name="new_status" value="inactive">
                                         <button type="submit" class="btn btn-warning btn-small">Deactivate</button>
                                     </form>
                                 <?php elseif ($child['status'] === 'inactive') : ?>
-                                    <form method="POST" style="display: inline;">
+                                    <form data-ajax="true" data-ajax-endpoint="ajax_handler.php" data-ajax-onsuccess="handleChildActionSuccess" style="display: inline;">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                        <input type="hidden" name="action_type" value="child">
                                         <input type="hidden" name="action" value="toggle_status">
                                         <input type="hidden" name="child_id" value="<?php echo $child['id']; ?>">
                                         <input type="hidden" name="new_status" value="available">
                                         <button type="submit" class="btn btn-success btn-small">Activate</button>
                                     </form>
                                 <?php endif; ?>
-                                
+
                                 <?php if ($child['sponsorship_count'] == 0) : ?>
-                                    <form method="POST" style="display: inline;" class="delete-child-form">
+                                    <form data-ajax="true" data-ajax-endpoint="ajax_handler.php" data-ajax-onsuccess="handleChildActionSuccess" style="display: inline;" class="delete-child-form">
                                         <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                        <input type="hidden" name="action_type" value="child">
                                         <input type="hidden" name="action" value="delete_child">
                                         <input type="hidden" name="child_id" value="<?php echo $child['id']; ?>">
                                         <button type="submit" class="btn btn-danger btn-small btn-delete-child">
@@ -904,6 +907,71 @@ include __DIR__ . '/includes/admin_header.php';
             const submitBtn = document.getElementById('submitBtn');
             const childForm = document.getElementById('childForm');
 
+            // Custom success handler for child actions (AJAX)
+            window.handleChildActionSuccess = function(data, form, button) {
+                const action = form.querySelector('input[name="action"]').value;
+
+                if (action === 'toggle_status') {
+                    // Update UI after status toggle
+                    const newStatus = data.new_status;
+                    const childCard = form.closest('.child-card');
+                    const statusBadge = childCard.querySelector('.status-badge');
+                    const actionsCell = childCard.querySelector('.child-actions');
+
+                    // Update status badge
+                    statusBadge.className = 'status-badge status-' + newStatus;
+                    statusBadge.textContent = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
+
+                    // Swap toggle button
+                    const childIdValue = form.querySelector('input[name="child_id"]').value;
+                    const csrfToken = form.querySelector('input[name="csrf_token"]').value;
+
+                    if (newStatus === 'available') {
+                        // Replace Activate with Deactivate button
+                        form.innerHTML = `
+                            <input type="hidden" name="csrf_token" value="${csrfToken}">
+                            <input type="hidden" name="action_type" value="child">
+                            <input type="hidden" name="action" value="toggle_status">
+                            <input type="hidden" name="child_id" value="${childIdValue}">
+                            <input type="hidden" name="new_status" value="inactive">
+                            <button type="submit" class="btn btn-warning btn-small">Deactivate</button>
+                        `;
+                    } else {
+                        // Replace Deactivate with Activate button
+                        form.innerHTML = `
+                            <input type="hidden" name="csrf_token" value="${csrfToken}">
+                            <input type="hidden" name="action_type" value="child">
+                            <input type="hidden" name="action" value="toggle_status">
+                            <input type="hidden" name="child_id" value="${childIdValue}">
+                            <input type="hidden" name="new_status" value="available">
+                            <button type="submit" class="btn btn-success btn-small">Activate</button>
+                        `;
+                    }
+
+                    // Re-add AJAX attribute
+                    form.setAttribute('data-ajax', 'true');
+                    form.setAttribute('data-ajax-endpoint', 'ajax_handler.php');
+
+                } else if (action === 'delete_child') {
+                    // Remove the child card from DOM
+                    const childCard = form.closest('.child-card');
+                    childCard.style.opacity = '0';
+                    childCard.style.transform = 'scale(0.95)';
+                    childCard.style.transition = 'all 0.3s ease';
+
+                    setTimeout(function() {
+                        childCard.remove();
+
+                        // Check if grid is now empty
+                        const childrenGrid = document.querySelector('.children-grid');
+                        if (childrenGrid && childrenGrid.children.length === 0) {
+                            // Show empty state (reload might be needed for proper UI)
+                            window.location.reload();
+                        }
+                    }, 300);
+                }
+            };
+
             // Helper function to show add modal
             function showAddModal() {
                 modalTitle.textContent = 'Add New Child';
@@ -954,15 +1022,16 @@ include __DIR__ . '/includes/admin_header.php';
                 });
             });
 
-            // Delete confirmation (event delegation)
-            document.querySelectorAll('.delete-child-form').forEach(form => {
-                form.addEventListener('submit', function(e) {
+            // Delete confirmation for AJAX forms (capture event BEFORE admin.js processes it)
+            document.addEventListener('submit', function(e) {
+                if (e.target.classList.contains('delete-child-form')) {
                     if (!confirm('Are you sure you want to delete this child? This action cannot be undone.')) {
                         e.preventDefault();
+                        e.stopImmediatePropagation(); // Prevent admin.js from processing this
                         return false;
                     }
-                });
-            });
+                }
+            }, true); // Use capture phase to run before admin.js
 
             // Close modal buttons
             const closeModalX = document.getElementById('close-modal-x');

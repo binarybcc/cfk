@@ -4,13 +4,16 @@
         <div class="admin-footer-content">
             <p>&copy; <?php echo date('Y'); ?> Christmas for Kids - Administration Panel</p>
             <p class="admin-version">
-                Version <?php echo config('app_version'); ?> | 
+                Version <?php echo config('app_version'); ?> |
                 <a href="<?php echo baseUrl(); ?>" target="_blank">View Public Site</a>
             </p>
         </div>
     </footer>
 
-    <!-- JavaScript (inline - no external admin.js needed) -->
+    <!-- Centralized Admin JavaScript -->
+    <script src="<?php echo baseUrl('admin/assets/admin.js'); ?>" nonce="<?php echo $cspNonce; ?>"></script>
+
+    <!-- Additional inline JavaScript -->
     <script nonce="<?php echo $cspNonce; ?>">
         // Simple confirmation for delete actions
         document.addEventListener('DOMContentLoaded', function() {

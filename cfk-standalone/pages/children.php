@@ -371,26 +371,102 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
 
         <!-- Pagination -->
         <?php if ($totalPages > 1) : ?>
-            <div class="pagination" style="margin-top: 2rem; text-align: center;">
+            <div class="pagination-wrapper">
                 <?php
                 // Preserve all query params except 'p' (page number)
                 $queryParams = $_GET;
                 unset($queryParams['p']);
                 $baseQuery = http_build_query($queryParams);
                 $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
+
+                // Calculate page range to display
+                $delta = 2; // Number of pages to show on each side of current page
+                $rangeStart = max(1, $currentPage - $delta);
+                $rangeEnd = min($totalPages, $currentPage + $delta);
+
+                // Adjust range if we're near the start or end
+                if ($rangeEnd - $rangeStart < $delta * 2) {
+                    if ($currentPage < $totalPages / 2) {
+                        $rangeEnd = min($totalPages, $rangeStart + ($delta * 2));
+                    } else {
+                        $rangeStart = max(1, $rangeEnd - ($delta * 2));
+                    }
+                }
                 ?>
 
-                <?php if ($currentPage > 1) : ?>
-                    <a href="?p=<?php echo $currentPage - 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">« Previous</a>
-                <?php endif; ?>
+                <nav class="pagination" role="navigation" aria-label="Pagination Navigation">
+                    <!-- First Page -->
+                    <?php if ($currentPage > 1) : ?>
+                        <a href="?p=1<?php echo $baseQuery; ?>"
+                           class="pagination-item pagination-first"
+                           aria-label="Go to first page">
+                            «
+                        </a>
+                    <?php else : ?>
+                        <span class="pagination-item pagination-first disabled" aria-disabled="true">«</span>
+                    <?php endif; ?>
 
-                <span style="margin: 0 1rem; font-weight: 600;">
-                    Page <?php echo $currentPage; ?> of <?php echo $totalPages; ?>
-                </span>
+                    <!-- Previous Page -->
+                    <?php if ($currentPage > 1) : ?>
+                        <a href="?p=<?php echo $currentPage - 1; ?><?php echo $baseQuery; ?>"
+                           class="pagination-item pagination-prev"
+                           aria-label="Go to previous page">
+                            ‹
+                        </a>
+                    <?php else : ?>
+                        <span class="pagination-item pagination-prev disabled" aria-disabled="true">‹</span>
+                    <?php endif; ?>
 
-                <?php if ($currentPage < $totalPages) : ?>
-                    <a href="?p=<?php echo $currentPage + 1; ?><?php echo $baseQuery; ?>" class="btn btn-secondary">Next »</a>
-                <?php endif; ?>
+                    <!-- Start Ellipsis -->
+                    <?php if ($rangeStart > 1) : ?>
+                        <span class="pagination-item pagination-ellipsis">...</span>
+                    <?php endif; ?>
+
+                    <!-- Page Numbers -->
+                    <?php for ($i = $rangeStart; $i <= $rangeEnd; $i++) : ?>
+                        <?php if ($i === $currentPage) : ?>
+                            <span class="pagination-item active" aria-current="page"><?php echo $i; ?></span>
+                        <?php else : ?>
+                            <a href="?p=<?php echo $i; ?><?php echo $baseQuery; ?>"
+                               class="pagination-item"
+                               aria-label="Go to page <?php echo $i; ?>">
+                                <?php echo $i; ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+
+                    <!-- End Ellipsis -->
+                    <?php if ($rangeEnd < $totalPages) : ?>
+                        <span class="pagination-item pagination-ellipsis">...</span>
+                    <?php endif; ?>
+
+                    <!-- Next Page -->
+                    <?php if ($currentPage < $totalPages) : ?>
+                        <a href="?p=<?php echo $currentPage + 1; ?><?php echo $baseQuery; ?>"
+                           class="pagination-item pagination-next"
+                           aria-label="Go to next page">
+                            ›
+                        </a>
+                    <?php else : ?>
+                        <span class="pagination-item pagination-next disabled" aria-disabled="true">›</span>
+                    <?php endif; ?>
+
+                    <!-- Last Page -->
+                    <?php if ($currentPage < $totalPages) : ?>
+                        <a href="?p=<?php echo $totalPages; ?><?php echo $baseQuery; ?>"
+                           class="pagination-item pagination-last"
+                           aria-label="Go to last page">
+                            »
+                        </a>
+                    <?php else : ?>
+                        <span class="pagination-item pagination-last disabled" aria-disabled="true">»</span>
+                    <?php endif; ?>
+                </nav>
+
+                <!-- Page Info -->
+                <div class="pagination-info">
+                    Page <strong><?php echo $currentPage; ?></strong> of <strong><?php echo $totalPages; ?></strong>
+                </div>
             </div>
         <?php endif; ?>
     </div>
