@@ -199,7 +199,7 @@ include __DIR__ . '/includes/admin_header.php';
                             <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
                             <?php if (!empty($sponsor['phone'])) : ?>
-                                <p><strong>Phone:</strong> <?php echo sanitizeString($sponsor['phone']); ?></p>
+                                <p><strong>Phone:</strong> <a href="tel:<?php echo sanitizeString($sponsor['phone']); ?>">📞 <?php echo sanitizeString($sponsor['phone']); ?></a></p>
                             <?php endif; ?>
                             <?php if (!empty($sponsor['address'])) : ?>
                                 <p><strong>Address:</strong> <?php echo sanitizeString($sponsor['address']); ?></p>
@@ -290,7 +290,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <?php if ($child['sponsor_email']) : ?>
                                     <a href="mailto:<?php echo $child['sponsor_email']; ?>"><?php echo $child['sponsor_email']; ?></a><br>
                                     <?php if ($child['sponsor_phone']) : ?>
-                                        <?php echo sanitizeString($child['sponsor_phone']); ?>
+                                        <a href="tel:<?php echo sanitizeString($child['sponsor_phone']); ?>">📞 <?php echo sanitizeString($child['sponsor_phone']); ?></a>
                                     <?php endif; ?>
                                 <?php else : ?>
                                     -
@@ -642,17 +642,29 @@ include __DIR__ . '/includes/admin_header.php';
 .data-table th {
     background: #2c5530;
     color: white;
-    padding: 0.75rem;
+    padding: 0.07rem 0.5rem;
     text-align: left;
+    line-height: 1.2;
 }
 
 .data-table td {
-    padding: 0.75rem;
+    padding: 0.07rem 0.5rem;
     border-bottom: 1px solid #ddd;
+    line-height: 1.2;
+}
+
+/* Zebra Striping */
+.data-table tbody tr:nth-child(even) {
+    background: #e9ecef;
+}
+
+.data-table tbody tr:nth-child(odd) {
+    background: white;
 }
 
 .data-table tr:hover {
-    background: #f8f9fa;
+    background: #e7f1ff !important;
+    transition: background-color 0.15s ease;
 }
 
 .status-badge {
