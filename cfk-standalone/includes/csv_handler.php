@@ -18,7 +18,7 @@ class CFK_CSV_Handler_DEPRECATED
     ];
 
     const ALL_COLUMNS = [
-        'age', 'gender', 'grade',
+        'age', 'gender',
         'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
         'interests', 'greatest_need', 'wish_list', 'special_needs', 'family_situation'
     ];
@@ -309,7 +309,6 @@ class CFK_CSV_Handler_DEPRECATED
         }
 
         // Set defaults for optional fields
-        $row['grade'] ??= '';
         $row['special_needs'] ??= 'None';
         $row['family_situation'] ??= '';
         $row['greatest_need'] ??= '';
@@ -415,14 +414,14 @@ class CFK_CSV_Handler_DEPRECATED
             'name' => $row['name'],
             'age' => $row['age'],
             'gender' => $row['gender'],
-            'grade' => $row['grade'] ?? '',
+            'grade' => '', // Not in CSV - calculated from age on display
             'school' => '', // Not in CSV
             'shirt_size' => $row['shirt_size'] ?? '',
             'pant_size' => $row['pant_size'] ?? '',
             'shoe_size' => $row['shoe_size'] ?? '',
             'jacket_size' => $row['jacket_size'] ?? '',
-            'interests' => $row['interests'] ?? '',
-            'wishes' => $row['greatest_need'] . ($row['wish_list'] ? '. Wish List: ' . $row['wish_list'] : ''),
+            'interests' => $row['greatest_need'] ?? '', // Greatest Need → Essential Needs (displays as "Essential Needs")
+            'wishes' => ($row['interests'] ?? '') . (($row['wish_list'] ?? '') ? '. Wish List: ' . $row['wish_list'] : ''), // Interests + Wish List → Christmas Wishes
             'special_needs' => $row['special_needs'] ?? 'None',
             'status' => 'available'
         ];
