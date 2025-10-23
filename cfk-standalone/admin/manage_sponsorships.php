@@ -385,7 +385,7 @@ include __DIR__ . '/includes/admin_header.php';
 
 .table th,
 .table td {
-    padding: 1rem;
+    padding: 0.65rem;
     text-align: left;
     border-bottom: 1px solid #eee;
 }
@@ -415,7 +415,7 @@ include __DIR__ . '/includes/admin_header.php';
 
 /* Zebra Striping */
 .table tbody tr:nth-child(even) {
-    background: #f8f9fa;
+    background: #e9ecef;
 }
 
 .table tbody tr:nth-child(odd) {
