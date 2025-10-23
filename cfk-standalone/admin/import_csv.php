@@ -160,6 +160,7 @@ function handleConfirmImport(): array
 
         $tempFile = $_SESSION['cfk_import_file'];
         $keepInactive = isset($_POST['keep_inactive_children']);
+        $importMode = sanitizeString($_POST['import_mode'] ?? 'replace'); // 'replace', 'append', 'update'
 
         // CREATE AUTOMATIC BACKUP BEFORE IMPORT
         $backupResult = BackupManager::createAutoBackup('csv_import');
@@ -169,7 +170,8 @@ function handleConfirmImport(): array
 
         // Apply import with sponsorship preservation
         $result = ImportAnalyzer::applyImportWithPreservation($tempFile, [
-            'keep_inactive' => $keepInactive
+            'keep_inactive' => $keepInactive,
+            'import_mode' => $importMode
         ]);
 
         // Clean up temp file
@@ -1171,13 +1173,52 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
 
                         <h4 style="margin-bottom: 1rem;">🎯 Ready to Import?</h4>
 
+                        <!-- Import Mode Selection -->
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 6px; border: 1px solid #dee2e6;">
+                            <label style="font-weight: 600; margin-bottom: 0.75rem; display: block; color: #2c5530;">
+                                Import Mode:
+                            </label>
+
+                            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                                <div class="radio-item">
+                                    <input type="radio" id="mode_replace" name="import_mode" value="replace" checked>
+                                    <label for="mode_replace" style="margin-left: 0.5rem;">
+                                        <strong>Replace All</strong> - Delete existing children and import fresh data
+                                    </label>
+                                    <div class="help-text" style="margin-left: 1.75rem; color: #6c757d; font-size: 0.9rem;">
+                                        Use this for complete data refresh. Sponsorship statuses are preserved for matching children.
+                                    </div>
+                                </div>
+
+                                <div class="radio-item">
+                                    <input type="radio" id="mode_append" name="import_mode" value="append">
+                                    <label for="mode_append" style="margin-left: 0.5rem;">
+                                        <strong>Append New Only</strong> - Add only children that don't already exist
+                                    </label>
+                                    <div class="help-text" style="margin-left: 1.75rem; color: #6c757d; font-size: 0.9rem;">
+                                        Skips existing children (based on family number + child letter). Safe for adding new families.
+                                    </div>
+                                </div>
+
+                                <div class="radio-item">
+                                    <input type="radio" id="mode_update" name="import_mode" value="update">
+                                    <label for="mode_update" style="margin-left: 0.5rem;">
+                                        <strong>Update Existing</strong> - Update existing children and add new ones
+                                    </label>
+                                    <div class="help-text" style="margin-left: 1.75rem; color: #6c757d; font-size: 0.9rem;">
+                                        Updates all fields for existing children, adds new ones. Preserves sponsorship statuses.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <?php if ($previewData['analysis']['stats']['total_removed'] > 0) : ?>
-                            <div class="checkbox-item" style="margin-bottom: 1rem;">
+                            <div class="checkbox-item" style="margin-bottom: 1rem; padding: 1rem; background: #fff3cd; border-radius: 6px; border: 1px solid #ffeaa7;">
                                 <input type="checkbox" id="keep_inactive_children" name="keep_inactive_children" checked>
                                 <label for="keep_inactive_children">
                                     <strong>Keep removed children as "Inactive"</strong> instead of deleting them
                                 </label>
-                                <div class="help-text">Recommended if children have sponsorships or you want to preserve their history.</div>
+                                <div class="help-text">Recommended if children have sponsorships or you want to preserve their history. (Only applies to "Replace All" mode)</div>
                             </div>
                         <?php endif; ?>
 

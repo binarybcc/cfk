@@ -213,7 +213,9 @@ class Analyzer
      */
     public static function applyImportWithPreservation(string $csvPath, array $options = []): array
     {
-        // Store current sponsorship statuses
+        $importMode = $options['import_mode'] ?? 'replace'; // 'replace', 'append', 'update'
+
+        // Store current sponsorship statuses for all modes
         $sponsorships = Connection::fetchAll("
             SELECT c.id, c.family_id, c.child_letter, c.status, f.family_number
             FROM children c
@@ -223,11 +225,41 @@ class Analyzer
 
         $sponsorshipLookup = [];
         foreach ($sponsorships as $child) {
-            $key = $child['family_id'] . '_' . $child['child_letter'];
+            $key = $child['family_number'] . '_' . $child['child_letter'];
             $sponsorshipLookup[$key] = $child['status'];
         }
 
-        // Handle removed sponsored children based on options
+        // Parse CSV to get new children data
+        $handler = new CSVHandler();
+        $parseResult = $handler->parseCSVForPreview($csvPath);
+
+        if (!$parseResult['success']) {
+            return $parseResult;
+        }
+
+        $newChildren = $parseResult['children'];
+
+        // Apply import based on mode
+        switch ($importMode) {
+            case 'replace':
+                return self::applyReplaceMode($csvPath, $sponsorshipLookup, $options);
+
+            case 'append':
+                return self::applyAppendMode($newChildren, $sponsorshipLookup);
+
+            case 'update':
+                return self::applyUpdateMode($newChildren, $sponsorshipLookup);
+
+            default:
+                return ['success' => false, 'message' => 'Invalid import mode'];
+        }
+    }
+
+    /**
+     * Replace mode: Delete all, insert new (current behavior)
+     */
+    private static function applyReplaceMode(string $csvPath, array $sponsorshipLookup, array $options): array
+    {
         $keepInactive = $options['keep_inactive'] ?? true;
 
         // Clear existing data (unless keeping inactive)
@@ -236,7 +268,7 @@ class Analyzer
             Connection::query('DELETE FROM families WHERE 1=1');
         }
 
-        // Import new data using namespaced CSVHandler
+        // Import new data
         $handler = new CSVHandler();
         $result = $handler->importChildren($csvPath, ['dry_run' => false]);
 
@@ -244,25 +276,245 @@ class Analyzer
             return $result;
         }
 
-        // Restore sponsorship statuses for matching children
+        // Restore sponsorship statuses
+        $restored = self::restoreSponsorshipStatuses($sponsorshipLookup);
+        $result['sponsorships_preserved'] = $restored;
+        $result['import_mode'] = 'replace';
+
+        return $result;
+    }
+
+    /**
+     * Append mode: Only insert children that don't exist
+     */
+    private static function applyAppendMode(array $newChildren, array $sponsorshipLookup): array
+    {
+        $imported = 0;
+        $skipped = 0;
+        $errors = [];
+
+        // Get existing children lookup
+        $existing = Connection::fetchAll("
+            SELECT c.id, f.family_number, c.child_letter
+            FROM children c
+            JOIN families f ON c.family_id = f.id
+        ");
+
+        $existingLookup = [];
+        foreach ($existing as $child) {
+            $key = $child['family_number'] . '_' . $child['child_letter'];
+            $existingLookup[$key] = true;
+        }
+
+        // Insert only new children
+        foreach ($newChildren as $childData) {
+            $key = $childData['family_id'] . '_' . $childData['child_letter'];
+
+            if (isset($existingLookup[$key])) {
+                $skipped++;
+                continue; // Skip existing children
+            }
+
+            // Ensure family exists
+            $familyId = self::ensureFamilyExists($childData);
+            if (!$familyId) {
+                $errors[] = "Failed to create family for {$childData['name']}";
+                continue;
+            }
+
+            // Insert child
+            try {
+                $childId = self::insertChild($childData, $familyId);
+                if ($childId) {
+                    $imported++;
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Failed to insert {$childData['name']}: " . $e->getMessage();
+            }
+        }
+
+        return [
+            'success' => $errors === [],
+            'imported' => $imported,
+            'skipped' => $skipped,
+            'errors' => $errors,
+            'message' => "Appended {$imported} new children ({$skipped} existing children skipped)",
+            'import_mode' => 'append'
+        ];
+    }
+
+    /**
+     * Update mode: Update existing children, insert new ones
+     */
+    private static function applyUpdateMode(array $newChildren, array $sponsorshipLookup): array
+    {
+        $inserted = 0;
+        $updated = 0;
+        $errors = [];
+
+        // Get existing children
+        $existing = Connection::fetchAll("
+            SELECT c.*, f.family_number
+            FROM children c
+            JOIN families f ON c.family_id = f.id
+        ");
+
+        $existingLookup = [];
+        foreach ($existing as $child) {
+            $key = $child['family_number'] . '_' . $child['child_letter'];
+            $existingLookup[$key] = $child;
+        }
+
+        // Process each child from CSV
+        foreach ($newChildren as $childData) {
+            $key = $childData['family_id'] . '_' . $childData['child_letter'];
+
+            // Ensure family exists
+            $familyId = self::ensureFamilyExists($childData);
+            if (!$familyId) {
+                $errors[] = "Failed to create family for {$childData['name']}";
+                continue;
+            }
+
+            if (isset($existingLookup[$key])) {
+                // Update existing child
+                try {
+                    $existingChild = $existingLookup[$key];
+                    $preserveStatus = isset($sponsorshipLookup[$key]); // Don't overwrite sponsored status
+
+                    self::updateChild($existingChild['id'], $childData, $familyId, $preserveStatus);
+                    $updated++;
+                } catch (\Exception $e) {
+                    $errors[] = "Failed to update {$childData['name']}: " . $e->getMessage();
+                }
+            } else {
+                // Insert new child
+                try {
+                    $childId = self::insertChild($childData, $familyId);
+                    if ($childId) {
+                        $inserted++;
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Failed to insert {$childData['name']}: " . $e->getMessage();
+                }
+            }
+        }
+
+        return [
+            'success' => $errors === [],
+            'imported' => $inserted + $updated,
+            'inserted' => $inserted,
+            'updated' => $updated,
+            'errors' => $errors,
+            'message' => "Updated {$updated} existing children, inserted {$inserted} new children",
+            'import_mode' => 'update'
+        ];
+    }
+
+    /**
+     * Restore sponsorship statuses for matching children
+     */
+    private static function restoreSponsorshipStatuses(array $sponsorshipLookup): int
+    {
         $restored = 0;
         foreach ($sponsorshipLookup as $key => $status) {
-            [$familyId, $childLetter] = explode('_', $key);
+            [$familyNumber, $childLetter] = explode('_', $key);
 
             $affectedRows = Connection::execute("
                 UPDATE children c
                 JOIN families f ON c.family_id = f.id
                 SET c.status = ?
                 WHERE f.family_number = ? AND c.child_letter = ?
-            ", [$status, $familyId, $childLetter]);
+            ", [$status, $familyNumber, $childLetter]);
 
             if ($affectedRows > 0) {
                 $restored++;
             }
         }
 
-        $result['sponsorships_preserved'] = $restored;
+        return $restored;
+    }
 
-        return $result;
+    /**
+     * Ensure family exists, return family DB ID
+     */
+    private static function ensureFamilyExists(array $childData): ?int
+    {
+        $familyNumber = (string) $childData['family_id'];
+
+        // Check if family exists
+        $existing = Connection::fetchRow(
+            "SELECT id FROM families WHERE family_number = ?",
+            [$familyNumber]
+        );
+
+        if ($existing) {
+            return (int) $existing['id'];
+        }
+
+        // Create new family
+        try {
+            return Connection::insert('families', [
+                'family_number' => $familyNumber,
+                'notes' => $childData['family_situation'] ?? ''
+            ]);
+        } catch (\Exception $e) {
+            error_log("Failed to create family {$familyNumber}: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Insert a new child
+     */
+    private static function insertChild(array $childData, int $familyId): ?int
+    {
+        return Connection::insert('children', [
+            'family_id' => $familyId,
+            'child_letter' => $childData['child_letter'],
+            'name' => $childData['name'],
+            'age' => $childData['age'],
+            'gender' => $childData['gender'],
+            'grade' => '', // Not in CSV - calculated from age
+            'school' => '',
+            'shirt_size' => $childData['shirt_size'] ?? '',
+            'pant_size' => $childData['pant_size'] ?? '',
+            'shoe_size' => $childData['shoe_size'] ?? '',
+            'jacket_size' => $childData['jacket_size'] ?? '',
+            'interests' => $childData['greatest_need'] ?? '',
+            'wishes' => ($childData['interests'] ?? '') . (($childData['wish_list'] ?? '') ? '. Wish List: ' . $childData['wish_list'] : ''),
+            'special_needs' => $childData['special_needs'] ?? 'None',
+            'status' => 'available'
+        ]);
+    }
+
+    /**
+     * Update an existing child
+     */
+    private static function updateChild(int $childId, array $childData, int $familyId, bool $preserveStatus): void
+    {
+        $updateData = [
+            'family_id' => $familyId,
+            'child_letter' => $childData['child_letter'],
+            'name' => $childData['name'],
+            'age' => $childData['age'],
+            'gender' => $childData['gender'],
+            'grade' => '',
+            'school' => '',
+            'shirt_size' => $childData['shirt_size'] ?? '',
+            'pant_size' => $childData['pant_size'] ?? '',
+            'shoe_size' => $childData['shoe_size'] ?? '',
+            'jacket_size' => $childData['jacket_size'] ?? '',
+            'interests' => $childData['greatest_need'] ?? '',
+            'wishes' => ($childData['interests'] ?? '') . (($childData['wish_list'] ?? '') ? '. Wish List: ' . $childData['wish_list'] : ''),
+            'special_needs' => $childData['special_needs'] ?? 'None'
+        ];
+
+        // Don't update status if preserving sponsorships
+        if (!$preserveStatus) {
+            $updateData['status'] = 'available';
+        }
+
+        Connection::update('children', $updateData, ['id' => $childId]);
     }
 }
