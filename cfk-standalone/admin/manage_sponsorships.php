@@ -385,7 +385,7 @@ include __DIR__ . '/includes/admin_header.php';
 
 .table th,
 .table td {
-    padding: 0.65rem;
+    padding: 0.35rem;
     text-align: left;
     border-bottom: 1px solid #eee;
 }
