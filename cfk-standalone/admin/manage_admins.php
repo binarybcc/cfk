@@ -283,7 +283,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     <span class="badge badge-primary">You</span>
                                 <?php endif; ?>
                             </td>
-                            <td><?php echo htmlspecialchars((string) $admin['email']); ?></td>
+                            <td><a href="mailto:<?php echo htmlspecialchars((string) $admin['email']); ?>"><?php echo htmlspecialchars((string) $admin['email']); ?></a></td>
                             <td><?php echo htmlspecialchars($admin['full_name'] ?? '—'); ?></td>
                             <td>
                                 <span class="badge badge-<?php echo $admin['role'] === 'admin' ? 'danger' : 'info'; ?>">
@@ -592,19 +592,31 @@ include __DIR__ . '/includes/admin_header.php';
 
 .data-table thead th {
     background: #f8f9fa;
-    padding: 1rem;
+    padding: 0.07rem 0.5rem;
     text-align: left;
     font-weight: 600;
     border-bottom: 2px solid #dee2e6;
+    line-height: 1.2;
 }
 
 .data-table tbody td {
-    padding: 1rem;
+    padding: 0.07rem 0.5rem;
     border-bottom: 1px solid #dee2e6;
+    line-height: 1.2;
+}
+
+/* Zebra Striping */
+.data-table tbody tr:nth-child(even) {
+    background: #e9ecef;
+}
+
+.data-table tbody tr:nth-child(odd) {
+    background: white;
 }
 
 .data-table tbody tr:hover {
-    background: #f8f9fa;
+    background: #e7f1ff !important;
+    transition: background-color 0.15s ease;
 }
 
 .badge {
