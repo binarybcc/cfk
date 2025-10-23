@@ -39,9 +39,9 @@ $pageTitle = 'About Us';
                     </p>
                 </div>
                 <div class="content-image">
-                    <img src="<?php echo baseUrl('assets/images/about-mission.jpg'); ?>" 
-                         alt="Children celebrating Christmas" 
-                         onerror="this.style.display='none'">
+                    <img src="<?php echo baseUrl('assets/images/cfk-horizontal.png'); ?>"
+                         alt="Christmas for Kids Logo"
+                         style="max-width: 100%; height: auto;">
                 </div>
             </div>
         </section>
