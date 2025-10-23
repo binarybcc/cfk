@@ -445,25 +445,30 @@ include __DIR__ . '/includes/admin_header.php';
     font-weight: 600;
     color: #2c5530;
     font-size: 0.95rem;
+    line-height: 1.2;
+    margin: 0;
 }
 
 .child-details .child-meta {
     font-size: 0.85rem;
     color: #666;
-    margin-top: 0.25rem;
+    margin: 0;
+    line-height: 1.2;
 }
 
 /* Sponsor Info Column */
 .sponsor-info .sponsor-name {
     font-weight: 600;
     color: #333;
-    margin-bottom: 0.25rem;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .sponsor-info a {
     color: #0066cc;
     text-decoration: none;
     font-size: 0.9rem;
+    line-height: 1.2;
 }
 
 .sponsor-info a:hover {
@@ -474,19 +479,23 @@ include __DIR__ . '/includes/admin_header.php';
     color: #666;
     font-size: 0.85rem;
     display: block;
-    margin-top: 0.25rem;
+    margin: 0;
+    line-height: 1.2;
 }
 
 /* Date Column */
 .date-info .request-date {
     font-weight: 500;
     color: #333;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .date-info .confirmed-date {
     font-size: 0.85rem;
     color: #666;
-    margin-top: 0.25rem;
+    margin: 0;
+    line-height: 1.2;
 }
 
 /* Actions Column */
