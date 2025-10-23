@@ -438,7 +438,14 @@ include __DIR__ . '/includes/admin_header.php';
 .child-info {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.child-details {
+    padding: 0;
+    margin: 0;
 }
 
 .child-details .child-id {
@@ -457,6 +464,11 @@ include __DIR__ . '/includes/admin_header.php';
 }
 
 /* Sponsor Info Column */
+.sponsor-info {
+    padding: 0;
+    margin: 0;
+}
+
 .sponsor-info .sponsor-name {
     font-weight: 600;
     color: #333;
@@ -484,6 +496,11 @@ include __DIR__ . '/includes/admin_header.php';
 }
 
 /* Date Column */
+.date-info {
+    padding: 0;
+    margin: 0;
+}
+
 .date-info .request-date {
     font-weight: 500;
     color: #333;
@@ -504,6 +521,8 @@ include __DIR__ . '/includes/admin_header.php';
     gap: 0.5rem;
     flex-wrap: wrap;
     align-items: center;
+    padding: 0;
+    margin: 0;
 }
 
 /* ===== Color-Coded Button System ===== */
