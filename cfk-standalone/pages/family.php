@@ -292,12 +292,19 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     line-height: 1.6;
 }
 
-/* Family Members Grid - 2 columns on desktop */
+/* Family Members Grid - Responsive columns */
 .family-members-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+    grid-template-columns: 1fr;
     gap: 1.25rem;
     margin-bottom: 2rem;
+}
+
+/* Desktop: 2 columns for wider screens */
+@media (min-width: 1024px) {
+    .family-members-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 /* Family Member Card - COMPACT */
@@ -480,12 +487,8 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     border-top: 2px solid var(--color-border);
 }
 
-/* Responsive - Single column on mobile */
+/* Responsive - Adjustments for mobile and tablet */
 @media (max-width: 768px) {
-    .family-members-grid {
-        grid-template-columns: 1fr;
-    }
-
     .family-header {
         padding: 1rem;
     }
