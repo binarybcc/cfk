@@ -58,3 +58,6 @@ composer.lock
 /rector-cache/
 .claude-flow/
 config/config.production.php
+
+# Local staging notes
+docs/cfkstaging.txt
