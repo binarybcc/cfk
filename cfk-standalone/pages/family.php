@@ -89,31 +89,29 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     <div class="family-members-grid">
         <?php foreach ($family_members as $member) : ?>
             <div class="family-member-card <?php echo $member['status'] !== 'available' ? 'member-sponsored' : ''; ?>">
-                <!-- Card Header -->
+                <!-- Card Header - Left Column -->
                 <div class="member-card-header">
                     <div class="member-photo">
                         <img src="<?php echo getPhotoUrl($member['photo_filename'], $member); ?>"
                              alt="Avatar for Child <?php echo sanitizeString($member['display_id']); ?>">
                     </div>
                     <div class="member-title">
-                        <h2>Child <?php echo sanitizeString($member['display_id']); ?></h2>
+                        <h2><?php echo sanitizeString($member['display_id']); ?></h2>
                         <span class="status-badge status-<?php echo $member['status']; ?>">
                             <?php echo ucfirst((string) $member['status']); ?>
                         </span>
                     </div>
                 </div>
 
-                <!-- Basic Info (Compact) -->
-                <div class="member-basic-info">
-                    <span class="info-chip"><strong>Age:</strong> <?php echo sanitizeInt($member['age']); ?></span>
-                    <span class="info-chip"><strong>Gender:</strong> <?php echo $member['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
-                    <?php if (!empty($member['grade'])) : ?>
-                        <span class="info-chip"><strong>Grade:</strong> <?php echo sanitizeString($member['grade']); ?></span>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Detailed Info -->
-                <div class="member-details">
+                <!-- Detailed Info - Center Column -->
+                <?php
+                $demographics = 'Age: ' . sanitizeInt($member['age']) . ' • ' .
+                               ($member['gender'] === 'M' ? 'Boy' : 'Girl');
+                if (!empty($member['grade'])) {
+                    $demographics .= ' • Grade: ' . sanitizeString($member['grade']);
+                }
+                ?>
+                <div class="member-details" data-demographics="<?php echo $demographics; ?>">
                     <!-- Essential Needs -->
                     <?php if (!empty($member['interests'])) : ?>
                         <div class="detail-row">
@@ -160,10 +158,10 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <?php endif; ?>
                 </div>
 
-                <!-- Actions -->
+                <!-- Actions - Right Column -->
                 <?php if ($member['status'] === 'available') : ?>
                     <div class="member-actions">
-                        <button class="btn btn-primary btn-block btn-sponsor-child"
+                        <button class="btn btn-primary btn-sponsor-child"
                                 data-child-id="<?php echo $member['id']; ?>"
                                 data-display-id="<?php echo sanitizeString($member['display_id']); ?>"
                                 data-family-id="<?php echo $member['family_id']; ?>"
@@ -307,13 +305,17 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     }
 }
 
-/* Family Member Card - COMPACT */
+/* Family Member Card - ULTRA COMPACT */
 .family-member-card {
     background: white;
     border: 2px solid var(--color-border);
     border-radius: 8px;
-    padding: 1rem;
+    padding: 0.75rem;
     transition: box-shadow 0.3s ease;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.75rem;
+    align-items: start;
 }
 
 .family-member-card:hover {
@@ -325,14 +327,13 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     background: var(--color-light);
 }
 
-/* Card Header - Horizontal layout */
+/* Card Header - Compact vertical layout with photo */
 .member-card-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--color-border);
+    gap: 0.4rem;
+    min-width: 90px;
 }
 
 .member-photo {
@@ -340,30 +341,32 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 }
 
 .member-photo img {
-    width: 80px;
-    height: 80px;
-    border-radius: 8px;
+    width: 70px;
+    height: 70px;
+    border-radius: 6px;
     object-fit: contain;
     background: var(--color-light);
 }
 
 .member-title {
-    flex-grow: 1;
+    text-align: center;
 }
 
 .member-title h2 {
-    margin: 0 0 0.25rem 0;
-    font-size: 1.25rem;
+    margin: 0 0 0.15rem 0;
+    font-size: 1rem;
     color: var(--color-primary);
+    font-weight: 700;
 }
 
 .status-badge {
     display: inline-block;
-    padding: 0.25rem 0.75rem;
-    border-radius: 12px;
-    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
+    white-space: nowrap;
 }
 
 .status-available {
@@ -378,96 +381,105 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     color: var(--color-secondary);
 }
 
-/* Basic Info - Inline chips */
+/* Basic Info - Inline chips (REMOVED - Now in details) */
 .member-basic-info {
+    display: none;
+}
+
+/* Details - ULTRA Compact with inline layout */
+.member-details {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
+    flex-direction: column;
+    gap: 0.4rem;
+    font-size: 0.85rem;
 }
 
-.info-chip {
-    background: var(--color-light);
-    padding: 0.25rem 0.75rem;
-    border-radius: 4px;
-    font-size: 0.875rem;
-}
-
-.info-chip strong {
+/* Basic demographics - inline */
+.member-details::before {
+    content: attr(data-demographics);
+    font-size: 0.8rem;
     color: var(--color-text-muted);
     font-weight: 600;
-}
-
-/* Details - ULTRA Compact rows */
-.member-details {
-    margin-bottom: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--color-light);
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.2rem;
 }
 
 .detail-section {
-    margin-bottom: 0.4rem;
+    margin: 0;
 }
 
 .detail-section strong {
     color: var(--color-text-muted);
-    display: block;
-    margin-bottom: 0.15rem;
-    font-size: 0.85rem;
+    display: inline;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
 .size-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.3rem;
-    margin-top: 0.15rem;
+    display: inline;
+    font-size: 0.8rem;
 }
 
 .size-item {
-    background: var(--color-light);
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
-    font-size: 0.8rem;
+    display: inline;
+    margin-right: 0.5rem;
     white-space: nowrap;
 }
 
-.detail-row {
-    margin-bottom: 0.3rem;
-    font-size: 0.85rem;
-    line-height: 1.3;
+.size-item::after {
+    content: " • ";
+    color: var(--color-text-muted);
 }
 
-.detail-row:last-child {
-    margin-bottom: 0;
+.size-item:last-child::after {
+    content: "";
+}
+
+.detail-row {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.4;
 }
 
 .detail-row strong {
     color: var(--color-text-muted);
-    display: block;
-    margin-bottom: 0.15rem;
+    display: inline;
+    font-weight: 600;
+    margin-right: 0.3rem;
 }
 
 .detail-row span {
-    display: block;
-    line-height: 1.3;
+    display: inline;
 }
 
 .detail-row.special-needs {
     background: var(--color-warning-bg);
-    padding: 0.3rem;
-    border-radius: 3px;
-    border-left: 2px solid var(--color-warning);
+    padding: 0.35rem 0.5rem;
+    border-radius: 4px;
+    border-left: 3px solid var(--color-warning);
+    font-size: 0.82rem;
 }
 
 .detail-row.special-needs strong {
     color: var(--color-warning-dark);
+    display: inline;
 }
 
-/* Member Actions */
+/* Member Actions - Right column */
 .member-actions {
-    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 140px;
 }
 
-.btn-block {
-    width: 100%;
+.member-actions .btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
 }
 
 .sponsored-message {
@@ -476,6 +488,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     font-style: italic;
     margin: 0;
     padding: 0.5rem;
+    font-size: 0.85rem;
 }
 
 /* Family Footer */
@@ -489,6 +502,38 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
 /* Responsive - Adjustments for mobile and tablet */
 @media (max-width: 768px) {
+    /* Stack card layout vertically on mobile */
+    .family-member-card {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 0.75rem;
+    }
+
+    .member-card-header {
+        flex-direction: row;
+        justify-content: flex-start;
+        text-align: left;
+        min-width: 0;
+    }
+
+    .member-title {
+        text-align: left;
+    }
+
+    .member-photo img {
+        width: 60px;
+        height: 60px;
+    }
+
+    .member-actions {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .member-actions .btn {
+        width: 100%;
+    }
+
     .family-header {
         padding: 1rem;
     }
