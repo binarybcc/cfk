@@ -4851,73 +4851,7 @@ a svg {
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* Sticky Cart Bar - Always visible at bottom when selections exist */
-.selections-sticky-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--color-white) !important;
-    background-color: #ffffff !important;
-    border-top: 3px solid var(--color-primary);
-    padding: 15px 20px;
-    z-index: 9998;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    display: none; /* Hidden by default, shown via JavaScript */
-}
-
-.selections-sticky-bar.visible {
-    display: block;
-    animation: slideUpBar 0.3s ease;
-}
-
-@keyframes slideUpBar {
-    from {
-        transform: translateY(100%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-.sticky-bar-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-}
-
-.sticky-bar-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.sticky-bar-icon {
-    font-size: 24px;
-}
-
-.sticky-bar-text {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--color-primary);
-}
-
-.sticky-bar-count {
-    background: var(--color-primary);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.sticky-bar-actions {
-    display: flex;
-    gap: 10px;
-}
+/* Sticky bar removed - using persistent toast notifications instead */
 
 /* Mobile Optimizations */
 @media (max-width: 768px) {
@@ -4927,30 +4861,11 @@ a svg {
         bottom: 10px;
         max-width: none;
     }
-
-    .sticky-bar-content {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 12px;
-    }
-
-    .sticky-bar-info {
-        justify-content: center;
-    }
-
-    .sticky-bar-actions {
-        flex-direction: column;
-    }
-
-    .sticky-bar-actions .btn {
-        width: 100%;
-    }
 }
 
-/* Print: Hide toast and sticky bar */
+/* Print: Hide toast */
 @media print {
-    .toast-notification,
-    .selections-sticky-bar {
+    .toast-notification {
         display: none !important;
     }
 }

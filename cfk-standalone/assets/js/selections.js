@@ -16,7 +16,6 @@ const CONFIG = Object.freeze({
     BADGE_SELECTOR: '#selections-badge',
     TOAST_DURATION: 5000,
     TOAST_ANIMATION_DURATION: 300,
-    STICKY_Z_INDEX: 9998,
     MAX_SELECTIONS: 50, // Prevent memory issues
 });
 
@@ -467,141 +466,7 @@ const ToastManager = (() => {
     return new ToastManagerClass();
 })();
 
-// ============================================================================
-// STICKY BAR MANAGER - Professional Implementation
-// ============================================================================
-
-const StickyBarManager = (() => {
-    let instance;
-
-    class StickyBarManagerClass {
-        constructor() {
-            if (instance) {
-                return instance;
-            }
-
-            this.bar = null;
-            this.baseUrl = '';
-            this.unsubscribe = null;
-
-            instance = this;
-        }
-
-        /**
-         * Initialize sticky bar
-         * @param {string} baseUrl - Base URL for links
-         */
-        init(baseUrl = '') {
-            if (this.bar) {
-                console.warn('StickyBarManager already initialized');
-                return;
-            }
-
-            this.baseUrl = baseUrl;
-
-            // Create sticky bar with safe DOM creation
-            this.bar = createElement('div', {
-                className: 'selections-sticky-bar',
-                role: 'complementary',
-                'aria-label': 'Shopping cart summary',
-                style: 'background-color: #ffffff; z-index: ' + CONFIG.STICKY_Z_INDEX
-            }, [
-                createElement('div', { className: 'sticky-bar-content' }, [
-                    createElement('div', { className: 'sticky-bar-info' }, [
-                        createElement('span', {
-                            className: 'sticky-bar-icon',
-                            role: 'img',
-                            'aria-label': 'Shopping cart'
-                        }, '🛒'),
-                        createElement('span', { className: 'sticky-bar-text' }, [
-                            createElement('span', {
-                                className: 'sticky-bar-count',
-                                'aria-live': 'polite'
-                            }, '0'),
-                            createElement('span', { className: 'sticky-bar-label' }, 'children selected')
-                        ])
-                    ]),
-                    createElement('div', { className: 'sticky-bar-actions' }, [
-                        createElement('a', {
-                            href: `${this.baseUrl}?page=my_sponsorships`,
-                            className: 'btn btn-outline btn-small'
-                        }, 'Review Selections'),
-                        createElement('a', {
-                            href: `${this.baseUrl}?page=confirm_sponsorship`,
-                            className: 'btn btn-success btn-small'
-                        }, 'Complete Sponsorship →')
-                    ])
-                ])
-            ]);
-
-            // Add to page
-            document.body.appendChild(this.bar);
-
-            // Subscribe to selection changes
-            this.unsubscribe = SelectionsManager.subscribe(() => this.update());
-
-            // Initial update
-            this.update();
-        }
-
-        /**
-         * Update sticky bar visibility and content
-         */
-        update() {
-            if (!this.bar) return;
-
-            try {
-                const count = SelectionsManager.getCount();
-                const countBadge = this.bar.querySelector('.sticky-bar-count');
-                const label = this.bar.querySelector('.sticky-bar-label');
-
-                if (count > 0) {
-                    this.bar.classList.add('visible');
-
-                    if (countBadge) {
-                        countBadge.textContent = count;
-                    }
-
-                    if (label) {
-                        label.textContent = count === 1 ? 'child selected' : 'children selected';
-                    }
-                } else {
-                    this.bar.classList.remove('visible');
-                }
-            } catch (error) {
-                console.error('Error updating sticky bar:', error);
-            }
-        }
-
-        /**
-         * Manually hide the bar
-         */
-        hide() {
-            if (this.bar) {
-                this.bar.classList.remove('visible');
-            }
-        }
-
-        /**
-         * Destroy sticky bar and cleanup
-         */
-        destroy() {
-            if (this.unsubscribe) {
-                this.unsubscribe();
-                this.unsubscribe = null;
-            }
-
-            if (this.bar && this.bar.parentNode) {
-                this.bar.parentNode.removeChild(this.bar);
-            }
-
-            this.bar = null;
-            instance = null;
-        }
-    }
-
-    return new StickyBarManagerClass();
-})();
+// Sticky bar removed - using persistent toast notifications instead
 
 // ============================================================================
 // EXPORTS & INITIALIZATION
@@ -610,7 +475,6 @@ const StickyBarManager = (() => {
 // Export to global scope (for backwards compatibility)
 window.SelectionsManager = SelectionsManager;
 window.ToastManager = ToastManager;
-window.StickyBarManager = StickyBarManager;
 
 // Auto-initialize on DOM ready
 if (document.readyState === 'loading') {
@@ -624,4 +488,3 @@ if (document.readyState === 'loading') {
 // Freeze exports to prevent tampering
 Object.freeze(window.SelectionsManager);
 Object.freeze(window.ToastManager);
-Object.freeze(window.StickyBarManager);
