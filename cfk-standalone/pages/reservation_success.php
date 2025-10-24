@@ -137,19 +137,19 @@ function sponsorshipSuccessApp() {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Success Header */
+/* Success Header - Reduced for better content visibility */
 .success-header {
     text-align: center;
-    padding: var(--spacing-3xl) var(--spacing-xl);
+    padding: 1.5rem 1.25rem;
     background: linear-gradient(135deg, #2c5530 0%, #3a6f3f 100%);
     color: var(--color-white);
     border-radius: var(--radius-xl);
-    margin-bottom: var(--spacing-xl);
+    margin-bottom: var(--spacing-lg);
 }
 
 .success-icon {
-    font-size: 5rem;
-    margin-bottom: var(--spacing-md);
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
     animation: scaleIn 0.6s ease-out;
 }
 
@@ -160,13 +160,13 @@ function sponsorshipSuccessApp() {
 }
 
 .success-header h1 {
-    margin: 0 0 var(--spacing-md) 0;
-    font-size: var(--font-size-3xl);
-    color: var(--color-white);
+    margin: 0 0 var(--spacing-sm) 0;
+    font-size: var(--font-size-2xl);
+    color: var(--color-white) !important;
 }
 
 .success-subtitle {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
     opacity: 0.95;
 }
 

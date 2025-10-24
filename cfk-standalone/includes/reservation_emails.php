@@ -132,19 +132,6 @@ function generateReservationConfirmationHTML(array $reservation): string
                         </td>
                     </tr>
 
-                    <!-- Reservation Token -->
-                    <tr>
-                        <td style="padding: 30px; background-color: #fffbea; border-bottom: 3px solid #f5b800;">
-                            <h2 style="color: #856404; margin: 0 0 15px 0; font-size: 18px;">📋 Your Reservation Token</h2>
-                            <div style="background: #ffffff; padding: 15px; border-radius: 6px; border: 2px solid #f5b800;">
-                                <code style="font-family: \'Courier New\', monospace; font-size: 16px; font-weight: bold; color: #2c5530; word-break: break-all;">' . htmlspecialchars((string) $reservation['reservation_token']) . '</code>
-                            </div>
-                            <p style="color: #856404; margin: 15px 0 0 0; font-size: 14px;">
-                                <strong>Save this token!</strong> You\'ll need it to track your reservation or make changes.
-                            </p>
-                        </td>
-                    </tr>
-
                     <!-- Sponsorship Confirmed -->
                     <tr>
                         <td style="padding: 30px;">
@@ -178,58 +165,77 @@ function generateReservationConfirmationHTML(array $reservation): string
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
                                         <td style="color: #666; padding: 5px 0;">' . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . '</td>
-                                    </tr>';
-
-        if (!empty($child['grade'])) {
-            $html .= '
-                                    <tr>
-                                        <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Grade:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['grade']) . '</td>
-                                    </tr>';
-        }
-
-        if (!empty($child['school'])) {
-            $html .= '
-                                    <tr>
-                                        <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">School:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['school']) . '</td>
-                                    </tr>';
-        }
-
-        $html .= '
+                                    </tr>
                                 </table>';
 
+        // Interests/Essential Needs
         if (!empty($child['interests'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
-                                    <strong style="color: #2c5530;">Essential Needs:</strong>
+                                    <strong style="color: #2c5530;">💙 Essential Needs/Interests:</strong>
                                     <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['interests'])) . '</p>
                                 </div>';
         }
 
+        // Christmas Wishes
         if (!empty($child['wishes'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
-                                    <strong style="color: #c41e3a;">🎁 Christmas Wishes:</strong>
+                                    <strong style="color: #c41e3a;">🎁 Christmas Wish List:</strong>
                                     <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars(cleanWishesText((string) $child['wishes']))) . '</p>
                                 </div>';
         }
 
-        if (!empty($child['clothing_sizes'])) {
+        // Special Needs
+        if (!empty($child['special_needs'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
-                                    <strong style="color: #2c5530;">👕 Clothing Sizes:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['clothing_sizes']) . '</p>
+                                    <strong style="color: #856404;">⚠️ Special Needs/Considerations:</strong>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #fff3cd; border-left: 3px solid #f5b800; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['special_needs'])) . '</p>
                                 </div>';
+        }
+
+        // Clothing Sizes Section
+        $html .= '
+                                <div style="margin-top: 15px; background-color: #e7f3ff; padding: 15px; border-radius: 6px;">
+                                    <strong style="color: #2c5530; font-size: 16px;">👕 Clothing Sizes:</strong>
+                                    <table width="100%" cellpadding="5" style="margin-top: 10px;">';
+
+        if (!empty($child['shirt_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0; width: 40%;">Shirt:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['shirt_size']) . '</td>
+                                        </tr>';
+        }
+
+        if (!empty($child['pant_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Pants:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['pant_size']) . '</td>
+                                        </tr>';
+        }
+
+        if (!empty($child['jacket_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Jacket:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['jacket_size']) . '</td>
+                                        </tr>';
         }
 
         if (!empty($child['shoe_size'])) {
             $html .= '
-                                <div style="margin-top: 15px;">
-                                    <strong style="color: #2c5530;">👟 Shoe Size:</strong>
-                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . htmlspecialchars((string) $child['shoe_size']) . '</p>
-                                </div>';
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Shoes:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['shoe_size']) . '</td>
+                                        </tr>';
         }
+
+        $html .= '
+                                    </table>
+                                </div>';
 
         $html .= '
                             </div>';
@@ -242,13 +248,53 @@ function generateReservationConfirmationHTML(array $reservation): string
                     <!-- Next Steps -->
                     <tr>
                         <td style="padding: 30px;">
-                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">📋 What Happens Next?</h2>
-                            <ol style="color: #666; line-height: 1.8; padding-left: 20px;">
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Your Sponsorship is Confirmed!</strong><br/>You\'ve successfully sponsored ' . count($children) . ' ' . (count($children) === 1 ? 'child' : 'children') . '. No further approval is needed.</li>
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Shop for Gifts</strong><br/>Purchase gifts based on each child\'s wishes and sizes listed above.</li>
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Wrap the Gifts</strong><br/>Please wrap each child\'s gifts separately and clearly label with their ID.</li>
-                                <li style="margin-bottom: 15px;"><strong style="color: #2c5530;">Deliver or Ship</strong><br/>Contact us at <a href="mailto:' . config('admin_email') . '" style="color: #2c5530;">' . config('admin_email') . '</a> for delivery instructions.</li>
-                            </ol>
+                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">📋 Important Gift Guidelines</h2>
+
+                            <div style="background-color: #fff3cd; border: 2px solid #f5b800; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #856404; margin: 0 0 15px 0; font-size: 18px;">🎁 What to Include</h3>
+                                <p style="color: #856404; margin: 0 0 10px 0; line-height: 1.6;">
+                                    You do <strong>not</strong> need to buy everything on a child\'s Wish List. Typically, a package includes:
+                                </p>
+                                <ul style="color: #856404; margin: 0 0 15px 0; padding-left: 20px; line-height: 1.8;">
+                                    <li>1 outfit</li>
+                                    <li>Undergarments and socks</li>
+                                    <li>Shoes</li>
+                                    <li>5 or 6 other wish list items</li>
+                                </ul>
+                                <p style="color: #856404; margin: 0; line-height: 1.6;">
+                                    <strong>If you can\'t get everything mentioned above, it\'s okay!</strong> Anything you can do is wonderful and appreciated. We can add some items to complete the package.
+                                </p>
+                            </div>
+
+                            <div style="background-color: #d4edda; border: 2px solid #28a745; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #155724; margin: 0 0 15px 0; font-size: 18px;">✅ Important Notes</h3>
+                                <ul style="color: #155724; margin: 0; padding-left: 20px; line-height: 1.8;">
+                                    <li style="margin-bottom: 10px;"><strong>No gift cards</strong> except those related to video games</li>
+                                    <li style="margin-bottom: 10px;"><strong>All gifts must be new</strong></li>
+                                    <li style="margin-bottom: 10px;"><strong>Gifts must NOT be wrapped</strong> - If desired, you may include gift wrap</li>
+                                    <li><strong>Place all gifts in a large bag</strong>, marked with that child\'s number</li>
+                                </ul>
+                            </div>
+
+                            <div style="background-color: #f8d7da; border: 2px solid #c41e3a; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #721c24; margin: 0 0 15px 0; font-size: 18px;">📅 Deadline & Drop-Off</h3>
+                                <p style="color: #721c24; margin: 0 0 15px 0; line-height: 1.6;">
+                                    <strong>All gifts must be received by Friday, December 5th</strong>
+                                </p>
+                                <p style="color: #721c24; margin: 0; line-height: 1.6;">
+                                    <strong>Drop-off location:</strong><br/>
+                                    The Journal<br/>
+                                    210 W North 1st Street, Seneca<br/>
+                                    Weekdays 8 a.m. - 5 p.m.
+                                </p>
+                            </div>
+
+                            <div style="background-color: #e7f3ff; border: 2px solid #2c5530; border-radius: 8px; padding: 15px;">
+                                <p style="color: #2c5530; margin: 0; font-size: 13px; line-height: 1.6;">
+                                    <strong>Tax Deduction:</strong> CFK Inc is a recognized 501(c)(3) not-for-profit organization<br/>
+                                    EIN: 82-3083435 - This number may be used for tax deduction purposes.
+                                </p>
+                            </div>
                         </td>
                     </tr>
 
@@ -281,9 +327,6 @@ function generateReservationConfirmationText(array $reservation): string
     $children = $reservation['children'] ?? [];
     $text = "RESERVATION CONFIRMED!\n\n";
     $text .= "Thank you for sponsoring " . count($children) . " " . (count($children) === 1 ? 'child' : 'children') . " this Christmas!\n\n";
-    $text .= "YOUR RESERVATION TOKEN\n";
-    $text .= "Token: " . $reservation['reservation_token'] . "\n";
-    $text .= "Save this token! You'll need it to track your sponsorship.\n\n";
     $text .= "SPONSORSHIP CONFIRMED\n";
     $text .= "Your sponsorship is now confirmed!\n";
     $text .= "These children are reserved for you.\n";
@@ -295,33 +338,70 @@ function generateReservationConfirmationText(array $reservation): string
     foreach ($children as $child) {
         $text .= $child['display_id'] . "\n";
         $text .= "Age: " . $child['age'] . " years old\n";
-        $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n";
-        if (!empty($child['grade'])) {
-            $text .= "Grade: " . $child['grade'] . "\n";
-        }
-        if (!empty($child['school'])) {
-            $text .= "School: " . $child['school'] . "\n";
-        }
+        $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
+
+        // Essential Needs/Interests
         if (!empty($child['interests'])) {
-            $text .= "Essential Needs: " . $child['interests'] . "\n";
+            $text .= "ESSENTIAL NEEDS/INTERESTS:\n" . $child['interests'] . "\n\n";
         }
+
+        // Christmas Wish List
         if (!empty($child['wishes'])) {
-            $text .= "Wishes: " . cleanWishesText($child['wishes']) . "\n";
+            $text .= "CHRISTMAS WISH LIST:\n" . cleanWishesText($child['wishes']) . "\n\n";
         }
-        if (!empty($child['clothing_sizes'])) {
-            $text .= "Clothing: " . $child['clothing_sizes'] . "\n";
+
+        // Special Needs
+        if (!empty($child['special_needs'])) {
+            $text .= "SPECIAL NEEDS/CONSIDERATIONS:\n" . $child['special_needs'] . "\n\n";
+        }
+
+        // Clothing Sizes
+        $text .= "CLOTHING SIZES:\n";
+        if (!empty($child['shirt_size'])) {
+            $text .= "  Shirt: " . $child['shirt_size'] . "\n";
+        }
+        if (!empty($child['pant_size'])) {
+            $text .= "  Pants: " . $child['pant_size'] . "\n";
+        }
+        if (!empty($child['jacket_size'])) {
+            $text .= "  Jacket: " . $child['jacket_size'] . "\n";
         }
         if (!empty($child['shoe_size'])) {
-            $text .= "Shoes: " . $child['shoe_size'] . "\n";
+            $text .= "  Shoes: " . $child['shoe_size'] . "\n";
         }
-        $text .= "\n";
+        $text .= "\n" . str_repeat('-', 50) . "\n\n";
     }
 
-    $text .= "WHAT HAPPENS NEXT?\n";
-    $text .= "1. Your sponsorship is confirmed! No further approval needed.\n";
-    $text .= "2. Shop for gifts based on each child's wishes and sizes\n";
-    $text .= "3. Wrap gifts separately and label with child ID\n";
-    $text .= "4. Contact us for delivery instructions: " . config('admin_email') . "\n\n";
+    $text .= "IMPORTANT GIFT GUIDELINES\n";
+    $text .= str_repeat('=', 50) . "\n\n";
+
+    $text .= "WHAT TO INCLUDE:\n";
+    $text .= "You do NOT need to buy everything on a child's Wish List.\n";
+    $text .= "Typically, a package includes:\n";
+    $text .= "  • 1 outfit\n";
+    $text .= "  • Undergarments and socks\n";
+    $text .= "  • Shoes\n";
+    $text .= "  • 5 or 6 other wish list items\n\n";
+    $text .= "If you can't get everything mentioned above, it's okay!\n";
+    $text .= "Anything you can do is wonderful and appreciated.\n";
+    $text .= "We can add some items to complete the package.\n\n";
+
+    $text .= "IMPORTANT NOTES:\n";
+    $text .= "  • No gift cards except those related to video games\n";
+    $text .= "  • All gifts must be new\n";
+    $text .= "  • Gifts must NOT be wrapped - If desired, you may include gift wrap\n";
+    $text .= "  • Place all gifts in a large bag, marked with that child's number\n\n";
+
+    $text .= "DEADLINE & DROP-OFF:\n";
+    $text .= "All gifts must be received by Friday, December 5th\n\n";
+    $text .= "Drop-off location:\n";
+    $text .= "  The Journal\n";
+    $text .= "  210 W North 1st Street, Seneca\n";
+    $text .= "  Weekdays 8 a.m. - 5 p.m.\n\n";
+
+    $text .= "TAX DEDUCTION:\n";
+    $text .= "CFK Inc is a recognized 501(c)(3) not-for-profit organization\n";
+    $text .= "EIN: 82-3083435 - This number may be used for tax deduction purposes.\n\n";
 
     return $text . ("Questions? Contact us at " . config('admin_email') . "\n");
 }
@@ -376,8 +456,8 @@ function sendAccessLinkEmail(string $email): array
         error_log("ACCESS LINK: Fetching sponsorships from database");
         $sponsorships = Database::fetchAll(
             "SELECT s.*,
-                    c.child_letter, c.age, c.gender, c.wishes, c.interests,
-                    c.shirt_size, c.pant_size, c.shoe_size,
+                    c.child_letter, c.age, c.gender, c.wishes, c.interests, c.special_needs,
+                    c.shirt_size, c.pant_size, c.jacket_size, c.shoe_size,
                     f.family_number,
                     CONCAT(f.family_number, c.child_letter) as display_id
              FROM sponsorships s
@@ -542,53 +622,159 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                         <td style="padding: 40px 30px;">
                             <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ' . htmlspecialchars($name) . ',</p>
 
-                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for sponsoring ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . ' this Christmas! Below are the complete details for your sponsorships:</p>';
+                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for sponsoring ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . ' this Christmas! Below are the complete details for your sponsorships:</p>
+                        </td>
+                    </tr>
+
+                    <!-- Sponsored Children -->
+                    <tr>
+                        <td style="padding: 30px; background-color: #f8fdf9;">
+                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">🎄 Your Sponsored Children (' . $childCount . ')</h2>';
 
     // Loop through each sponsorship and display details
-    foreach ($sponsorships as $index => $child) {
-        $childNum = $index + 1;
+    foreach ($sponsorships as $child) {
         $html .= '
-                            <!-- Child ' . $childNum . ' -->
-                            <table width="100%" cellpadding="20" style="background-color: #f8f9fa; border-radius: 8px; margin: 20px 0; border: 2px solid #2c5530;">
-                                <tr>
-                                    <td>
-                                        <h2 style="color: #2c5530; margin: 0 0 15px 0; font-size: 20px;">Child #' . htmlspecialchars((string) $child['display_id']) . '</h2>
+                            <div style="background: #ffffff; border: 2px solid #2c5530; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
+                                <h3 style="color: #2c5530; margin: 0 0 15px 0; font-size: 18px; border-bottom: 2px solid #2c5530; padding-bottom: 10px;">' . htmlspecialchars((string) $child['display_id']) . '</h3>
 
-                                        <p style="margin: 8px 0; color: #333;"><strong>Age:</strong> ' . (int)$child['age'] . '</p>
-                                        <p style="margin: 8px 0; color: #333;"><strong>Gender:</strong> ' . ($child['gender'] === 'M' ? 'Male' : 'Female') . '</p>';
+                                <table width="100%" cellpadding="5">
+                                    <tr>
+                                        <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Age:</td>
+                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['age']) . ' years old</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
+                                        <td style="color: #666; padding: 5px 0;">' . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . '</td>
+                                    </tr>
+                                </table>';
 
-        if (!empty($child['wishes'])) {
-            $html .= '
-                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">🎁 Gift Wishes:</p>
-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars(cleanWishesText((string) $child['wishes'])) . '</p>';
-        }
-
+        // Interests/Essential Needs
         if (!empty($child['interests'])) {
             $html .= '
-                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">💙 Essential Needs:</p>
-                                        <p style="margin: 5px 0; color: #333; white-space: pre-wrap;">' . htmlspecialchars((string) $child['interests']) . '</p>';
+                                <div style="margin-top: 15px;">
+                                    <strong style="color: #2c5530;">💙 Essential Needs/Interests:</strong>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #3a6f3f; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['interests'])) . '</p>
+                                </div>';
+        }
+
+        // Christmas Wishes
+        if (!empty($child['wishes'])) {
+            $html .= '
+                                <div style="margin-top: 15px;">
+                                    <strong style="color: #c41e3a;">🎁 Christmas Wish List:</strong>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #fef5f5; border-left: 3px solid #c41e3a; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars(cleanWishesText((string) $child['wishes']))) . '</p>
+                                </div>';
+        }
+
+        // Special Needs
+        if (!empty($child['special_needs'])) {
+            $html .= '
+                                <div style="margin-top: 15px;">
+                                    <strong style="color: #856404;">⚠️ Special Needs/Considerations:</strong>
+                                    <p style="margin: 5px 0; padding: 10px; background-color: #fff3cd; border-left: 3px solid #f5b800; border-radius: 4px; color: #666;">' . nl2br(htmlspecialchars((string) $child['special_needs'])) . '</p>
+                                </div>';
+        }
+
+        // Clothing Sizes Section
+        $html .= '
+                                <div style="margin-top: 15px; background-color: #e7f3ff; padding: 15px; border-radius: 6px;">
+                                    <strong style="color: #2c5530; font-size: 16px;">👕 Clothing Sizes:</strong>
+                                    <table width="100%" cellpadding="5" style="margin-top: 10px;">';
+
+        if (!empty($child['shirt_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0; width: 40%;">Shirt:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['shirt_size']) . '</td>
+                                        </tr>';
+        }
+
+        if (!empty($child['pant_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Pants:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['pant_size']) . '</td>
+                                        </tr>';
+        }
+
+        if (!empty($child['jacket_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Jacket:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['jacket_size']) . '</td>
+                                        </tr>';
+        }
+
+        if (!empty($child['shoe_size'])) {
+            $html .= '
+                                        <tr>
+                                            <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Shoes:</td>
+                                            <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['shoe_size']) . '</td>
+                                        </tr>';
         }
 
         $html .= '
-                                        <p style="margin: 15px 0 8px 0; color: #2c5530; font-weight: bold;">👕 Clothing Sizes:</p>
-                                        <p style="margin: 5px 0; color: #333;">Shirt: ' . htmlspecialchars($child['shirt_size'] ?? 'Not specified') . '</p>
-                                        <p style="margin: 5px 0; color: #333;">Pants: ' . htmlspecialchars($child['pant_size'] ?? 'Not specified') . '</p>
-                                        <p style="margin: 5px 0; color: #333;">Shoes: ' . htmlspecialchars($child['shoe_size'] ?? 'Not specified') . '</p>
-                                    </td>
-                                </tr>
-                            </table>';
+                                    </table>
+                                </div>';
+
+        $html .= '
+                            </div>';
     }
 
     return $html . ('
+                        </td>
+                    </tr>
 
-                            <p style="font-size: 16px; color: #333; margin: 30px 0 10px 0;"><strong>📋 Shopping Tips:</strong></p>
-                            <ul style="color: #666; line-height: 1.8; margin: 0 0 20px 0; padding-left: 20px;">
-                                <li>You can print this email to take shopping with you</li>
-                                <li>Gift wishes are suggestions - feel free to get creative!</li>
-                                <li>Please have gifts delivered or drop them off by the deadline</li>
-                            </ul>
+                    <!-- Next Steps -->
+                    <tr>
+                        <td style="padding: 30px;">
+                            <h2 style="color: #2c5530; margin: 0 0 20px 0; font-size: 20px;">📋 Important Gift Guidelines</h2>
 
-                            <p style="font-size: 16px; color: #333; margin: 20px 0 0 0;"><strong>Need help?</strong> Contact us at ' . config('admin_email') . '</p>
+                            <div style="background-color: #fff3cd; border: 2px solid #f5b800; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #856404; margin: 0 0 15px 0; font-size: 18px;">🎁 What to Include</h3>
+                                <p style="color: #856404; margin: 0 0 10px 0; line-height: 1.6;">
+                                    You do <strong>not</strong> need to buy everything on a child\'s Wish List. Typically, a package includes:
+                                </p>
+                                <ul style="color: #856404; margin: 0 0 15px 0; padding-left: 20px; line-height: 1.8;">
+                                    <li>1 outfit</li>
+                                    <li>Undergarments and socks</li>
+                                    <li>Shoes</li>
+                                    <li>5 or 6 other wish list items</li>
+                                </ul>
+                                <p style="color: #856404; margin: 0; line-height: 1.6;">
+                                    <strong>If you can\'t get everything mentioned above, it\'s okay!</strong> Anything you can do is wonderful and appreciated. We can add some items to complete the package.
+                                </p>
+                            </div>
+
+                            <div style="background-color: #d4edda; border: 2px solid #28a745; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #155724; margin: 0 0 15px 0; font-size: 18px;">✅ Important Notes</h3>
+                                <ul style="color: #155724; margin: 0; padding-left: 20px; line-height: 1.8;">
+                                    <li style="margin-bottom: 10px;"><strong>No gift cards</strong> except those related to video games</li>
+                                    <li style="margin-bottom: 10px;"><strong>All gifts must be new</strong></li>
+                                    <li style="margin-bottom: 10px;"><strong>Gifts must NOT be wrapped</strong> - If desired, you may include gift wrap</li>
+                                    <li><strong>Place all gifts in a large bag</strong>, marked with that child\'s number</li>
+                                </ul>
+                            </div>
+
+                            <div style="background-color: #f8d7da; border: 2px solid #c41e3a; border-radius: 8px; padding: 20px; margin-bottom: 25px;">
+                                <h3 style="color: #721c24; margin: 0 0 15px 0; font-size: 18px;">📅 Deadline & Drop-Off</h3>
+                                <p style="color: #721c24; margin: 0 0 15px 0; line-height: 1.6;">
+                                    <strong>All gifts must be received by Friday, December 5th</strong>
+                                </p>
+                                <p style="color: #721c24; margin: 0; line-height: 1.6;">
+                                    <strong>Drop-off location:</strong><br/>
+                                    The Journal<br/>
+                                    210 W North 1st Street, Seneca<br/>
+                                    Weekdays 8 a.m. - 5 p.m.
+                                </p>
+                            </div>
+
+                            <div style="background-color: #e7f3ff; border: 2px solid #2c5530; border-radius: 8px; padding: 15px;">
+                                <p style="color: #2c5530; margin: 0; font-size: 13px; line-height: 1.6;">
+                                    <strong>Tax Deduction:</strong> CFK Inc is a recognized 501(c)(3) not-for-profit organization<br/>
+                                    EIN: 82-3083435 - This number may be used for tax deduction purposes.
+                                </p>
+                            </div>
                         </td>
                     </tr>
 
@@ -624,38 +810,76 @@ function generateAccessLinkText(string $email, string $name, array $sponsorships
     $text .= "==========================================\n\n";
     $text .= "Hi $name,\n\n";
     $text .= "Thank you for sponsoring $childCount " . ($childCount === 1 ? 'child' : 'children') . " this Christmas! Below are the complete details for your sponsorships:\n\n";
+    $text .= "YOUR SPONSORED CHILDREN (" . $childCount . ")\n";
+    $text .= str_repeat('-', 50) . "\n\n";
 
-    foreach ($sponsorships as $index => $child) {
-        $childNum = $index + 1;
-        $text .= "==========================================\n";
-        $text .= "CHILD #" . $child['display_id'] . "\n";
-        $text .= "==========================================\n\n";
-        $text .= "Age: " . $child['age'] . "\n";
-        $text .= "Gender: " . ($child['gender'] === 'M' ? 'Male' : 'Female') . "\n\n";
+    foreach ($sponsorships as $child) {
+        $text .= $child['display_id'] . "\n";
+        $text .= "Age: " . $child['age'] . " years old\n";
+        $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
 
-        if (!empty($child['wishes'])) {
-            $text .= "GIFT WISHES:\n";
-            $text .= cleanWishesText($child['wishes']) . "\n\n";
-        }
-
+        // Essential Needs/Interests
         if (!empty($child['interests'])) {
-            $text .= "INTERESTS:\n";
-            $text .= $child['interests'] . "\n\n";
+            $text .= "ESSENTIAL NEEDS/INTERESTS:\n" . $child['interests'] . "\n\n";
         }
 
+        // Christmas Wish List
+        if (!empty($child['wishes'])) {
+            $text .= "CHRISTMAS WISH LIST:\n" . cleanWishesText($child['wishes']) . "\n\n";
+        }
+
+        // Special Needs
+        if (!empty($child['special_needs'])) {
+            $text .= "SPECIAL NEEDS/CONSIDERATIONS:\n" . $child['special_needs'] . "\n\n";
+        }
+
+        // Clothing Sizes
         $text .= "CLOTHING SIZES:\n";
-        $text .= "  Shirt: " . ($child['shirt_size'] ?? 'Not specified') . "\n";
-        $text .= "  Pants: " . ($child['pant_size'] ?? 'Not specified') . "\n";
-        $text .= "  Shoes: " . ($child['shoe_size'] ?? 'Not specified') . "\n\n";
+        if (!empty($child['shirt_size'])) {
+            $text .= "  Shirt: " . $child['shirt_size'] . "\n";
+        }
+        if (!empty($child['pant_size'])) {
+            $text .= "  Pants: " . $child['pant_size'] . "\n";
+        }
+        if (!empty($child['jacket_size'])) {
+            $text .= "  Jacket: " . $child['jacket_size'] . "\n";
+        }
+        if (!empty($child['shoe_size'])) {
+            $text .= "  Shoes: " . $child['shoe_size'] . "\n";
+        }
+        $text .= "\n" . str_repeat('-', 50) . "\n\n";
     }
 
-    $text .= "==========================================\n\n";
-    $text .= "SHOPPING TIPS:\n";
-    $text .= "- You can print this email to take shopping with you\n";
-    $text .= "- Gift wishes are suggestions - feel free to get creative!\n";
-    $text .= "- Please have gifts delivered or drop them off by the deadline\n\n";
-    $text .= "Need help? Contact us at " . config('admin_email') . "\n\n";
-    $text .= "Christmas for Kids\n";
+    $text .= "IMPORTANT GIFT GUIDELINES\n";
+    $text .= str_repeat('=', 50) . "\n\n";
 
-    return $text . "Bringing Christmas joy to local children in need\n";
+    $text .= "WHAT TO INCLUDE:\n";
+    $text .= "You do NOT need to buy everything on a child's Wish List.\n";
+    $text .= "Typically, a package includes:\n";
+    $text .= "  • 1 outfit\n";
+    $text .= "  • Undergarments and socks\n";
+    $text .= "  • Shoes\n";
+    $text .= "  • 5 or 6 other wish list items\n\n";
+    $text .= "If you can't get everything mentioned above, it's okay!\n";
+    $text .= "Anything you can do is wonderful and appreciated.\n";
+    $text .= "We can add some items to complete the package.\n\n";
+
+    $text .= "IMPORTANT NOTES:\n";
+    $text .= "  • No gift cards except those related to video games\n";
+    $text .= "  • All gifts must be new\n";
+    $text .= "  • Gifts must NOT be wrapped - If desired, you may include gift wrap\n";
+    $text .= "  • Place all gifts in a large bag, marked with that child's number\n\n";
+
+    $text .= "DEADLINE & DROP-OFF:\n";
+    $text .= "All gifts must be received by Friday, December 5th\n\n";
+    $text .= "Drop-off location:\n";
+    $text .= "  The Journal\n";
+    $text .= "  210 W North 1st Street, Seneca\n";
+    $text .= "  Weekdays 8 a.m. - 5 p.m.\n\n";
+
+    $text .= "TAX DEDUCTION:\n";
+    $text .= "CFK Inc is a recognized 501(c)(3) not-for-profit organization\n";
+    $text .= "EIN: 82-3083435 - This number may be used for tax deduction purposes.\n\n";
+
+    return $text . ("Questions? Contact us at " . config('admin_email') . "\n");
 }

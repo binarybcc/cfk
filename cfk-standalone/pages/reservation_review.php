@@ -247,16 +247,14 @@ function reservationReviewApp() {
     margin-top: var(--spacing-xl);
 }
 
-/* Sticky Action Bar */
+/* Action Bar - Christmas Red emphasis */
 .sticky-action-bar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background: linear-gradient(135deg, #2c5f2d 0%, #3a7d3b 100%);
+    position: relative;
+    background: linear-gradient(135deg, #c41e3a 0%, #a01829 100%);
     border-radius: var(--radius-lg);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    margin-bottom: var(--spacing-xl);
-    animation: slideDown 0.3s ease-out;
+    box-shadow: 0 4px 12px rgba(196, 30, 58, 0.25);
+    margin-bottom: var(--spacing-lg);
+    border: 2px solid #8b1520;
 }
 
 @keyframes slideDown {
@@ -274,8 +272,8 @@ function reservationReviewApp() {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg) var(--spacing-xl);
-    gap: var(--spacing-xl);
+    padding: 1rem 1.25rem;
+    gap: var(--spacing-md);
 }
 
 .summary-info {
@@ -290,31 +288,49 @@ function reservationReviewApp() {
 }
 
 .summary-instruction {
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
     font-size: var(--font-size-md);
     margin: 0;
+    font-weight: 500;
 }
 
 .btn-prominent {
     font-size: var(--font-size-lg);
-    padding: var(--spacing-md) var(--spacing-2xl);
+    padding: 0.875rem 1.75rem;
     background: white;
-    color: var(--color-primary);
+    color: #c41e3a;
     font-weight: 700;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    min-width: 250px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-width: 260px;
     white-space: nowrap;
+    border: 2px solid white;
+    text-transform: none;
+    letter-spacing: 0.3px;
+    animation: gentlePulse 3s ease-in-out infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% {
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+    50% {
+        box-shadow: 0 6px 20px rgba(255, 255, 255, 0.5);
+    }
 }
 
 .btn-prominent:hover:not(:disabled) {
     background: #f8f8f8;
+    color: #a01829;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 24px rgba(255, 255, 255, 0.6);
+    animation: none;
 }
 
 .btn-prominent:disabled {
     background: #e0e0e0;
     color: #999;
+    border-color: #ccc;
+    animation: none;
 }
 
 .review-section {

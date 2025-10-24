@@ -193,6 +193,8 @@ $sponsorships = Database::fetchAll("
            c.id as child_id,
            CONCAT(f.family_number, c.child_letter) as child_name,
            c.age, c.grade, c.gender, c.status as child_status,
+           c.interests, c.wishes, c.special_needs,
+           c.shirt_size, c.pant_size, c.jacket_size, c.shoe_size,
            CONCAT(f.family_number, c.child_letter) as child_display_id,
            f.family_number
     FROM sponsorships s
@@ -903,6 +905,47 @@ include __DIR__ . '/includes/admin_header.php';
                                             • <?php echo sanitizeString($sponsorship['grade']); ?>
                                         <?php endif; ?>
                                     </div>
+
+                                    <?php if (!empty($sponsorship['interests'])) : ?>
+                                        <div style="margin-top: 4px; font-size: 0.8rem;">
+                                            <strong style="color: #2c5530;">Essential Needs:</strong>
+                                            <div style="color: #666; margin-top: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['interests'])); ?></div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($sponsorship['wishes'])) : ?>
+                                        <div style="margin-top: 4px; font-size: 0.8rem;">
+                                            <strong style="color: #c41e3a;">Wishes:</strong>
+                                            <div style="color: #666; margin-top: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['wishes'])); ?></div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($sponsorship['special_needs'])) : ?>
+                                        <div style="margin-top: 4px; font-size: 0.8rem;">
+                                            <strong style="color: #856404;">⚠️ Special Needs:</strong>
+                                            <div style="color: #666; margin-top: 2px; padding: 4px; background-color: #fff3cd; border-left: 2px solid #f5b800; border-radius: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['special_needs'])); ?></div>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($sponsorship['shirt_size']) || !empty($sponsorship['pant_size']) || !empty($sponsorship['jacket_size']) || !empty($sponsorship['shoe_size'])) : ?>
+                                        <div style="margin-top: 4px; font-size: 0.8rem; background-color: #e7f3ff; padding: 4px; border-radius: 2px;">
+                                            <strong style="color: #2c5530;">Sizes:</strong>
+                                            <div style="margin-top: 2px; color: #666; line-height: 1.3;">
+                                                <?php if (!empty($sponsorship['shirt_size'])) : ?>
+                                                    Shirt: <?php echo sanitizeString($sponsorship['shirt_size']); ?><br>
+                                                <?php endif; ?>
+                                                <?php if (!empty($sponsorship['pant_size'])) : ?>
+                                                    Pants: <?php echo sanitizeString($sponsorship['pant_size']); ?><br>
+                                                <?php endif; ?>
+                                                <?php if (!empty($sponsorship['jacket_size'])) : ?>
+                                                    Jacket: <?php echo sanitizeString($sponsorship['jacket_size']); ?><br>
+                                                <?php endif; ?>
+                                                <?php if (!empty($sponsorship['shoe_size'])) : ?>
+                                                    Shoes: <?php echo sanitizeString($sponsorship['shoe_size']); ?>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </td>

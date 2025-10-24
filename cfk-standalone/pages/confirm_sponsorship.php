@@ -137,7 +137,6 @@ $pageTitle = 'Confirm Your Sponsorship';
                                 x-model="formData.acceptTerms"
                                 required>
                             <span>
-                                I understand that this reservation is valid for 48 hours.
                                 I will receive confirmation details via email.
                             </span>
                         </label>

@@ -403,7 +403,7 @@ const ToastManager = (() => {
             const {
                 message,
                 actionUrl = '',
-                actionText = 'View Cart',
+                actionText = 'View Reservations',
                 dismissText = 'Keep Browsing',
                 duration = CONFIG.TOAST_DURATION,
                 type = 'info'
@@ -429,13 +429,17 @@ const ToastManager = (() => {
                 ].filter(Boolean))
             ]);
 
-            // Add dismiss handler
+            // Add dismiss handler to "Keep Browsing" button
             const dismissBtn = toast.querySelector('.toast-btn-secondary');
-            const dismissHandler = () => this.hide();
+            const dismissHandler = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.hide();
+            };
             dismissBtn.addEventListener('click', dismissHandler);
 
             // Track for cleanup
-            this.eventListeners.push({ element: dismissBtn, handler: dismissHandler });
+            this.eventListeners.push({ element: dismissBtn, event: 'click', handler: dismissHandler });
 
             // Add to page
             document.body.appendChild(toast);
@@ -461,8 +465,8 @@ const ToastManager = (() => {
             }
 
             // Remove event listeners (prevent memory leaks)
-            this.eventListeners.forEach(({ element, handler }) => {
-                element.removeEventListener('click', handler);
+            this.eventListeners.forEach(({ element, event, handler }) => {
+                element.removeEventListener(event, handler);
             });
             this.eventListeners = [];
 

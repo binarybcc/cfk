@@ -112,33 +112,50 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <?php endif; ?>
                 </div>
 
-                <!-- Detailed Info (Collapsible sections) -->
+                <!-- Detailed Info -->
                 <div class="member-details">
-                    <?php if (!empty($member['clothing_sizes'])) : ?>
-                        <div class="detail-row">
-                            <strong>Sizes:</strong>
-                            <span><?php echo sanitizeString($member['clothing_sizes']); ?></span>
-                        </div>
-                    <?php endif; ?>
-
+                    <!-- Essential Needs -->
                     <?php if (!empty($member['interests'])) : ?>
                         <div class="detail-row">
                             <strong>Essential Needs:</strong>
-                            <span><?php echo sanitizeString($member['interests']); ?></span>
+                            <span><?php echo nl2br(sanitizeString($member['interests'])); ?></span>
                         </div>
                     <?php endif; ?>
 
+                    <!-- Christmas Wishes -->
                     <?php if (!empty($member['wishes'])) : ?>
                         <div class="detail-row">
-                            <strong>Wishes:</strong>
-                            <span><?php echo sanitizeString(cleanWishesText($member['wishes'])); ?></span>
+                            <strong>Christmas Wishes:</strong>
+                            <span><?php echo nl2br(sanitizeString(cleanWishesText($member['wishes']))); ?></span>
                         </div>
                     <?php endif; ?>
 
+                    <!-- Special Needs/Considerations -->
                     <?php if (!empty($member['special_needs'])) : ?>
                         <div class="detail-row special-needs">
-                            <strong>⚠️ Special Notes:</strong>
-                            <span><?php echo sanitizeString($member['special_needs']); ?></span>
+                            <strong>⚠️ Special Considerations:</strong>
+                            <span><?php echo nl2br(sanitizeString($member['special_needs'])); ?></span>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Clothing Sizes - Individual fields -->
+                    <?php if ($member['shirt_size'] || $member['pant_size'] || $member['shoe_size'] || $member['jacket_size']) : ?>
+                        <div class="detail-section">
+                            <strong>Clothing Sizes:</strong>
+                            <div class="size-grid">
+                                <?php if ($member['shirt_size']) : ?>
+                                    <span class="size-item">Shirt: <?php echo sanitizeString($member['shirt_size']); ?></span>
+                                <?php endif; ?>
+                                <?php if ($member['pant_size']) : ?>
+                                    <span class="size-item">Pants: <?php echo sanitizeString($member['pant_size']); ?></span>
+                                <?php endif; ?>
+                                <?php if ($member['shoe_size']) : ?>
+                                    <span class="size-item">Shoes: <?php echo sanitizeString($member['shoe_size']); ?></span>
+                                <?php endif; ?>
+                                <?php if ($member['jacket_size']) : ?>
+                                    <span class="size-item">Jacket: <?php echo sanitizeString($member['jacket_size']); ?></span>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -374,15 +391,41 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
     font-weight: 600;
 }
 
-/* Details - Compact rows */
+/* Details - ULTRA Compact rows */
 .member-details {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.detail-section {
+    margin-bottom: 0.4rem;
+}
+
+.detail-section strong {
+    color: var(--color-text-muted);
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.85rem;
+}
+
+.size-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.15rem;
+}
+
+.size-item {
+    background: var(--color-light);
+    padding: 0.15rem 0.4rem;
+    border-radius: 3px;
+    font-size: 0.8rem;
+    white-space: nowrap;
 }
 
 .detail-row {
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-    line-height: 1.4;
+    margin-bottom: 0.3rem;
+    font-size: 0.85rem;
+    line-height: 1.3;
 }
 
 .detail-row:last-child {
@@ -391,15 +434,24 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
 .detail-row strong {
     color: var(--color-text-muted);
-    display: inline-block;
-    min-width: 80px;
+    display: block;
+    margin-bottom: 0.15rem;
+}
+
+.detail-row span {
+    display: block;
+    line-height: 1.3;
 }
 
 .detail-row.special-needs {
     background: var(--color-warning-bg);
-    padding: 0.5rem;
-    border-radius: 4px;
-    border-left: 3px solid var(--color-warning);
+    padding: 0.3rem;
+    border-radius: 3px;
+    border-left: 2px solid var(--color-warning);
+}
+
+.detail-row.special-needs strong {
+    color: var(--color-warning-dark);
 }
 
 /* Member Actions */
@@ -550,7 +602,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ToastManager.show({
                                 message: `✓ Child ${displayId} added to your cart`,
                                 actionUrl: '<?php echo baseUrl('?page=my_sponsorships'); ?>',
-                                actionText: 'View Cart',
+                                actionText: 'View Reservations',
                                 dismissText: 'Keep Browsing',
                                 duration: 5000
                             });

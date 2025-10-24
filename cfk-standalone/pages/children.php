@@ -329,16 +329,57 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                         <div class="child-info">
                             <!-- Essential Needs & Wishes -->
                             <?php if (!empty($child['interests'])) : ?>
-                                <div style="margin-bottom: 15px;">
-                                    <strong style="color: #2c5530;">Essential Needs:</strong>
-                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars((string) $child['interests']); ?></p>
+                                <div style="margin-bottom: 6px;">
+                                    <strong style="color: #2c5530; font-size: 0.9rem;">💙 Essential Needs:</strong>
+                                    <p style="margin: 3px 0 0 0; padding: 5px; background-color: #f8f9fa; border-left: 2px solid #3a6f3f; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars((string) $child['interests'])); ?></p>
                                 </div>
                             <?php endif; ?>
 
                             <?php if (!empty($child['wishes'])) : ?>
-                                <div style="margin-bottom: 15px;">
-                                    <strong style="color: #c41e3a;">Wishes:</strong>
-                                    <p style="margin: 5px 0 0 0; color: #666;"><?php echo htmlspecialchars(cleanWishesText((string) $child['wishes'])); ?></p>
+                                <div style="margin-bottom: 6px;">
+                                    <strong style="color: #c41e3a; font-size: 0.9rem;">🎁 Wishes:</strong>
+                                    <p style="margin: 3px 0 0 0; padding: 5px; background-color: #fef5f5; border-left: 2px solid #c41e3a; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars(cleanWishesText((string) $child['wishes']))); ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Special Needs -->
+                            <?php if (!empty($child['special_needs'])) : ?>
+                                <div style="margin-bottom: 6px;">
+                                    <strong style="color: #856404; font-size: 0.9rem;">⚠️ Special Needs:</strong>
+                                    <p style="margin: 3px 0 0 0; padding: 5px; background-color: #fff3cd; border-left: 2px solid #f5b800; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars((string) $child['special_needs'])); ?></p>
+                                </div>
+                            <?php endif; ?>
+
+                            <!-- Clothing Sizes Section -->
+                            <?php if (!empty($child['shirt_size']) || !empty($child['pant_size']) || !empty($child['jacket_size']) || !empty($child['shoe_size'])) : ?>
+                                <div style="margin-bottom: 6px; background-color: #e7f3ff; padding: 6px; border-radius: 3px;">
+                                    <strong style="color: #2c5530; font-size: 0.9rem;">👕 Sizes:</strong>
+                                    <div style="margin-top: 4px; font-size: 0.85rem; line-height: 1.3;">
+                                        <?php if (!empty($child['shirt_size'])) : ?>
+                                            <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                <span style="color: #2c5530; font-weight: bold;">Shirt:</span>
+                                                <span style="color: #666;"><?php echo htmlspecialchars((string) $child['shirt_size']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($child['pant_size'])) : ?>
+                                            <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                <span style="color: #2c5530; font-weight: bold;">Pants:</span>
+                                                <span style="color: #666;"><?php echo htmlspecialchars((string) $child['pant_size']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($child['jacket_size'])) : ?>
+                                            <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                <span style="color: #2c5530; font-weight: bold;">Jacket:</span>
+                                                <span style="color: #666;"><?php echo htmlspecialchars((string) $child['jacket_size']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($child['shoe_size'])) : ?>
+                                            <div style="display: flex; justify-content: space-between; padding: 2px 0;">
+                                                <span style="color: #2c5530; font-weight: bold;">Shoes:</span>
+                                                <span style="color: #666;"><?php echo htmlspecialchars((string) $child['shoe_size']); ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                         </div>
@@ -553,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             ToastManager.show({
                                 message: `✓ Child ${childData.display_id} added to your cart`,
                                 actionUrl: '<?php echo baseUrl('?page=my_sponsorships'); ?>',
-                                actionText: 'View Cart',
+                                actionText: 'View Reservations',
                                 dismissText: 'Keep Browsing',
                                 duration: 5000
                             });

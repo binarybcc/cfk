@@ -110,52 +110,26 @@ try {
                 }
             }
 
-            // Send simple email using PHP mail()
-            $to = $sponsorData['email'];
-            $subject = 'Christmas for Kids - Sponsorship Confirmed!';
+            // Create reservation data structure for email template
+            $reservationData = [
+                'id' => $sponsorshipIds[0], // Use first sponsorship ID
+                'sponsor_name' => $sponsorData['name'],
+                'sponsor_email' => $sponsorData['email'],
+                'reservation_token' => 'SPO-' . strtoupper(substr(md5($sponsorData['email'] . time()), 0, 8)),
+                'total_children' => count($children),
+                'children' => $children,
+                'created_at' => gmdate('Y-m-d H:i:s'),
+                'expires_at' => gmdate('Y-m-d H:i:s', strtotime('+2 hours')) // Not used but required by template
+            ];
 
-            // Build email body
-            $body = "Dear {$sponsorData['name']},\n\n";
-            $body .= "Thank you for sponsoring " . count($children) . " " . (count($children) === 1 ? 'child' : 'children') . " this Christmas!\n\n";
-            $body .= "Your Sponsored Children:\n\n";
-
-            foreach ($children as $child) {
-                $body .= "Child ID: {$child['display_id']}\n";
-                $body .= "Age: {$child['age']} years\n";
-                $body .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n";
-                if (!empty($child['grade'])) {
-                    $body .= "Grade: {$child['grade']}\n";
-                }
-                if (!empty($child['wishes'])) {
-                    $body .= "Wishes: {$child['wishes']}\n";
-                }
-                if (!empty($child['clothing_sizes'])) {
-                    $body .= "Clothing Sizes: {$child['clothing_sizes']}\n";
-                }
-                if (!empty($child['shoe_size'])) {
-                    $body .= "Shoe Size: {$child['shoe_size']}\n";
-                }
-                $body .= "\n";
-            }
-
-            $body .= "You can view your sponsorships anytime at:\n";
-            $body .= "https://cforkids.org/?page=my_sponsorships\n\n";
-            $body .= "Just enter your email address to see all your sponsored children.\n\n";
-            $body .= "Thank you for making a difference this Christmas!\n\n";
-            $body .= "- Christmas for Kids Team";
-
-            $headers = "From: Christmas for Kids <noreply@cforkids.org>\r\n";
-            $headers .= "Reply-To: info@cforkids.org\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-
-            $emailSent = mail($to, $subject, $body, $headers);
-            $emailResult['success'] = $emailSent;
+            // Send HTML email using the proper email template
+            $emailResult = sendReservationConfirmationEmail($reservationData);
 
             error_log(sprintf(
                 'Sponsorship confirmed: Email=%s, Children=%d, EmailSent=%s',
                 $sponsorData['email'],
                 count($childrenIds),
-                $emailSent ? 'yes' : 'no'
+                $emailResult['success'] ? 'yes' : 'no'
             ));
         } catch (Throwable $emailException) {
             error_log('Email sending failed: ' . $emailException->getMessage());

@@ -682,18 +682,41 @@ include __DIR__ . '/includes/admin_header.php';
                                     <div class="info-label">Age</div>
                                     <div class="info-value"><?php echo $child['age']; ?> years</div>
                                 </div>
-                                
+
                                 <div class="info-item">
                                     <div class="info-label">Grade</div>
                                     <div class="info-value"><?php echo empty($child['grade']) ? 'Not specified' : sanitizeString($child['grade']); ?></div>
                                 </div>
-                                
+
                                 <div class="info-item">
                                     <div class="info-label">Gender</div>
                                     <div class="info-value"><?php echo $child['gender'] === 'M' ? 'Male' : 'Female'; ?></div>
                                 </div>
                             </div>
-                            
+
+                            <!-- Clothing Sizes Section -->
+                            <div class="clothing-sizes" style="background: #f8f9fa; padding: 0.4rem; border-radius: 3px; margin: 0.5rem 0;">
+                                <div style="font-weight: 500; color: #333; margin-bottom: 0.25rem; font-size: 0.85rem;">Sizes</div>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; font-size: 0.8rem;">
+                                    <div>
+                                        <span style="color: #666;">Shirt:</span>
+                                        <strong><?php echo !empty($child['shirt_size']) ? sanitizeString($child['shirt_size']) : 'N/A'; ?></strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: #666;">Pant:</span>
+                                        <strong><?php echo !empty($child['pant_size']) ? sanitizeString($child['pant_size']) : 'N/A'; ?></strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: #666;">Jacket:</span>
+                                        <strong><?php echo !empty($child['jacket_size']) ? sanitizeString($child['jacket_size']) : 'N/A'; ?></strong>
+                                    </div>
+                                    <div>
+                                        <span style="color: #666;">Shoe:</span>
+                                        <strong><?php echo !empty($child['shoe_size']) ? sanitizeString($child['shoe_size']) : 'N/A'; ?></strong>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="child-details">
                                 <?php if (!empty($child['interests'])) : ?>
                                     <div class="detail-section">
@@ -701,19 +724,26 @@ include __DIR__ . '/includes/admin_header.php';
                                         <div class="detail-value"><?php echo sanitizeString($child['interests']); ?></div>
                                     </div>
                                 <?php endif; ?>
-                                
+
                                 <?php if (!empty($child['wishes'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Christmas Wishes</div>
                                         <div class="detail-value"><?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?><?php echo strlen((string) $child['wishes']) > 100 ? '...' : ''; ?></div>
                                     </div>
                                 <?php endif; ?>
-                                
+
+                                <?php if (!empty($child['special_needs'])) : ?>
+                                    <div class="detail-section">
+                                        <div class="detail-label">Special Needs</div>
+                                        <div class="detail-value"><?php echo sanitizeString($child['special_needs']); ?></div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <div class="detail-section">
                                     <div class="detail-label">Family</div>
                                     <div class="detail-value">Family <?php echo sanitizeString($child['family_number']); ?></div>
                                 </div>
-                                
+
                                 <?php if ($child['sponsorship_count'] > 0) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Active Sponsorships</div>
