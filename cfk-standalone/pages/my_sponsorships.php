@@ -117,25 +117,8 @@ $pageTitle = 'My Sponsorships';
     <div class="page-header">
         <h1>My Sponsorships</h1>
         <p class="page-description">
-            Manage your pending selections and access your confirmed sponsorships
+            Manage your pending selections and request your sponsorship details via email
         </p>
-
-        <!-- Debug: Force Clear localStorage (will be removed after testing) -->
-        <div style="margin-top: 1rem; padding: 1rem; background: #fffbea; border: 2px solid #f5b800; border-radius: 8px;">
-            <strong style="color: #856404;">🔧 Troubleshooting:</strong>
-            <p style="margin: 0.5rem 0; font-size: 0.9rem;">If you see "pending selections" but no children appear, click below to force clear your browser's saved data:</p>
-            <button id="force-clear-btn" class="btn btn-secondary" style="margin-top: 0.5rem;">
-                Force Clear All Data & Reload
-            </button>
-        </div>
-        <script nonce="<?php echo $cspNonce; ?>">
-        document.getElementById('force-clear-btn').addEventListener('click', function() {
-            console.log('Force clear button clicked');
-            localStorage.clear();
-            console.log('localStorage cleared');
-            window.location.reload();
-        });
-        </script>
     </div>
 
     <!-- Pending Selections Section (only shows if there are selections) -->
@@ -188,10 +171,10 @@ $pageTitle = 'My Sponsorships';
     <div class="lookup-section">
         <div class="section-card">
             <div class="section-header">
-                <h2>🔍 Look Up Your Confirmed Sponsorships</h2>
+                <h2>📧 Request Your Sponsorship Details</h2>
             </div>
             <p class="section-description">
-                Already sponsored children? Enter your email to view your sponsorships.
+                Already sponsored children? Enter your email and we'll send you a detailed email with all your sponsorship information, including wish lists, clothing sizes, and interests.
             </p>
 
             <?php if ($emailSent && $sponsorships === []) : ?>
@@ -313,15 +296,15 @@ $pageTitle = 'My Sponsorships';
                 <!-- Lookup Form -->
                 <div class="lookup-form-container">
                     <div class="info-box">
-                        <h4>What you'll see:</h4>
+                        <h4>What you'll receive in your email:</h4>
                         <ul class="feature-list">
-                            <li>✓ All your sponsored children with complete details</li>
+                            <li>✓ Complete details for all your sponsored children</li>
                             <li>✓ Gift wishes and clothing sizes</li>
-                            <li>✓ Option to resend confirmation email</li>
-                            <li>✓ Print-friendly view for shopping</li>
+                            <li>✓ Interests and special considerations</li>
+                            <li>✓ Print-friendly format for shopping</li>
                         </ul>
                         <div class="security-note">
-                            <strong>🔒 Privacy:</strong> Your email is never shared. Only you can view your sponsorships.
+                            <strong>🔒 Privacy:</strong> Your email is never shared. We'll send the information directly to you.
                         </div>
                     </div>
 
@@ -357,7 +340,7 @@ $pageTitle = 'My Sponsorships';
                         </div>
 
                         <button type="submit" class="btn btn-large btn-primary">
-                            Send Access Link
+                            Email My Sponsorship Details
                         </button>
                     </form>
 

@@ -492,7 +492,7 @@ function sendAccessLinkEmail(string $email): array
         $mailer->addAddress($email, $sponsorName);
 
         // Set subject
-        $mailer->Subject = 'Christmas for Kids - Access Your Sponsorships';
+        $mailer->Subject = 'Christmas for Kids - Your Sponsorship Details Enclosed';
         error_log("ACCESS LINK: Subject set");
 
         // Generate HTML email body
@@ -613,7 +613,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                     <tr>
                         <td style="background: linear-gradient(135deg, #2c5530 0%, #3a6f3f 100%); padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
                             <h1 style="color: #ffffff; margin: 0; font-size: 28px;">🎄 Christmas for Kids</h1>
-                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">Your Sponsorships</p>
+                            <p style="color: #ffffff; margin: 10px 0 0 0; opacity: 0.95; font-size: 18px;">Your Sponsorship Details</p>
                         </td>
                     </tr>
 
@@ -622,7 +622,9 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                         <td style="padding: 40px 30px;">
                             <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Hi ' . htmlspecialchars($name) . ',</p>
 
-                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for sponsoring ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . ' this Christmas! Below are the complete details for your sponsorships:</p>
+                            <p style="font-size: 16px; color: #333; margin: 0 0 20px 0;">Thank you for sponsoring ' . $childCount . ' ' . ($childCount === 1 ? 'child' : 'children') . ' this Christmas! This email contains all the details you need for your sponsored ' . ($childCount === 1 ? 'child' : 'children') . ', including wish lists, clothing sizes, and interests.</p>
+
+                            <p style="font-size: 14px; color: #666; margin: 0 0 20px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #2c5530; border-radius: 4px;"><strong>📌 Tip:</strong> Save this email for reference when shopping! All the information you need is included below.</p>
                         </td>
                     </tr>
 
