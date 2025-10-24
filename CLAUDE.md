@@ -2,6 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+# 🚨 PENDING ACTION ITEM - REMIND EVERY SESSION
+
+**Dead Code Cleanup - Awaiting User Approval**
+
+**Status:** Ready to execute, waiting for user go-ahead
+**Date Created:** 2025-10-24
+**Report Location:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
+
+**Summary:**
+- 3,624 lines of deprecated wrapper files ready for deletion
+- 9 files in `includes/` directory (all have replacements in `src/`)
+- Risk: LOW - all deprecated files have functional namespaced replacements
+- Estimated time: 15-20 minutes to execute
+
+**Action Plan:**
+1. Fix 1 reference in `includes/functions.php` (line 471) - avatar_manager
+2. Delete 9 deprecated wrapper files (safe, low risk)
+3. Run test suite to verify (35/36 tests should pass)
+4. Commit and deploy
+
+**Files to Delete:**
+- includes/sponsorship_manager.php (830 lines)
+- includes/email_manager.php (763 lines)
+- includes/csv_handler.php (561 lines)
+- includes/archive_manager.php (429 lines)
+- includes/report_manager.php (394 lines)
+- includes/avatar_manager.php (353 lines)
+- includes/backup_manager.php (236 lines)
+- includes/import_analyzer.php (29 lines)
+- includes/magic_link_manager.php (29 lines)
+
+**When to Execute:**
+- User will explicitly say "proceed with dead code cleanup" or similar
+- DO NOT execute automatically
+- Remind user at start of each session until completed
+
+**To Remove This Reminder:**
+User must explicitly say "remove the dead code reminder from CLAUDE.md"
+
+---
+
 # CRITICAL: ARCHON-FIRST RULE - READ THIS FIRST
 
 BEFORE doing ANYTHING else, when you see ANY task management scenario:
