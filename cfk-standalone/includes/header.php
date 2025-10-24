@@ -13,9 +13,9 @@
         "img-src 'self' data: https:",
         "font-src 'self' data:",
         "frame-src https://www.zeffy.com", // Allow Zeffy iframe
-        "connect-src 'self'",
+        "connect-src 'self' https://www.zeffy.com https://*.zeffy.com https://zeffy-scripts.s3.ca-central-1.amazonaws.com",
         "base-uri 'self'",
-        "form-action 'self'",
+        "form-action 'self' https://www.zeffy.com https://*.zeffy.com",
         "frame-ancestors 'none'", // Prevent site from being iframed (replaces X-Frame-Options)
         "upgrade-insecure-requests",
         "block-all-mixed-content"
