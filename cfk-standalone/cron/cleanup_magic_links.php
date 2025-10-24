@@ -14,7 +14,7 @@ ini_set('display_errors', '0');
 define('CFK_APP', true);
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
+// MagicLinkManager available via autoloader (src/Auth/MagicLinkManager.php)
 require_once __DIR__ . '/../includes/rate_limiter.php';
 
 // Log file path

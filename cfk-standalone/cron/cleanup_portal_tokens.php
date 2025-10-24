@@ -12,7 +12,7 @@ define('CFK_APP', true);
 
 // Load dependencies
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
+// Sponsorship Manager available via autoloader (src/Sponsorship/Manager.php)
 
 // Clean up expired tokens
 $deleted = CFK_Sponsorship_Manager::cleanupExpiredPortalTokens();
