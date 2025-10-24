@@ -28,10 +28,35 @@ if (file_exists(__DIR__ . '/../.env')) {
     }
 }
 
-// Environment detection
-$isProduction = ($_SERVER['HTTP_HOST'] ?? 'localhost') !== 'localhost' &&
-                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', '.local') === false &&
-                strpos($_SERVER['HTTP_HOST'] ?? 'localhost', ':') === false;
+// Environment Detection Function
+function detectEnvironment(): string {
+    // Allow manual override via .env file
+    $envOverride = getenv('ENVIRONMENT');
+    if ($envOverride && in_array($envOverride, ['local', 'staging', 'production'], true)) {
+        return $envOverride;
+    }
+
+    // Auto-detect based on hostname
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    // Staging detection (customize these patterns for your Nexcess staging URL)
+    if (str_contains($host, 'staging') || str_contains($host, 'stage') || str_contains($host, '.test')) {
+        return 'staging';
+    }
+
+    // Production detection
+    if ($host === 'cforkids.org' || $host === 'www.cforkids.org') {
+        return 'production';
+    }
+
+    // Local development (localhost, .local, or with port numbers)
+    return 'local';
+}
+
+// Detect current environment
+$environment = detectEnvironment();
+$isProduction = ($environment === 'production');
+$isStaging = ($environment === 'staging');
 
 // Database Configuration - USE ENVIRONMENT VARIABLES
 $dbConfig = [
@@ -44,12 +69,17 @@ $dbConfig = [
 // Application Settings
 $appConfig = [
     'app_name' => 'Christmas for Kids',
-    'app_version' => '1.7',
+    'app_version' => '1.8',
+    'environment' => $environment,
     'timezone' => 'America/New_York',
-    'debug' => !$isProduction,
-    
-    // Paths
-    'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',
+    'debug' => getenv('APP_DEBUG') === 'true' || (!$isProduction && !$isStaging),
+
+    // Paths - prioritize .env, then auto-detect
+    'base_url' => getenv('BASE_URL') ?: match($environment) {
+        'production' => 'https://cforkids.org/',
+        'staging' => 'https://staging.cforkids.org/', // Update with your actual staging URL
+        default => 'http://localhost:8082/',
+    },
     'upload_path' => __DIR__ . '/../uploads/',
     'photo_path' => __DIR__ . '/../uploads/photos/',
     
@@ -68,13 +98,13 @@ $appConfig = [
     'from_name' => 'Christmas for Kids',
 
     // SMTP Configuration (MailChannels via Nexcess)
-    'email_use_smtp' => $isProduction, // Use SMTP in production, sendmail in dev
-    'smtp_host' => 'relay.mailchannels.net',
-    'smtp_port' => 587,
+    'email_use_smtp' => ($isProduction || $isStaging), // Use SMTP in production/staging, sendmail in local
+    'smtp_host' => getenv('SMTP_HOST') ?: 'relay.mailchannels.net',
+    'smtp_port' => (int)(getenv('SMTP_PORT') ?: 587),
     'smtp_auth' => true,
-    'smtp_username' => getenv('SMTP_USERNAME') ?: '', // Set in environment or here
-    'smtp_password' => getenv('SMTP_PASSWORD') ?: '', // Set in environment or here
-    'smtp_encryption' => 'tls', // TLS encryption on port 587
+    'smtp_username' => getenv('SMTP_USERNAME') ?: '', // Set in .env file
+    'smtp_password' => getenv('SMTP_PASSWORD') ?: '', // Set in .env file
+    'smtp_encryption' => getenv('SMTP_ENCRYPTION') ?: 'tls', // TLS encryption on port 587
     
     // Security
     'session_name' => 'CFK_SESSION',
@@ -241,4 +271,21 @@ function sanitizeInt(mixed $input): int {
 
 function sanitizeEmail(string $input): string {
     return filter_var(trim($input), FILTER_SANITIZE_EMAIL);
+}
+
+// Environment badge helper (for displaying in admin)
+function getEnvironmentBadge(): string {
+    $env = config('environment');
+    $colors = [
+        'local' => '#6c757d',      // gray
+        'staging' => '#ffc107',    // yellow/orange
+        'production' => '#28a745'  // green
+    ];
+    $color = $colors[$env] ?? '#6c757d';
+
+    return sprintf(
+        '<span style="display:inline-block;padding:4px 12px;background:%s;color:white;border-radius:4px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">%s</span>',
+        $color,
+        htmlspecialchars($env)
+    );
 }
