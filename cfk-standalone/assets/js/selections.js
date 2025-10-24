@@ -409,47 +409,27 @@ const ToastManager = (() => {
                 type = 'info'
             } = options;
 
-            // Create toast with safe DOM creation
+            // Create toast with safe DOM creation (sticky notification)
             const toast = createElement('div', {
                 className: `toast-notification toast-${type}`,
                 role: 'alert',
                 'aria-live': 'polite'
             }, [
                 createElement('p', { className: 'toast-message' }, sanitizeHTML(message)),
-                createElement('div', { className: 'toast-actions' }, [
-                    actionUrl ? createElement('a', {
+                actionUrl ? createElement('div', { className: 'toast-actions' }, [
+                    createElement('a', {
                         href: actionUrl,
                         className: 'toast-btn toast-btn-primary'
-                    }, actionText) : null,
-                    createElement('button', {
-                        className: 'toast-btn toast-btn-secondary',
-                        type: 'button',
-                        'aria-label': 'Dismiss notification'
-                    }, dismissText)
-                ].filter(Boolean))
-            ]);
-
-            // Add dismiss handler to "Keep Browsing" button
-            const dismissBtn = toast.querySelector('.toast-btn-secondary');
-            const dismissHandler = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.hide();
-            };
-            dismissBtn.addEventListener('click', dismissHandler);
-
-            // Track for cleanup
-            this.eventListeners.push({ element: dismissBtn, event: 'click', handler: dismissHandler });
+                    }, actionText)
+                ]) : null
+            ].filter(Boolean));
 
             // Add to page
             document.body.appendChild(toast);
             this.activeToast = toast;
 
-            // Auto-hide after duration
-            this.hideTimeout = setTimeout(() => this.hide(), duration);
-
-            // Focus management for accessibility
-            dismissBtn.focus();
+            // No auto-hide - toast stays until user clicks action or navigates away
+            // This makes it work like a persistent sticky notification
         }
 
         /**
