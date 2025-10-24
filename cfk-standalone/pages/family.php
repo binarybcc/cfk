@@ -409,46 +409,48 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
 .detail-section {
     margin: 0;
+    margin-top: 0.3rem;
 }
 
 .detail-section strong {
     color: var(--color-text-muted);
-    display: inline;
+    display: block;
     font-size: 0.8rem;
     font-weight: 600;
+    margin-bottom: 0.2rem;
 }
 
 .size-grid {
-    display: inline;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     font-size: 0.8rem;
+    margin-top: 0.25rem;
 }
 
 .size-item {
-    display: inline;
-    margin-right: 0.5rem;
+    background: var(--color-light);
+    padding: 0.2rem 0.5rem;
+    border-radius: 3px;
+    font-size: 0.75rem;
     white-space: nowrap;
-}
-
-.size-item::after {
-    content: " • ";
-    color: var(--color-text-muted);
-}
-
-.size-item:last-child::after {
-    content: "";
 }
 
 .detail-row {
     margin: 0;
+    margin-bottom: 0.35rem;
     font-size: 0.82rem;
     line-height: 1.4;
+}
+
+.detail-row:last-child {
+    margin-bottom: 0;
 }
 
 .detail-row strong {
     color: var(--color-text-muted);
     display: inline;
     font-weight: 600;
-    margin-right: 0.3rem;
 }
 
 .detail-row span {
