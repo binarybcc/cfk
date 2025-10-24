@@ -143,7 +143,63 @@ if ($_POST !== [] && !isset($_POST['bulk_action'])) {
                     $messageType = 'error';
                 }
                 break;
+
+            case 'edit_sponsorship':
+                $result = updateSponsorship($_POST);
+                $message = $result['message'];
+                $messageType = $result['success'] ? 'success' : 'error';
+                break;
         }
+    }
+}
+
+// AJAX endpoint to fetch sponsorship data for editing
+if (isset($_GET['action']) && $_GET['action'] === 'get_sponsorship' && isset($_GET['id'])) {
+    $sponsorshipId = sanitizeInt($_GET['id']);
+    $sponsorship = Database::fetchRow(
+        "SELECT * FROM sponsorships WHERE id = ?",
+        [$sponsorshipId]
+    );
+
+    if ($sponsorship) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'sponsorship' => $sponsorship]);
+        exit;
+    } else {
+        header('Content-Type: application/json');
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Sponsorship not found']);
+        exit;
+    }
+}
+
+// Function to update sponsorship details
+function updateSponsorship($data): array
+{
+    try {
+        $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);
+        if (!$sponsorshipId) {
+            return ['success' => false, 'message' => 'Invalid sponsorship ID'];
+        }
+
+        // Validate email
+        $email = sanitizeEmail($data['sponsor_email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Invalid email address'];
+        }
+
+        // Update sponsorship
+        Database::update('sponsorships', [
+            'sponsor_name' => sanitizeString($data['sponsor_name'] ?? ''),
+            'sponsor_email' => $email,
+            'sponsor_phone' => sanitizeString($data['sponsor_phone'] ?? ''),
+            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? '')
+        ], ['id' => $sponsorshipId]);
+
+        return ['success' => true, 'message' => 'Sponsorship updated successfully'];
+    } catch (Exception $e) {
+        error_log('Update sponsorship error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to update sponsorship'];
     }
 }
 
@@ -638,6 +694,18 @@ include __DIR__ . '/includes/admin_header.php';
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
+/* EDIT SPONSORSHIP BUTTON */
+.btn-edit-sponsorship {
+    background: #0d6efd;
+    color: white;
+}
+
+.btn-edit-sponsorship:hover {
+    background: #0b5ed7;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
 /* Modal Styles */
 .modal {
     display: none;
@@ -1029,6 +1097,15 @@ include __DIR__ . '/includes/admin_header.php';
                                     </button>
                                 <?php endif; ?>
 
+                                <!-- EDIT ACTION: Blue edit button for all active sponsorships -->
+                                <?php if ($sponsorship['status'] !== 'cancelled') : ?>
+                                    <button class="btn-action btn-edit-sponsorship"
+                                            data-sponsorship-id="<?php echo $sponsorship['id']; ?>"
+                                            title="Edit sponsor information">
+                                        ✏️ Edit
+                                    </button>
+                                <?php endif; ?>
+
                                 <?php if (in_array($sponsorship['status'], ['confirmed', 'logged'])) : ?>
                                     <!-- CANCEL ACTION: Red button for active sponsorships -->
                                     <button class="btn-action btn-cancel-action btn-cancel-sponsorship"
@@ -1092,6 +1169,50 @@ include __DIR__ . '/includes/admin_header.php';
         <div class="actions" style="margin-top: 1rem;">
             <button type="button" id="close-message-modal-btn" class="btn btn-primary">Close</button>
         </div>
+    </div>
+</div>
+
+<!-- Edit Sponsorship Modal -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-edit-modal-x">&times;</span>
+        <div class="modal-header">
+            <h3>Edit Sponsor Information</h3>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+            <input type="hidden" name="action" value="edit_sponsorship">
+            <input type="hidden" name="sponsorship_id" id="editSponsorshipId">
+
+            <div class="form-group">
+                <label for="editSponsorName">Sponsor Name: *</label>
+                <input type="text" name="sponsor_name" id="editSponsorName" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div class="form-group">
+                <label for="editSponsorEmail">Sponsor Email: *</label>
+                <input type="email" name="sponsor_email" id="editSponsorEmail" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div class="form-group">
+                <label for="editSponsorPhone">Sponsor Phone:</label>
+                <input type="tel" name="sponsor_phone" id="editSponsorPhone"
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div class="form-group">
+                <label for="editSponsorAddress">Sponsor Address:</label>
+                <textarea name="sponsor_address" id="editSponsorAddress" rows="3"
+                          style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            </div>
+
+            <div class="actions" style="margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary">Update Sponsor</button>
+                <button type="button" id="close-edit-modal-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -1540,6 +1661,58 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => activeStatEl.style.transform = 'scale(1)', 200);
         }
     }
+
+    // ===== Edit Sponsorship Modal =====
+    const editModal = document.getElementById('editModal');
+    const editButtons = document.querySelectorAll('.btn-edit-sponsorship');
+    const closeEditModalX = document.getElementById('close-edit-modal-x');
+    const closeEditModalBtn = document.getElementById('close-edit-modal-btn');
+
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const sponsorshipId = this.getAttribute('data-sponsorship-id');
+
+            // Fetch sponsorship data via AJAX
+            fetch(`?action=get_sponsorship&id=${sponsorshipId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.sponsorship) {
+                        const sp = data.sponsorship;
+
+                        // Populate form fields
+                        document.getElementById('editSponsorshipId').value = sp.id;
+                        document.getElementById('editSponsorName').value = sp.sponsor_name || '';
+                        document.getElementById('editSponsorEmail').value = sp.sponsor_email || '';
+                        document.getElementById('editSponsorPhone').value = sp.sponsor_phone || '';
+                        document.getElementById('editSponsorAddress').value = sp.sponsor_address || '';
+
+                        // Show modal
+                        editModal.style.display = 'block';
+                    } else {
+                        alert('Error loading sponsorship data: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sponsorship data:', error);
+                    alert('Error loading sponsorship data. Please try again.');
+                });
+        });
+    });
+
+    // Close edit modal
+    if (closeEditModalX) {
+        closeEditModalX.addEventListener('click', () => editModal.style.display = 'none');
+    }
+    if (closeEditModalBtn) {
+        closeEditModalBtn.addEventListener('click', () => editModal.style.display = 'none');
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === editModal) {
+            editModal.style.display = 'none';
+        }
+    });
 });
 </script>
 

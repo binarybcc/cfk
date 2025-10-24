@@ -27,6 +27,72 @@ if (!isLoggedIn()) {
 }
 
 $pageTitle = 'Reports';
+$message = '';
+$messageType = '';
+
+// Handle sponsor edit action
+if ($_POST !== [] && isset($_POST['action']) && $_POST['action'] === 'edit_sponsor') {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $message = 'Security token invalid. Please try again.';
+        $messageType = 'error';
+    } else {
+        $sponsorEmail = sanitizeEmail($_POST['sponsor_email'] ?? '');
+        $newEmail = sanitizeEmail($_POST['new_email'] ?? '');
+
+        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+            $message = 'Invalid email address';
+            $messageType = 'error';
+        } else {
+            try {
+                // Update all sponsorships with this email
+                Database::query(
+                    "UPDATE sponsorships
+                     SET sponsor_name = ?,
+                         sponsor_email = ?,
+                         sponsor_phone = ?,
+                         sponsor_address = ?
+                     WHERE sponsor_email = ?",
+                    [
+                        sanitizeString($_POST['sponsor_name'] ?? ''),
+                        $newEmail,
+                        sanitizeString($_POST['sponsor_phone'] ?? ''),
+                        sanitizeString($_POST['sponsor_address'] ?? ''),
+                        $sponsorEmail
+                    ]
+                );
+                $message = 'Sponsor information updated successfully';
+                $messageType = 'success';
+            } catch (Exception $e) {
+                error_log('Update sponsor error: ' . $e->getMessage());
+                $message = 'Failed to update sponsor information';
+                $messageType = 'error';
+            }
+        }
+    }
+}
+
+// AJAX endpoint to fetch sponsor data
+if (isset($_GET['action']) && $_GET['action'] === 'get_sponsor' && isset($_GET['email'])) {
+    $email = sanitizeEmail($_GET['email']);
+    $sponsor = Database::fetchRow(
+        "SELECT sponsor_name, sponsor_email, sponsor_phone, sponsor_address
+         FROM sponsorships
+         WHERE sponsor_email = ?
+         LIMIT 1",
+        [$email]
+    );
+
+    if ($sponsor) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'sponsor' => $sponsor]);
+        exit;
+    } else {
+        header('Content-Type: application/json');
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Sponsor not found']);
+        exit;
+    }
+}
 
 // Get report type
 $reportType = $_GET['type'] ?? 'dashboard';
@@ -186,6 +252,12 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=sponsor_directory&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
+            <?php if ($message) : ?>
+                <div class="alert alert-<?php echo $messageType; ?>" style="margin-bottom: 1rem;">
+                    <?php echo sanitizeString($message); ?>
+                </div>
+            <?php endif; ?>
+
             <div class="sponsor-directory">
                 <?php if ($groupedSponsors === []) : ?>
                     <div class="empty-state">
@@ -196,7 +268,14 @@ include __DIR__ . '/includes/admin_header.php';
                     <?php foreach ($groupedSponsors as $sponsor) : ?>
                         <div class="sponsor-card">
                         <div class="sponsor-info">
-                            <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
+                                <button class="btn btn-small btn-edit-sponsor"
+                                        data-sponsor-email="<?php echo htmlspecialchars($sponsor['email'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        style="background: #0d6efd; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
+                                    ✏️ Edit Sponsor
+                                </button>
+                            </div>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
                             <?php if (!empty($sponsor['phone'])) : ?>
                                 <p><strong>Phone:</strong> <a href="tel:<?php echo sanitizeString($sponsor['phone']); ?>">📞 <?php echo sanitizeString($sponsor['phone']); ?></a></p>
@@ -773,6 +852,171 @@ include __DIR__ . '/includes/admin_header.php';
     color: #999;
     font-size: 1rem;
 }
+
+/* Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-header {
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2c5530;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #2c5530;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
 </style>
+
+<!-- Edit Sponsor Modal -->
+<div id="editSponsorModal" class="modal">
+    <div class="modal-content">
+        <span class="close" id="close-edit-sponsor-modal-x">&times;</span>
+        <div class="modal-header">
+            <h3>Edit Sponsor Information</h3>
+        </div>
+        <form method="POST" action="?type=sponsor_directory">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+            <input type="hidden" name="action" value="edit_sponsor">
+            <input type="hidden" name="sponsor_email" id="editOriginalEmail">
+
+            <div class="form-group">
+                <label for="editSponsorName">Sponsor Name: *</label>
+                <input type="text" name="sponsor_name" id="editSponsorName" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div class="form-group">
+                <label for="editNewEmail">Sponsor Email: *</label>
+                <input type="email" name="new_email" id="editNewEmail" required
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+                <small style="color: #666;">This will update the email for all of this sponsor's children</small>
+            </div>
+
+            <div class="form-group">
+                <label for="editSponsorPhoneReport">Sponsor Phone:</label>
+                <input type="tel" name="sponsor_phone" id="editSponsorPhoneReport"
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+
+            <div class="form-group">
+                <label for="editSponsorAddressReport">Sponsor Address:</label>
+                <textarea name="sponsor_address" id="editSponsorAddressReport" rows="3"
+                          style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">Update Sponsor</button>
+                <button type="button" id="close-edit-sponsor-modal-btn" class="btn btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script nonce="<?php echo $cspNonce ?? ''; ?>">
+document.addEventListener('DOMContentLoaded', function() {
+    const editModal = document.getElementById('editSponsorModal');
+    const editButtons = document.querySelectorAll('.btn-edit-sponsor');
+    const closeEditModalX = document.getElementById('close-edit-sponsor-modal-x');
+    const closeEditModalBtn = document.getElementById('close-edit-sponsor-modal-btn');
+
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const sponsorEmail = this.getAttribute('data-sponsor-email');
+
+            // Fetch sponsor data via AJAX
+            fetch(`?action=get_sponsor&email=${encodeURIComponent(sponsorEmail)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.sponsor) {
+                        const sp = data.sponsor;
+
+                        // Populate form fields
+                        document.getElementById('editOriginalEmail').value = sp.sponsor_email;
+                        document.getElementById('editSponsorName').value = sp.sponsor_name || '';
+                        document.getElementById('editNewEmail').value = sp.sponsor_email || '';
+                        document.getElementById('editSponsorPhoneReport').value = sp.sponsor_phone || '';
+                        document.getElementById('editSponsorAddressReport').value = sp.sponsor_address || '';
+
+                        // Show modal
+                        editModal.style.display = 'block';
+                    } else {
+                        alert('Error loading sponsor data: ' + (data.message || 'Unknown error'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching sponsor data:', error);
+                    alert('Error loading sponsor data. Please try again.');
+                });
+        });
+    });
+
+    // Close edit modal
+    if (closeEditModalX) {
+        closeEditModalX.addEventListener('click', () => editModal.style.display = 'none');
+    }
+    if (closeEditModalBtn) {
+        closeEditModalBtn.addEventListener('click', () => editModal.style.display = 'none');
+    }
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === editModal) {
+            editModal.style.display = 'none';
+        }
+    });
+});
+</script>
 
 <?php include __DIR__ . '/includes/admin_footer.php'; ?>

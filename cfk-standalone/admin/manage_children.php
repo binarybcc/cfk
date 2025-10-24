@@ -66,6 +66,29 @@ if ($_POST && isset($_POST['action'])) {
     }
 }
 
+// AJAX endpoint to fetch child data for editing
+if (isset($_GET['action']) && $_GET['action'] === 'get_child' && isset($_GET['id'])) {
+    $childId = sanitizeInt($_GET['id']);
+    $child = Database::fetchRow(
+        "SELECT c.*, f.family_number
+         FROM children c
+         JOIN families f ON c.family_id = f.id
+         WHERE c.id = ?",
+        [$childId]
+    );
+
+    if ($child) {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'child' => $child]);
+        exit;
+    } else {
+        header('Content-Type: application/json');
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Child not found']);
+        exit;
+    }
+}
+
 // Get filter parameters
 $statusFilter = $_GET['status'] ?? 'all';
 $familyFilter = $_GET['family'] ?? 'all';
@@ -1014,17 +1037,43 @@ include __DIR__ . '/includes/admin_header.php';
 
             // Helper function to show edit modal
             function showEditModal(childIdValue) {
-                // This would normally fetch child data via AJAX
-                // For now, we'll implement a basic version
                 modalTitle.textContent = 'Edit Child';
                 formAction.value = 'edit_child';
                 childId.value = childIdValue;
                 submitBtn.textContent = 'Update Child';
 
-                // In a full implementation, you would fetch the child data here
-                // and populate the form fields
+                // Fetch child data via AJAX
+                fetch(`?action=get_child&id=${childIdValue}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.child) {
+                            const child = data.child;
 
-                modal.style.display = 'block';
+                            // Populate all form fields
+                            document.getElementById('childFamily').value = child.family_id || '';
+                            document.getElementById('childLetter').value = child.child_letter || '';
+                            document.getElementById('childName').value = child.name || '';
+                            document.getElementById('childAge').value = child.age || '';
+                            document.getElementById('childGrade').value = child.grade || '';
+                            document.getElementById('childGender').value = child.gender || '';
+                            document.getElementById('childSchool').value = child.school || '';
+                            document.getElementById('shirtSize').value = child.shirt_size || '';
+                            document.getElementById('pantSize').value = child.pant_size || '';
+                            document.getElementById('jacketSize').value = child.jacket_size || '';
+                            document.getElementById('shoeSize').value = child.shoe_size || '';
+                            document.getElementById('interests').value = child.interests || '';
+                            document.getElementById('wishes').value = child.wishes || '';
+                            document.getElementById('specialNeeds').value = child.special_needs || '';
+
+                            modal.style.display = 'block';
+                        } else {
+                            alert('Error loading child data: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching child data:', error);
+                        alert('Error loading child data. Please try again.');
+                    });
             }
 
             // Helper function to hide modal
