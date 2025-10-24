@@ -181,11 +181,7 @@ class CFK_Email_Queue
     private static function sendEmail(array $email): array
     {
         try {
-            // Load email manager
-            if (!class_exists('CFK_Email_Manager')) {
-                require_once __DIR__ . '/email_manager.php';
-            }
-
+            // Email Manager available via autoloader (src/Email/Manager.php)
             $mailer = CFK_Email_Manager::getMailer();
 
             $mailer->clearAddresses();
@@ -296,10 +292,7 @@ class CFK_Email_Queue
      */
     public static function queueSponsorConfirmation(array $sponsorship): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
+        // Email Manager available via autoloader (src/Email/Manager.php)
         return self::queue(
             $sponsorship['sponsor_email'],
             'Christmas for Kids - Sponsorship Confirmation',
@@ -318,10 +311,7 @@ class CFK_Email_Queue
      */
     public static function queueAdminNotification(string $subject, string $message, array $data = []): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
+        // Email Manager available via autoloader (src/Email/Manager.php)
         return self::queue(
             config('admin_email'),
             'CFK Admin - ' . $subject,

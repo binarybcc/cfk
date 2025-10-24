@@ -12,7 +12,7 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/email_manager.php';
+// Email Manager available via autoloader (src/Email/Manager.php)
 require_once __DIR__ . '/functions.php'; // For cleanWishesText()
 
 /**
