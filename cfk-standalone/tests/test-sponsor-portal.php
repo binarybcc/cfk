@@ -18,8 +18,7 @@ session_start();
 // Load configuration and functions
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Sponsorship Manager and Email Manager available via autoloader (src/Sponsorship/Manager.php, src/Email/Manager.php)
 
 echo "=== Sponsor Portal Testing ===\n\n";
 

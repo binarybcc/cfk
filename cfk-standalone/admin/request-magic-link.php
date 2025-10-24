@@ -10,7 +10,7 @@ declare(strict_types=1);
 define('CFK_APP', true);
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Email Manager available via autoloader (src/Email/Manager.php)
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/magic_link_email_template.php';
 

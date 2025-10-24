@@ -128,7 +128,7 @@ header('Content-Type: text/html; charset=utf-8');
     <div class="debug-box">
         <h3>5. CFK_Archive_Manager Class Test</h3>
         <?php
-        require_once __DIR__ . '/../includes/archive_manager.php';
+        // Archive Manager available via autoloader (src/Archive/Manager.php)
         if (class_exists('CFK_Archive_Manager')) {
             echo '<p class="success">✓ CFK_Archive_Manager class is loaded</p>';
             echo '<pre>';

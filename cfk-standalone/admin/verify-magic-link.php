@@ -12,7 +12,7 @@ session_start();
 
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/email_manager.php';
+// Email Manager available via autoloader (src/Email/Manager.php)
 
 use CFK\Auth\MagicLinkManager;
 use CFK\Database\Connection as Database;
