@@ -190,7 +190,6 @@ function addChild($data): array
         $childId = Database::insert('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
-            'name' => sanitizeString($data['name']),
             'age' => sanitizeInt($data['age']),
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
@@ -246,7 +245,6 @@ function editChild($data): array
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
-            'name' => sanitizeString($data['name']),
             'age' => sanitizeInt($data['age']),
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
@@ -313,9 +311,7 @@ function validateChildData($data): array
 {
     $errors = [];
 
-    if (in_array(trim($data['name'] ?? ''), ['', '0'], true)) {
-        $errors[] = 'Name is required';
-    }
+    // Name is optional - no validation needed
 
     $age = sanitizeInt($data['age'] ?? 0);
     if ($age < 1 || $age > 18) {
@@ -855,11 +851,6 @@ include __DIR__ . '/includes/admin_header.php';
                     
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="childName">Name *</label>
-                            <input type="text" id="childName" name="name" required>
-                        </div>
-                        
-                        <div class="form-group">
                             <label for="childAge">Age *</label>
                             <input type="number" id="childAge" name="age" min="1" max="18" required>
                         </div>
@@ -1052,7 +1043,6 @@ include __DIR__ . '/includes/admin_header.php';
                             // Populate all form fields
                             document.getElementById('childFamily').value = child.family_id || '';
                             document.getElementById('childLetter').value = child.child_letter || '';
-                            document.getElementById('childName').value = child.name || '';
                             document.getElementById('childAge').value = child.age || '';
                             document.getElementById('childGrade').value = child.grade || '';
                             document.getElementById('childGender').value = child.gender || '';
@@ -1140,13 +1130,12 @@ include __DIR__ . '/includes/admin_header.php';
 
             // Form validation
             childForm.addEventListener('submit', function(e) {
-                const name = document.getElementById('childName').value.trim();
                 const age = document.getElementById('childAge').value;
                 const gender = document.getElementById('childGender').value;
                 const family = document.getElementById('childFamily').value;
                 const letter = document.getElementById('childLetter').value;
 
-                if (!name || !age || !gender || !family || !letter) {
+                if (!age || !gender || !family || !letter) {
                     alert('Please fill in all required fields (marked with *)');
                     e.preventDefault();
                     return false;

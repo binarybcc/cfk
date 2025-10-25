@@ -1506,9 +1506,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
 
                     if (data.success) {
-                        // UPDATE UI DYNAMICALLY (NO PAGE RELOAD)
-                        updateButtonStatesAfterAction(button, action, form);
-                        updateStatsAfterAction(action);
+                        // Special handling for edit modal
+                        if (action === 'edit_sponsorship') {
+                            // Close modal
+                            const editModal = document.getElementById('editModal');
+                            if (editModal) {
+                                editModal.style.display = 'none';
+                            }
+                            // Reload page to show updated data
+                            setTimeout(() => location.reload(), 500);
+                        } else {
+                            // UPDATE UI DYNAMICALLY (NO PAGE RELOAD)
+                            updateButtonStatesAfterAction(button, action, form);
+                            updateStatsAfterAction(action);
+                        }
                     } else {
                         // Re-enable button on error
                         if (button) {
