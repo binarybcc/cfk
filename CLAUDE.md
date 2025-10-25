@@ -2,6 +2,52 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+# ⚠️ CRITICAL LESSON LEARNED - PRODUCTION FIRST PRINCIPLE
+
+**Date Added**: October 25, 2025
+**Issue**: Systemic exclusion of admin code from quality checks
+**Root Cause**: "Migration mindset" - labeled admin as "legacy to deal with later"
+**Impact**: 9 critical bugs hidden for 5 days because admin was excluded from PHPStan
+
+## The Pattern That Failed:
+
+**What We Did (WRONG)**:
+- Focused on modern PSR-4 code in `src/` directory
+- Labeled `admin/`, `includes/`, `pages/` as "legacy to migrate later"
+- Excluded admin from PHPStan, dead code analysis, comprehensive testing
+- Prioritized: Architecture elegance > Production safety
+
+**Why This Failed**:
+- `src/` contains beautiful PSR-4 code... that isn't fully used yet
+- `admin/` contains "legacy" code... that RUNS PRODUCTION RIGHT NOW
+- Result: Found 3,624 lines of dead code, missed 9 critical production bugs
+
+## The Principle Going Forward:
+
+**PRODUCTION FIRST - ALWAYS**
+
+```
+Priority 1: ALL production code (admin, includes, pages, cron) - SCAN EVERYTHING
+Priority 2: Modern code (src/)
+Priority 3: Dead/deprecated code cleanup
+Priority 4: Architecture improvements and migration
+```
+
+**Rules**:
+1. ✅ ALWAYS scan code that runs in production, regardless of architecture
+2. ✅ Production safety > Code elegance
+3. ✅ "Legacy" doesn't mean "skip quality checks"
+4. ✅ PHPStan, tests, security audits apply to ALL production code
+5. ❌ NEVER exclude production code because it's "old" or "being migrated"
+
+**Key Insight**:
+> Architectural age ≠ Production importance
+> Code running on cforkids.org TODAY deserves maximum scrutiny
+
+**See**: `docs/analysis/why-admin-was-excluded-systemic-issue.md` for full analysis
+
+---
+
 # 🚨 PENDING ACTION ITEM - REMIND EVERY SESSION
 
 **Dead Code Cleanup - Awaiting User Approval**
