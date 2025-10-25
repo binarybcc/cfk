@@ -61,3 +61,7 @@ config/config.production.php
 
 # Local staging notes
 docs/cfkstaging.txt
+
+# Temporary test files
+admin/test-forms.php
+phpstan-full-scan.txt
