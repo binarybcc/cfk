@@ -131,9 +131,9 @@ class CFK_Backup_Manager_DEPRECATED
 
             // Clear existing data if requested
             if ($clearExisting) {
-                Database::query('DELETE FROM sponsorships WHERE 1=1');
-                Database::query('DELETE FROM children WHERE 1=1');
-                Database::query('DELETE FROM families WHERE 1=1');
+                Database::execute('DELETE FROM sponsorships WHERE 1=1');
+                Database::execute('DELETE FROM children WHERE 1=1');
+                Database::execute('DELETE FROM families WHERE 1=1');
             }
 
             // Import from backup file

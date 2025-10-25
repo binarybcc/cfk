@@ -132,7 +132,7 @@ function handleAdminAction(string $action, array $data): array
  */
 function toggleChildStatus(int $childId): array
 {
-    $child = Database::fetchOne("SELECT status FROM children WHERE id = ?", [$childId]);
+    $child = Database::fetchRow("SELECT status FROM children WHERE id = ?", [$childId]);
 
     if (!$child) {
         return ['success' => false, 'message' => 'Child not found'];

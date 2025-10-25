@@ -3,10 +3,10 @@ parameters:
     paths:
         # Focus on new PSR-4 classes during migration
         - src
-        # Uncomment to check legacy files after migration complete
-        # - includes
-        # - pages
-        # - admin
+        # Scanning legacy files for v1.7.2 critical bugfix
+        - includes
+        - pages
+        - admin
         # - cron
     excludePaths:
         - vendor

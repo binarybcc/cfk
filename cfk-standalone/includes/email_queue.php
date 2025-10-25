@@ -262,7 +262,7 @@ class CFK_Email_Queue
      */
     public static function retryFailed(int $limit = 10): int
     {
-        return Database::query("
+        return Database::execute("
             UPDATE email_queue
             SET status = :queued,
                 attempts = 0,
@@ -284,7 +284,7 @@ class CFK_Email_Queue
     {
         $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
 
-        return Database::query("
+        return Database::execute("
             DELETE FROM email_queue
             WHERE status IN ('sent', 'failed')
               AND queued_at < :cutoff

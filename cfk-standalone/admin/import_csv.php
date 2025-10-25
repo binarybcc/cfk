@@ -218,14 +218,14 @@ function handleDeleteAllChildren(): array
         }
 
         // Delete all children records
-        Database::query("DELETE FROM children");
+        Database::execute("DELETE FROM children");
 
         // Also delete related family records if they exist
-        Database::query("DELETE FROM families");
+        Database::execute("DELETE FROM families");
 
         // Delete related sponsorships if table exists
         try {
-            Database::query("DELETE FROM cfk_sponsorships");
+            Database::execute("DELETE FROM cfk_sponsorships");
         } catch (Exception $e) {
             // Table might not exist, continue without error
             error_log('cfk_sponsorships table not found during delete: ' . $e->getMessage());
