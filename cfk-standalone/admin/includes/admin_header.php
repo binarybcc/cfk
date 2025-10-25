@@ -32,6 +32,9 @@
             <div class="admin-logo">
                 <h1><a href="index.php">CFK Admin</a></h1>
                 <p class="admin-tagline">Christmas for Kids Administration</p>
+                <div style="margin-top: 8px;">
+                    <?php echo getEnvironmentBadge(); ?>
+                </div>
             </div>
             
             <nav class="admin-nav">
