@@ -72,7 +72,7 @@ $appConfig = [
     'app_version' => '1.8',
     'environment' => $environment,
     'timezone' => 'America/New_York',
-    'debug' => getenv('APP_DEBUG') === 'true' || (!$isProduction && !$isStaging),
+    'debug' => filter_var(getenv('APP_DEBUG'), FILTER_VALIDATE_BOOLEAN) || (!$isProduction && !$isStaging),
 
     // Paths - prioritize .env, then auto-detect
     'base_url' => getenv('BASE_URL') ?: match($environment) {
@@ -98,7 +98,9 @@ $appConfig = [
     'from_name' => 'Christmas for Kids',
 
     // SMTP Configuration (MailChannels via Nexcess)
-    'email_use_smtp' => ($isProduction || $isStaging), // Use SMTP in production/staging, sendmail in local
+    'email_use_smtp' => getenv('EMAIL_USE_SMTP') !== false
+        ? filter_var(getenv('EMAIL_USE_SMTP'), FILTER_VALIDATE_BOOLEAN)
+        : ($isProduction || $isStaging), // Use SMTP in production/staging, sendmail in local (unless .env overrides)
     'smtp_host' => getenv('SMTP_HOST') ?: 'relay.mailchannels.net',
     'smtp_port' => (int)(getenv('SMTP_PORT') ?: 587),
     'smtp_auth' => true,
