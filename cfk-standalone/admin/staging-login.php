@@ -41,11 +41,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Get admin user from database
         $admin = Database::fetchRow(
-            "SELECT id, username, password, role FROM admin_users WHERE username = ?",
+            "SELECT id, username, password_hash, role FROM admin_users WHERE username = ?",
             [$username]
         );
 
-        if ($admin && password_verify($password, $admin['password'])) {
+        if ($admin && password_verify($password, $admin['password_hash'])) {
             // Login successful - create session
             $_SESSION['cfk_admin_id'] = $admin['id'];
             $_SESSION['cfk_admin_username'] = $admin['username'];
