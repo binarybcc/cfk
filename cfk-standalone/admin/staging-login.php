@@ -52,9 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['cfk_admin_role'] = $admin['role'];
 
             // Update last login
-            Database::query(
-                "UPDATE admin_users SET last_login = NOW() WHERE id = ?",
-                [$admin['id']]
+            Database::update(
+                'admin_users',
+                ['last_login' => date('Y-m-d H:i:s')],
+                ['id' => $admin['id']]
             );
 
             // Redirect to dashboard
