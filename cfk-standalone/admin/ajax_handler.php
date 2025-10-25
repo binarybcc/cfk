@@ -85,6 +85,7 @@ function handleSponsorshipAction(string $action, array $data): array
             $sponsorshipId,
             sanitizeString($data['reason'] ?? 'Cancelled by admin')
         ),
+        'edit_sponsorship' => editSponsorship($data),
         default => ['success' => false, 'message' => 'Invalid sponsorship action']
     };
 }
@@ -103,6 +104,7 @@ function handleChildAction(string $action, array $data): array
     return match ($action) {
         'toggle_status' => toggleChildStatus($childId),
         'delete_child' => deleteChild($childId),
+        'edit_child' => editChild($data),
         default => ['success' => false, 'message' => 'Invalid child action']
     };
 }
@@ -192,4 +194,125 @@ function updateAdmin(array $data): array
 function deleteAdmin(array $data): array
 {
     return ['success' => false, 'message' => 'Not implemented yet'];
+}
+
+/**
+ * Edit sponsorship details
+ */
+function editSponsorship(array $data): array
+{
+    try {
+        $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);
+        if (!$sponsorshipId) {
+            return ['success' => false, 'message' => 'Invalid sponsorship ID'];
+        }
+
+        // Validate email
+        $email = sanitizeEmail($data['sponsor_email'] ?? '');
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['success' => false, 'message' => 'Invalid email address'];
+        }
+
+        // Update sponsorship
+        Database::update('sponsorships', [
+            'sponsor_name' => sanitizeString($data['sponsor_name'] ?? ''),
+            'sponsor_email' => $email,
+            'sponsor_phone' => sanitizeString($data['sponsor_phone'] ?? ''),
+            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? '')
+        ], ['id' => $sponsorshipId]);
+
+        return ['success' => true, 'message' => 'Sponsorship updated successfully'];
+    } catch (Exception $e) {
+        error_log('Update sponsorship error: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'Failed to update sponsorship'];
+    }
+}
+
+/**
+ * Edit child details
+ */
+function editChild(array $data): array
+{
+    try {
+        $childId = sanitizeInt($data['child_id'] ?? 0);
+        if (!$childId) {
+            return ['success' => false, 'message' => 'Invalid child ID'];
+        }
+
+        // Validate required fields
+        $validation = validateChildData($data);
+        if (!$validation['valid']) {
+            return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
+        }
+
+        // Check if child exists
+        $child = Database::fetchRow("SELECT id, family_id, child_letter FROM children WHERE id = ?", [$childId]);
+        if (!$child) {
+            return ['success' => false, 'message' => 'Child not found'];
+        }
+
+        // Check if child_letter is unique within family (if changed)
+        if ($child['family_id'] != $data['family_id'] || $child['child_letter'] != $data['child_letter']) {
+            $existing = Database::fetchRow(
+                "SELECT id FROM children WHERE family_id = ? AND child_letter = ? AND id != ?",
+                [$data['family_id'], $data['child_letter'], $childId]
+            );
+            if ($existing) {
+                return ['success' => false, 'message' => 'Child letter already exists in this family'];
+            }
+        }
+
+        Database::update('children', [
+            'family_id' => sanitizeInt($data['family_id']),
+            'child_letter' => sanitizeString($data['child_letter']),
+            'age' => sanitizeInt($data['age']),
+            'grade' => sanitizeString($data['grade']),
+            'gender' => sanitizeString($data['gender']),
+            'school' => sanitizeString($data['school'] ?? ''),
+            'shirt_size' => sanitizeString($data['shirt_size'] ?? ''),
+            'pant_size' => sanitizeString($data['pant_size'] ?? ''),
+            'shoe_size' => sanitizeString($data['shoe_size'] ?? ''),
+            'jacket_size' => sanitizeString($data['jacket_size'] ?? ''),
+            'interests' => sanitizeString($data['interests'] ?? ''),
+            'wishes' => sanitizeString($data['wishes'] ?? ''),
+            'special_needs' => sanitizeString($data['special_needs'] ?? '')
+        ], ['id' => $childId]);
+
+        return ['success' => true, 'message' => 'Child updated successfully'];
+    } catch (Exception $e) {
+        error_log('Failed to edit child: ' . $e->getMessage());
+        return ['success' => false, 'message' => 'System error occurred. Please try again.'];
+    }
+}
+
+/**
+ * Validate child data
+ */
+function validateChildData(array $data): array
+{
+    $errors = [];
+
+    // Name is optional - no validation needed
+
+    $age = sanitizeInt($data['age'] ?? 0);
+    if ($age < 1 || $age > 18) {
+        $errors[] = 'Age must be between 1 and 18';
+    }
+
+    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
+        $errors[] = 'Valid gender is required';
+    }
+
+    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
+        $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
+    }
+
+    if (empty(sanitizeInt($data['family_id'] ?? 0))) {
+        $errors[] = 'Family selection is required';
+    }
+
+    return [
+        'valid' => $errors === [],
+        'errors' => $errors
+    ];
 }

@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     image: php:8.2-apache
@@ -8,15 +6,27 @@ services:
       - "8082:80"
     volumes:
       - .:/var/www/html
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./logs:/var/www/html/logs
     environment:
       - APACHE_DOCUMENT_ROOT=/var/www/html
+      # Production-like PHP settings
+      - PHP_MEMORY_LIMIT=256M
+      - PHP_MAX_EXECUTION_TIME=300
+      - PHP_UPLOAD_MAX_FILESIZE=50M
+      - PHP_POST_MAX_SIZE=50M
+      - PHP_DISPLAY_ERRORS=Off
+      - PHP_LOG_ERRORS=On
     depends_on:
       - db
     command: >
       bash -c "
         docker-php-ext-install pdo pdo_mysql mysqli &&
+        docker-php-ext-enable opcache &&
         a2enmod rewrite &&
         echo 'ServerName localhost' >> /etc/apache2/apache2.conf &&
+        mkdir -p /var/www/html/logs &&
+        chown -R www-data:www-data /var/www/html/logs &&
         apache2-foreground
       "
 
