@@ -45,7 +45,7 @@ if ($_POST !== [] && isset($_POST['action']) && $_POST['action'] === 'edit_spons
         } else {
             try {
                 // Update all sponsorships with this email
-                Database::query(
+                Database::execute(
                     "UPDATE sponsorships
                      SET sponsor_name = ?,
                          sponsor_email = ?,
