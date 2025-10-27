@@ -28,27 +28,30 @@ class CFK_Avatar_Manager_DEPRECATED
      */
     public static function getAvatarForChild(array $child): string
     {
-        $category = self::determineAvatarCategory($child['age'], $child['gender']);
+        $category = self::determineAvatarCategory($child['age_months'], $child['gender']);
         return self::getAvatarImagePath($category);
     }
 
     /**
      * Determine avatar category based on age and gender
      */
-    private static function determineAvatarCategory(int $age, string $gender): string
+    private static function determineAvatarCategory(int $ageMonths, string $gender): string
     {
+        // Convert months to years for category determination
+        $ageYears = (int)floor($ageMonths / 12);
+
         // Infant/Toddler (0-4)
-        if ($age <= 4) {
+        if ($ageYears <= 4) {
             return $gender === 'M' ? 'male_toddler' : 'female_toddler';
         }
 
         // Elementary (5-10)
-        if ($age <= 10) {
+        if ($ageYears <= 10) {
             return $gender === 'M' ? 'male_elementary' : 'female_elementary';
         }
 
         // Middle School (11-13)
-        if ($age <= 13) {
+        if ($ageYears <= 13) {
             return $gender === 'M' ? 'male_middle' : 'female_middle';
         }
 

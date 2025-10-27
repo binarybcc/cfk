@@ -66,9 +66,10 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
-            $sql .= " AND c.age BETWEEN :min_age AND :max_age";
-            $params['min_age'] = $category['min'];
-            $params['max_age'] = $category['max'];
+            // Convert age category (in years) to months for comparison
+            $sql .= " AND c.age_months BETWEEN :min_age AND :max_age";
+            $params['min_age'] = $category['min'] * 12;
+            $params['max_age'] = $category['max'] * 12;
         }
     }
 
@@ -127,9 +128,10 @@ function getChildrenCount(array $filters = []): int
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
-            $sql .= " AND c.age BETWEEN :min_age AND :max_age";
-            $params['min_age'] = $category['min'];
-            $params['max_age'] = $category['max'];
+            // Convert age category (in years) to months for comparison
+            $sql .= " AND c.age_months BETWEEN :min_age AND :max_age";
+            $params['min_age'] = $category['min'] * 12;
+            $params['max_age'] = $category['max'] * 12;
         }
     }
 
@@ -372,20 +374,51 @@ function getSponsorshipById(int $sponsorshipId): ?array
 /**
  * Format age display
  */
-function formatAge(int $age): string
+/**
+ * Display age in appropriate format (months or years)
+ *
+ * @param int $ageMonths Age in months
+ * @return string Formatted age display (e.g., "15 months", "2 years", "5 years")
+ */
+function displayAge(int $ageMonths): string
 {
-    return $age . ' year' . ($age !== 1 ? 's' : '') . ' old';
+    if ($ageMonths < 25) {
+        // Under 25 months: display as months (matches 24-month clothing sizes)
+        return $ageMonths . ' month' . ($ageMonths !== 1 ? 's' : '');
+    } elseif ($ageMonths < 36) {
+        // 25-35 months: display as "2 years"
+        return '2 years';
+    } else {
+        // 36+ months: display as years
+        $years = (int)floor($ageMonths / 12);
+        return $years . ' year' . ($years !== 1 ? 's' : '');
+    }
 }
 
 /**
- * Get age category for a given age
+ * Legacy alias for displayAge() - for backwards compatibility
+ * @deprecated Use displayAge() instead
  */
-function getAgeCategory(int $age): string
+function formatAge(int $ageMonths): string
+{
+    return displayAge($ageMonths);
+}
+
+/**
+ * Get age category for a given age in months
+ *
+ * @param int $ageMonths Age in months
+ * @return string Age category label
+ */
+function getAgeCategory(int $ageMonths): string
 {
     global $ageCategories;
 
+    // Convert months to years for category matching
+    $ageYears = (int)floor($ageMonths / 12);
+
     foreach ($ageCategories as $key => $category) {
-        if ($age >= $category['min'] && $age <= $category['max']) {
+        if ($ageYears >= $category['min'] && $ageYears <= $category['max']) {
             return $category['label'];
         }
     }
@@ -467,7 +500,7 @@ function getMessage(): ?array
 function getPhotoUrl(string $filename = null, array $child = null): string
 {
     // ALWAYS use avatars - no real photos for privacy protection
-    if ($child && isset($child['age']) && isset($child['gender'])) {
+    if ($child && isset($child['age_months']) && isset($child['gender'])) {
         require_once __DIR__ . '/avatar_manager.php';
         return CFK_Avatar_Manager::getAvatarForChild($child);
     }
