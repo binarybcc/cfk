@@ -384,7 +384,7 @@ class Manager
     }
 
     /**
-     * Get list of available archives
+     * Get list of available archives (individual archive sets by timestamp)
      *
      * @return array<int, array<string, mixed>> List of available archives
      */
@@ -397,28 +397,84 @@ class Manager
         }
 
         $archives = [];
-        $dirs = glob($archivesDir . '/*', GLOB_ONLYDIR);
+        $yearDirs = glob($archivesDir . '/*', GLOB_ONLYDIR);
 
-        if ($dirs === false) {
+        if ($yearDirs === false) {
             return [];
         }
 
-        foreach ($dirs as $dir) {
-            $year = basename($dir);
-            $summaryFile = $dir . '/ARCHIVE_SUMMARY.txt';
+        foreach ($yearDirs as $yearDir) {
+            $year = basename($yearDir);
 
-            $files = glob($dir . '/*');
-            $archives[] = [
-                'year' => $year,
-                'path' => $dir,
-                'has_summary' => file_exists($summaryFile),
-                'file_count' => is_array($files) ? count($files) : 0,
-                'size' => self::getDirectorySize($dir)
-            ];
+            // Find all backup files in this year to identify individual archives
+            $backupFiles = glob($yearDir . '/database_backup_*.sql');
+
+            if (!$backupFiles) {
+                continue;
+            }
+
+            foreach ($backupFiles as $backupFile) {
+                // Extract timestamp from backup filename
+                if (preg_match('/_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.sql$/', $backupFile, $matches)) {
+                    $timestamp = $matches[1];
+                    $archiveDate = str_replace('_', ' ', $timestamp);
+
+                    // Find all files for this archive set
+                    $archiveFiles = [
+                        $backupFile,
+                        $yearDir . '/children_' . $timestamp . '.csv',
+                        $yearDir . '/families_' . $timestamp . '.csv',
+                        $yearDir . '/sponsorships_' . $timestamp . '.csv',
+                        $yearDir . '/email_log_' . $timestamp . '.csv',
+                    ];
+
+                    // Calculate size and count of this archive set
+                    $size = 0;
+                    $fileCount = 0;
+                    $hasData = false;
+
+                    foreach ($archiveFiles as $file) {
+                        if (file_exists($file)) {
+                            $size += filesize($file);
+                            $fileCount++;
+                            // Check if children CSV has data
+                            if (str_contains($file, 'children_') && filesize($file) > 100) {
+                                $hasData = true;
+                            }
+                        }
+                    }
+
+                    // Add ARCHIVE_SUMMARY.txt if it exists (shared by all archives in year)
+                    $summaryFile = $yearDir . '/ARCHIVE_SUMMARY.txt';
+                    $hasSummary = file_exists($summaryFile);
+                    if ($hasSummary) {
+                        $size += filesize($summaryFile);
+                        $fileCount++;
+                    }
+
+                    $archives[] = [
+                        'year' => $year,
+                        'timestamp' => $timestamp,
+                        'date' => $archiveDate,
+                        'path' => $yearDir,
+                        'backup_file' => basename($backupFile),
+                        'has_summary' => $hasSummary,
+                        'has_data' => $hasData,
+                        'file_count' => $fileCount,
+                        'size' => $size
+                    ];
+                }
+            }
         }
 
-        // Sort by year descending
-        usort($archives, fn($a, $b): int => strcmp((string) $b['year'], (string) $a['year']));
+        // Sort by year and timestamp descending (newest first)
+        usort($archives, function($a, $b) {
+            $yearCompare = strcmp((string) $b['year'], (string) $a['year']);
+            if ($yearCompare !== 0) {
+                return $yearCompare;
+            }
+            return strcmp((string) $b['timestamp'], (string) $a['timestamp']);
+        });
 
         return $archives;
     }
@@ -755,5 +811,225 @@ class Manager
                 'debug_log' => $debugLog
             ];
         }
+    }
+
+    /**
+     * Get list of archives that will be deleted (all but last 2 with data)
+     *
+     * @return array<string, mixed> Array with archives to keep and delete
+     */
+    public static function getArchivesForDeletion(): array
+    {
+        $allArchives = self::getAvailableArchives();
+
+        // Filter to only archives with data
+        $archivesWithData = array_filter($allArchives, function ($archive) {
+            return $archive['has_data'];
+        });
+
+        // Sort by year DESC, then timestamp DESC (newest first)
+        usort($archivesWithData, function ($a, $b) {
+            if ($a['year'] !== $b['year']) {
+                return $b['year'] <=> $a['year'];
+            }
+            return $b['timestamp'] <=> $a['timestamp'];
+        });
+
+        // Keep the 2 most recent, mark rest for deletion
+        $toKeep = array_slice($archivesWithData, 0, 2);
+        $toDelete = array_slice($archivesWithData, 2);
+
+        // Calculate total size to be deleted
+        $totalSize = 0;
+        foreach ($toDelete as $archive) {
+            $totalSize += $archive['size'];
+        }
+
+        return [
+            'to_keep' => $toKeep,
+            'to_delete' => $toDelete,
+            'delete_count' => count($toDelete),
+            'total_size' => $totalSize,
+            'total_size_mb' => round($totalSize / 1024 / 1024, 2)
+        ];
+    }
+
+    /**
+     * Delete a specific archive by year and timestamp
+     *
+     * @param string $year Year of archive
+     * @param string $timestamp Timestamp of archive (YYYY-MM-DD_HH-MM-SS)
+     * @param bool $debug Enable debug logging
+     * @return array<string, mixed> Result with success status and details
+     */
+    public static function deleteArchive(string $year, string $timestamp, bool $debug = false): array
+    {
+        $debugLog = [];
+        $archiveDir = __DIR__ . '/../../archives/' . $year;
+
+        if (!is_dir($archiveDir)) {
+            return [
+                'success' => false,
+                'message' => "Archive directory not found for year: {$year}",
+                'debug_log' => ['Archive directory does not exist']
+            ];
+        }
+
+        // Find all files for this archive set
+        $archiveFiles = [
+            $archiveDir . '/database_backup_' . $timestamp . '.sql',
+            $archiveDir . '/children_' . $timestamp . '.csv',
+            $archiveDir . '/families_' . $timestamp . '.csv',
+            $archiveDir . '/sponsorships_' . $timestamp . '.csv',
+            $archiveDir . '/email_log_' . $timestamp . '.csv',
+        ];
+
+        $deletedFiles = [];
+        $deletedSize = 0;
+        $errors = [];
+
+        foreach ($archiveFiles as $file) {
+            if (file_exists($file)) {
+                $fileSize = filesize($file);
+                if ($debug) {
+                    $debugLog[] = "Deleting: " . basename($file) . " (" . round($fileSize / 1024, 2) . " KB)";
+                }
+
+                if (unlink($file)) {
+                    $deletedFiles[] = basename($file);
+                    $deletedSize += $fileSize;
+                } else {
+                    $errors[] = "Failed to delete: " . basename($file);
+                }
+            }
+        }
+
+        // Check if we should delete the year directory (if empty)
+        $remainingFiles = glob($archiveDir . '/*');
+        $shouldDeleteDir = false;
+
+        // Only delete if just ARCHIVE_SUMMARY.txt remains (or directory is empty)
+        if ($remainingFiles === false || count($remainingFiles) === 0) {
+            $shouldDeleteDir = true;
+        } elseif (count($remainingFiles) === 1 && basename($remainingFiles[0]) === 'ARCHIVE_SUMMARY.txt') {
+            $shouldDeleteDir = true;
+            unlink($remainingFiles[0]);
+            $debugLog[] = "Deleted: ARCHIVE_SUMMARY.txt";
+        }
+
+        if ($shouldDeleteDir) {
+            rmdir($archiveDir);
+            $debugLog[] = "Deleted empty directory: {$year}";
+        }
+
+        if (count($errors) > 0) {
+            return [
+                'success' => false,
+                'message' => 'Some files could not be deleted',
+                'deleted_files' => $deletedFiles,
+                'deleted_size' => $deletedSize,
+                'errors' => $errors,
+                'debug_log' => $debugLog
+            ];
+        }
+
+        if ($debug) {
+            $debugLog[] = "Successfully deleted " . count($deletedFiles) . " files (" . round($deletedSize / 1024 / 1024, 2) . " MB)";
+        }
+
+        error_log("Deleted archive: {$year} - {$timestamp} (" . count($deletedFiles) . " files, " . round($deletedSize / 1024 / 1024, 2) . " MB)");
+
+        return [
+            'success' => true,
+            'message' => 'Archive deleted successfully',
+            'deleted_files' => $deletedFiles,
+            'deleted_size' => $deletedSize,
+            'deleted_size_mb' => round($deletedSize / 1024 / 1024, 2),
+            'debug_log' => $debugLog
+        ];
+    }
+
+    /**
+     * Delete old archives, keeping only the last 2 archives with data
+     *
+     * @param string $confirmationCode Must be "DELETE OLD ARCHIVES"
+     * @param bool $debug Enable debug logging
+     * @return array<string, mixed> Result with success status and details
+     */
+    public static function deleteOldArchives(string $confirmationCode, bool $debug = true): array
+    {
+        $debugLog = [];
+
+        // Validate confirmation code
+        if ($confirmationCode !== 'DELETE OLD ARCHIVES') {
+            return [
+                'success' => false,
+                'message' => 'Invalid confirmation code. Expected: DELETE OLD ARCHIVES',
+                'debug_log' => ['Confirmation code mismatch']
+            ];
+        }
+
+        $debugLog[] = "=== Starting Old Archives Deletion ===";
+        $debugLog[] = "Timestamp: " . date('Y-m-d H:i:s');
+
+        // Get deletion preview
+        $deletionInfo = self::getArchivesForDeletion();
+
+        if ($deletionInfo['delete_count'] === 0) {
+            $debugLog[] = "No archives to delete (keeping last 2 with data)";
+            return [
+                'success' => true,
+                'message' => 'No archives to delete',
+                'deleted_count' => 0,
+                'kept_count' => count($deletionInfo['to_keep']),
+                'debug_log' => $debugLog
+            ];
+        }
+
+        $debugLog[] = "Archives to delete: " . $deletionInfo['delete_count'];
+        $debugLog[] = "Total size to free: " . $deletionInfo['total_size_mb'] . " MB";
+        $debugLog[] = "Archives to keep: " . count($deletionInfo['to_keep']);
+
+        $deletedCount = 0;
+        $totalDeleted = 0;
+        $errors = [];
+
+        foreach ($deletionInfo['to_delete'] as $archive) {
+            $debugLog[] = "--- Deleting: Year {$archive['year']} - {$archive['date']} ---";
+
+            $result = self::deleteArchive($archive['year'], $archive['timestamp'], $debug);
+
+            if ($result['success']) {
+                $deletedCount++;
+                $totalDeleted += $result['deleted_size'];
+                $debugLog[] = "✅ Deleted successfully (" . $result['deleted_size_mb'] . " MB)";
+            } else {
+                $errors[] = "Year {$archive['year']} - {$archive['date']}: " . $result['message'];
+                $debugLog[] = "❌ Failed: " . $result['message'];
+            }
+
+            // Merge individual delete logs
+            if (isset($result['debug_log'])) {
+                $debugLog = array_merge($debugLog, $result['debug_log']);
+            }
+        }
+
+        $debugLog[] = "=== Deletion Complete ===";
+        $debugLog[] = "Deleted: {$deletedCount} archives";
+        $debugLog[] = "Freed: " . round($totalDeleted / 1024 / 1024, 2) . " MB";
+
+        error_log("Deleted {$deletedCount} old archives, freed " . round($totalDeleted / 1024 / 1024, 2) . " MB");
+
+        return [
+            'success' => count($errors) === 0,
+            'message' => count($errors) === 0
+                ? "Successfully deleted {$deletedCount} old archives"
+                : "Deleted {$deletedCount} archives with " . count($errors) . " errors",
+            'deleted_count' => $deletedCount,
+            'kept_count' => count($deletionInfo['to_keep']),
+            'total_deleted_mb' => round($totalDeleted / 1024 / 1024, 2),
+            'errors' => $errors,
+            'debug_log' => $debugLog
+        ];
     }
 }

@@ -59,10 +59,56 @@ $errors = [];
 $success = null;
 $resetResult = null;
 $restoreResult = null;
+$deleteResult = null;
 $debugLog = [];
+$deletionPreview = null;
 
 // Debug: Log all requests
 error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+
+// Get deletion preview for display
+try {
+    $deletionPreview = ArchiveManager::getArchivesForDeletion();
+} catch (Exception $e) {
+    error_log("Failed to get deletion preview: " . $e->getMessage());
+    $deletionPreview = null;
+}
+
+// Handle delete archives form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_delete'])) {
+    error_log("DELETE_ARCHIVES: Form submitted. POST data: " . print_r($_POST, true));
+
+    // Verify CSRF token
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        error_log("DELETE_ARCHIVES: CSRF token verification FAILED");
+        $errors[] = 'Security token invalid. Please try again.';
+    } else {
+        $confirmationCode = $_POST['delete_confirmation_code'] ?? '';
+
+        // Perform deletion
+        error_log("DELETE_ARCHIVES: Calling deleteOldArchives");
+        $deleteResult = ArchiveManager::deleteOldArchives($confirmationCode, true);
+        $debugLog = $deleteResult['debug_log'] ?? [];
+        error_log("DELETE_ARCHIVES: Result: " . ($deleteResult['success'] ? 'SUCCESS' : 'FAILED'));
+
+        if ($deleteResult['success']) {
+            $success = $deleteResult['message'];
+
+            // Log the action
+            error_log("Old archives deleted by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown') . " - Deleted: " . $deleteResult['deleted_count'] . " archives, Freed: " . $deleteResult['total_deleted_mb'] . " MB");
+
+            // Refresh archives list and deletion preview
+            try {
+                $archives = ArchiveManager::getAvailableArchives();
+                $deletionPreview = ArchiveManager::getArchivesForDeletion();
+            } catch (Exception $e) {
+                error_log("Failed to refresh archives: " . $e->getMessage());
+            }
+        } else {
+            $errors[] = $deleteResult['message'];
+        }
+    }
+}
 
 // Handle restore form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
@@ -211,6 +257,24 @@ include __DIR__ . '/includes/admin_header.php';
                     <li>Test the public-facing site functionality</li>
                 </ol>
             <?php endif; ?>
+
+            <?php if ($deleteResult) : ?>
+                <h4>Deletion Summary:</h4>
+                <ul>
+                    <li>Archives Deleted: <?php echo (int)($deleteResult['deleted_count'] ?? 0); ?></li>
+                    <li>Archives Kept: <?php echo (int)($deleteResult['kept_count'] ?? 0); ?></li>
+                    <li>Disk Space Freed: <?php echo $deleteResult['total_deleted_mb'] ?? 0; ?> MB</li>
+                </ul>
+
+                <?php if (!empty($deleteResult['errors'])) : ?>
+                    <h4>⚠️ Errors During Deletion:</h4>
+                    <ul>
+                        <?php foreach ($deleteResult['errors'] as $error) : ?>
+                            <li><?php echo sanitizeString($error); ?></li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 
@@ -326,25 +390,33 @@ include __DIR__ . '/includes/admin_header.php';
 
             <div class="archives-list">
                 <?php foreach ($archives as $archive) : ?>
-                    <div class="archive-card">
+                    <div class="archive-card <?php echo $archive['has_data'] ? '' : 'archive-empty'; ?>">
                         <div class="archive-header">
-                            <h3>Year <?php echo sanitizeString($archive['year']); ?></h3>
+                            <h3>Year <?php echo sanitizeString($archive['year']); ?> - <?php echo sanitizeString($archive['date']); ?></h3>
                             <span class="archive-size"><?php echo ArchiveManager::formatBytes($archive['size']); ?></span>
                         </div>
                         <div class="archive-details">
                             <p><strong>Files:</strong> <?php echo $archive['file_count']; ?></p>
-                            <p><strong>Location:</strong> <code><?php echo sanitizeString($archive['path']); ?></code></p>
+                            <p><strong>Backup:</strong> <code><?php echo sanitizeString($archive['backup_file']); ?></code></p>
+                            <?php if ($archive['has_data']) : ?>
+                                <p class="archive-status">✅ Contains data</p>
+                            <?php else : ?>
+                                <p class="archive-status-warning">⚠️ Empty archive (0 records)</p>
+                            <?php endif; ?>
                             <?php if ($archive['has_summary']) : ?>
-                                <p class="archive-status">✅ Archive summary available</p>
+                                <p class="archive-status">📄 Summary available</p>
                             <?php endif; ?>
                         </div>
                         <div class="archive-actions">
-                            <a href="<?php echo str_replace(__DIR__ . '/..', '..', $archive['path']); ?>/ARCHIVE_SUMMARY.txt"
-                               class="btn btn-small btn-primary"
-                               target="_blank">View Summary</a>
+                            <?php if ($archive['has_summary']) : ?>
+                                <a href="<?php echo str_replace(__DIR__ . '/..', '..', $archive['path']); ?>/ARCHIVE_SUMMARY.txt"
+                                   class="btn btn-small btn-primary"
+                                   target="_blank">View Summary</a>
+                            <?php endif; ?>
                             <button type="button"
-                                    class="btn btn-small btn-success"
-                                    onclick="showRestoreForm('<?php echo sanitizeString($archive['year']); ?>')">
+                                    class="btn btn-small btn-success <?php echo $archive['has_data'] ? '' : 'btn-disabled'; ?>"
+                                    onclick="showRestoreForm('<?php echo sanitizeString($archive['year']); ?>', '<?php echo sanitizeString($archive['timestamp']); ?>', <?php echo $archive['has_data'] ? 'true' : 'false'; ?>)"
+                                    <?php echo $archive['has_data'] ? '' : 'disabled title="Cannot restore empty archive"'; ?>>
                                 🔄 Restore
                             </button>
                         </div>
@@ -411,6 +483,87 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
     <?php endif; ?>
 
+    <!-- Delete Old Archives -->
+    <?php if ($deletionPreview && $deletionPreview['delete_count'] > 0) : ?>
+        <div class="delete-archives-section">
+            <h2>🗑️ Delete Old Archives</h2>
+
+            <div class="info-box">
+                <h3>💾 Disk Space Management</h3>
+                <p>This system keeps the <strong>2 most recent archives with data</strong>. Older archives can be safely deleted to free disk space.</p>
+            </div>
+
+            <div class="deletion-preview">
+                <h3>Preview: What Will Be Deleted</h3>
+
+                <div class="deletion-summary">
+                    <div class="deletion-stat">
+                        <span class="deletion-label">Archives to Delete:</span>
+                        <span class="deletion-value"><?php echo $deletionPreview['delete_count']; ?></span>
+                    </div>
+                    <div class="deletion-stat">
+                        <span class="deletion-label">Space to Free:</span>
+                        <span class="deletion-value"><?php echo $deletionPreview['total_size_mb']; ?> MB</span>
+                    </div>
+                    <div class="deletion-stat">
+                        <span class="deletion-label">Archives to Keep:</span>
+                        <span class="deletion-value"><?php echo count($deletionPreview['to_keep']); ?></span>
+                    </div>
+                </div>
+
+                <h4>❌ Archives That Will Be Deleted:</h4>
+                <div class="deletion-list">
+                    <?php foreach ($deletionPreview['to_delete'] as $archive) : ?>
+                        <div class="deletion-item">
+                            <span class="deletion-item-name">Year <?php echo sanitizeString($archive['year']); ?> - <?php echo sanitizeString($archive['date']); ?></span>
+                            <span class="deletion-item-size"><?php echo ArchiveManager::formatBytes($archive['size']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <h4>✅ Archives That Will Be Kept (Most Recent 2):</h4>
+                <div class="kept-list">
+                    <?php foreach ($deletionPreview['to_keep'] as $archive) : ?>
+                        <div class="kept-item">
+                            <span class="kept-item-name">Year <?php echo sanitizeString($archive['year']); ?> - <?php echo sanitizeString($archive['date']); ?></span>
+                            <span class="kept-item-size"><?php echo ArchiveManager::formatBytes($archive['size']); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <form method="POST" action="" id="deleteForm" class="delete-form">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                <input type="hidden" name="perform_delete" value="1">
+
+                <div class="form-group">
+                    <label for="delete_confirmation_code" class="form-label">Confirmation Code</label>
+                    <input type="text"
+                           id="delete_confirmation_code"
+                           name="delete_confirmation_code"
+                           class="form-input"
+                           placeholder="Type: DELETE OLD ARCHIVES"
+                           required>
+                    <div class="form-help">Type exactly: <strong>DELETE OLD ARCHIVES</strong></div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-large btn-warning">
+                        🗑️ Delete Old Archives (Free <?php echo $deletionPreview['total_size_mb']; ?> MB)
+                    </button>
+                    <button type="button" class="btn btn-large btn-secondary" onclick="document.getElementById('deleteForm').reset()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    <?php elseif ($deletionPreview && $deletionPreview['delete_count'] === 0) : ?>
+        <div class="delete-archives-section">
+            <h2>🗑️ Delete Old Archives</h2>
+            <div class="info-box">
+                <p>✅ Only the 2 most recent archives are being kept. No old archives to delete.</p>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Instructions -->
     <div class="instructions-section">
         <h2>📖 Instructions</h2>
@@ -467,7 +620,7 @@ include __DIR__ . '/includes/admin_header.php';
     color: #666;
 }
 
-.system-state-section, .reset-form-section, .archives-section, .instructions-section {
+.system-state-section, .reset-form-section, .archives-section, .instructions-section, .delete-archives-section {
     background: white;
     padding: 2rem;
     border-radius: 8px;
@@ -790,6 +943,138 @@ include __DIR__ . '/includes/admin_header.php';
     gap: 0.5rem;
     margin-top: 1rem;
 }
+
+.archive-empty {
+    opacity: 0.6;
+    border-left-color: #dc3545 !important;
+}
+
+.archive-status-warning {
+    color: #856404;
+    font-weight: bold;
+}
+
+.btn-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Delete Archives Section */
+.delete-archives-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.delete-archives-section h2 {
+    color: #ff6b35;
+    margin-bottom: 1.5rem;
+}
+
+.info-box {
+    background: #e7f3ff;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-box h3 {
+    color: #004085;
+    margin-top: 0;
+}
+
+.deletion-preview {
+    margin-bottom: 2rem;
+}
+
+.deletion-preview h3 {
+    color: #2c5530;
+    margin-bottom: 1rem;
+}
+
+.deletion-preview h4 {
+    color: #666;
+    margin: 1.5rem 0 0.75rem 0;
+    font-size: 1.1rem;
+}
+
+.deletion-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.deletion-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.deletion-label {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.deletion-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c5530;
+}
+
+.deletion-list, .kept-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.deletion-item, .kept-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    background: #f8f9fa;
+}
+
+.deletion-item {
+    border-left: 4px solid #dc3545;
+}
+
+.kept-item {
+    border-left: 4px solid #28a745;
+}
+
+.deletion-item-name, .kept-item-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.deletion-item-size, .kept-item-size {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.delete-form {
+    margin-top: 2rem;
+}
+
+.btn-warning {
+    background: #ff6b35;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e55a28;
+}
 </style>
 
 <script nonce="<?php echo $cspNonce; ?>">
@@ -833,10 +1118,15 @@ document.getElementById('resetForm').addEventListener('submit', function(e) {
 });
 
 // Restore form functions
-function showRestoreForm(year) {
+function showRestoreForm(year, timestamp, hasData) {
+    if (!hasData) {
+        alert('Cannot restore an empty archive. This archive contains 0 records.');
+        return;
+    }
+
     // Set the year
     document.getElementById('restoreYear').value = year;
-    document.getElementById('restoreYearDisplay').textContent = year;
+    document.getElementById('restoreYearDisplay').textContent = year + ' - ' + timestamp.replace('_', ' at ');
     document.getElementById('restoreYearHint').textContent = year;
 
     // Show the form
