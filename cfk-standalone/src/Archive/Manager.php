@@ -587,11 +587,25 @@ class Manager
         $summary = file_exists($summaryFile) ? file_get_contents($summaryFile) : null;
 
         // Find CSV files to get record counts
+        // Use the largest children CSV to find the backup with actual data
+        $childrenCSVs = glob($archiveDir . '/children_*.csv');
+        usort($childrenCSVs, function ($a, $b) {
+            return filesize($b) <=> filesize($a);
+        });
+
+        $bestChildrenCSV = $childrenCSVs[0] ?? null;
+
+        // Extract timestamp from children CSV to find matching backup
+        $csvTimestamp = null;
+        if ($bestChildrenCSV && preg_match('/_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.csv$/', $bestChildrenCSV, $matches)) {
+            $csvTimestamp = $matches[1];
+        }
+
         $csvFiles = [
-            'children' => glob($archiveDir . '/children_*.csv')[0] ?? null,
-            'families' => glob($archiveDir . '/families_*.csv')[0] ?? null,
-            'sponsorships' => glob($archiveDir . '/sponsorships_*.csv')[0] ?? null,
-            'email_log' => glob($archiveDir . '/email_log_*.csv')[0] ?? null,
+            'children' => $bestChildrenCSV,
+            'families' => $csvTimestamp ? glob($archiveDir . '/families_*' . $csvTimestamp . '.csv')[0] ?? null : null,
+            'sponsorships' => $csvTimestamp ? glob($archiveDir . '/sponsorships_*' . $csvTimestamp . '.csv')[0] ?? null : null,
+            'email_log' => $csvTimestamp ? glob($archiveDir . '/email_log_*' . $csvTimestamp . '.csv')[0] ?? null : null,
         ];
 
         $counts = [];
@@ -605,13 +619,25 @@ class Manager
             }
         }
 
-        // Find most recent database backup
-        $backupFiles = glob($archiveDir . '/database_backup_*.sql');
-        usort($backupFiles, function ($a, $b) {
-            return filemtime($b) <=> filemtime($a);
-        });
+        // Find matching database backup using the same timestamp
+        $latestBackup = null;
+        if ($csvTimestamp) {
+            $matchingBackup = glob($archiveDir . '/database_backup_' . $csvTimestamp . '.sql')[0] ?? null;
+            if ($matchingBackup) {
+                $latestBackup = $matchingBackup;
+            }
+        }
 
-        $latestBackup = $backupFiles[0] ?? null;
+        // Fallback to newest backup if no match found
+        if (!$latestBackup) {
+            $backupFiles = glob($archiveDir . '/database_backup_*.sql');
+            if ($backupFiles) {
+                usort($backupFiles, function ($a, $b) {
+                    return filemtime($b) <=> filemtime($a);
+                });
+                $latestBackup = $backupFiles[0];
+            }
+        }
 
         return [
             'success' => true,
