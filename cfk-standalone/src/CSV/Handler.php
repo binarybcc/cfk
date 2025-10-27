@@ -20,12 +20,12 @@ class Handler
 {
     /** @var array<string> Required CSV columns */
     public const REQUIRED_COLUMNS = [
-        'age', 'gender'
+        'gender'  // age_months OR age_years required (validated separately)
     ];
 
     /** @var array<string> All possible CSV columns */
     public const ALL_COLUMNS = [
-        'age', 'gender',
+        'age_months', 'age_years', 'gender',
         'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
         'interests', 'greatest_need', 'wish_list', 'special_needs', 'family_situation'
     ];
@@ -303,16 +303,27 @@ class Handler
         // Validate required fields
         foreach (self::REQUIRED_COLUMNS as $field) {
             $value = trim((string) ($row[$field] ?? ''));
-            // Special handling for age field - 0 is valid, also accept months like "10m"
-            if ($field === 'age') {
-                if ($value === '' || (!is_numeric($value) && !preg_match('/^\d+m$/', $value))) {
-                    $this->errors[] = "Row $rowNumber: Missing or invalid required field '$field'";
-                    return null;
-                }
-            } elseif ($value === '' || $value === '0') {
+            if ($value === '' || $value === '0') {
                 $this->errors[] = "Row $rowNumber: Missing required field '$field'";
                 return null;
             }
+        }
+
+        // Validate age fields: exactly ONE of age_months OR age_years must be filled
+        $ageMonths = trim((string) ($row['age_months'] ?? ''));
+        $ageYears = trim((string) ($row['age_years'] ?? ''));
+
+        $hasMonths = $ageMonths !== '' && $ageMonths !== '0';
+        $hasYears = $ageYears !== '' && $ageYears !== '0';
+
+        if (!$hasMonths && !$hasYears) {
+            $this->errors[] = "Row $rowNumber: Must provide either age_months OR age_years";
+            return null;
+        }
+
+        if ($hasMonths && $hasYears) {
+            $this->errors[] = "Row $rowNumber: Cannot provide both age_months AND age_years - use only ONE";
+            return null;
         }
 
         // Clean and validate data
@@ -335,17 +346,18 @@ class Handler
             $row[$key] = is_string($value) ? trim($value) : $value;
         }
 
-        // Ensure required fields have values - handle months format
-        if (preg_match('/^(\d+)m$/', (string) $row['age'], $matches)) {
-            // Convert months to decimal age (e.g., 10m = 0.83 years)
-            $months = (int) $matches[1];
-            $row['age'] = round($months / 12, 2);
-            if ($row['age'] == 0 && $months > 0) {
-                $row['age'] = 0.1;
-            } // Ensure non-zero for babies
-        } else {
-            $row['age'] = (int) $row['age'];
+        // Convert age to months for database storage
+        $ageMonthsValue = trim((string) ($row['age_months'] ?? ''));
+        $ageYearsValue = trim((string) ($row['age_years'] ?? ''));
+
+        if ($ageMonthsValue !== '' && $ageMonthsValue !== '0') {
+            // Age provided in months - use directly
+            $row['age_months'] = (int) $ageMonthsValue;
+        } elseif ($ageYearsValue !== '' && $ageYearsValue !== '0') {
+            // Age provided in years - convert to months
+            $row['age_months'] = (int) $ageYearsValue * 12;
         }
+
         $row['gender'] = strtoupper((string) $row['gender']);
 
         // Parse family ID from name field (e.g., "001A" -> family_id=001, child_letter=A)
@@ -382,10 +394,30 @@ class Handler
     {
         $valid = true;
 
-        // Age validation - handle numeric ages (including decimals for months)
-        if ($row['age'] < 0 || $row['age'] > 18) {
-            $this->errors[] = "Row $rowNumber: Age must be between 0 and 18";
+        // Age validation - age_months should be 0-216 (0-18 years)
+        if (!isset($row['age_months']) || $row['age_months'] < 0 || $row['age_months'] > 216) {
+            $this->errors[] = "Row $rowNumber: Age must be between 0-24 months or 0-18 years (max 216 months)";
             $valid = false;
+        }
+
+        // Validate range based on source
+        $ageMonthsInput = trim((string) ($row['age_months'] ?? ''));
+        $ageYearsInput = trim((string) ($row['age_years'] ?? ''));
+
+        if ($ageMonthsInput !== '' && $ageMonthsInput !== '0') {
+            // Months provided - validate 0-24 range
+            $months = (int) $ageMonthsInput;
+            if ($months < 0 || $months > 24) {
+                $this->errors[] = "Row $rowNumber: age_months must be between 0 and 24";
+                $valid = false;
+            }
+        } elseif ($ageYearsInput !== '' && $ageYearsInput !== '0') {
+            // Years provided - validate 0-18 range
+            $years = (int) $ageYearsInput;
+            if ($years < 0 || $years > 18) {
+                $this->errors[] = "Row $rowNumber: age_years must be between 0 and 18";
+                $valid = false;
+            }
         }
 
         // Gender validation
@@ -408,9 +440,12 @@ class Handler
             }
         }
 
-        // Age/grade consistency check (convert decimals to int for checking)
-        if (!empty($row['grade']) && $this->isAgeGradeMismatch((int) $row['age'], (string) $row['grade'])) {
-            $this->warnings[] = "Row $rowNumber: Age {$row['age']} and grade '{$row['grade']}' may not match";
+        // Age/grade consistency check (convert months to years for checking)
+        if (!empty($row['grade']) && isset($row['age_months'])) {
+            $ageYears = (int) floor($row['age_months'] / 12);
+            if ($this->isAgeGradeMismatch($ageYears, (string) $row['grade'])) {
+                $this->warnings[] = "Row $rowNumber: Age " . displayAge($row['age_months']) . " and grade '{$row['grade']}' may not match";
+            }
         }
 
         // Shoe size date conversion check (common Excel error)
@@ -478,7 +513,7 @@ class Handler
             'family_id' => $familyId,
             'child_letter' => $childLetter,
             'name' => $row['name'],
-            'age' => $row['age'],
+            'age_months' => $row['age_months'],
             'gender' => $row['gender'],
             'grade' => '', // Not in CSV - calculated from age on display
             'school' => '', // Not in CSV
