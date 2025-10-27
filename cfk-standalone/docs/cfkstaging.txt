@@ -1,0 +1,5 @@
+host: 10ce79bd48.nxcli.io
+Port: 22
+Username: ac6c9a98_1
+SSH Command:ssh ac6c9a98_1@10ce79bd48.nxcli.io
+password:WhitFezMunchWooer
