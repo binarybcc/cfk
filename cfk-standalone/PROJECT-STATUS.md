@@ -1,15 +1,40 @@
 # Christmas for Kids - Project Status
 
-**Last Updated:** October 14, 2025
-**Current Version:** v1.5.1
-**Active Branch:** `v1.5-reservation-system`
-**Main Branch:** `v1.0.3-rebuild`
+**Last Updated:** October 27, 2025
+**Current Version:** v1.7.2 (Production) / v1.9-modernization (Development)
+**Active Branch:** `v1.7` (stable), `v1.9-modernization` (latest)
+**Main Branch:** `main`
+
+---
+
+## 🌐 PRODUCTION DEPLOYMENT STATUS
+
+### Current Production Version: v1.7.2
+**Deployed:** October 25, 2025 (21:00)
+**URL:** https://cforkids.org
+**Status:** ✅ STABLE - Running in production
+
+**Deployed Features:**
+- ✅ v1.7 base release (comprehensive edit functionality, AJAX system)
+- ✅ v1.7.1 bugfixes (edit handlers, stuck Processing button fixes)
+- ✅ v1.7.2 PHPStan fixes (Database method improvements, code quality)
+
+**Available but NOT Deployed:**
+- 🔄 v1.8-cleanup (dead code cleanup, 3,624 lines removed)
+- 🔄 v1.9-modernization (complete OOP modernization plan)
+
+**Verification Command:**
+```bash
+# Check production version from any workstation
+sshpass -p 'HangerAbodeFicesMoved' ssh a4409d26_1@d646a74eb9.nxcli.io \
+  "cd public_html/config && grep app_version config.php"
+```
 
 ---
 
 ## 🎯 Current Project State
 
-### Status: ✅ STABLE - Ready for User Testing
+### Status: ✅ STABLE - Production Ready
 - All security fixes deployed and tested
 - Functional testing infrastructure in place
 - No critical issues outstanding
@@ -64,9 +89,20 @@
 - **Status:** ✅ Deployed and stable
 - **Host:** d646a74eb9.nxcli.io
 - **URL:** https://cforkids.org
-- **Last Deployment:** October 14, 2025
+- **Current Version:** v1.7.2
+- **Last Deployment:** October 25, 2025 (21:00)
 - **Security Score:** 9.5/10
 - **Known Issues:** None
+
+### 📊 Available Branches
+| Branch | Status | Deployed | Description |
+|--------|--------|----------|-------------|
+| `main` | Stable | No | Main branch |
+| `v1.7` | Stable | ✅ Yes (base) | Production stable |
+| `v1.7.1-edit-bugfix` | Stable | ✅ Yes | Edit handlers, bugfixes |
+| `v1.7.2-phpstan-fixes` | Stable | ✅ Yes | PHPStan code quality |
+| `v1.8-cleanup` | Ready | No | Dead code cleanup (3,624 lines) |
+| `v1.9-modernization` | Planning | No | OOP modernization plan |
 
 ---
 
@@ -119,12 +155,24 @@ docker-compose logs web  # View PHP logs
 ```bash
 🌐 PRODUCTION:
 # Deploy single file
-sshpass -p 'PiggedCoifSourerFating' scp -P 22 \
+sshpass -p 'HangerAbodeFicesMoved' scp \
   admin/filename.php \
-  a4409d26_1@d646a74eb9.nxcli.io:/home/a4409d26/d646a74eb9.nxcli.io/html/admin/
+  a4409d26_1@d646a74eb9.nxcli.io:public_html/admin/
 
 # SSH to server
-ssh a4409d26_1@d646a74eb9.nxcli.io
+sshpass -p 'HangerAbodeFicesMoved' ssh a4409d26_1@d646a74eb9.nxcli.io
+
+# Check deployed version
+sshpass -p 'HangerAbodeFicesMoved' ssh a4409d26_1@d646a74eb9.nxcli.io \
+  "cd public_html/config && grep app_version config.php"
+```
+
+### Update Production Version Number
+```bash
+🌐 PRODUCTION:
+# After deploying new version, update version string
+sshpass -p 'HangerAbodeFicesMoved' ssh a4409d26_1@d646a74eb9.nxcli.io \
+  "cd public_html/config && sed -i \"s/'app_version' => '.*'/'app_version' => 'X.X.X'/g\" config.php"
 ```
 
 ### Check Production Logs
