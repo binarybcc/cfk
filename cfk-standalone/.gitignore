@@ -41,8 +41,8 @@ temp/
 # Node modules (if using npm for any tools)
 node_modules/
 
-# Archive directory
-archive/
+# Archives directory (backup storage, not source code!)
+/archives/
 
 # Generated documentation exports
 docs/exports/
