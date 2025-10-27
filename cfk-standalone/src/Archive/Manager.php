@@ -471,4 +471,263 @@ class Manager
 
         return round($bytes / 1073741824, 2) . ' GB';
     }
+
+    /**
+     * Restore database from SQL backup file
+     *
+     * @param string $year Archive year
+     * @param string $backupFile Backup filename (not full path)
+     * @param bool $debug Enable detailed debug logging
+     * @return array<string, mixed> Result with success status and details
+     */
+    public static function restoreDatabase(string $year, string $backupFile, bool $debug = true): array
+    {
+        $debugLog = [];
+
+        try {
+            $debugLog[] = "Starting database restore for year: {$year}";
+            $archiveDir = __DIR__ . '/../../archives/' . $year;
+            $backupPath = $archiveDir . '/' . $backupFile;
+
+            // Validate backup file exists
+            if (!file_exists($backupPath)) {
+                $debugLog[] = "ERROR: Backup file not found at: {$backupPath}";
+                error_log("Archive restore failed: Backup file not found - {$backupPath}");
+
+                return [
+                    'success' => false,
+                    'message' => 'Backup file not found',
+                    'debug_log' => $debugLog
+                ];
+            }
+
+            $fileSize = filesize($backupPath);
+            $debugLog[] = "Backup file found: " . self::formatBytes($fileSize);
+
+            // Get database credentials
+            $dbHost = getenv('DB_HOST') ?: config('db_host', 'localhost');
+            $dbName = getenv('DB_NAME') ?: config('db_name', '');
+            $dbUser = getenv('DB_USER') ?: config('db_user', '');
+            $dbPass = getenv('DB_PASSWORD') ?: config('db_password', '');
+
+            $debugLog[] = "Database: {$dbName}@{$dbHost}";
+
+            // Build mysql restore command
+            $command = sprintf(
+                'mysql -h %s -u %s -p%s %s < %s 2>&1',
+                escapeshellarg($dbHost),
+                escapeshellarg($dbUser),
+                escapeshellarg($dbPass),
+                escapeshellarg($dbName),
+                escapeshellarg($backupPath)
+            );
+
+            $debugLog[] = "Executing restore command...";
+            $startTime = microtime(true);
+
+            exec($command, $output, $returnCode);
+
+            $duration = round(microtime(true) - $startTime, 2);
+            $debugLog[] = "Restore completed in {$duration} seconds";
+            $debugLog[] = "Return code: {$returnCode}";
+
+            if ($returnCode === 0) {
+                $debugLog[] = "✅ Database restore successful";
+                error_log("Archive restore successful: {$year}/{$backupFile}");
+
+                return [
+                    'success' => true,
+                    'message' => 'Database restored successfully',
+                    'duration' => $duration,
+                    'file_size' => $fileSize,
+                    'debug_log' => $debugLog
+                ];
+            }
+
+            $debugLog[] = "❌ Restore command failed";
+            $debugLog[] = "Output: " . implode("\n", $output);
+            error_log("Archive restore failed: " . implode(" | ", $output));
+
+            return [
+                'success' => false,
+                'message' => 'Database restore failed: ' . implode("\n", $output),
+                'debug_log' => $debugLog
+            ];
+        } catch (Exception $e) {
+            $debugLog[] = "EXCEPTION: " . $e->getMessage();
+            error_log('Archive restore exception: ' . $e->getMessage());
+
+            return [
+                'success' => false,
+                'message' => 'Restore error: ' . $e->getMessage(),
+                'debug_log' => $debugLog
+            ];
+        }
+    }
+
+    /**
+     * Get restore preview - what data would be restored
+     *
+     * @param string $year Archive year
+     * @return array<string, mixed> Preview data
+     */
+    public static function getRestorePreview(string $year): array
+    {
+        $archiveDir = __DIR__ . '/../../archives/' . $year;
+
+        if (!file_exists($archiveDir)) {
+            return [
+                'success' => false,
+                'message' => 'Archive not found'
+            ];
+        }
+
+        // Read archive summary
+        $summaryFile = $archiveDir . '/ARCHIVE_SUMMARY.txt';
+        $summary = file_exists($summaryFile) ? file_get_contents($summaryFile) : null;
+
+        // Find CSV files to get record counts
+        $csvFiles = [
+            'children' => glob($archiveDir . '/children_*.csv')[0] ?? null,
+            'families' => glob($archiveDir . '/families_*.csv')[0] ?? null,
+            'sponsorships' => glob($archiveDir . '/sponsorships_*.csv')[0] ?? null,
+            'email_log' => glob($archiveDir . '/email_log_*.csv')[0] ?? null,
+        ];
+
+        $counts = [];
+        foreach ($csvFiles as $type => $file) {
+            if ($file && file_exists($file)) {
+                // Count lines (minus header)
+                $lines = count(file($file));
+                $counts[$type] = max(0, $lines - 1);
+            } else {
+                $counts[$type] = 0;
+            }
+        }
+
+        // Find most recent database backup
+        $backupFiles = glob($archiveDir . '/database_backup_*.sql');
+        usort($backupFiles, function ($a, $b) {
+            return filemtime($b) <=> filemtime($a);
+        });
+
+        $latestBackup = $backupFiles[0] ?? null;
+
+        return [
+            'success' => true,
+            'year' => $year,
+            'summary' => $summary,
+            'counts' => $counts,
+            'backup_file' => $latestBackup ? basename($latestBackup) : null,
+            'backup_size' => $latestBackup ? filesize($latestBackup) : 0,
+            'backup_date' => $latestBackup ? date('Y-m-d H:i:s', filemtime($latestBackup)) : null,
+        ];
+    }
+
+    /**
+     * Perform full archive restoration with confirmation
+     *
+     * @param string $year Year to restore
+     * @param string $confirmationCode Must be "RESTORE [YEAR]"
+     * @param bool $debug Enable debug logging
+     * @return array<string, mixed> Result with success status and details
+     */
+    public static function performArchiveRestore(string $year, string $confirmationCode, bool $debug = true): array
+    {
+        $debugLog = [];
+
+        // Validate confirmation code
+        $expectedCode = 'RESTORE ' . $year;
+        if ($confirmationCode !== $expectedCode) {
+            return [
+                'success' => false,
+                'message' => 'Invalid confirmation code. Expected: ' . $expectedCode,
+                'debug_log' => ['Confirmation code mismatch']
+            ];
+        }
+
+        $debugLog[] = "=== Starting Archive Restore for Year {$year} ===";
+        $debugLog[] = "Timestamp: " . date('Y-m-d H:i:s');
+
+        // Get preview to find backup file
+        $preview = self::getRestorePreview($year);
+        if (!$preview['success']) {
+            $debugLog[] = "ERROR: Archive not found";
+            return [
+                'success' => false,
+                'message' => 'Archive not found for year: ' . $year,
+                'debug_log' => $debugLog
+            ];
+        }
+
+        $backupFile = $preview['backup_file'];
+        if (!$backupFile) {
+            $debugLog[] = "ERROR: No backup file found in archive";
+            return [
+                'success' => false,
+                'message' => 'No database backup found in archive',
+                'debug_log' => $debugLog
+            ];
+        }
+
+        $debugLog[] = "Backup file: {$backupFile}";
+        $debugLog[] = "Expected records - Children: {$preview['counts']['children']}, Families: {$preview['counts']['families']}";
+
+        // Perform database restore
+        $debugLog[] = "--- Starting Database Restore ---";
+        $restoreResult = self::restoreDatabase($year, $backupFile, $debug);
+
+        // Merge debug logs
+        if (isset($restoreResult['debug_log'])) {
+            $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
+        }
+
+        if (!$restoreResult['success']) {
+            $debugLog[] = "❌ DATABASE RESTORE FAILED";
+            error_log("Archive restoration failed for {$year}: " . $restoreResult['message']);
+
+            return [
+                'success' => false,
+                'message' => 'Archive restoration failed: ' . $restoreResult['message'],
+                'debug_log' => $debugLog
+            ];
+        }
+
+        // Verify restoration by counting records
+        $debugLog[] = "--- Verifying Restoration ---";
+        try {
+            $verifyStats = [
+                'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
+                'families' => Connection::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
+                'sponsorships' => Connection::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
+                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
+            ];
+
+            $debugLog[] = "Restored records:";
+            $debugLog[] = "  - Children: {$verifyStats['children']}";
+            $debugLog[] = "  - Families: {$verifyStats['families']}";
+            $debugLog[] = "  - Sponsorships: {$verifyStats['sponsorships']}";
+            $debugLog[] = "  - Email Logs: {$verifyStats['email_log']}";
+
+            $debugLog[] = "=== Archive Restore Completed Successfully ===";
+
+            error_log("Archive restoration completed for {$year} - Children: {$verifyStats['children']}, Families: {$verifyStats['families']}");
+
+            return [
+                'success' => true,
+                'message' => 'Archive restored successfully',
+                'restored_counts' => $verifyStats,
+                'duration' => $restoreResult['duration'] ?? 0,
+                'debug_log' => $debugLog
+            ];
+        } catch (Exception $e) {
+            $debugLog[] = "ERROR during verification: " . $e->getMessage();
+
+            return [
+                'success' => false,
+                'message' => 'Restore completed but verification failed: ' . $e->getMessage(),
+                'debug_log' => $debugLog
+            ];
+        }
+    }
 }
