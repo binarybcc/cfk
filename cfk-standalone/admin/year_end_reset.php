@@ -108,19 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
-<!-- DEBUG BANNER -->
-<div style="background: #fff3cd; border: 3px solid #856404; padding: 15px; margin: 20px; border-radius: 8px; font-family: monospace;">
-    <h3 style="margin: 0 0 10px 0; color: #856404;">🔍 DEBUG INFO</h3>
-    <p style="margin: 5px 0;"><strong>REQUEST_METHOD:</strong> <?php echo $_SERVER['REQUEST_METHOD'] ?? 'NOT SET'; ?></p>
-    <p style="margin: 5px 0;"><strong>POST received:</strong> <?php echo $_POST === [] ? '❌ NO' : '✅ YES'; ?></p>
-    <?php if ($_POST !== []) : ?>
-        <p style="margin: 5px 0;"><strong>POST keys:</strong> <?php echo implode(', ', array_keys($_POST)); ?></p>
-        <p style="margin: 5px 0;"><strong>perform_reset present:</strong> <?php echo isset($_POST['perform_reset']) ? '✅ YES' : '❌ NO'; ?></p>
-    <?php endif; ?>
-    <p style="margin: 5px 0;"><strong>Form submitted detected:</strong> <?php echo ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) ? '✅ YES' : '❌ NO'; ?></p>
-</div>
-<!-- END DEBUG BANNER -->
-
 <div class="year-end-reset-page">
     <div class="page-header">
         <h1>⚠️ Year-End Reset</h1>
@@ -146,10 +133,10 @@ include __DIR__ . '/includes/admin_header.php';
             <?php if ($resetResult && isset($resetResult['deleted_counts'])) : ?>
                 <h4>Deleted Records:</h4>
                 <ul>
-                    <li>Children: <?php echo $resetResult['deleted_counts']['children']; ?></li>
-                    <li>Families: <?php echo $resetResult['deleted_counts']['families']; ?></li>
-                    <li>Sponsorships: <?php echo $resetResult['deleted_counts']['sponsorships']; ?></li>
-                    <li>Email Logs: <?php echo $resetResult['deleted_counts']['email_log']; ?></li>
+                    <li>Children: <?php echo (int)($resetResult['deleted_counts']['children'] ?? 0); ?></li>
+                    <li>Families: <?php echo (int)($resetResult['deleted_counts']['families'] ?? 0); ?></li>
+                    <li>Sponsorships: <?php echo (int)($resetResult['deleted_counts']['sponsorships'] ?? 0); ?></li>
+                    <li>Email Logs: <?php echo (int)($resetResult['deleted_counts']['email_log'] ?? 0); ?></li>
                 </ul>
             <?php endif; ?>
 
@@ -170,7 +157,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3><?php echo $currentStats['children']; ?></h3>
+                    <h3><?php echo (int)($currentStats['children'] ?? 0); ?></h3>
                     <p>Children</p>
                 </div>
             </div>
@@ -178,7 +165,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👨‍👩‍👧‍👦</div>
                 <div class="stat-content">
-                    <h3><?php echo $currentStats['families']; ?></h3>
+                    <h3><?php echo (int)($currentStats['families'] ?? 0); ?></h3>
                     <p>Families</p>
                 </div>
             </div>
@@ -186,7 +173,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
                 <div class="stat-content">
-                    <h3><?php echo $currentStats['sponsorships']; ?></h3>
+                    <h3><?php echo (int)($currentStats['sponsorships'] ?? 0); ?></h3>
                     <p>Sponsorships</p>
                 </div>
             </div>
@@ -194,7 +181,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-content">
-                    <h3><?php echo $currentStats['email_log']; ?></h3>
+                    <h3><?php echo (int)($currentStats['email_log'] ?? 0); ?></h3>
                     <p>Email Logs</p>
                 </div>
             </div>
