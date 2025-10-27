@@ -16,10 +16,7 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-
-// Use namespaced classes
-use CFK\Archive\Manager as ArchiveManager;
-use CFK\Database\Connection as Database;
+require_once __DIR__ . '/../includes/archive_manager.php';
 
 // Check if user is logged in
 if (!isLoggedIn()) {
@@ -31,11 +28,12 @@ $pageTitle = 'Year-End Reset';
 
 // Get current stats
 try {
+    $db = getDatabase();
     $currentStats = [
-        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+        'children' => $db->query("SELECT COUNT(*) as count FROM children")->fetch(PDO::FETCH_ASSOC)['count'],
+        'families' => $db->query("SELECT COUNT(*) as count FROM families")->fetch(PDO::FETCH_ASSOC)['count'],
+        'sponsorships' => $db->query("SELECT COUNT(*) as count FROM sponsorships")->fetch(PDO::FETCH_ASSOC)['count'],
+        'email_log' => $db->query("SELECT COUNT(*) as count FROM email_log")->fetch(PDO::FETCH_ASSOC)['count']
     ];
 } catch (Exception $e) {
     error_log("Failed to get stats: " . $e->getMessage());
