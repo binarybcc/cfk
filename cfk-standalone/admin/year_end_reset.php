@@ -58,11 +58,58 @@ try {
 $errors = [];
 $success = null;
 $resetResult = null;
+$restoreResult = null;
+$debugLog = [];
 
 // Debug: Log all requests
 error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
 
-// Handle form submission
+// Handle restore form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
+    error_log("ARCHIVE_RESTORE: Form submitted. POST data: " . print_r($_POST, true));
+
+    // Verify CSRF token
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        error_log("ARCHIVE_RESTORE: CSRF token verification FAILED");
+        $errors[] = 'Security token invalid. Please try again.';
+    } else {
+        $year = sanitizeString($_POST['restore_year'] ?? '');
+        $confirmationCode = $_POST['restore_confirmation_code'] ?? '';
+
+        if (empty($year)) {
+            $errors[] = 'Please select a year to restore.';
+        } else {
+            // Perform restore
+            error_log("ARCHIVE_RESTORE: Calling performArchiveRestore for year={$year}");
+            $restoreResult = ArchiveManager::performArchiveRestore($year, $confirmationCode, true);
+            $debugLog = $restoreResult['debug_log'] ?? [];
+            error_log("ARCHIVE_RESTORE: Result: " . ($restoreResult['success'] ? 'SUCCESS' : 'FAILED'));
+
+            if ($restoreResult['success']) {
+                $success = $restoreResult['message'];
+
+                // Log the action
+                error_log("Archive restored for year {$year} by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown'));
+
+                // Refresh stats to show restored data
+                try {
+                    $currentStats = [
+                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
+                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
+                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
+                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+                    ];
+                } catch (Exception $e) {
+                    // Keep existing stats
+                }
+            } else {
+                $errors[] = $restoreResult['message'];
+            }
+        }
+    }
+}
+
+// Handle reset form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
     error_log("YEAR_END_RESET: Form submitted. POST data: " . print_r($_POST, true));
 
@@ -138,14 +185,43 @@ include __DIR__ . '/includes/admin_header.php';
                     <li>Sponsorships: <?php echo (int)($resetResult['deleted_counts']['sponsorships'] ?? 0); ?></li>
                     <li>Email Logs: <?php echo (int)($resetResult['deleted_counts']['email_log'] ?? 0); ?></li>
                 </ul>
+
+                <p><strong>Next Steps:</strong></p>
+                <ol>
+                    <li>Verify archive was created in <code>archives/<?php echo sanitizeString($_POST['year'] ?? ''); ?>/</code></li>
+                    <li>Import new season's CSV data</li>
+                    <li>Test with a few sample children</li>
+                </ol>
             <?php endif; ?>
 
-            <p><strong>Next Steps:</strong></p>
-            <ol>
-                <li>Verify archive was created in <code>archives/<?php echo sanitizeString($_POST['year'] ?? ''); ?>/</code></li>
-                <li>Import new season's CSV data</li>
-                <li>Test with a few sample children</li>
-            </ol>
+            <?php if ($restoreResult && isset($restoreResult['restored_counts'])) : ?>
+                <h4>Restored Records:</h4>
+                <ul>
+                    <li>Children: <?php echo (int)($restoreResult['restored_counts']['children'] ?? 0); ?></li>
+                    <li>Families: <?php echo (int)($restoreResult['restored_counts']['families'] ?? 0); ?></li>
+                    <li>Sponsorships: <?php echo (int)($restoreResult['restored_counts']['sponsorships'] ?? 0); ?></li>
+                    <li>Email Logs: <?php echo (int)($restoreResult['restored_counts']['email_log'] ?? 0); ?></li>
+                </ul>
+                <p><strong>Duration:</strong> <?php echo number_format($restoreResult['duration'] ?? 0, 2); ?> seconds</p>
+
+                <p><strong>Next Steps:</strong></p>
+                <ol>
+                    <li>Verify data on <a href="manage_children.php">Children Management</a> page</li>
+                    <li>Check <a href="manage_sponsorships.php">Sponsorships</a> are restored correctly</li>
+                    <li>Test the public-facing site functionality</li>
+                </ol>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
+
+    <?php if (!empty($debugLog)) : ?>
+        <div class="debug-log-section">
+            <h3>🔍 Restoration Debug Log</h3>
+            <div class="debug-log-content">
+                <?php foreach ($debugLog as $logEntry) : ?>
+                    <div class="debug-log-entry"><?php echo htmlspecialchars($logEntry); ?></div>
+                <?php endforeach; ?>
+            </div>
         </div>
     <?php endif; ?>
 
@@ -266,10 +342,67 @@ include __DIR__ . '/includes/admin_header.php';
                             <a href="<?php echo str_replace(__DIR__ . '/..', '..', $archive['path']); ?>/ARCHIVE_SUMMARY.txt"
                                class="btn btn-small btn-primary"
                                target="_blank">View Summary</a>
+                            <button type="button"
+                                    class="btn btn-small btn-success"
+                                    onclick="showRestoreForm('<?php echo sanitizeString($archive['year']); ?>')">
+                                🔄 Restore
+                            </button>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
+        </div>
+
+        <!-- Restore Archive Form -->
+        <div class="restore-form-section" id="restoreFormSection" style="display: none;">
+            <h2>🔄 Restore Archive</h2>
+
+            <div class="warning-box">
+                <h3>⚠️ CRITICAL WARNING</h3>
+                <p><strong>This action will:</strong></p>
+                <ul>
+                    <li>❌ OVERWRITE all current data in the database</li>
+                    <li>✅ Restore all children, families, and sponsorships from archive</li>
+                    <li>✅ Restore email logs</li>
+                    <li>⚠️  Current data will be LOST unless you create a backup first!</li>
+                </ul>
+                <p class="warning-note"><strong>THIS ACTION CANNOT BE UNDONE!</strong></p>
+                <p>Only proceed if you are certain you want to restore this archive.</p>
+            </div>
+
+            <form method="POST" action="" id="restoreForm" class="reset-form">
+                <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                <input type="hidden" name="perform_restore" value="1">
+                <input type="hidden" name="restore_year" id="restoreYear" value="">
+
+                <div class="form-group">
+                    <label class="form-label">Year to Restore</label>
+                    <div class="form-input-readonly" id="restoreYearDisplay"></div>
+                    <div class="form-help">The archive year that will be restored</div>
+                </div>
+
+                <div class="form-group" id="restorePreview">
+                    <!-- Preview will be loaded via JavaScript -->
+                </div>
+
+                <div class="form-group">
+                    <label for="restore_confirmation_code" class="form-label">Confirmation Code</label>
+                    <input type="text"
+                           id="restore_confirmation_code"
+                           name="restore_confirmation_code"
+                           class="form-input"
+                           placeholder="Type: RESTORE [YEAR]"
+                           required>
+                    <div class="form-help">Type <strong>RESTORE</strong> followed by a space and the year (e.g., "RESTORE <span id="restoreYearHint"></span>")</div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" name="perform_restore" class="btn btn-large btn-success" id="restoreButton">
+                        🔄 Restore Archive
+                    </button>
+                    <button type="button" class="btn btn-large btn-secondary" onclick="hideRestoreForm()">Cancel</button>
+                </div>
+            </form>
         </div>
     <?php else : ?>
         <div class="archives-section">
@@ -587,6 +720,76 @@ include __DIR__ . '/includes/admin_header.php';
 .alert ul {
     margin: 1rem 0;
 }
+
+.restore-form-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.restore-form-section h2 {
+    color: #28a745;
+    margin-bottom: 1.5rem;
+}
+
+.form-input-readonly {
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    background: #f8f9fa;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c5530;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.debug-log-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border-left: 4px solid #007bff;
+}
+
+.debug-log-section h3 {
+    color: #007bff;
+    margin-top: 0;
+}
+
+.debug-log-content {
+    background: #fff;
+    padding: 1rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.debug-log-entry {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.debug-log-entry:last-child {
+    border-bottom: none;
+}
+
+.archive-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
 </style>
 
 <script nonce="<?php echo $cspNonce; ?>">
@@ -628,6 +831,69 @@ document.getElementById('resetForm').addEventListener('submit', function(e) {
     // Allow form to submit naturally (don't prevent default)
     // Form will submit after this event handler completes
 });
+
+// Restore form functions
+function showRestoreForm(year) {
+    // Set the year
+    document.getElementById('restoreYear').value = year;
+    document.getElementById('restoreYearDisplay').textContent = year;
+    document.getElementById('restoreYearHint').textContent = year;
+
+    // Show the form
+    document.getElementById('restoreFormSection').style.display = 'block';
+
+    // Scroll to the form
+    document.getElementById('restoreFormSection').scrollIntoView({ behavior: 'smooth' });
+
+    // Clear previous confirmation
+    document.getElementById('restore_confirmation_code').value = '';
+}
+
+function hideRestoreForm() {
+    document.getElementById('restoreFormSection').style.display = 'none';
+    document.getElementById('restoreYear').value = '';
+    document.getElementById('restore_confirmation_code').value = '';
+}
+
+// Restore form validation
+const restoreFormEl = document.getElementById('restoreForm');
+if (restoreFormEl) {
+    restoreFormEl.addEventListener('submit', function(e) {
+        const year = document.getElementById('restoreYear').value.trim();
+        const confirmationCode = document.getElementById('restore_confirmation_code').value.trim();
+        const expectedCode = 'RESTORE ' + year;
+
+        if (!year) {
+            alert('Please select a year to restore.');
+            e.preventDefault();
+            return;
+        }
+
+        if (confirmationCode !== expectedCode) {
+            alert(`Confirmation code incorrect.\n\nYou must type exactly: ${expectedCode}`);
+            e.preventDefault();
+            return;
+        }
+
+        // Final confirmation
+        const message = `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
+                        `This will:\n` +
+                        `• OVERWRITE all current database data\n` +
+                        `• Restore archive from year ${year}\n` +
+                        `• Current data will be LOST!\n` +
+                        `• This CANNOT be undone!\n\n` +
+                        `Are you ABSOLUTELY SURE you want to proceed?`;
+
+        if (!confirm(message)) {
+            e.preventDefault();
+            return;
+        }
+
+        // Disable button to prevent double-submit
+        document.getElementById('restoreButton').disabled = true;
+        document.getElementById('restoreButton').textContent = '⏳ Restoring...';
+    });
+}
 </script>
 
 <?php include __DIR__ . '/includes/admin_footer.php'; ?>
