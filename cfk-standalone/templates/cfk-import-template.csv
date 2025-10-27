@@ -1,7 +1,7 @@
-name,age,gender,shirt_size,pant_size,shoe_size,jacket_size,interests,greatest_need,wish_list,special_needs,family_situation
-"001A",2,"F","Toddler 3T","Toddler 3T","7","Toddler 3T","Cocomelon Toys, Baby Shark","Diapers Size 5, Baby Wipes","Toy Laptop, Shopping Cart","None","Single mother, low income"
-"002A",16,"M","Men's Small","Men's Small","9","Men's XL","Gaming, Guitar, Medieval Books","Socks, Winter Coat","Gaming Headphones, Nintendo Switch","None","Grandmother raising grandchildren"
-"003A",8,"F","Girls 8","8","3","Girls 8","Soccer, Gardening, Horses","Pants, Shirts, Underwear","Soccer Ball, Bike, Lego Sets","None","Recent immigrant family"
-"003B",7,"F","Girls 7","7","1","Girls 7","Crafts, Jewelry, Horses","Socks, Underwear","Bike, Wood Craft Sets","None","Recent immigrant family"
-"004A",14,"F","Ladies XL","16","11","Ladies XL","Country Music, Mystery Games","Shoes, Winter Coat","Bell Bottom Jeans, Makeup","None","Single father, full-time student"
-"004B",6,"M","Boys 6","6 Slim","13","Boys 6","Football, Minecraft, Robots","Socks, Underwear","Interactive Robot, Nintendo Games","None","Single father, full-time student"
+name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,interests,greatest_need,wish_list,special_needs,family_situation
+"001A",24,,"F","Toddler 3T","Toddler 3T","7","Toddler 3T","Cocomelon Toys, Baby Shark","Diapers Size 5, Baby Wipes","Toy Laptop, Shopping Cart","None","Single mother, low income"
+"002A",,16,"M","Men's Small","Men's Small","9","Men's XL","Gaming, Guitar, Medieval Books","Socks, Winter Coat","Gaming Headphones, Nintendo Switch","None","Grandmother raising grandchildren"
+"003A",,8,"F","Girls 8","8","3","Girls 8","Soccer, Gardening, Horses","Pants, Shirts, Underwear","Soccer Ball, Bike, Lego Sets","None","Recent immigrant family"
+"003B",,7,"F","Girls 7","7","1","Girls 7","Crafts, Jewelry, Horses","Socks, Underwear","Bike, Wood Craft Sets","None","Recent immigrant family"
+"004A",,14,"F","Ladies XL","16","11","Ladies XL","Country Music, Mystery Games","Shoes, Winter Coat","Bell Bottom Jeans, Makeup","None","Single father, full-time student"
+"004B",,6,"M","Boys 6","6 Slim","13","Boys 6","Football, Minecraft, Robots","Socks, Underwear","Interactive Robot, Nintendo Games","None","Single father, full-time student"
