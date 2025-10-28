@@ -11,6 +11,9 @@
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="<?php echo baseUrl('assets/images/favicon.ico'); ?>">
 
+    <!-- Alpine.js for reactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <!-- Scroll Position Preservation - Execute BEFORE page renders -->
     <script>
         // Restore scroll position immediately (before any rendering)
@@ -70,7 +73,19 @@
                 'type' => $messageType ?? 'success'
             ];
         }
-        if ($displayMessage) : ?>
+
+        // Persistent error messages (for import errors and critical messages)
+        if ($displayMessage && $displayMessage['type'] === 'error') : ?>
+            <div class="persistent-alert persistent-alert-<?php echo $displayMessage['type']; ?>">
+                <strong><?php
+                    if ($displayMessage['type'] === 'error') echo '❌ Error: ';
+                    if ($displayMessage['type'] === 'success') echo '✅ Success: ';
+                    if ($displayMessage['type'] === 'warning') echo '⚠️ Warning: ';
+                ?></strong>
+                <?php echo sanitizeString($displayMessage['text']); ?>
+            </div>
+        <?php elseif ($displayMessage) : ?>
+            <!-- Toast notification for success/info messages -->
             <script>
                 // Show toast notification without disrupting page
                 (function() {
@@ -333,5 +348,37 @@
         right: 20px;
         max-width: none;
     }
+}
+
+/* Persistent Alert Messages (for errors) */
+.persistent-alert {
+    padding: 1rem 1.5rem;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    line-height: 1.6;
+}
+
+.persistent-alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border-left-color: #dc3545;
+}
+
+.persistent-alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-left-color: #28a745;
+}
+
+.persistent-alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-left-color: #ffc107;
+}
+
+.persistent-alert strong {
+    font-weight: 600;
 }
 </style>

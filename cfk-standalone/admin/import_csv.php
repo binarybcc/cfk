@@ -345,15 +345,6 @@ $backupStats = BackupManager::getBackupStats();
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
-<!-- Error/Success Messages -->
-<?php if ($message) : ?>
-    <div class="container" style="max-width: 1200px; margin: 2rem auto 0 auto; padding: 0 2rem;">
-        <div class="alert alert-<?php echo $messageType; ?>">
-            <?php echo htmlspecialchars($message); ?>
-        </div>
-    </div>
-<?php endif; ?>
-
 <!-- Page-specific styles -->
 <style>
         * {
