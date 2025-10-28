@@ -29,6 +29,9 @@ if (!isLoggedIn()) {
 }
 
 $pageTitle = 'Import Children from CSV';
+
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 $message = '';
 $messageType = '';
 $importResults = null;

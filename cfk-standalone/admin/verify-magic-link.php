@@ -36,6 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     $csrfToken = $_SESSION['csrf_token'];
+
+    // Generate CSP nonce for inline scripts
+    $cspNonce = bin2hex(random_bytes(16));
     ?>
     <!DOCTYPE html>
     <html lang="en">

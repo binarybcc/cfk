@@ -139,6 +139,8 @@ $admins = Database::fetchAll("
     ORDER BY created_at DESC
 ");
 
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 include __DIR__ . '/includes/admin_header.php';
 ?>
 

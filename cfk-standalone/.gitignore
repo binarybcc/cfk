@@ -58,3 +58,8 @@ composer.lock
 /rector-cache/
 .claude-flow/
 config/config.production.php
+
+# Temporary test files
+admin/test-forms.php
+admin/test_reset_form.php
+phpstan-full-scan.txt

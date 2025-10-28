@@ -32,6 +32,16 @@ $admin = Database::fetchRow(
     [$_SESSION['cfk_admin_id']]
 );
 
+// Ensure admin exists
+if (!$admin) {
+    error_log("Admin not found in database for session ID: " . ($_SESSION['cfk_admin_id'] ?? 'none'));
+    header('Location: logout.php');
+    exit;
+}
+
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
+
 // Handle password change submission
 if ($_POST && isset($_POST['change_password'])) {
     $currentPassword = $_POST['current_password'] ?? '';

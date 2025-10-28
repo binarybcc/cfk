@@ -63,8 +63,10 @@ $deleteResult = null;
 $debugLog = [];
 $deletionPreview = null;
 
-// Debug: Log all requests
-error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+// Debug: Log all requests (only in debug mode)
+if (config('app_debug', false)) {
+    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+}
 
 // Get deletion preview for display
 try {
@@ -76,7 +78,9 @@ try {
 
 // Handle delete archives form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_delete'])) {
-    error_log("DELETE_ARCHIVES: Form submitted. POST data: " . print_r($_POST, true));
+    if (config('app_debug', false)) {
+        error_log("DELETE_ARCHIVES: Form submitted. POST data: " . print_r($_POST, true));
+    }
 
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -86,10 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_delete'])) {
         $confirmationCode = $_POST['delete_confirmation_code'] ?? '';
 
         // Perform deletion
-        error_log("DELETE_ARCHIVES: Calling deleteOldArchives");
+        if (config('app_debug', false)) {
+            error_log("DELETE_ARCHIVES: Calling deleteOldArchives");
+        }
         $deleteResult = ArchiveManager::deleteOldArchives($confirmationCode, true);
         $debugLog = $deleteResult['debug_log'] ?? [];
-        error_log("DELETE_ARCHIVES: Result: " . ($deleteResult['success'] ? 'SUCCESS' : 'FAILED'));
+        if (config('app_debug', false)) {
+            error_log("DELETE_ARCHIVES: Result: " . ($deleteResult['success'] ? 'SUCCESS' : 'FAILED'));
+        }
 
         if ($deleteResult['success']) {
             $success = $deleteResult['message'];
@@ -112,7 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_delete'])) {
 
 // Handle restore form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
-    error_log("ARCHIVE_RESTORE: Form submitted. POST data: " . print_r($_POST, true));
+    if (config('app_debug', false)) {
+        error_log("ARCHIVE_RESTORE: Form submitted. POST data: " . print_r($_POST, true));
+    }
 
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
@@ -126,10 +136,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
             $errors[] = 'Please select a year to restore.';
         } else {
             // Perform restore
-            error_log("ARCHIVE_RESTORE: Calling performArchiveRestore for year={$year}");
+            if (config('app_debug', false)) {
+                error_log("ARCHIVE_RESTORE: Calling performArchiveRestore for year={$year}");
+            }
             $restoreResult = ArchiveManager::performArchiveRestore($year, $confirmationCode, true);
             $debugLog = $restoreResult['debug_log'] ?? [];
-            error_log("ARCHIVE_RESTORE: Result: " . ($restoreResult['success'] ? 'SUCCESS' : 'FAILED'));
+            if (config('app_debug', false)) {
+                error_log("ARCHIVE_RESTORE: Result: " . ($restoreResult['success'] ? 'SUCCESS' : 'FAILED'));
+            }
 
             if ($restoreResult['success']) {
                 $success = $restoreResult['message'];
@@ -157,14 +171,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
 
 // Handle reset form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
-    error_log("YEAR_END_RESET: Form submitted. POST data: " . print_r($_POST, true));
+    if (config('app_debug', false)) {
+        error_log("YEAR_END_RESET: Form submitted. POST data: " . print_r($_POST, true));
+    }
 
     // Verify CSRF token
     if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         error_log("YEAR_END_RESET: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
-        error_log("YEAR_END_RESET: CSRF token verified successfully");
+        if (config('app_debug', false)) {
+            error_log("YEAR_END_RESET: CSRF token verified successfully");
+        }
         $year = sanitizeString($_POST['year'] ?? '');
         $confirmationCode = $_POST['confirmation_code'] ?? '';
 
@@ -174,9 +192,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
             $errors[] = 'Year must be a 4-digit number.';
         } else {
             // Perform reset
-            error_log("YEAR_END_RESET: Calling performYearEndReset for year={$year}, code={$confirmationCode}");
+            if (config('app_debug', false)) {
+                error_log("YEAR_END_RESET: Calling performYearEndReset for year={$year}, code={$confirmationCode}");
+            }
             $resetResult = ArchiveManager::performYearEndReset($year, $confirmationCode);
-            error_log("YEAR_END_RESET: Result: " . print_r($resetResult, true));
+            if (config('app_debug', false)) {
+                error_log("YEAR_END_RESET: Result: " . print_r($resetResult, true));
+            }
 
             if ($resetResult['success']) {
                 $success = $resetResult['message'];
@@ -198,6 +220,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
     }
 }
 
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 include __DIR__ . '/includes/admin_header.php';
 ?>
 

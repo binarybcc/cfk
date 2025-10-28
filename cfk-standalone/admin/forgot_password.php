@@ -27,6 +27,9 @@ $message = '';
 $error = '';
 $success = false;
 
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
+
 // Handle password reset request
 if ($_POST && isset($_POST['reset_request'])) {
     $username = sanitizeString($_POST['username'] ?? '');

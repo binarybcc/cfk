@@ -140,6 +140,8 @@ if ($exportFormat === 'csv') {
     }
 }
 
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
