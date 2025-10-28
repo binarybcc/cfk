@@ -97,22 +97,34 @@ try {
         ]);
 
         // Send email (only for valid admins) - Use working pattern from reservation_emails.php
-        $mailer = CFK_Email_Manager::getMailer();
-        $mailer->clearAddresses();
-        $mailer->addAddress($email);
-        $mailer->Subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
-        $mailer->Body = $htmlContent;
-        $mailer->AltBody = $textContent;
+        try {
+            $mailer = CFK_Email_Manager::getMailer();
+            $mailer->clearAddresses();
+            $mailer->isHTML(true);
+            $mailer->addAddress($email);
+            $mailer->Subject = 'Magic Link Login - ' . config('app_name', 'Christmas for Kids');
+            $mailer->Body = $htmlContent;
+            $mailer->AltBody = $textContent;
 
-        $sent = $mailer->send();
+            $sent = $mailer->send();
 
-        if (!$sent) {
-            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
-                'email' => $email
-            ]);
-        } else {
-            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_sent', $ipAddress, $userAgent, 'success', [
-                'email' => $email
+            if (!$sent) {
+                error_log('Magic link email send failed: ' . $mailer->ErrorInfo);
+                MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
+                    'email' => $email,
+                    'error' => $mailer->ErrorInfo
+                ]);
+            } else {
+                error_log('Magic link email sent successfully to: ' . $email);
+                MagicLinkManager::logEvent($adminUser['id'], 'magic_link_sent', $ipAddress, $userAgent, 'success', [
+                    'email' => $email
+                ]);
+            }
+        } catch (Exception $e) {
+            error_log('Magic link email exception: ' . $e->getMessage());
+            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_exception', $ipAddress, $userAgent, 'failed', [
+                'email' => $email,
+                'error' => $e->getMessage()
             ]);
         }
     } else {

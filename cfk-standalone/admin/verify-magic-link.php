@@ -167,9 +167,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Log successful login
         MagicLinkManager::logEvent($adminUser['id'], 'admin_login_success', $ipAddress, $userAgent, 'success');
 
-        // Send login notification email
-        sendLoginNotificationEmail($adminUser['email'], $ipAddress, $userAgent);
-
         // Redirect to admin dashboard
         header('Location: ' . baseUrl('admin/'));
         exit;
@@ -187,86 +184,6 @@ http_response_code(405);
 setMessage('Method not allowed', 'error');
 header('Location: ' . baseUrl('admin/'));
 exit;
-
-/**
- * Send login notification email to admin
- */
-function sendLoginNotificationEmail(string $email, string $ipAddress, string $userAgent): void
-{
-    try {
-        // Get IP geolocation (simple approach)
-        $location = getLocationFromIp($ipAddress);
-        $deviceInfo = parseUserAgent($userAgent);
-        $timestamp = date('M d, Y \a\t g:i A T');
-
-        $subject = '🔐 New Admin Login - ' . config('app_name', 'Christmas for Kids');
-
-        $htmlContent = <<<HTML
-<!DOCTYPE html>
-<html>
-<head>
-    <style>
-        body { font-family: Arial, sans-serif; }
-        .container { max-width: 600px; margin: 0 auto; }
-        .info-box { background: #f0f0f0; padding: 15px; border-radius: 5px; margin: 10px 0; }
-        .warning { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; }
-        a { color: #2c5530; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h2>🎄 New Admin Login Notification</h2>
-        <p>Your admin account just logged in. Here are the details:</p>
-
-        <div class="info-box">
-            <strong>Login Time:</strong> {$timestamp}<br>
-            <strong>IP Address:</strong> {$ipAddress}<br>
-            <strong>Location:</strong> {$location}<br>
-            <strong>Device:</strong> {$deviceInfo}
-        </div>
-
-        <div class="warning">
-            <strong>⚠️ Suspicious Activity?</strong><br>
-            If this login wasn't you, please contact the system administrator immediately.
-        </div>
-
-        <p style="font-size: 12px; color: #999;">
-            This is an automated security notification. Please do not reply to this email.
-        </p>
-    </div>
-</body>
-</html>
-HTML;
-
-        $textContent = <<<TEXT
-New Admin Login Notification
-
-Your admin account just logged in. Here are the details:
-
-Login Time: {$timestamp}
-IP Address: {$ipAddress}
-Location: {$location}
-Device: {$deviceInfo}
-
-Suspicious Activity?
-If this login wasn't you, please contact the system administrator immediately.
-
-This is an automated security notification.
-TEXT;
-
-        // Use working email pattern from reservation_emails.php
-        $mailer = CFK_Email_Manager::getMailer();
-        $mailer->clearAddresses();
-        $mailer->addAddress($email);
-        $mailer->Subject = $subject;
-        $mailer->Body = $htmlContent;
-        $mailer->AltBody = $textContent;
-        $mailer->send();
-    } catch (Exception $e) {
-        error_log('Failed to send login notification: ' . $e->getMessage());
-        // Don't fail the login if notification fails
-    }
-}
 
 /**
  * Get approximate location from IP address

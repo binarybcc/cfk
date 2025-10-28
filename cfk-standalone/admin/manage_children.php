@@ -119,16 +119,16 @@ if ($familyFilter !== 'all') {
 if ($ageFilter !== 'all') {
     switch ($ageFilter) {
         case 'birth-4':
-            $whereConditions[] = "c.age BETWEEN 0 AND 4";
+            $whereConditions[] = "c.age_months BETWEEN 0 AND 48";
             break;
         case 'elementary':
-            $whereConditions[] = "c.age BETWEEN 5 AND 10";
+            $whereConditions[] = "c.age_months BETWEEN 60 AND 120";
             break;
         case 'middle':
-            $whereConditions[] = "c.age BETWEEN 11 AND 13";
+            $whereConditions[] = "c.age_months BETWEEN 132 AND 156";
             break;
         case 'high':
-            $whereConditions[] = "c.age BETWEEN 14 AND 18";
+            $whereConditions[] = "c.age_months BETWEEN 168 AND 216";
             break;
     }
 }
@@ -172,25 +172,83 @@ function addChild($data): array
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
 
+        $assignedFamilyNumber = null;
+        $assignedChildLetter = null;
+
+        // Handle new family creation - AUTO-ASSIGN family number
+        if ($data['family_id'] === 'new') {
+            // Find the next available family number
+            $maxFamilyResult = Database::fetchRow("SELECT MAX(CAST(family_number AS UNSIGNED)) as max_num FROM families");
+            $nextFamilyNumber = ($maxFamilyResult['max_num'] ?? 99) + 1;
+
+            $assignedFamilyNumber = (string)$nextFamilyNumber;
+
+            // Create new family with auto-assigned number
+            $familyId = Database::insert('families', [
+                'family_number' => $assignedFamilyNumber
+            ]);
+
+            if (!$familyId) {
+                return ['success' => false, 'message' => 'Failed to create new family'];
+            }
+
+            // Use the newly created family ID
+            $data['family_id'] = $familyId;
+
+            // For new families, always start with 'A'
+            $assignedChildLetter = 'A';
+            $data['child_letter'] = $assignedChildLetter;
+        } else {
+            // For existing families, auto-assign next available child letter
+            $existingLettersResult = Database::fetchAll(
+                "SELECT child_letter FROM children WHERE family_id = ? ORDER BY child_letter",
+                [$data['family_id']]
+            );
+
+            $existingLetters = array_column($existingLettersResult, 'child_letter');
+
+            // Find the next available letter
+            $letters = range('A', 'Z');
+            foreach ($letters as $letter) {
+                if (!in_array($letter, $existingLetters)) {
+                    $assignedChildLetter = $letter;
+                    $data['child_letter'] = $assignedChildLetter;
+                    break;
+                }
+            }
+
+            if (!$assignedChildLetter) {
+                return ['success' => false, 'message' => 'No available child letters for this family (maximum 26 children per family)'];
+            }
+        }
+
         // Check if family exists
-        $family = Database::fetchRow("SELECT id FROM families WHERE id = ?", [$data['family_id']]);
+        $family = Database::fetchRow("SELECT id, family_number FROM families WHERE id = ?", [$data['family_id']]);
         if (!$family) {
             return ['success' => false, 'message' => 'Selected family does not exist'];
         }
 
-        // Check if child_letter is unique within family
+        // Final safety check - ensure letter is unique within family
         $existing = Database::fetchRow(
             "SELECT id FROM children WHERE family_id = ? AND child_letter = ?",
             [$data['family_id'], $data['child_letter']]
         );
         if ($existing) {
-            return ['success' => false, 'message' => 'Child letter already exists in this family'];
+            return ['success' => false, 'message' => 'Child letter ' . $data['child_letter'] . ' already exists in this family'];
+        }
+
+        // Convert age to months if years provided
+        $ageMonths = sanitizeInt($data['age_months'] ?? 0);
+        $ageYears = sanitizeInt($data['age_years'] ?? 0);
+
+        if ($ageYears > 0) {
+            $ageMonths = $ageYears * 12;
         }
 
         $childId = Database::insert('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
-            'age' => sanitizeInt($data['age']),
+            'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
             'school' => sanitizeString($data['school'] ?? ''),
@@ -204,7 +262,15 @@ function addChild($data): array
             'status' => 'available'
         ]);
 
-        return ['success' => true, 'message' => 'Child added successfully'];
+        // Build success message with assigned family/child ID
+        $displayId = $family['family_number'] . $assignedChildLetter;
+        $successMessage = "Child {$displayId} added successfully";
+
+        if ($assignedFamilyNumber) {
+            $successMessage .= " (New family {$assignedFamilyNumber} created)";
+        }
+
+        return ['success' => true, 'message' => $successMessage];
     } catch (Exception $e) {
         error_log('Failed to add child: ' . $e->getMessage());
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
@@ -242,10 +308,18 @@ function editChild($data): array
             }
         }
 
+        // Convert age to months if years provided
+        $ageMonths = sanitizeInt($data['age_months'] ?? 0);
+        $ageYears = sanitizeInt($data['age_years'] ?? 0);
+
+        if ($ageYears > 0) {
+            $ageMonths = $ageYears * 12;
+        }
+
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
-            'age' => sanitizeInt($data['age']),
+            'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
             'school' => sanitizeString($data['school'] ?? ''),
@@ -313,20 +387,31 @@ function validateChildData($data): array
 
     // Name is optional - no validation needed
 
-    $age = sanitizeInt($data['age'] ?? 0);
-    if ($age < 1 || $age > 18) {
-        $errors[] = 'Age must be between 1 and 18';
+    // Age validation - require exactly one of months or years
+    $ageMonths = sanitizeInt($data['age_months'] ?? 0);
+    $ageYears = sanitizeInt($data['age_years'] ?? 0);
+
+    if ($ageMonths === 0 && $ageYears === 0) {
+        $errors[] = 'Age is required (enter either months or years)';
+    } elseif ($ageMonths > 0 && $ageYears > 0) {
+        $errors[] = 'Please enter age in either months OR years, not both';
+    } elseif ($ageMonths > 0) {
+        if ($ageMonths < 0 || $ageMonths > 24) {
+            $errors[] = 'Age in months must be between 0 and 24';
+        }
+    } elseif ($ageYears > 0) {
+        if ($ageYears < 0 || $ageYears > 18) {
+            $errors[] = 'Age in years must be between 0 and 18';
+        }
     }
 
     if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
         $errors[] = 'Valid gender is required';
     }
 
-    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
-        $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
-    }
+    // Child letter is auto-assigned - no validation needed
 
-    if (empty(sanitizeInt($data['family_id'] ?? 0))) {
+    if (empty($data['family_id']) || ($data['family_id'] !== 'new' && empty(sanitizeInt($data['family_id'])))) {
         $errors[] = 'Family selection is required';
     }
 
@@ -699,7 +784,7 @@ include __DIR__ . '/includes/admin_header.php';
 
                                 <div class="info-item">
                                     <div class="info-label">Age</div>
-                                    <div class="info-value"><?php echo $child['age']; ?> years</div>
+                                    <div class="info-value"><?php echo displayAge($child['age_months']); ?></div>
                                 </div>
 
                                 <div class="info-item">
@@ -850,11 +935,23 @@ include __DIR__ . '/includes/admin_header.php';
                     <input type="hidden" name="child_id" id="childId" value="">
                     
                     <div class="form-grid">
-                        <div class="form-group">
-                            <label for="childAge">Age *</label>
-                            <input type="number" id="childAge" name="age" min="1" max="18" required>
+                        <!-- Age Input - Months OR Years -->
+                        <div class="form-group form-group-full age-input-group">
+                            <label>Age * <span style="font-size: 0.9em; color: #666;">(Enter as months OR years, not both)</span></label>
+                            <div style="display: flex; gap: 1rem; align-items: center;">
+                                <div style="flex: 1;">
+                                    <label for="childAgeMonths" style="font-size: 0.9em; color: #666; margin-bottom: 0.25rem;">Months (0-24)</label>
+                                    <input type="number" id="childAgeMonths" name="age_months" min="0" max="24" placeholder="e.g., 18">
+                                </div>
+                                <div style="padding-top: 1.5rem; color: #999; font-weight: bold;">OR</div>
+                                <div style="flex: 1;">
+                                    <label for="childAgeYears" style="font-size: 0.9em; color: #666; margin-bottom: 0.25rem;">Years (0-18)</label>
+                                    <input type="number" id="childAgeYears" name="age_years" min="0" max="18" placeholder="e.g., 5">
+                                </div>
+                            </div>
+                            <div id="ageError" style="color: #dc3545; font-size: 0.9em; margin-top: 0.25rem; display: none;"></div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="childGender">Gender *</label>
                             <select id="childGender" name="gender" required>
@@ -873,22 +970,17 @@ include __DIR__ . '/includes/admin_header.php';
                             <label for="childFamily">Family *</label>
                             <select id="childFamily" name="family_id" required>
                                 <option value="">Select Family</option>
+                                <option value="new">➕ Create New Family (Auto-assigned)</option>
                                 <?php foreach ($families as $family) : ?>
                                     <option value="<?php echo $family['id']; ?>">
                                         Family <?php echo $family['family_number']; ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="childLetter">Child Letter *</label>
-                            <select id="childLetter" name="child_letter" required>
-                                <option value="">Select Letter</option>
-                                <?php for ($i = ord('A'); $i <= ord('Z'); $i++) : ?>
-                                    <option value="<?php echo chr($i); ?>"><?php echo chr($i); ?></option>
-                                <?php endfor; ?>
-                            </select>
+                            <small class="form-help">
+                                Family number and child letter are automatically assigned.<br>
+                                New families start at the next available number. Child letters start at 'A'.
+                            </small>
                         </div>
                         
                         <div class="form-group">
@@ -1043,7 +1135,19 @@ include __DIR__ . '/includes/admin_header.php';
                             // Populate all form fields
                             document.getElementById('childFamily').value = child.family_id || '';
                             document.getElementById('childLetter').value = child.child_letter || '';
-                            document.getElementById('childAge').value = child.age || '';
+
+                            // Populate age fields - convert stored months to appropriate display field
+                            const ageMonths = child.age_months || 0;
+                            if (ageMonths <= 24) {
+                                // Show in months field
+                                document.getElementById('childAgeMonths').value = ageMonths;
+                                document.getElementById('childAgeYears').value = '';
+                            } else {
+                                // Show in years field
+                                document.getElementById('childAgeMonths').value = '';
+                                document.getElementById('childAgeYears').value = Math.floor(ageMonths / 12);
+                            }
+
                             document.getElementById('childGrade').value = child.grade || '';
                             document.getElementById('childGender').value = child.gender || '';
                             document.getElementById('childSchool').value = child.school || '';
@@ -1129,20 +1233,80 @@ include __DIR__ . '/includes/admin_header.php';
             });
 
             // Form validation
+            // Age validation - clear opposite field when one is filled
+            const ageMonthsInput = document.getElementById('childAgeMonths');
+            const ageYearsInput = document.getElementById('childAgeYears');
+            const ageError = document.getElementById('ageError');
+
+            ageMonthsInput.addEventListener('input', function() {
+                if (this.value) {
+                    ageYearsInput.value = '';
+                    ageError.style.display = 'none';
+                }
+            });
+
+            ageYearsInput.addEventListener('input', function() {
+                if (this.value) {
+                    ageMonthsInput.value = '';
+                    ageError.style.display = 'none';
+                }
+            });
+
+            // Family selection - no longer needs show/hide logic (auto-assigned)
+
             childForm.addEventListener('submit', function(e) {
-                const age = document.getElementById('childAge').value;
+                const ageMonths = ageMonthsInput.value;
+                const ageYears = ageYearsInput.value;
                 const gender = document.getElementById('childGender').value;
                 const family = document.getElementById('childFamily').value;
-                const letter = document.getElementById('childLetter').value;
 
-                if (!age || !gender || !family || !letter) {
-                    alert('Please fill in all required fields (marked with *)');
+                // Validate age fields - exactly one must be filled
+                if (!ageMonths && !ageYears) {
+                    ageError.textContent = 'Please enter age in either months OR years';
+                    ageError.style.display = 'block';
                     e.preventDefault();
                     return false;
                 }
 
-                if (age < 1 || age > 18) {
-                    alert('Age must be between 1 and 18');
+                if (ageMonths && ageYears) {
+                    ageError.textContent = 'Please use only ONE age field (months OR years, not both)';
+                    ageError.style.display = 'block';
+                    e.preventDefault();
+                    return false;
+                }
+
+                // Validate ranges
+                if (ageMonths) {
+                    const months = parseInt(ageMonths);
+                    if (months < 0 || months > 24) {
+                        ageError.textContent = 'Age in months must be between 0 and 24';
+                        ageError.style.display = 'block';
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+
+                if (ageYears) {
+                    const years = parseInt(ageYears);
+                    if (years < 0 || years > 18) {
+                        ageError.textContent = 'Age in years must be between 0 and 18';
+                        ageError.style.display = 'block';
+                        e.preventDefault();
+                        return false;
+                    }
+                }
+
+                // Validate family selection
+                if (!family) {
+                    alert('Please select a family or create a new one');
+                    e.preventDefault();
+                    return false;
+                }
+
+                // No need to validate new family number or child letter - they're auto-assigned!
+
+                if (!gender) {
+                    alert('Please fill in all required fields (marked with *)');
                     e.preventDefault();
                     return false;
                 }
