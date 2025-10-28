@@ -10,6 +10,8 @@
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
+
+global $cspNonce;
 }
 
 // Get family_number from URL (e.g., 201, 202, etc.)
@@ -48,7 +50,6 @@ $available_count = count(array_filter($family_members, fn($member): bool => $mem
 $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
 // Generate CSP nonce for inline scripts
-$cspNonce = bin2hex(random_bytes(16));
 ?>
 
 <div class="family-page">

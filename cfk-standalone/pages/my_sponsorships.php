@@ -10,6 +10,8 @@
 if (!defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
+
+global $cspNonce;
 }
 
 require_once __DIR__ . '/../includes/reservation_functions.php';

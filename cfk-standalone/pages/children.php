@@ -11,10 +11,8 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
+global $cspNonce;
 $pageTitle = 'Children Needing Sponsorship';
-
-// Generate CSP nonce for inline scripts
-$cspNonce = bin2hex(random_bytes(16));
 
 // Check if viewing a specific family
 $viewingFamily = !empty($_GET['family_id']);

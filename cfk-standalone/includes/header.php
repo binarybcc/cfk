@@ -1,9 +1,6 @@
 <?php
-// Set strict Content Security Policy with nonces
-if (!isset($_SESSION['csp_nonce'])) {
-    $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
-}
-$cspNonce = $_SESSION['csp_nonce'];
+// CSP nonce is generated in config.php and available as $cspNonce
+global $cspNonce;
 
 // Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
 $csp = implode('; ', [
@@ -149,7 +146,7 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
     </style>
     
     <!-- Zeffy donation integration -->
-    <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
+    <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js" nonce="<?php echo $cspNonce; ?>"></script>
 </head>
 <body>
     <!-- Skip Navigation Link for Keyboard Users (WCAG 2.4.1) -->

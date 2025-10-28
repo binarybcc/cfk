@@ -116,6 +116,7 @@ $sponsorshipStatusOptions = [
 if (!isset($_SESSION['csp_nonce'])) {
     $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
 }
+$GLOBALS['cspNonce'] = $_SESSION['csp_nonce'];
 $cspNonce = $_SESSION['csp_nonce'];
 
 // Set timezone
