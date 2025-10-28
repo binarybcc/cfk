@@ -127,6 +127,31 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
 
     <!-- Zeffy donation integration -->
     <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js" nonce="<?php echo $cspNonce; ?>"></script>
+
+    <!-- Smooth scroll function for navigation -->
+    <script nonce="<?php echo $cspNonce; ?>">
+    function smoothScrollTo(elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    }
+
+    // Attach event listeners to header navigation links
+    document.addEventListener('DOMContentLoaded', function() {
+        const scrollLinks = document.querySelectorAll('a[data-scroll-to]');
+        scrollLinks.forEach(function(link) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-scroll-to');
+                smoothScrollTo(targetId);
+            });
+        });
+    });
+    </script>
 </head>
 <body>
     <!-- Skip Navigation Link for Keyboard Users (WCAG 2.4.1) -->
@@ -147,7 +172,7 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
 
             <nav>
                 <ul>
-                    <li><a href="<?php echo baseUrl('?page=how_to_apply'); ?>">How to Apply</a></li>
+                    <li><a href="#how-to-apply" data-scroll-to="how-to-apply">How to Apply</a></li>
                     <li><a href="<?php echo baseUrl('admin/'); ?>">Admin</a></li>
                 </ul>
             </nav>

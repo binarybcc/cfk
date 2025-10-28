@@ -417,7 +417,7 @@ $interval = $now->diff($launchTime);
             We're gratefully accepting donations now to help make Christmas magical for local children in need.
             100% of your donation goes directly to the children and families we serve.
         </p>
-        <button class="cta-button" onclick="smoothScrollTo('donate-form')">Donate Now</button>
+        <button class="cta-button" data-scroll-to="donate-form">Donate Now</button>
     </div>
 
     <!-- Sponsorships Coming Soon Section -->
@@ -430,7 +430,7 @@ $interval = $now->diff($launchTime);
         <p>
             <strong>New to sponsorships?</strong> Learn more about how the program works and how to apply:
         </p>
-        <button class="cta-button" style="background: #2c5530;" onclick="smoothScrollTo('how-to-apply')">
+        <button class="cta-button" style="background: #2c5530;" data-scroll-to="how-to-apply">
             How to Apply
         </button>
     </div>
@@ -577,7 +577,7 @@ $interval = $now->diff($launchTime);
     setInterval(updateCountdown, 1000);
 })();
 
-// Smooth scroll function for donate button
+// Smooth scroll function for buttons
 function smoothScrollTo(elementId) {
     const element = document.getElementById(elementId);
     if (element) {
@@ -587,4 +587,16 @@ function smoothScrollTo(elementId) {
         });
     }
 }
+
+// Attach event listeners to all scroll buttons
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollButtons = document.querySelectorAll('[data-scroll-to]');
+    scrollButtons.forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('data-scroll-to');
+            smoothScrollTo(targetId);
+        });
+    });
+});
 </script>
