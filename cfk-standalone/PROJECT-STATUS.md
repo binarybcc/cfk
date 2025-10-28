@@ -1,22 +1,47 @@
 # Christmas for Kids - Project Status
 
-**Last Updated:** October 14, 2025
-**Current Version:** v1.5.1
-**Active Branch:** `v1.5-reservation-system`
+**Last Updated:** October 28, 2025
+**Current Version:** v1.7.3
+**Active Branch:** `v1.7.3-production-hardening`
 **Main Branch:** `v1.0.3-rebuild`
 
 ---
 
 ## 🎯 Current Project State
 
-### Status: ✅ STABLE - Ready for User Testing
+### Status: ✅ PRODUCTION READY - Temporary Landing Page Active
+- Temporary landing page live until Nov 1, 2025 at 12:01 AM ET
+- CSV import system updated to match field CSV format
 - All security fixes deployed and tested
-- Functional testing infrastructure in place
-- No critical issues outstanding
+- Error messaging fixed and user-friendly
 - Ready for production use
 
-### Recent Major Accomplishments (Oct 13-14, 2025)
-1. ✅ **Security Audit Complete** - v1.5.1
+### Recent Major Accomplishments
+
+#### v1.7.3 Updates (Oct 28, 2025)
+1. ✅ **Temporary Landing Page**
+   - Pre-launch countdown page until Nov 1, 2025 at 12:01 AM ET
+   - Live countdown timer with auto-transition
+   - Zeffy donation form integration
+   - "How to Apply" section with PDF downloads
+   - Tested and working perfectly
+   - See: `docs/features/temporary-landing-page.md`
+
+2. ✅ **CSV Import System Updates**
+   - Fixed age field validation (blank age_months or age_years now works)
+   - Updated CSV format to match real-world usage
+   - CSV `greatest_need` → DB `interests` (displays as "Essential Needs")
+   - Made optional: `jacket_size`, `family_situation`, `special_needs`
+   - Error messages now display persistently (not flashing)
+   - See: `docs/fixes/csv-age-field-validation-fix.md`
+
+3. ✅ **Production Deployment**
+   - All v1.7.3 changes deployed to https://cforkids.org
+   - Countdown page live and functional
+   - CSV importer ready for real data
+
+#### v1.5.1 Updates (Oct 13-14, 2025)
+1. ✅ **Security Audit Complete**
    - See: `docs/audits/v1.5.1-security-audit.md`
    - See: `docs/audits/v1.5.1-security-action-plan.md`
    - Score: 8.2/10 → 9.5/10 after fixes
@@ -168,9 +193,36 @@ Success Rate: 97.2%
 
 ## 🐛 Known Issues
 
-### None Currently! 🎉
+### Technical Debt Items
 
-Last verified: October 14, 2025
+#### 1. Database/CSV Column Name Mismatch (v1.7.3)
+**Status:** ⚠️ WORKAROUND IN PLACE (needs proper fix in v1.8/v1.9)
+
+**Issue:**
+- Database field is named `interests` but displays as "Essential Needs"
+- CSV column is named `greatest_need` to match actual usage
+- Current workaround: CSV Handler maps `greatest_need` → `interests` during import
+
+**Proper Solution (for v1.8 or v1.9):**
+1. Rename database column: `interests` → `greatest_need`
+2. Update all 27 PHP files that reference `interests` field
+3. Create database migration script
+4. Update production database with migration
+5. Update CSV template to match
+
+**Why Deferred:**
+- Current workaround works perfectly for users
+- Display already says "Essential Needs" - no user-facing issue
+- Database migration adds risk and complexity
+- Better to schedule for planned maintenance window
+
+**Priority:** Medium (maintenance improvement, not user-facing bug)
+**Estimated Effort:** 2-3 hours
+**Best Time:** During v1.8 or v1.9 release cycle
+
+---
+
+Last verified: October 28, 2025
 
 ---
 
