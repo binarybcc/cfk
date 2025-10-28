@@ -13,9 +13,13 @@ if (!defined('CFK_APP')) {
 
 $pageTitle = 'Children Needing Sponsorship';
 
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
+
 // Check if viewing a specific family
 $viewingFamily = !empty($_GET['family_id']);
 $familyId = $viewingFamily ? sanitizeInt($_GET['family_id']) : null;
+$familyInfo = null; // Initialize to prevent undefined variable warning
 
 if ($viewingFamily) {
     // Family view mode - show only this family, no pagination

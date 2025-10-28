@@ -156,7 +156,7 @@ function getChildrenCount(array $filters = []): int
     }
 
     $result = Database::fetchRow($sql, $params);
-    return (int) $result['total'];
+    return (int) ($result['total'] ?? 0);
 }
 
 /**

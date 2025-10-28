@@ -46,6 +46,9 @@ $family_members = $members;
 $available_count = count(array_filter($family_members, fn($member): bool => $member['status'] === 'available'));
 
 $pageTitle = 'Family ' . sanitizeString($family['family_number']);
+
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 ?>
 
 <div class="family-page">

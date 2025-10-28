@@ -12,6 +12,9 @@ if (!defined('CFK_APP')) {
 }
 
 $pageTitle = 'About Us';
+
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 ?>
 
 <div class="about-page">

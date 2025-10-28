@@ -13,6 +13,9 @@ if (!defined('CFK_APP')) {
 }
 
 $pageTitle = 'Sponsorship Confirmed!';
+
+// Generate CSP nonce for inline scripts
+$cspNonce = bin2hex(random_bytes(16));
 ?>
 
 <div class="reservation-success-page" x-data="sponsorshipSuccessApp()">

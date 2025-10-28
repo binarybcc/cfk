@@ -31,11 +31,16 @@ $pageTitle = 'Year-End Reset';
 
 // Get current stats
 try {
+    $childrenResult = Database::fetchRow("SELECT COUNT(*) as count FROM children");
+    $familiesResult = Database::fetchRow("SELECT COUNT(*) as count FROM families");
+    $sponsorshipsResult = Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships");
+    $emailLogResult = Database::fetchRow("SELECT COUNT(*) as count FROM email_log");
+
     $currentStats = [
-        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+        'children' => (int)($childrenResult['count'] ?? 0),
+        'families' => (int)($familiesResult['count'] ?? 0),
+        'sponsorships' => (int)($sponsorshipsResult['count'] ?? 0),
+        'email_log' => (int)($emailLogResult['count'] ?? 0)
     ];
 } catch (Exception $e) {
     error_log("Failed to get stats: " . $e->getMessage());
