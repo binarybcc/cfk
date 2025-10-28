@@ -60,7 +60,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
         </p>
 
         <p class="child-age">
-            <?php echo formatAge($child['age']); ?>
+            <?php echo formatAge($child['age_months']); ?>
         </p>
 
         <?php if ($showInterests && !empty($child['interests'])) : ?>

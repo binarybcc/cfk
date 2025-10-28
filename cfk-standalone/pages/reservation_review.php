@@ -62,7 +62,7 @@ $pageTitle = 'Review Your Sponsorship';
                             <div class="card-header">
                                 <strong x-text="child.display_id"></strong>
                                 <span class="age-gender">
-                                    <span x-text="child.age"></span> years,
+                                    <span x-text="formatAge(child.age_months)"></span>,
                                     <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
                                 </span>
                             </div>
@@ -71,7 +71,14 @@ $pageTitle = 'Review Your Sponsorship';
                                 <div x-show="child.school"><strong>School:</strong> <span x-text="child.school"></span></div>
                                 <div x-show="child.interests"><strong>Essential Needs:</strong> <span x-text="child.interests"></span></div>
                                 <div x-show="child.wishes"><strong>Wishes:</strong> <span x-text="child.wishes"></span></div>
-                                <div x-show="child.clothing_sizes"><strong>Clothing:</strong> <span x-text="child.clothing_sizes"></span></div>
+                                <div x-show="child.shirt_size || child.pant_size || child.jacket_size">
+                                    <strong>Clothing:</strong>
+                                    <span>
+                                        <span x-show="child.shirt_size">Shirt: <span x-text="child.shirt_size"></span></span>
+                                        <span x-show="child.pant_size"> | Pants: <span x-text="child.pant_size"></span></span>
+                                        <span x-show="child.jacket_size"> | Jacket: <span x-text="child.jacket_size"></span></span>
+                                    </span>
+                                </div>
                                 <div x-show="child.shoe_size"><strong>Shoes:</strong> <span x-text="child.shoe_size"></span></div>
                             </div>
                         </div>
@@ -105,19 +112,6 @@ $pageTitle = 'Review Your Sponsorship';
                 </button>
             </div>
 
-            <!-- Important Notice -->
-            <div class="review-section">
-                <div class="notice-box">
-                    <h3>📋 Important Information</h3>
-                    <ul>
-                        <li>Your reservation will be valid for <strong>48 hours</strong></li>
-                        <li>You will receive a confirmation email with full child details</li>
-                        <li>You'll have a unique reservation token to track your sponsorship</li>
-                        <li>After 48 hours, unreserved children will become available again</li>
-                    </ul>
-                </div>
-            </div>
-
             <!-- Action Buttons -->
             <div class="review-actions">
                 <button @click="goBack()" class="btn btn-secondary" :disabled="isSubmitting">
@@ -136,12 +130,26 @@ $pageTitle = 'Review Your Sponsorship';
 </div>
 
 <script nonce="<?php echo $cspNonce; ?>">
+// Helper function to format age
+function formatAge(ageMonths) {
+    if (!ageMonths) return '';
+    if (ageMonths < 25) {
+        return ageMonths + ' month' + (ageMonths !== 1 ? 's' : '');
+    } else if (ageMonths < 36) {
+        return '2 years';
+    } else {
+        const years = Math.floor(ageMonths / 12);
+        return years + ' year' + (years !== 1 ? 's' : '');
+    }
+}
+
 function reservationReviewApp() {
     return {
         selections: [],
         sponsorData: {},
         dataLoaded: false,
         isSubmitting: false,
+        formatAge: formatAge, // Make it available in Alpine scope
 
         init() {
             this.loadData();

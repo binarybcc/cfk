@@ -117,38 +117,42 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
     window.siblingsByFamily = <?php echo json_encode($siblingsByFamily, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
 
     // Helper function for age/gender-appropriate placeholder images
-    window.getPlaceholderImage = function(age, gender) {
+    window.getPlaceholderImage = function(ageMonths, gender) {
         const baseUrl = '<?php echo baseUrl('assets/images/'); ?>';
 
+        // Convert months to years for categorization
+        const ageYears = Math.floor(ageMonths / 12);
+
         // Age categories
-        if (age <= 5) {
+        if (ageYears <= 5) {
             return baseUrl + (gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
-        } else if (age <= 11) {
+        } else if (ageYears <= 11) {
             return baseUrl + (gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
-        } else if (age <= 14) {
+        } else if (ageYears <= 14) {
             return baseUrl + (gender === 'M' ? 'middleboysm.png' : 'middlegirlsm.png');
         } else {
             return baseUrl + (gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
         }
     };
 
-    // Helper function to get age category from age
-    window.getAgeCategory = function(age) {
-        if (age <= 4) {
+    // Helper function to get age category from age in months
+    window.getAgeCategory = function(ageMonths) {
+        const ageYears = Math.floor(ageMonths / 12);
+        if (ageYears <= 4) {
             return 'birth_to_4';
-        } else if (age <= 10) {
+        } else if (ageYears <= 10) {
             return 'elementary';
-        } else if (age <= 13) {
+        } else if (ageYears <= 13) {
             return 'middle_school';
-        } else if (age <= 18) {
+        } else if (ageYears <= 18) {
             return 'high_school';
         }
         return 'high_school'; // Default for ages > 18
     };
 
     // Helper function to get age category label
-    window.getAgeCategoryLabel = function(age) {
-        const category = window.getAgeCategory(age);
+    window.getAgeCategoryLabel = function(ageMonths) {
+        const category = window.getAgeCategory(ageMonths);
         const labels = {
             'birth_to_4': 'Birth to 4 Years',
             'elementary': 'Elementary',
@@ -302,7 +306,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                         <div class="child-top-section">
                             <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
                             <div class="child-photo-compact">
-                                <img src="<?php echo getPlaceholderImage($child['age'], $child['gender']); ?>"
+                                <img src="<?php echo getPlaceholderImage($child['age_months'], $child['gender']); ?>"
                                      alt="Child <?php echo htmlspecialchars((string) $child['display_id']); ?>">
                             </div>
 
@@ -312,7 +316,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                     <strong>Child:</strong> <span><?php echo htmlspecialchars((string) $child['display_id']); ?></span>
                                 </div>
                                 <div class="child-meta-item">
-                                    <strong>Age:</strong> <span><?php echo (int)$child['age']; ?></span>
+                                    <strong>Age:</strong> <span><?php echo displayAge($child['age_months']); ?></span>
                                 </div>
                                 <div class="child-meta-item">
                                     <strong></strong> <span><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>

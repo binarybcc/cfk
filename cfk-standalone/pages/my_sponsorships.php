@@ -35,7 +35,7 @@ if (!empty($token)) {
     if ($verifiedEmail) {
         // Valid token - load sponsorships
         $sponsorships = Database::fetchAll(
-            "SELECT s.*, c.child_letter, c.age, c.gender, c.grade, c.wishes,
+            "SELECT s.*, c.child_letter, c.age_months, c.gender, c.grade, c.wishes,
                     c.clothing_sizes, c.shoe_size, f.family_number,
                     CONCAT(f.family_number, c.child_letter) as display_id
              FROM sponsorships s
@@ -145,7 +145,7 @@ $pageTitle = 'My Sponsorships';
                             </button>
                         </div>
                         <div class="card-details">
-                            <span x-text="child.age + ' years'"></span> •
+                            <span x-text="formatAge(child.age_months)"></span> •
                             <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
                             <template x-if="child.grade">
                                 • <span x-text="'Grade ' + child.grade"></span>
@@ -222,7 +222,7 @@ $pageTitle = 'My Sponsorships';
                                 <div class="child-info-grid">
                                     <div class="info-item">
                                         <strong>Age:</strong>
-                                        <span><?php echo (int)$sponsorship['age']; ?> years</span>
+                                        <span><?php echo displayAge($sponsorship['age_months']); ?></span>
                                     </div>
                                     <div class="info-item">
                                         <strong>Gender:</strong>
@@ -361,6 +361,18 @@ function mySponsorshipsApp() {
     return {
         selections: [],
         selectionCount: 0,
+
+        formatAge(ageMonths) {
+            if (!ageMonths) return '';
+            if (ageMonths < 25) {
+                return ageMonths + ' month' + (ageMonths !== 1 ? 's' : '');
+            } else if (ageMonths < 36) {
+                return '2 years';
+            } else {
+                const years = Math.floor(ageMonths / 12);
+                return years + ' year' + (years !== 1 ? 's' : '');
+            }
+        },
 
         init() {
             // Wait for SelectionsManager to be ready

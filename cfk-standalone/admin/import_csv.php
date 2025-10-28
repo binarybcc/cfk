@@ -283,11 +283,10 @@ function downloadTemplate(): void
     } else {
         // Generate template on the fly if file doesn't exist
         $headers = [
-            'family_id',
-            'child_letter',
-            'age',
+            'name',
+            'age_months',
+            'age_years',
             'gender',
-            'grade',
             'shirt_size',
             'pant_size',
             'shoe_size',
@@ -305,17 +304,26 @@ function downloadTemplate(): void
         $output = fopen('php://output', 'w');
         fputcsv($output, $headers);
 
-        // Add sample rows
+        // Add sample rows showing both age formats
+        // Row 1: Using age_months (2 year old = 24 months)
         fputcsv($output, [
-            '001', 'A', 8, 'F', '3rd', 'Girls 8', 'Girls 8', 'Youth 3', 'Girls 8',
-            'Sports, Art', 'Winter Coat, Socks', 'Soccer Ball, Art Supplies', 'None',
-            'Single mother, working two jobs'
+            '001A', 24, '', 'F', 'Toddler 3T', 'Toddler 3T', '7', 'Toddler 3T',
+            'Cocomelon Toys, Baby Shark', 'Diapers Size 5, Baby Wipes', 'Toy Laptop, Shopping Cart', 'None',
+            'Single mother, low income'
         ]);
 
+        // Row 2: Using age_years (8 year old)
         fputcsv($output, [
-            '001', 'B', 6, 'M', '1st', 'Boys 6', 'Boys 6', 'Youth 1', 'Boys 6',
-            'Cars, Building', 'Shoes, Underwear', 'Lego Sets, Hot Wheels', 'None',
-            'Single mother, working two jobs'
+            '001B', '', 8, 'M', 'Boys 8', 'Boys 8', 'Youth 2', 'Boys 8',
+            'Soccer, Video Games', 'Winter Coat, Socks', 'Soccer Ball, Nintendo Games', 'None',
+            'Single mother, low income'
+        ]);
+
+        // Row 3: Another age_years example (16 year old)
+        fputcsv($output, [
+            '002A', '', 16, 'F', 'Ladies Medium', 'Ladies 10', '9', 'Ladies Large',
+            'Music, Art, Reading', 'Shoes, Winter Coat', 'Art Supplies, Books', 'None',
+            'Grandmother raising grandchildren'
         ]);
 
         fclose($output);
@@ -940,22 +948,26 @@ include __DIR__ . '/includes/admin_header.php';
                 <div class="requirements">
                     <h4>Template Format</h4>
                     <div class="sample-format">
-family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_size,interests,greatest_need,wish_list,special_needs,family_situation
-"001","A",8,"F","3rd","Girls 8","Girls 8","Youth 3","Girls 8","Sports, Art","Winter Coat","Soccer Ball","None","Single mother"
+name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,interests,greatest_need,wish_list,special_needs,family_situation
+"001A",96,,"F","Girls 8","Girls 8","Youth 3","Girls 8","Sports, Art","Winter Coat","Soccer Ball","None","Single mother"
+"001B",,6,"M","Boys 6","Boys 6","Youth 1","Boys 6","Cars, Building","Shoes","Lego Sets","None","Single mother"
                     </div>
                     <ul>
-                        <li><strong>family_id</strong>: Unique family number (001, 002, etc.)</li>
-                        <li><strong>child_letter</strong>: Child identifier within family (A, B, C, etc.)</li>
-                        <li><strong>age</strong>: Child's age (1-18)</li>
+                        <li><strong>name</strong>: Combined family ID + child letter (e.g., "001A", "002B") - family 001, child A</li>
+                        <li><strong>age_months</strong>: Child's age in months (0-24) - <em>leave blank if using age_years</em></li>
+                        <li><strong>age_years</strong>: Child's age in years (0-18) - <em>leave blank if using age_months</em></li>
                         <li><strong>gender</strong>: M or F</li>
-                        <li><strong>grade</strong>: School grade (Pre-K, K, 1st, 2nd, etc.)</li>
-                        <li><strong>Clothing sizes</strong>: Standard clothing sizes</li>
+                        <li><strong>shirt_size, pant_size, shoe_size, jacket_size</strong>: Standard clothing sizes</li>
                         <li><strong>interests</strong>: Comma-separated hobbies/interests</li>
-                        <li><strong>greatest_need</strong>: Essential items needed</li>
+                        <li><strong>greatest_need</strong>: Essential items needed (winter coat, socks, etc.)</li>
                         <li><strong>wish_list</strong>: Christmas gift wishes</li>
                         <li><strong>special_needs</strong>: Any special considerations</li>
                         <li><strong>family_situation</strong>: Brief family background</li>
                     </ul>
+                    <div class="alert alert-info" style="margin-top: 1rem;">
+                        <strong>📌 Important:</strong> Use either <code>age_months</code> OR <code>age_years</code>, not both.
+                        For children under 2 years, use age_months. For older children, age_years is easier.
+                    </div>
                 </div>
             </div>
         </div>
@@ -971,9 +983,10 @@ family_id,child_letter,age,gender,grade,shirt_size,pant_size,shoe_size,jacket_si
                         <h4>Before Importing:</h4>
                         <ul>
                             <li>Fill out the CSV template with your child data</li>
-                            <li>Ensure all family_id values are unique</li>
-                            <li>Use consistent child_letter assignments (A, B, C for siblings)</li>
-                            <li>Double-check ages and gender values</li>
+                            <li>Use the correct <strong>name</strong> format: family number + letter (e.g., "001A", "002B")</li>
+                            <li>For siblings, use consecutive letters (001A, 001B, 001C for family 001)</li>
+                            <li>Fill EITHER <strong>age_months</strong> OR <strong>age_years</strong> - not both!</li>
+                            <li>Double-check gender values (M or F)</li>
                             <li>Save your file as CSV format (.csv)</li>
                         </ul>
                     </div>

@@ -67,7 +67,7 @@ if ($_POST !== [] && isset($_POST['bulk_action']) && isset($_POST['sponsorship_i
             $exportData = Database::fetchAll("
                 SELECT s.*,
                        CONCAT(f.family_number, c.child_letter) as child_display_id,
-                       c.age, c.grade, c.gender
+                       c.age_months, c.grade, c.gender
                 FROM sponsorships s
                 JOIN children c ON s.child_id = c.id
                 JOIN families f ON c.family_id = f.id
@@ -248,7 +248,7 @@ $sponsorships = Database::fetchAll("
     SELECT s.*,
            c.id as child_id,
            CONCAT(f.family_number, c.child_letter) as child_name,
-           c.age, c.grade, c.gender, c.status as child_status,
+           c.age_months, c.grade, c.gender, c.status as child_status,
            c.interests, c.wishes, c.special_needs,
            c.shirt_size, c.pant_size, c.jacket_size, c.shoe_size,
            CONCAT(f.family_number, c.child_letter) as child_display_id,
@@ -967,7 +967,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 <div class="child-details">
                                     <div class="child-id"><?php echo sanitizeString($sponsorship['child_display_id']); ?></div>
                                     <div class="child-meta">
-                                        <?php echo $sponsorship['age']; ?>y
+                                        <?php echo displayAge($sponsorship['age_months']); ?>
                                         <?php echo $sponsorship['gender'] === 'M' ? '♂' : '♀'; ?>
                                         <?php if (!empty($sponsorship['grade'])) : ?>
                                             • <?php echo sanitizeString($sponsorship['grade']); ?>

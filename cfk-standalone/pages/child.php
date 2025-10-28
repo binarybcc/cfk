@@ -56,7 +56,7 @@ $isAvailable = $child['status'] === 'available';
                 
                 <div class="basic-details">
                     <div class="detail-item">
-                        <strong>Age:</strong> <?php echo formatAge($child['age']); ?>
+                        <strong>Age:</strong> <?php echo formatAge($child['age_months']); ?>
                     </div>
                     
                     <div class="detail-item">
@@ -64,7 +64,7 @@ $isAvailable = $child['status'] === 'available';
                     </div>
                     
                     <div class="detail-item">
-                        <strong>Age Group:</strong> <?php echo getAgeCategory($child['age']); ?>
+                        <strong>Age Group:</strong> <?php echo getAgeCategory($child['age_months']); ?>
                     </div>
                     
                     <?php if (!empty($child['school'])) : ?>
@@ -177,7 +177,7 @@ $isAvailable = $child['status'] === 'available';
                                         <div class="sibling-info">
                                             <h4><?php echo sanitizeString($sibling['name']); ?></h4>
                                             <p>ID: <?php echo sanitizeString($sibling['display_id']); ?></p>
-                                            <p><?php echo formatAge($sibling['age']); ?></p>
+                                            <p><?php echo formatAge($sibling['age_months']); ?></p>
                                             <div class="status-badge status-<?php echo $sibling['status']; ?>">
                                                 <?php echo $childStatusOptions[$sibling['status']] ?? ucfirst((string) $sibling['status']); ?>
                                             </div>

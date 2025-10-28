@@ -8,7 +8,7 @@
     // Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
     $csp = implode('; ', [
         "default-src 'self'",
-        "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
+        "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
         "style-src 'self' 'unsafe-inline'", // Allow inline styles for simplicity
         "img-src 'self' data: https:",
         "font-src 'self' data:",
@@ -42,7 +42,9 @@
     <link rel="icon" type="image/png" sizes="16x16" href="<?php echo baseUrl('assets/images/favicon-16x16.png'); ?>">
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo baseUrl('assets/images/apple-touch-icon.png'); ?>">
 
-    <!-- Alpine.js v1.4 - Progressive Enhancement -->
+    <!-- Alpine.js v3.14.1 - Progressive Enhancement -->
+    <!-- Load Collapse plugin before Alpine.js core -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js" nonce="<?php echo $cspNonce; ?>"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js" nonce="<?php echo $cspNonce; ?>"></script>
 
     <!-- Selections System v1.5 -->

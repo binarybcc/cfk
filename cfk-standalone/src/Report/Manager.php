@@ -37,7 +37,7 @@ class Manager
                 s.confirmation_date,
                 c.id as child_id,
                 CONCAT(f.family_number, c.child_letter) as child_name,
-                c.age as child_age,
+                c.age_months as child_age,
                 c.gender as child_gender,
                 c.shirt_size,
                 c.pant_size,
@@ -85,7 +85,7 @@ class Manager
                 c.id as child_id,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
                 CONCAT(f.family_number, c.child_letter) as child_name,
-                c.age,
+                c.age_months,
                 c.gender,
                 c.status as child_status,
                 c.interests,
@@ -167,7 +167,7 @@ class Manager
                 s.completion_date,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
                 CONCAT(f.family_number, c.child_letter) as child_name,
-                c.age,
+                c.age_months,
                 c.gender,
                 DATEDIFF(NOW(), s.confirmation_date) as days_since_confirmed
             FROM sponsorships s
@@ -201,7 +201,7 @@ class Manager
                 c.id,
                 CONCAT(f.family_number, c.child_letter) as display_id,
                 CONCAT(f.family_number, c.child_letter) as name,
-                c.age,
+                c.age_months,
                 c.gender,
                 c.grade,
                 c.shirt_size,
@@ -222,12 +222,12 @@ class Manager
         $params = [];
 
         if (!empty($filters['age_min'])) {
-            $sql .= " AND c.age >= :age_min";
+            $sql .= " AND c.age_months >= :age_min";
             $params['age_min'] = $filters['age_min'];
         }
 
         if (!empty($filters['age_max'])) {
-            $sql .= " AND c.age <= :age_max";
+            $sql .= " AND c.age_months <= :age_max";
             $params['age_max'] = $filters['age_max'];
         }
 
@@ -294,7 +294,7 @@ class Manager
                 s.sponsor_email,
                 CONCAT(f.family_number, c.child_letter) as child_display_id,
                 CONCAT(f.family_number, c.child_letter) as child_name,
-                c.age,
+                c.age_months,
                 c.gender,
                 c.shirt_size,
                 c.pant_size,
@@ -327,7 +327,7 @@ class Manager
                 -- Child Information
                 CONCAT(f.family_number, c.child_letter) as child_id,
                 CONCAT(f.family_number, c.child_letter) as child_name,
-                c.age,
+                c.age_months,
                 c.gender,
                 c.grade,
                 c.school,
