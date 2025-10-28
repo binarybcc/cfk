@@ -5,7 +5,7 @@ $cspNonce = $_SESSION['csp_nonce'] ?? base64_encode(random_bytes(16));
 // Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
 $csp = implode('; ', [
     "default-src 'self'",
-        "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
+        "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
         "style-src 'self' 'unsafe-inline'", // Allow inline styles for simplicity
         "img-src 'self' data: https:",
         "font-src 'self' data:",
