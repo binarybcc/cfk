@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <?php
-    // Set strict Content Security Policy with nonces
-    $cspNonce = $_SESSION['csp_nonce'] ?? base64_encode(random_bytes(16));
+<?php
+// Set strict Content Security Policy with nonces
+$cspNonce = $_SESSION['csp_nonce'] ?? base64_encode(random_bytes(16));
 
-    // Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
-    $csp = implode('; ', [
-        "default-src 'self'",
+// Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
+$csp = implode('; ', [
+    "default-src 'self'",
         "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
         "style-src 'self' 'unsafe-inline'", // Allow inline styles for simplicity
         "img-src 'self' data: https:",
@@ -21,13 +18,16 @@
         "block-all-mixed-content"
     ]);
 
-    header("Content-Security-Policy: {$csp}");
-    header("X-Content-Type-Options: nosniff");
-    header("X-XSS-Protection: 1; mode=block");
-    header("Referrer-Policy: strict-origin-when-cross-origin");
-    header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
-    header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-    ?>
+header("Content-Security-Policy: {$csp}");
+header("X-Content-Type-Options: nosniff");
+header("X-XSS-Protection: 1; mode=block");
+header("Referrer-Policy: strict-origin-when-cross-origin");
+header("Permissions-Policy: geolocation=(), microphone=(), camera=()");
+header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo isset($pageTitle) ? $pageTitle . ' - ' : ''; ?><?php echo config('app_name'); ?></title>
