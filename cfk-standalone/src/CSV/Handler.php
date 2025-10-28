@@ -25,15 +25,19 @@ class Handler
 
     /** @var array<string> All possible CSV columns */
     public const ALL_COLUMNS = [
-        'age_months', 'age_years', 'gender',
+        'name', 'age_months', 'age_years', 'gender',
         'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
-        'interests', 'greatest_need', 'wish_list', 'special_needs', 'family_situation'
+        'greatest_need', 'wish_list', 'special_needs', 'family_situation'
+    ];
+
+    /** @var array<string> Optional CSV columns (can be missing or empty) */
+    public const OPTIONAL_COLUMNS = [
+        'jacket_size', 'family_situation', 'special_needs'
     ];
 
     /** @var array<string, int> Maximum lengths for text fields */
     public const MAX_LENGTHS = [
-        'interests' => 500,
-        'greatest_need' => 200,
+        'greatest_need' => 500,  // Stored in 'interests' DB field
         'wish_list' => 500,
         'special_needs' => 200,
         'family_situation' => 300,
@@ -372,12 +376,14 @@ class Handler
             return $row;
         }
 
+        // Map CSV columns to database fields
+        // CSV 'greatest_need' → DB 'interests' (displayed as "Essential Needs")
+        $row['interests'] = $row['greatest_need'] ?? '';
+
         // Set defaults for optional fields
         $row['special_needs'] ??= 'None';
         $row['family_situation'] ??= '';
-        $row['greatest_need'] ??= '';
         $row['wish_list'] ??= '';
-        $row['interests'] ??= '';
         $row['shirt_size'] ??= '';
         $row['pant_size'] ??= '';
         $row['shoe_size'] ??= '';
@@ -506,8 +512,8 @@ class Handler
             'pant_size' => $row['pant_size'] ?? '',
             'shoe_size' => $row['shoe_size'] ?? '',
             'jacket_size' => $row['jacket_size'] ?? '',
-            'interests' => $row['greatest_need'] ?? '', // Greatest Need → Essential Needs (displays as "Essential Needs")
-            'wishes' => ($row['interests'] ?? '') . (($row['wish_list'] ?? '') ? '. Wish List: ' . $row['wish_list'] : ''), // Interests + Wish List → Christmas Wishes
+            'interests' => $row['interests'] ?? '', // CSV 'greatest_need' mapped to this in cleanRowData
+            'wishes' => $row['wish_list'] ?? '', // CSV 'wish_list' → DB 'wishes' (displays as "Christmas Wishes")
             'special_needs' => $row['special_needs'] ?? 'None',
             'status' => 'available'
         ];
@@ -594,25 +600,28 @@ class Handler
      */
     private function formatChildForExport(array $child): array
     {
-        // Split wishes back into greatest_need and wish_list
-        $wishes = $child['wishes'] ?? '';
-        $wishParts = explode('. Wish List: ', (string) $wishes);
-        $greatestNeed = $wishParts[0] ?? '';
-        $wishList = $wishParts[1] ?? '';
+        // Map database fields to CSV columns
+        // DB 'interests' → CSV 'greatest_need'
+        // DB 'wishes' → CSV 'wish_list'
 
         return [
-            $child['display_id'] ?? $child['family_number'] . $child['child_letter'],
-            $child['age'],
-            $child['gender'],
-            $child['family_number'],
-            $child['grade'] ?? '',
+            // name (family_number + child_letter, e.g., "198A")
+            ($child['family_number'] ?? '') . ($child['child_letter'] ?? ''),
+
+            // age_months, age_years, gender
+            $child['age_months'] ?? 0,
+            '', // age_years (leave blank, use months)
+            $child['gender'] ?? '',
+
+            // Clothing sizes
             $child['shirt_size'] ?? '',
             $child['pant_size'] ?? '',
             $child['shoe_size'] ?? '',
             $child['jacket_size'] ?? '',
-            $child['interests'] ?? '',
-            $greatestNeed,
-            $wishList,
+
+            // Content fields (mapped from DB to CSV column names)
+            $child['interests'] ?? '', // DB 'interests' → CSV 'greatest_need' (Essential Needs)
+            $child['wishes'] ?? '', // DB 'wishes' → CSV 'wish_list' (Christmas Wishes)
             $child['special_needs'] ?? 'None',
             $child['family_notes'] ?? ''
         ];
