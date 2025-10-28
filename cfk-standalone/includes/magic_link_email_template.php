@@ -124,6 +124,11 @@ class MagicLinkEmailTemplate
     </style>
 </head>
 <body>
+    <!-- Login Button at the TOP (before everything else) -->
+    <div style="text-align: center; margin: 20px 0;">
+        <a href="{$loginLink}" class="cta-button">Login to Admin Panel</a>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🎄 {$appName}</h1>
@@ -134,12 +139,13 @@ class MagicLinkEmailTemplate
             <p class="greeting">Hello Admin,</p>
 
             <p class="message">
-                You requested to log in to the {$appName} admin portal. Click the button below to complete your login.
+                You requested to log in to the {$appName} admin portal.
                 <strong>This link will expire at {$expirationTime} ({$expirationMinutes} minutes from now).</strong>
             </p>
 
-            <div style="text-align: center;">
-                <a href="{$loginLink}" class="cta-button">Login to Admin Panel</a>
+            <div class="info-box">
+                <strong>⏰ Link Expires Soon</strong>
+                This magic link is only valid for {$expirationMinutes} minutes. If it expires, you can request a new one.
             </div>
 
             <p style="text-align: center; font-size: 13px; color: #999; margin-top: 20px;">
@@ -148,11 +154,6 @@ class MagicLinkEmailTemplate
                     {$loginLink}
                 </code>
             </p>
-
-            <div class="info-box">
-                <strong>⏰ Link Expires Soon</strong>
-                This magic link is only valid for {$expirationMinutes} minutes. If it expires, you can request a new one.
-            </div>
 
             <div class="security-notice">
                 <strong>🔒 Security Reminder:</strong> Never share this link with anyone. Do not forward this email. This link is unique and will only work once.
@@ -182,17 +183,18 @@ HTML;
         $expirationTime = date('g:i A', time() + ($expirationMinutes * 60));
 
         return <<<TEXT
+LOGIN LINK:
+{$loginLink}
+
+========================================
 {$appName} - Admin Portal Login
 ========================================
 
 Hello Admin,
 
-You requested to log in to the {$appName} admin portal. Use the link below to complete your login.
+You requested to log in to the {$appName} admin portal.
 
 This link will expire at {$expirationTime} ({$expirationMinutes} minutes from now).
-
-LOGIN LINK:
-{$loginLink}
 
 SECURITY REMINDER:
 - Never share this link with anyone
