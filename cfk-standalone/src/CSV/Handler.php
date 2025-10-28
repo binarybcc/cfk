@@ -356,6 +356,9 @@ class Handler
         } elseif ($ageYearsValue !== '' && $ageYearsValue !== '0') {
             // Age provided in years - convert to months
             $row['age_months'] = (int) $ageYearsValue * 12;
+        } else {
+            // Neither provided - will fail validation
+            $row['age_months'] = -1; // Invalid placeholder
         }
 
         $row['gender'] = strtoupper((string) $row['gender']);
@@ -394,30 +397,12 @@ class Handler
     {
         $valid = true;
 
-        // Age validation - age_months should be 0-216 (0-18 years)
+        // Validate final converted age_months value
+        // Note: parseRow() already validated that exactly ONE age field was provided
+        // cleanRowData() already converted the age to months
         if (!isset($row['age_months']) || $row['age_months'] < 0 || $row['age_months'] > 216) {
             $this->errors[] = "Row $rowNumber: Age must be between 0-24 months or 0-18 years (max 216 months)";
             $valid = false;
-        }
-
-        // Validate range based on source
-        $ageMonthsInput = trim((string) ($row['age_months'] ?? ''));
-        $ageYearsInput = trim((string) ($row['age_years'] ?? ''));
-
-        if ($ageMonthsInput !== '' && $ageMonthsInput !== '0') {
-            // Months provided - validate 0-24 range
-            $months = (int) $ageMonthsInput;
-            if ($months < 0 || $months > 24) {
-                $this->errors[] = "Row $rowNumber: age_months must be between 0 and 24";
-                $valid = false;
-            }
-        } elseif ($ageYearsInput !== '' && $ageYearsInput !== '0') {
-            // Years provided - validate 0-18 range
-            $years = (int) $ageYearsInput;
-            if ($years < 0 || $years > 18) {
-                $this->errors[] = "Row $rowNumber: age_years must be between 0 and 18";
-                $valid = false;
-            }
         }
 
         // Gender validation
