@@ -8,15 +8,14 @@ $csp = implode('; ', [
     "default-src 'self'",
         "script-src 'self' 'nonce-{$cspNonce}' 'unsafe-eval' 'unsafe-inline' https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/ https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/ https://zeffy-scripts.s3.ca-central-1.amazonaws.com/",
         "style-src 'self' 'unsafe-inline'", // Allow inline styles for simplicity
-        "img-src 'self' data: https:",
+        "img-src 'self' data: https: http:", // Allow HTTP images for local development
         "font-src 'self' data:",
         "frame-src https://www.zeffy.com", // Allow Zeffy iframe
         "connect-src 'self' https://www.zeffy.com https://*.zeffy.com https://zeffy-scripts.s3.ca-central-1.amazonaws.com",
         "base-uri 'self'",
         "form-action 'self' https://www.zeffy.com https://*.zeffy.com",
-        "frame-ancestors 'none'", // Prevent site from being iframed (replaces X-Frame-Options)
-        "upgrade-insecure-requests",
-        "block-all-mixed-content"
+        "frame-ancestors 'none'" // Prevent site from being iframed (replaces X-Frame-Options)
+        // Note: upgrade-insecure-requests and block-all-mixed-content removed for local development compatibility
     ]);
 
 header("Content-Security-Policy: {$csp}");
@@ -150,6 +149,23 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
                 smoothScrollTo(targetId);
             });
         });
+
+        // Handle logo image error (fallback to text)
+        const logoImage = document.getElementById('logo-image');
+        if (logoImage) {
+            // Only add error handler if image hasn't already loaded successfully
+            if (logoImage.complete && logoImage.naturalWidth === 0) {
+                // Image failed to load
+                logoImage.style.display = 'none';
+                document.getElementById('logo-text-fallback').style.display = 'block';
+            } else if (!logoImage.complete) {
+                // Image still loading, add error handler
+                logoImage.addEventListener('error', function() {
+                    this.style.display = 'none';
+                    document.getElementById('logo-text-fallback').style.display = 'block';
+                });
+            }
+        }
     });
     </script>
 </head>
@@ -160,14 +176,12 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
     <header class="temp-header">
         <div class="container">
             <div class="logo">
-                <a href="<?php echo baseUrl(); ?>">
-                    <img src="<?php echo baseUrl('assets/images/cfk-horizontal.png'); ?>"
-                         alt="Christmas for Kids"
-                         onerror="this.style.display='none'; document.getElementById('logo-text-fallback').style.display='block';">
-                    <h1 id="logo-text-fallback" style="display:none; color: #2c5530; margin: 0;">
-                        <?php echo config('app_name'); ?>
-                    </h1>
-                </a>
+                <img src="<?php echo baseUrl('assets/images/cfk-horizontal.png'); ?>"
+                     alt="Christmas for Kids"
+                     id="logo-image">
+                <h1 id="logo-text-fallback" style="display:none; color: #2c5530; margin: 0;">
+                    <?php echo config('app_name'); ?>
+                </h1>
             </div>
 
             <nav>
