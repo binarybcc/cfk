@@ -1,6 +1,9 @@
 <?php
 // Set strict Content Security Policy with nonces
-$cspNonce = $_SESSION['csp_nonce'] ?? base64_encode(random_bytes(16));
+if (!isset($_SESSION['csp_nonce'])) {
+    $_SESSION['csp_nonce'] = base64_encode(random_bytes(16));
+}
+$cspNonce = $_SESSION['csp_nonce'];
 
 // Build CSP header - allows Zeffy iframe and Alpine.js while maintaining security
 $csp = implode('; ', [
