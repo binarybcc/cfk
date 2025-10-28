@@ -42,7 +42,7 @@ try {
             AND s.status = 'available'
         WHERE c.status = 'available'
         GROUP BY c.id
-        ORDER BY c.family_id, c.age
+        ORDER BY c.family_id, c.age_months
     ";
 
     $stmt = $db->prepare($query);
@@ -56,7 +56,7 @@ try {
             'display_id' => $child['display_id'],
             'family_id' => (int)$child['family_id'],
             'family_number' => $child['family_number'],
-            'age' => (int)$child['age'],
+            'age_months' => (int)$child['age_months'],
             'gender' => $child['gender'],
             'grade' => $child['grade'] ?? null,
             'interests' => $child['interests'] ?? null,
@@ -74,7 +74,7 @@ try {
         SELECT
             c.id,
             c.family_id,
-            c.age,
+            c.age_months,
             c.gender,
             c.grade,
             c.interests,
@@ -93,7 +93,7 @@ try {
         WHERE c.family_id IN (
             SELECT DISTINCT family_id FROM children WHERE status = 'available'
         )
-        ORDER BY c.family_id, c.age
+        ORDER BY c.family_id, c.age_months
     ";
 
     $familyStmt = $db->prepare($familyQuery);
@@ -111,7 +111,7 @@ try {
             'id' => (int)$member['id'],
             'display_id' => $member['display_id'],
             'family_id' => $familyId,
-            'age' => (int)$member['age'],
+            'age_months' => (int)$member['age_months'],
             'gender' => $member['gender'],
             'grade' => $member['grade'] ?? null,
             'interests' => $member['interests'] ?? null,

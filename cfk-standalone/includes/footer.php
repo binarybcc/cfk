@@ -60,6 +60,14 @@
     // Initialize sticky bar on page load
     if (typeof StickyBarManager !== 'undefined') {
         StickyBarManager.init('<?php echo baseUrl(); ?>');
+
+        // Hide sticky bar on cart pages (my_sponsorships, confirm_sponsorship, reservation_review)
+        const currentPage = new URLSearchParams(window.location.search).get('page');
+        const cartPages = ['my_sponsorships', 'confirm_sponsorship', 'reservation_review'];
+
+        if (cartPages.includes(currentPage)) {
+            StickyBarManager.hide();
+        }
     }
     </script>
 

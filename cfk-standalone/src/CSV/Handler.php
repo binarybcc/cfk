@@ -587,12 +587,12 @@ class Handler
         }
 
         if (!empty($filters['age_min'])) {
-            $sql .= " AND c.age >= :age_min";
+            $sql .= " AND c.age_months >= :age_min";
             $params['age_min'] = $filters['age_min'];
         }
 
         if (!empty($filters['age_max'])) {
-            $sql .= " AND c.age <= :age_max";
+            $sql .= " AND c.age_months <= :age_max";
             $params['age_max'] = $filters['age_max'];
         }
 

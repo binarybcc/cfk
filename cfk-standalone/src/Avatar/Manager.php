@@ -33,7 +33,7 @@ class Manager
      */
     public static function getAvatarForChild(array $child): string
     {
-        $category = self::determineAvatarCategory((int) $child['age'], (string) $child['gender']);
+        $category = self::determineAvatarCategory((int) $child['age_months'], (string) $child['gender']);
         return self::getAvatarImagePath($category);
     }
 

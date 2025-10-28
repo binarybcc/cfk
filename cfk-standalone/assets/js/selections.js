@@ -254,13 +254,15 @@ const SelectionsManager = (() => {
                 id: child.id,
                 display_id: child.display_id || 'Unknown',
                 family_id: child.family_id,
-                age: child.age,
+                age_months: child.age_months,
                 gender: child.gender,
                 grade: child.grade || '',
                 school: child.school || '',
                 interests: child.interests || '',
                 wishes: child.wishes || '',
-                clothing_sizes: child.clothing_sizes || {},
+                shirt_size: child.shirt_size || '',
+                pant_size: child.pant_size || '',
+                jacket_size: child.jacket_size || '',
                 shoe_size: child.shoe_size || '',
                 added_at: new Date().toISOString()
             };
@@ -415,41 +417,43 @@ const ToastManager = (() => {
                 role: 'alert',
                 'aria-live': 'polite'
             }, [
-                createElement('p', { className: 'toast-message' }, sanitizeHTML(message)),
+                createElement('p', { className: 'toast-message' }, [sanitizeHTML(message)]),
                 createElement('div', { className: 'toast-actions' }, [
                     actionUrl ? createElement('a', {
                         href: actionUrl,
                         className: 'toast-btn toast-btn-primary'
-                    }, actionText) : null,
+                    }, [actionText]) : null,
                     createElement('button', {
                         className: 'toast-btn toast-btn-secondary',
                         type: 'button',
                         'aria-label': 'Dismiss notification'
-                    }, dismissText)
+                    }, [dismissText])
                 ].filter(Boolean))
             ]);
 
-            // Add dismiss handler to "Keep Browsing" button
-            const dismissBtn = toast.querySelector('.toast-btn-secondary');
-            const dismissHandler = (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                this.hide();
-            };
-            dismissBtn.addEventListener('click', dismissHandler);
-
-            // Track for cleanup
-            this.eventListeners.push({ element: dismissBtn, event: 'click', handler: dismissHandler });
-
-            // Add to page
+            // Add to page first
             document.body.appendChild(toast);
             this.activeToast = toast;
 
+            // Add dismiss handler to "Keep Browsing" button (after adding to DOM)
+            const dismissBtn = toast.querySelector('.toast-btn-secondary');
+            if (dismissBtn) {
+                const dismissHandler = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    this.hide();
+                };
+                dismissBtn.addEventListener('click', dismissHandler);
+
+                // Track for cleanup
+                this.eventListeners.push({ element: dismissBtn, event: 'click', handler: dismissHandler });
+
+                // Focus management for accessibility
+                dismissBtn.focus();
+            }
+
             // Auto-hide after duration
             this.hideTimeout = setTimeout(() => this.hide(), duration);
-
-            // Focus management for accessibility
-            dismissBtn.focus();
         }
 
         /**
@@ -641,7 +645,5 @@ if (document.readyState === 'loading') {
     console.info('Selections system initialized');
 }
 
-// Freeze exports to prevent tampering
-Object.freeze(window.SelectionsManager);
-Object.freeze(window.ToastManager);
-Object.freeze(window.StickyBarManager);
+// Note: We don't freeze the manager instances because they need to maintain internal state
+// The classes themselves are already protected by the IIFE pattern

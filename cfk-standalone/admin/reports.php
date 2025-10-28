@@ -362,7 +362,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <tr>
                             <td><?php echo sanitizeString($child['child_display_id']); ?></td>
                             <td><?php echo sanitizeString($child['child_name']); ?></td>
-                            <td><?php echo $child['age']; ?></td>
+                            <td><?php echo displayAge($child['age_months']); ?></td>
                             <td><span class="status-badge status-<?php echo $child['child_status']; ?>"><?php echo ucfirst((string) $child['child_status']); ?></span></td>
                             <td><?php echo $child['sponsor_name'] ? sanitizeString($child['sponsor_name']) : '-'; ?></td>
                             <td>
@@ -491,7 +491,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <tr>
                             <td><?php echo sanitizeString($child['display_id']); ?></td>
                             <td><?php echo sanitizeString($child['name']); ?></td>
-                            <td><?php echo $child['age']; ?></td>
+                            <td><?php echo displayAge($child['age_months']); ?></td>
                             <td><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
                             <td><?php echo sanitizeString($child['grade'] ?? '-'); ?></td>
                             <td><?php echo sanitizeString($child['family_number']); ?></td>

@@ -172,7 +172,7 @@ class Manager
                 $fullSponsorship = Connection::fetchRow(
                     "SELECT s.*,
                             CONCAT(f.family_number, c.child_letter) as child_name,
-                            c.age as child_age,
+                            c.age_months as child_age,
                             c.grade as child_grade,
                             c.gender as child_gender,
                             c.shirt_size,
@@ -636,7 +636,7 @@ class Manager
             "SELECT s.*,
                     c.id as child_id,
                     CONCAT(f.family_number, c.child_letter) as child_name,
-                    c.age as child_age,
+                    c.age_months as child_age,
                     c.grade as child_grade,
                     c.gender as child_gender,
                     c.shirt_size,

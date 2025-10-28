@@ -105,7 +105,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
                 <!-- Detailed Info - Center Column -->
                 <?php
-                $demographics = 'Age: ' . sanitizeInt($member['age']) . ' • ' .
+                $demographics = displayAge($member['age_months']) . ' • ' .
                                ($member['gender'] === 'M' ? 'Boy' : 'Girl');
                 if (!empty($member['grade'])) {
                     $demographics .= ' • Grade: ' . sanitizeString($member['grade']);
@@ -165,11 +165,17 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                                 data-child-id="<?php echo $member['id']; ?>"
                                 data-display-id="<?php echo sanitizeString($member['display_id']); ?>"
                                 data-family-id="<?php echo $member['family_id']; ?>"
-                                data-age="<?php echo sanitizeInt($member['age']); ?>"
+                                data-age-months="<?php echo sanitizeInt($member['age_months']); ?>"
                                 data-gender="<?php echo sanitizeString($member['gender']); ?>"
                                 data-grade="<?php echo sanitizeString($member['grade'] ?? ''); ?>"
                                 data-school="<?php echo sanitizeString($member['school'] ?? ''); ?>"
-                                aria-label="Sponsor child <?php echo sanitizeString($member['display_id']); ?>, age <?php echo sanitizeInt($member['age']); ?>">
+                                data-shirt-size="<?php echo sanitizeString($member['shirt_size'] ?? ''); ?>"
+                                data-pant-size="<?php echo sanitizeString($member['pant_size'] ?? ''); ?>"
+                                data-jacket-size="<?php echo sanitizeString($member['jacket_size'] ?? ''); ?>"
+                                data-shoe-size="<?php echo sanitizeString($member['shoe_size'] ?? ''); ?>"
+                                data-interests="<?php echo sanitizeString($member['interests'] ?? ''); ?>"
+                                data-wishes="<?php echo sanitizeString($member['wishes'] ?? ''); ?>"
+                                aria-label="Sponsor child <?php echo sanitizeString($member['display_id']); ?>, age <?php echo displayAge($member['age_months']); ?>">
                             Sponsor This Child
                         </button>
                     </div>
@@ -614,19 +620,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const childId = parseInt(this.getAttribute('data-child-id'));
             const displayId = this.getAttribute('data-display-id');
             const familyId = parseInt(this.getAttribute('data-family-id'));
-            const age = parseInt(this.getAttribute('data-age'));
+            const ageMonths = parseInt(this.getAttribute('data-age-months'));
             const gender = this.getAttribute('data-gender');
             const grade = this.getAttribute('data-grade') || '';
             const school = this.getAttribute('data-school') || '';
+            const shirtSize = this.getAttribute('data-shirt-size') || '';
+            const pantSize = this.getAttribute('data-pant-size') || '';
+            const jacketSize = this.getAttribute('data-jacket-size') || '';
+            const shoeSize = this.getAttribute('data-shoe-size') || '';
+            const interests = this.getAttribute('data-interests') || '';
+            const wishes = this.getAttribute('data-wishes') || '';
 
             const childData = {
                 id: childId,
                 display_id: displayId,
                 family_id: familyId,
-                age: age,
+                age_months: ageMonths,
                 gender: gender,
                 grade: grade,
-                school: school
+                school: school,
+                shirt_size: shirtSize,
+                pant_size: pantSize,
+                jacket_size: jacketSize,
+                shoe_size: shoeSize,
+                interests: interests,
+                wishes: wishes
             };
 
             // Use existing SelectionsManager
@@ -689,19 +707,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 const childId = parseInt(childButton.getAttribute('data-child-id'));
                 const displayId = childButton.getAttribute('data-display-id');
                 const familyId = parseInt(childButton.getAttribute('data-family-id'));
-                const age = parseInt(childButton.getAttribute('data-age'));
+                const ageMonths = parseInt(childButton.getAttribute('data-age-months'));
                 const gender = childButton.getAttribute('data-gender');
                 const grade = childButton.getAttribute('data-grade') || '';
                 const school = childButton.getAttribute('data-school') || '';
+                const shirtSize = childButton.getAttribute('data-shirt-size') || '';
+                const pantSize = childButton.getAttribute('data-pant-size') || '';
+                const jacketSize = childButton.getAttribute('data-jacket-size') || '';
+                const shoeSize = childButton.getAttribute('data-shoe-size') || '';
+                const interests = childButton.getAttribute('data-interests') || '';
+                const wishes = childButton.getAttribute('data-wishes') || '';
 
                 const childData = {
                     id: childId,
                     display_id: displayId,
                     family_id: familyId,
-                    age: age,
+                    age_months: ageMonths,
                     gender: gender,
                     grade: grade,
-                    school: school
+                    school: school,
+                    shirt_size: shirtSize,
+                    pant_size: pantSize,
+                    jacket_size: jacketSize,
+                    shoe_size: shoeSize,
+                    interests: interests,
+                    wishes: wishes
                 };
 
                 if (typeof SelectionsManager !== 'undefined') {

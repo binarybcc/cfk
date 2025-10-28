@@ -160,7 +160,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                 <table width="100%" cellpadding="5">
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Age:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['age']) . ' years old</td>
+                                        <td style="color: #666; padding: 5px 0;">' . displayAge($child['age_months']) . '</td>
                                     </tr>
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
@@ -337,7 +337,7 @@ function generateReservationConfirmationText(array $reservation): string
 
     foreach ($children as $child) {
         $text .= $child['display_id'] . "\n";
-        $text .= "Age: " . $child['age'] . " years old\n";
+        $text .= "Age: " . displayAge($child['age_months']) . "\n";
         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
 
         // Essential Needs/Interests
@@ -456,7 +456,7 @@ function sendAccessLinkEmail(string $email): array
         error_log("ACCESS LINK: Fetching sponsorships from database");
         $sponsorships = Database::fetchAll(
             "SELECT s.*,
-                    c.child_letter, c.age, c.gender, c.wishes, c.interests, c.special_needs,
+                    c.child_letter, c.age_months, c.gender, c.wishes, c.interests, c.special_needs,
                     c.shirt_size, c.pant_size, c.jacket_size, c.shoe_size,
                     f.family_number,
                     CONCAT(f.family_number, c.child_letter) as display_id
@@ -642,7 +642,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                 <table width="100%" cellpadding="5">
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Age:</td>
-                                        <td style="color: #666; padding: 5px 0;">' . htmlspecialchars((string) $child['age']) . ' years old</td>
+                                        <td style="color: #666; padding: 5px 0;">' . displayAge($child['age_months']) . '</td>
                                     </tr>
                                     <tr>
                                         <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Gender:</td>
@@ -817,7 +817,7 @@ function generateAccessLinkText(string $email, string $name, array $sponsorships
 
     foreach ($sponsorships as $child) {
         $text .= $child['display_id'] . "\n";
-        $text .= "Age: " . $child['age'] . " years old\n";
+        $text .= "Age: " . displayAge($child['age_months']) . "\n";
         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
 
         // Essential Needs/Interests
