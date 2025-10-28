@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Temporary Landing Page - Pre-Launch (Until Nov 1, 2025)
+ * Temporary Landing Page - Pre-Launch (Until Oct 28, 2025 1:00 PM ET - TESTING)
  * Shows donation information and countdown to sponsorship launch
  */
 
@@ -12,10 +12,10 @@ if (!defined('CFK_APP')) {
 }
 
 global $cspNonce;
-$pageTitle = 'Christmas for Kids - Coming November 1, 2025';
+$pageTitle = 'Christmas for Kids - Coming October 28, 2025';
 
-// Calculate countdown to Nov 1, 2025 00:01 ET
-$launchTime = new DateTime('2025-11-01 00:01:00', new DateTimeZone('America/New_York'));
+// Calculate countdown to Oct 28, 2025 13:00 ET (TESTING)
+$launchTime = new DateTime('2025-10-28 13:00:00', new DateTimeZone('America/New_York'));
 $now = new DateTime('now', new DateTimeZone('America/New_York'));
 $interval = $now->diff($launchTime);
 ?>
@@ -406,7 +406,7 @@ $interval = $now->diff($launchTime);
 
         <div class="launch-date">
             🎁 Child Sponsorships Open:<br>
-            <strong>Saturday, November 1, 2025 at 12:01 AM ET</strong>
+            <strong>Monday, October 28, 2025 at 1:00 PM ET</strong>
         </div>
     </div>
 
@@ -422,9 +422,9 @@ $interval = $now->diff($launchTime);
 
     <!-- Sponsorships Coming Soon Section -->
     <div class="message-section">
-        <h2><span class="icon">🎁</span> Child Sponsorships Begin November 1st</h2>
+        <h2><span class="icon">🎁</span> Child Sponsorships Begin Today at 1:00 PM</h2>
         <p>
-            Browse children and select sponsorships starting Saturday, November 1, 2025 at 12:01 AM Eastern Time.
+            Browse children and select sponsorships starting Monday, October 28, 2025 at 1:00 PM Eastern Time.
             Each child represents a family in our community who could use extra support this Christmas season.
         </p>
         <p>
@@ -549,7 +549,7 @@ $interval = $now->diff($launchTime);
 <script nonce="<?php echo $cspNonce; ?>">
 (function() {
     // Countdown to Nov 1, 2025 00:01:00 ET (EST is UTC-5)
-    const launchDate = new Date('2025-11-01T00:01:00-05:00');
+    const launchDate = new Date('2025-10-28T13:00:00-04:00');
 
     function updateCountdown() {
         const now = new Date();
