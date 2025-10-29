@@ -3293,6 +3293,22 @@ tr:hover {
     color: #ccc;
 }
 
+.footer-bottom a {
+    color: var(--color-white);
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+.footer-bottom a:hover {
+    color: #ffd700;
+    text-decoration: underline;
+}
+
+.ai-attribution {
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-sm);
+}
+
 .version {
     font-size: var(--font-size-xs);
     opacity: 0.7;
