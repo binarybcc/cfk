@@ -1216,16 +1216,6 @@ name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,inte
                                         Skips existing children (based on family number + child letter). Safe for adding new families.
                                     </div>
                                 </div>
-
-                                <div class="radio-item">
-                                    <input type="radio" id="mode_update" name="import_mode" value="update">
-                                    <label for="mode_update" style="margin-left: 0.5rem;">
-                                        <strong>Update Existing</strong> - Update existing children and add new ones
-                                    </label>
-                                    <div class="help-text" style="margin-left: 1.75rem; color: #6c757d; font-size: 0.9rem;">
-                                        Updates all fields for existing children, adds new ones. Preserves sponsorship statuses.
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
