@@ -29,17 +29,8 @@ $admin = Database::fetchRow(
     [$_SESSION['cfk_admin_id']]
 );
 
-// Force password change if:
-// 1. Username is 'admin' AND
-// 2. Never logged in before (first login) OR created_at equals updated_at (password never changed)
-if ($admin && $admin['username'] === 'admin') {
-    $isFirstLogin = ($admin['last_login'] === null || $admin['created_at'] === $admin['updated_at']);
-    if ($isFirstLogin) {
-        $_SESSION['force_password_change'] = true;
-        header('Location: change_password.php');
-        exit;
-    }
-}
+// Note: Password-based authentication removed in favor of Magic Link (passwordless)
+// First-time login handled by Magic Link system - no password change needed
 
 $pageTitle = 'Admin Dashboard';
 

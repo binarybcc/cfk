@@ -1,0 +1,1 @@
+- Always use the local .env file to find productia nd staging login information.
