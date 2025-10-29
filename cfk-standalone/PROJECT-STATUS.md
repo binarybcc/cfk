@@ -332,7 +332,7 @@ After deploying to production:
 
 ### Technical Debt
 - Session timeout configuration (LOW priority)
-- Password complexity requirements (LOW priority)
+- Legacy password files cleanup (change_password.php, forgot_password.php, reset_password.php - unused with Magic Link auth)
 
 ---
 
