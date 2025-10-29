@@ -332,7 +332,6 @@ After deploying to production:
 
 ### Technical Debt
 - Session timeout configuration (LOW priority)
-- Remember-me token security (TODO in login.php:75)
 - Password complexity requirements (LOW priority)
 
 ---
