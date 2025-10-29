@@ -234,10 +234,12 @@ class Analyzer
         $parseResult = $handler->parseCSVForPreview($csvPath);
 
         if (!$parseResult['success']) {
+            error_log("APPEND DEBUG: CSV parse failed");
             return $parseResult;
         }
 
         $newChildren = $parseResult['children'];
+        error_log("APPEND DEBUG: Parsed " . count($newChildren) . " children from CSV");
 
         // Apply import based on mode
         switch ($importMode) {
@@ -245,6 +247,7 @@ class Analyzer
                 return self::applyReplaceMode($csvPath, $sponsorshipLookup, $options);
 
             case 'append':
+                error_log("APPEND DEBUG: Starting append mode with " . count($newChildren) . " children");
                 return self::applyAppendMode($newChildren, $sponsorshipLookup);
 
             case 'update':
@@ -487,7 +490,7 @@ class Analyzer
             'family_id' => $familyId,
             'child_letter' => $childData['child_letter'],
             'name' => $childData['name'],
-            'age' => $childData['age'],
+            'age_months' => $childData['age_months'],
             'gender' => $childData['gender'],
             'grade' => '', // Not in CSV - calculated from age
             'school' => '',
@@ -511,7 +514,7 @@ class Analyzer
             'family_id' => $familyId,
             'child_letter' => $childData['child_letter'],
             'name' => $childData['name'],
-            'age' => $childData['age'],
+            'age_months' => $childData['age_months'],
             'gender' => $childData['gender'],
             'grade' => '',
             'school' => '',
