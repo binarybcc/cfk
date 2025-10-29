@@ -40,6 +40,12 @@
    - Countdown page live and functional
    - CSV importer ready for real data
 
+4. ✅ **Security Fix - Password Authentication Removal**
+   - Deleted legacy password authentication files (change_password.php, forgot_password.php, reset_password.php)
+   - Closed potential security vulnerability (unauthenticated password reset)
+   - System is 100% Magic Link authentication (passwordless)
+   - No functionality lost - Magic Link handles all admin access
+
 #### v1.5.1 Updates (Oct 13-14, 2025)
 1. ✅ **Security Audit Complete**
    - See: `docs/audits/v1.5.1-security-audit.md`
@@ -332,7 +338,6 @@ After deploying to production:
 
 ### Technical Debt
 - Session timeout configuration (LOW priority)
-- Legacy password files cleanup (change_password.php, forgot_password.php, reset_password.php - unused with Magic Link auth)
 
 ---
 
