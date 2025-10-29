@@ -46,7 +46,7 @@
             <div class="footer-bottom">
                 <p>&copy; <?php echo date('Y'); ?> <?php echo config('app_name'); ?>. All rights reserved.</p>
                 <p class="version">Version <?php echo config('app_version'); ?></p>
-                <p class="ai-attribution">This site was created with Claude AI under human direction. If you'd like to see what AI can do for you and your business, <a href="mailto:help@edwards-group.com">contact The Journal by email</a>.</p>
+                <p class="ai-attribution">This site was created with <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude AI</a> under human direction. If you'd like to see what AI can do for you and your business, <a href="mailto:help@edwards-group.com">contact The Journal by email</a>.</p>
             </div>
         </div>
     </footer>
