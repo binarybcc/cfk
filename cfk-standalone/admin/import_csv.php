@@ -842,73 +842,6 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
         </div>
 
-        <!-- Backup Management Section -->
-        <?php if ($backupStats['total_backups'] > 0) : ?>
-        <div class="backup-section section">
-            <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
-                💾 Automatic Backups (Last <?php echo $backupStats['max_backups']; ?> Versions)
-            </div>
-            <div class="section-body">
-                <div class="alert alert-info">
-                    <strong>ℹ️ Auto-Protection Enabled:</strong> Every CSV import automatically creates a backup first. You can restore any of the last <?php echo $backupStats['max_backups']; ?> backups below.
-                </div>
-
-                <div class="backup-list">
-                    <?php foreach ($backupStats['backups'] as $backup) : ?>
-                        <?php
-                        $metadata = $backup['metadata'];
-                        $created = date('F j, Y g:i A', $backup['created']);
-                        $size = round($backup['size'] / 1024, 1);
-                        ?>
-                        <div class="backup-item">
-                            <div class="backup-info">
-                                <div class="backup-filename">
-                                    <strong>📄 <?php echo htmlspecialchars((string) $backup['filename']); ?></strong>
-                                </div>
-                                <div class="backup-meta">
-                                    <span>🕐 <?php echo $created; ?></span>
-                                    <span>📊 <?php echo $metadata['children_count'] ?? 0; ?> children</span>
-                                    <span>👨‍👩‍👧‍👦 <?php echo $metadata['families_count'] ?? 0; ?> families</span>
-                                    <span>💾 <?php echo $size; ?> KB</span>
-                                </div>
-                            </div>
-                            <div class="backup-actions">
-                                <form method="POST" style="display: inline;" onsubmit="return confirm('Restore this backup? Current data will be replaced.');">
-                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                    <input type="hidden" name="action" value="restore_backup">
-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
-                                    <input type="hidden" name="clear_existing" value="1">
-                                    <button type="submit" class="btn btn-warning btn-sm">
-                                        ♻️ Restore
-                                    </button>
-                                </form>
-                                <form method="POST" style="display: inline;">
-                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
-                                    <input type="hidden" name="action" value="download_backup">
-                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
-                                    <button type="submit" class="btn btn-secondary btn-sm">
-                                        💾 Download
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-        </div>
-        <?php else : ?>
-        <div class="backup-section section">
-            <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
-                💾 Automatic Backups
-            </div>
-            <div class="section-body">
-                <div class="alert alert-info">
-                    <strong>ℹ️ No backups yet.</strong> Backups will be created automatically when you import your first CSV file.
-                </div>
-            </div>
-        </div>
-        <?php endif; ?>
-
         <!-- Delete All Children Section -->
         <div class="delete-section section">
             <div class="section-header" style="background-color: #f8d7da; color: #721c24;">
@@ -962,11 +895,8 @@ name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,inte
                         <li><strong>age_years</strong>: Child's age in years (0-18) - <em>leave blank if using age_months</em></li>
                         <li><strong>gender</strong>: M or F</li>
                         <li><strong>shirt_size, pant_size, shoe_size, jacket_size</strong>: Standard clothing sizes</li>
-                        <li><strong>interests</strong>: Comma-separated hobbies/interests</li>
-                        <li><strong>greatest_need</strong>: Essential items needed (winter coat, socks, etc.)</li>
                         <li><strong>wish_list</strong>: Christmas gift wishes</li>
                         <li><strong>special_needs</strong>: Any special considerations</li>
-                        <li><strong>family_situation</strong>: Brief family background</li>
                     </ul>
                     <div class="alert alert-info" style="margin-top: 1rem;">
                         <strong>📌 Important:</strong> Use either <code>age_months</code> OR <code>age_years</code>, not both.
@@ -1282,6 +1212,73 @@ name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,inte
                     </div>
                 </div>
             </div>
+        <?php endif; ?>
+
+        <!-- Backup Management Section -->
+        <?php if ($backupStats['total_backups'] > 0) : ?>
+        <div class="backup-section section">
+            <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
+                💾 Automatic Backups (Last <?php echo $backupStats['max_backups']; ?> Versions)
+            </div>
+            <div class="section-body">
+                <div class="alert alert-info">
+                    <strong>ℹ️ Auto-Protection Enabled:</strong> Every CSV import automatically creates a backup first. You can restore any of the last <?php echo $backupStats['max_backups']; ?> backups below.
+                </div>
+
+                <div class="backup-list">
+                    <?php foreach ($backupStats['backups'] as $backup) : ?>
+                        <?php
+                        $metadata = $backup['metadata'];
+                        $created = date('F j, Y g:i A', $backup['created']);
+                        $size = round($backup['size'] / 1024, 1);
+                        ?>
+                        <div class="backup-item">
+                            <div class="backup-info">
+                                <div class="backup-filename">
+                                    <strong>📄 <?php echo htmlspecialchars((string) $backup['filename']); ?></strong>
+                                </div>
+                                <div class="backup-meta">
+                                    <span>🕐 <?php echo $created; ?></span>
+                                    <span>📊 <?php echo $metadata['children_count'] ?? 0; ?> children</span>
+                                    <span>👨‍👩‍👧‍👦 <?php echo $metadata['families_count'] ?? 0; ?> families</span>
+                                    <span>💾 <?php echo $size; ?> KB</span>
+                                </div>
+                            </div>
+                            <div class="backup-actions">
+                                <form method="POST" style="display: inline;" onsubmit="return confirm('Restore this backup? Current data will be replaced.');">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                    <input type="hidden" name="action" value="restore_backup">
+                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
+                                    <input type="hidden" name="clear_existing" value="1">
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        ♻️ Restore
+                                    </button>
+                                </form>
+                                <form method="POST" style="display: inline;">
+                                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                                    <input type="hidden" name="action" value="download_backup">
+                                    <input type="hidden" name="backup_filename" value="<?php echo htmlspecialchars((string) $backup['filename']); ?>">
+                                    <button type="submit" class="btn btn-secondary btn-sm">
+                                        💾 Download
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+        <?php else : ?>
+        <div class="backup-section section">
+            <div class="section-header" style="background-color: #d1ecf1; color: #0c5460;">
+                💾 Automatic Backups
+            </div>
+            <div class="section-body">
+                <div class="alert alert-info">
+                    <strong>ℹ️ No backups yet.</strong> Backups will be created automatically when you import your first CSV file.
+                </div>
+            </div>
+        </div>
         <?php endif; ?>
     </div>
 
