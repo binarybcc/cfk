@@ -884,11 +884,6 @@ include __DIR__ . '/includes/admin_header.php';
 
                 <div class="requirements">
                     <h4>Template Format</h4>
-                    <div class="sample-format">
-name,age_months,age_years,gender,shirt_size,pant_size,shoe_size,jacket_size,interests,greatest_need,wish_list,special_needs,family_situation
-"001A",96,,"F","Girls 8","Girls 8","Youth 3","Girls 8","Sports, Art","Winter Coat","Soccer Ball","None","Single mother"
-"001B",,6,"M","Boys 6","Boys 6","Youth 1","Boys 6","Cars, Building","Shoes","Lego Sets","None","Single mother"
-                    </div>
                     <ul>
                         <li><strong>name</strong>: Combined family ID + child letter (e.g., "001A", "002B") - family 001, child A</li>
                         <li><strong>age_months</strong>: Child's age in months (0-24) - <em>leave blank if using age_years</em></li>
