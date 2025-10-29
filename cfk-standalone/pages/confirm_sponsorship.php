@@ -51,7 +51,7 @@ $pageTitle = 'Confirm Your Sponsorship';
                         <li>
                             <strong x-text="child.display_id"></strong>
                             <span class="child-details">
-                                - <span x-text="Math.floor(child.age_months / 12)"></span> years old,
+                                - <span x-text="child.age_months < 24 ? child.age_months + ' months old' : Math.floor(child.age_months / 12) + ' years old'"></span>,
                                 <span x-text="child.gender === 'M' ? 'Boy' : 'Girl'"></span>
                             </span>
                         </li>
