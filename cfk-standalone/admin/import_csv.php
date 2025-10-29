@@ -345,6 +345,7 @@ $backupStats = BackupManager::getBackupStats();
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
+
 <!-- Page-specific styles -->
 <style>
         * {
