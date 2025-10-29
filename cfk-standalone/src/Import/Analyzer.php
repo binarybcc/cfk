@@ -234,12 +234,10 @@ class Analyzer
         $parseResult = $handler->parseCSVForPreview($csvPath);
 
         if (!$parseResult['success']) {
-            error_log("APPEND DEBUG: CSV parse failed");
             return $parseResult;
         }
 
         $newChildren = $parseResult['children'];
-        error_log("APPEND DEBUG: Parsed " . count($newChildren) . " children from CSV");
 
         // Apply import based on mode
         switch ($importMode) {
@@ -247,7 +245,6 @@ class Analyzer
                 return self::applyReplaceMode($csvPath, $sponsorshipLookup, $options);
 
             case 'append':
-                error_log("APPEND DEBUG: Starting append mode with " . count($newChildren) . " children");
                 return self::applyAppendMode($newChildren, $sponsorshipLookup);
 
             case 'update':
@@ -313,39 +310,25 @@ class Analyzer
         foreach ($newChildren as $childData) {
             $key = $childData['family_id'] . '_' . $childData['child_letter'];
 
-            // DEBUG logging
-            error_log("APPEND DEBUG: Processing child {$childData['name']}, key=$key");
-            error_log("APPEND DEBUG: family_id={$childData['family_id']}, child_letter={$childData['child_letter']}");
-
             if (isset($existingLookup[$key])) {
-                error_log("APPEND DEBUG: Child $key already exists, skipping");
                 $skipped++;
                 continue; // Skip existing children
             }
 
-            error_log("APPEND DEBUG: Child $key is new, attempting to insert");
-
             // Ensure family exists
             $familyId = self::ensureFamilyExists($childData);
             if (!$familyId) {
-                error_log("APPEND DEBUG: Failed to create family for {$childData['name']}");
                 $errors[] = "Failed to create family for {$childData['name']}";
                 continue;
             }
-
-            error_log("APPEND DEBUG: Family exists/created with ID=$familyId");
 
             // Insert child
             try {
                 $childId = self::insertChild($childData, $familyId);
                 if ($childId) {
-                    error_log("APPEND DEBUG: Successfully inserted child with ID=$childId");
                     $imported++;
-                } else {
-                    error_log("APPEND DEBUG: insertChild returned null/false");
                 }
             } catch (\Exception $e) {
-                error_log("APPEND DEBUG: Exception inserting child: " . $e->getMessage());
                 $errors[] = "Failed to insert {$childData['name']}: " . $e->getMessage();
             }
         }
