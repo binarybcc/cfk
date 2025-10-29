@@ -882,21 +882,9 @@ include __DIR__ . '/includes/admin_header.php';
                     <button type="submit" class="btn btn-success">📥 Download CSV Template</button>
                 </form>
 
-                <div class="requirements">
-                    <h4>Template Format</h4>
-                    <ul>
-                        <li><strong>name</strong>: Combined family ID + child letter (e.g., "001A", "002B") - family 001, child A</li>
-                        <li><strong>age_months</strong>: Child's age in months (0-24) - <em>leave blank if using age_years</em></li>
-                        <li><strong>age_years</strong>: Child's age in years (0-18) - <em>leave blank if using age_months</em></li>
-                        <li><strong>gender</strong>: M or F</li>
-                        <li><strong>shirt_size, pant_size, shoe_size, jacket_size</strong>: Standard clothing sizes</li>
-                        <li><strong>wish_list</strong>: Christmas gift wishes</li>
-                        <li><strong>special_needs</strong>: Any special considerations</li>
-                    </ul>
-                    <div class="alert alert-info" style="margin-top: 1rem;">
-                        <strong>📌 Important:</strong> Use either <code>age_months</code> OR <code>age_years</code>, not both.
-                        For children under 2 years, use age_months. For older children, age_years is easier.
-                    </div>
+                <div class="alert alert-info" style="margin-top: 1rem;">
+                    <strong>📌 Important:</strong> Use either <code>age_months</code> OR <code>age_years</code>, not both.
+                    For children under 2 years, use age_months. For older children, age_years is easier.
                 </div>
             </div>
         </div>
