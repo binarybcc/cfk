@@ -1136,7 +1136,7 @@ include __DIR__ . '/includes/admin_header.php';
 
                             // Populate all form fields
                             document.getElementById('childFamily').value = child.family_id || '';
-                            document.getElementById('childLetter').value = child.child_letter || '';
+                            // Note: child_letter is auto-assigned and not editable in the form
 
                             // Populate age fields - convert stored months to appropriate display field
                             const ageMonths = child.age_months || 0;
