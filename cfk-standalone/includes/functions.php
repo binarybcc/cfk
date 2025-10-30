@@ -501,8 +501,7 @@ function getPhotoUrl(string $filename = null, array $child = null): string
 {
     // ALWAYS use avatars - no real photos for privacy protection
     if ($child && isset($child['age_months']) && isset($child['gender'])) {
-        require_once __DIR__ . '/avatar_manager.php';
-        return CFK_Avatar_Manager::getAvatarForChild($child);
+        return \CFK\Avatar\Manager::getAvatarForChild($child);
     }
 
     // Fallback avatar if child data not available
