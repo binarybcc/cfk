@@ -226,8 +226,8 @@ cfk-standalone/
 
 To prevent confusion about which environment we're working in:
 
-- 🏠 **LOCAL** = Your development machine
-- 🐳 **DOCKER** = OrbStack/Docker containers (PHP 8.2)
+- 🏠 **LOCAL** = Your development machine (code editing only)
+- 🧪 **STAGING** = https://10ce79bd48.nxcli.io/ (testing environment)
 - 🌐 **PRODUCTION** = Live cforkids.org server
 
 Always use these markers when working on files or running commands.
@@ -246,48 +246,39 @@ Always use these markers when working on files or running commands.
    ```bash
    🏠 LOCAL:
    cp .env.example .env
-   # Edit .env with your Docker/local settings
+   # Edit .env with your local settings
    chmod 600 .env
 
    # Verify .env is NOT tracked by git
    git status  # Should not show .env
    ```
 
-3. **Start Docker Environment**
-   ```bash
-   🐳 DOCKER:
-   docker-compose up -d
-   # Access: http://localhost:8082
-   ```
-
-4. **Run Automated Tests**
-   ```bash
-   🐳 DOCKER:
-   ./tests/security-functional-tests.sh
-   # Should show: 35/36 tests passing
-   ```
+3. **Testing Setup**
+   - All testing done on staging environment: https://10ce79bd48.nxcli.io/
+   - Deploy changes to staging using `/deploy-staging` command
+   - Manual verification required for all changes
 
 ### Daily Development Workflow
 
 1. **Before Starting Work**
    ```bash
    🏠 LOCAL:
-   git pull origin v1.5-reservation-system
-   docker-compose ps  # Verify containers running
+   git pull origin v1.7.3-production-hardening
    ```
 
 2. **During Development**
-   - Test changes in Docker before deploying
-   - Run functional tests: `./tests/security-functional-tests.sh`
-   - Check logs: `docker-compose logs web`
+   - Make changes locally
+   - Run PHPStan for static analysis
+   - Deploy to staging for testing: `/deploy-staging`
+   - Test on staging: https://10ce79bd48.nxcli.io/
 
 3. **Before Committing**
    ```bash
    🏠 LOCAL:
-   ./tests/security-functional-tests.sh  # All tests must pass
+   vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
    git add -A
    git commit -m "description"
-   git push origin v1.5-reservation-system
+   git push origin [branch-name]
    ```
 
 ### Technical Details
@@ -346,7 +337,7 @@ This project uses environment variables for all sensitive configuration. **NEVER
 
 **Local Development (.env):**
 ```ini
-DB_HOST=db                        # Docker: 'db', Local: 'localhost'
+DB_HOST=localhost                 # Local database host
 DB_NAME=cfk_sponsorship_dev
 DB_USER=cfk_user
 DB_PASSWORD=cfk_pass              # Local dev password

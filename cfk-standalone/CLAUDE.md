@@ -80,9 +80,8 @@ vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
 
 After ANY code change:
 1. Run PHPStan (verify no new errors)
-2. Run functional test suite
-3. Check Docker logs for errors
-4. Manual testing (if user-facing change)
+2. Deploy to staging for testing (if user-facing change)
+3. Manual testing on staging: https://10ce79bd48.nxcli.io/
 
 ### 5. 🚨 DEPLOYMENT RULE (MANDATORY)
 
@@ -92,7 +91,6 @@ After ANY code change:
 
 **Allowed deployments for this branch:**
 - ✅ **Staging only:** https://10ce79bd48.nxcli.io/
-- ✅ **Local development:** Docker environment
 - ❌ **NEVER production:** cforkids.org
 
 **Workflow for this branch:**
@@ -269,9 +267,9 @@ open docs/metrics/index.html
 - [x] Branch created from v1.7.3
 - [x] Master plan documented
 - [x] Testing methodology defined
-- [ ] Docker environment running
+- [x] Staging environment accessible (https://10ce79bd48.nxcli.io/)
 - [ ] PHPStan baseline created
-- [ ] Functional tests passing
+- [ ] Manual testing on staging verified
 
 ---
 
