@@ -49,7 +49,7 @@ $appConfig = [
     'debug' => !$isProduction,
     
     // Paths
-    'base_url' => $isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/',
+    'base_url' => getenv('BASE_URL') ?: ($isProduction ? 'https://cforkids.org/' : 'http://localhost:8082/'),
     'upload_path' => __DIR__ . '/../uploads/',
     'photo_path' => __DIR__ . '/../uploads/photos/',
     
