@@ -107,7 +107,7 @@ if ($_POST !== []) {
                 }
             }
 
-            if ($error === '' || $error === '0') {
+            if ($error === '') {
                 Database::update('admin_users', $updateData, ['id' => $adminId]);
                 $message = 'Administrator updated successfully.';
                 error_log("CFK Admin: Admin user updated: ID $adminId by " . $_SESSION['cfk_admin_username']);
