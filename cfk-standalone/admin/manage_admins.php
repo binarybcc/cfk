@@ -144,26 +144,25 @@ $cspNonce = bin2hex(random_bytes(16));
 include __DIR__ . '/includes/admin_header.php';
 ?>
 
-<div class="admin-content">
-    <div class="content-header">
-        <h1><?php echo $pageTitle; ?></h1>
-        <p class="subtitle">Manage administrator accounts and permissions</p>
+<div class="content-header">
+    <h1><?php echo $pageTitle; ?></h1>
+    <p class="subtitle">Manage administrator accounts and permissions</p>
+</div>
+
+<?php if ($message !== '' && $message !== '0') : ?>
+    <div class="alert alert-success">
+        ✓ <?php echo htmlspecialchars($message); ?>
     </div>
+<?php endif; ?>
 
-    <?php if ($message !== '' && $message !== '0') : ?>
-        <div class="alert alert-success">
-            ✓ <?php echo htmlspecialchars($message); ?>
-        </div>
-    <?php endif; ?>
+<?php if ($error !== '' && $error !== '0') : ?>
+    <div class="alert alert-error">
+        ✗ <?php echo htmlspecialchars($error); ?>
+    </div>
+<?php endif; ?>
 
-    <?php if ($error !== '' && $error !== '0') : ?>
-        <div class="alert alert-error">
-            ✗ <?php echo htmlspecialchars($error); ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- Add New Admin Button -->
-    <div class="action-bar">
+<!-- Add New Admin Button -->
+<div class="action-bar">
         <button id="show-add-admin-btn" class="btn btn-primary">
             ➕ Add New Administrator
         </button>
@@ -387,14 +386,8 @@ include __DIR__ . '/includes/admin_header.php';
         <input type="hidden" name="admin_id" id="deleteAdminId">
         <input type="hidden" name="delete_admin" value="1">
     </form>
-</div>
 
 <style>
-.admin-content {
-    padding: 2rem;
-    max-width: 1400px;
-    margin: 0 auto;
-}
 
 .content-header {
     margin-bottom: 2rem;
