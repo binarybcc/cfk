@@ -76,12 +76,8 @@
 
         // Persistent error messages (for import errors and critical messages)
         if ($displayMessage && $displayMessage['type'] === 'error') : ?>
-            <div class="persistent-alert persistent-alert-<?php echo $displayMessage['type']; ?>">
-                <strong><?php
-                    if ($displayMessage['type'] === 'error') echo '❌ Error: ';
-                    elseif ($displayMessage['type'] === 'success') echo '✅ Success: ';
-                    elseif ($displayMessage['type'] === 'warning') echo '⚠️ Warning: ';
-                ?></strong>
+            <div class="persistent-alert persistent-alert-error">
+                <strong>❌ Error: </strong>
                 <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
         <?php elseif ($displayMessage) : ?>
@@ -93,8 +89,8 @@
                     toast.className = 'cfk-toast cfk-toast-<?php echo $displayMessage['type']; ?>';
                     toast.innerHTML = '<span class="cfk-toast-icon"><?php
                         if ($displayMessage['type'] === 'success') echo '✓';
-                        if ($displayMessage['type'] === 'error') echo '✕';
-                        if ($displayMessage['type'] === 'warning') echo '⚠';
+                        elseif ($displayMessage['type'] === 'error') echo '✕';
+                        elseif ($displayMessage['type'] === 'warning') echo '⚠';
                     ?></span><span class="cfk-toast-text"><?php echo addslashes(sanitizeString($displayMessage['text'])); ?></span>';
 
                     document.body.appendChild(toast);
