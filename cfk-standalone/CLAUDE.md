@@ -79,6 +79,126 @@ After ANY code change:
 
 ---
 
+## 🔍 Quality Tools Suite
+
+**Available Tools:** 8 professional code quality analyzers installed and configured
+
+**Quick Access:** Use `/quality-check` slash command for detailed workflow guide
+
+### Essential Pre-Deployment Checks
+
+**Run BEFORE every deployment:**
+
+```bash
+# 1. Static analysis (must pass - no new errors)
+vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
+
+# 2. Functional tests (must pass - 35/36)
+./tests/security-functional-tests.sh
+```
+
+**Expected baseline:**
+- PHPStan: 161 errors (no increase acceptable)
+- Functional tests: 35/36 passing
+
+### Available Analysis Tools
+
+| Tool | Purpose | When to Use | Command |
+|------|---------|-------------|---------|
+| **PHPStan** | Type safety, critical bugs | Before every deploy | `vendor/bin/phpstan analyse` |
+| **Functional Tests** | Security & workflow validation | Before every deploy | `./tests/security-functional-tests.sh` |
+| **PHPMD** | Code smells detection | Weekly cleanup | `vendor/bin/phpmd ... text phpmd.xml` |
+| **PHPCS** | PSR-12 compliance | Weekly cleanup | `vendor/bin/phpcs --standard=phpcs.xml` |
+| **PHP CS Fixer** | Auto-format code | Weekly cleanup | `vendor/bin/php-cs-fixer fix` |
+| **Rector** | Auto-refactoring | Monthly cleanup | `vendor/bin/rector process` |
+| **Psalm** | Stricter type analysis | Monthly audit | `vendor/bin/psalm` |
+| **PHPMetrics** | Visual metrics dashboard | Monthly audit | `vendor/bin/phpmetrics --report-html=docs/metrics/` |
+
+### Auto-Fixers (Safe to Run Anytime)
+
+**These tools automatically fix issues:**
+
+```bash
+# Format code (PSR-12 compliance)
+vendor/bin/php-cs-fixer fix
+
+# Fix spacing/indentation
+vendor/bin/phpcbf --standard=phpcs.xml
+
+# Refactor to modern PHP patterns
+vendor/bin/rector process
+```
+
+**Use weekly** to keep code clean without manual effort.
+
+### Workflow Integration
+
+**Before committing:**
+```bash
+vendor/bin/phpstan analyse [changed-files] --level 6
+```
+
+**Before staging deploy:**
+```bash
+vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
+./tests/security-functional-tests.sh
+```
+
+**Before production deploy:**
+```bash
+vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
+./tests/security-functional-tests.sh
+vendor/bin/psalm --show-info=false
+```
+
+**Weekly cleanup session:**
+```bash
+vendor/bin/php-cs-fixer fix
+vendor/bin/phpcbf --standard=phpcs.xml
+vendor/bin/rector process
+git add -A && git commit -m "style: Weekly auto-fixer improvements"
+```
+
+**Monthly quality audit:**
+```bash
+vendor/bin/phpmetrics --report-html=docs/metrics/ admin/ includes/ pages/ cron/ src/
+open docs/metrics/index.html
+```
+
+### Quality Metrics Dashboard
+
+**View current quality metrics:**
+
+```bash
+# Generate latest metrics
+vendor/bin/phpmetrics --report-html=docs/metrics/ admin/ includes/ pages/ cron/ src/
+
+# Open in browser
+open docs/metrics/index.html
+```
+
+**Dashboard shows:**
+- Lines of code and complexity trends
+- Maintainability index
+- Coupling and dependencies
+- Violations over time
+
+### Current Quality Baseline (v1.8.1)
+
+**Established metrics:**
+- PHPStan: 161 errors (44% improved from 287)
+- PHPCS: 655 violations (19 auto-fixed)
+- Psalm: 117 errors
+- Functional tests: 35/36 passing
+- Code formatted: 64 files improved
+- Auto-refactored: 13 files modernized
+
+**Zero regression tolerance:** Any deployment that increases error counts must be fixed before merging.
+
+**For detailed workflows:** Run `/quality-check` command
+
+---
+
 ## 📚 Key Documentation References
 
 ### Planning & Methodology:
