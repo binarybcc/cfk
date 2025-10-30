@@ -13,6 +13,8 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
+use CFK\Email\Manager as EmailManager;
+
 class CFK_Email_Queue
 {
     const STATUS_QUEUED = 'queued';
@@ -181,12 +183,7 @@ class CFK_Email_Queue
     private static function sendEmail(array $email): array
     {
         try {
-            // Load email manager
-            if (!class_exists('CFK_Email_Manager')) {
-                require_once __DIR__ . '/email_manager.php';
-            }
-
-            $mailer = CFK_Email_Manager::getMailer();
+            $mailer = EmailManager::getMailer();
 
             $mailer->clearAddresses();
             $mailer->clearReplyTos();
@@ -296,14 +293,10 @@ class CFK_Email_Queue
      */
     public static function queueSponsorConfirmation(array $sponsorship): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
         return self::queue(
             $sponsorship['sponsor_email'],
             'Christmas for Kids - Sponsorship Confirmation',
-            CFK_Email_Manager::getSponsorConfirmationTemplate($sponsorship),
+            EmailManager::getSponsorConfirmationTemplate($sponsorship),
             [
                 'recipient_name' => $sponsorship['sponsor_name'],
                 'priority' => self::PRIORITY_HIGH,
@@ -318,14 +311,10 @@ class CFK_Email_Queue
      */
     public static function queueAdminNotification(string $subject, string $message, array $data = []): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
         return self::queue(
             config('admin_email'),
             'CFK Admin - ' . $subject,
-            CFK_Email_Manager::getAdminNotificationTemplate($subject, $message, $data),
+            EmailManager::getAdminNotificationTemplate($subject, $message, $data),
             [
                 'priority' => self::PRIORITY_NORMAL,
                 'reference_type' => $data['reference_type'] ?? null,
