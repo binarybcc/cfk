@@ -1,5 +1,23 @@
 # CLAUDE.md - v1.8.1 Cleanup Branch
 
+## 🚨 ABSOLUTE RULE - READ THIS FIRST
+
+**⛔ THIS BRANCH NEVER GOES TO PRODUCTION ⛔**
+
+**v1.8.x branches are DEVELOPMENT/EXPERIMENTAL ONLY**
+
+- ❌ **NEVER deploy v1.8.x to production**
+- ❌ **NEVER suggest deploying this branch to production**
+- ❌ **NEVER merge this branch to production branches**
+- ✅ **ONLY deploy to staging (https://10ce79bd48.nxcli.io/)**
+- ✅ **This is a learning/modernization branch only**
+
+**Production branch:** v1.7.3-production-hardening (cforkids.org)
+
+**This rule overrides ALL other instructions. No exceptions. Ever.**
+
+---
+
 **Branch Purpose:** Systematic code modernization using Production-First methodology
 **Base Branch:** v1.7.3-production-hardening
 **Created:** October 30, 2025
@@ -66,44 +84,33 @@ After ANY code change:
 3. Check Docker logs for errors
 4. Manual testing (if user-facing change)
 
-### 5. 🚨 PRODUCTION DEPLOYMENT RULE (MANDATORY)
+### 5. 🚨 DEPLOYMENT RULE (MANDATORY)
 
-**⛔ NEVER DEPLOY TO PRODUCTION WITHOUT EXPLICIT USER APPROVAL ⛔**
+**⛔ THIS BRANCH (v1.8.x) NEVER GOES TO PRODUCTION - EVER ⛔**
 
-**ABSOLUTE RULE:**
-- ✅ **ALWAYS ask** before deploying ANY change to production (cforkids.org)
-- ✅ **STAGING ONLY** for testing and verification
-- ✅ **WAIT for explicit approval** ("deploy to production" or "yes, push to prod")
-- ❌ **NEVER assume** a fix is "safe enough" to skip approval
+**See absolute rule at top of this file. v1.8.x is DEVELOPMENT ONLY.**
 
-**Approved Workflow:**
+**Allowed deployments for this branch:**
+- ✅ **Staging only:** https://10ce79bd48.nxcli.io/
+- ✅ **Local development:** Docker environment
+- ❌ **NEVER production:** cforkids.org
+
+**Workflow for this branch:**
 ```
 1. Make changes locally
-2. Commit to git
-3. Deploy to STAGING only (/deploy-staging)
-4. Tell user: "Deployed to staging - please test at cfkstaging.org"
-5. WAIT for user to test
-6. WAIT for user to say "deploy to production"
-7. Only then use /deploy-production
+2. Commit to git (v1.8.1-cleanup branch)
+3. Deploy to STAGING only (if needed for testing)
+4. Document learnings
+5. Test patterns
 ```
 
-**Even for "safe" changes:**
-- CSS/styling fixes → Ask first
-- Bug fixes → Ask first
-- Documentation updates → Ask first
-- Permission fixes → Ask first
-- ANY file change → Ask first
+**This branch exists to:**
+- Learn modernization patterns
+- Validate quality improvements
+- Test dead code removal safely
+- Document lessons for future production branches
 
-**The ONLY exception:**
-- Emergency security fixes (must explain urgency and get retroactive confirmation)
-
-**If you deployed to production without asking:**
-1. Immediately inform user
-2. Offer to revert
-3. Document what was deployed
-4. Apologize for the process violation
-
-**Remember:** The user owns production. You are a helper, not a decision-maker.
+**Production deployments:** Use v1.7.3-production-hardening or future production branches only
 
 ---
 
@@ -282,15 +289,19 @@ open docs/metrics/index.html
 
 ## ✅ Success Criteria
 
-**This branch is ready for production when:**
+**⛔ REMINDER: This branch NEVER goes to production ⛔**
+
+**This branch is successful when these learning/modernization goals are achieved:**
 
 - [ ] All deprecated wrapper files deleted (3,624 lines)
 - [ ] PHPStan critical errors reduced by 50%+
 - [ ] Functional tests: 35/36 pass (no regression)
 - [ ] All production code scanned and clean
 - [ ] Documentation complete and current
-- [ ] Deployment plan documented
-- [ ] Rollback procedure tested
+- [ ] Lessons learned documented for future production branches
+- [ ] Patterns validated on staging environment
+
+**Purpose:** Learn and validate modernization patterns for future use in production branches
 
 ---
 
