@@ -26,7 +26,7 @@ $pageTitle = 'Database Diagnostic';
 $cspNonce = bin2hex(random_bytes(16));
 
 try {
-    $db = Connection::getInstance();
+    $db = Connection::getConnection();
 
     // Check children table
     $childCount = $db->query('SELECT COUNT(*) FROM cfk_children')->fetchColumn();
