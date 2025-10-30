@@ -79,8 +79,8 @@
             <div class="persistent-alert persistent-alert-<?php echo $displayMessage['type']; ?>">
                 <strong><?php
                     if ($displayMessage['type'] === 'error') echo '❌ Error: ';
-                    if ($displayMessage['type'] === 'success') echo '✅ Success: ';
-                    if ($displayMessage['type'] === 'warning') echo '⚠️ Warning: ';
+                    elseif ($displayMessage['type'] === 'success') echo '✅ Success: ';
+                    elseif ($displayMessage['type'] === 'warning') echo '⚠️ Warning: ';
                 ?></strong>
                 <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
