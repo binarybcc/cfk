@@ -66,6 +66,45 @@ After ANY code change:
 3. Check Docker logs for errors
 4. Manual testing (if user-facing change)
 
+### 5. 🚨 PRODUCTION DEPLOYMENT RULE (MANDATORY)
+
+**⛔ NEVER DEPLOY TO PRODUCTION WITHOUT EXPLICIT USER APPROVAL ⛔**
+
+**ABSOLUTE RULE:**
+- ✅ **ALWAYS ask** before deploying ANY change to production (cforkids.org)
+- ✅ **STAGING ONLY** for testing and verification
+- ✅ **WAIT for explicit approval** ("deploy to production" or "yes, push to prod")
+- ❌ **NEVER assume** a fix is "safe enough" to skip approval
+
+**Approved Workflow:**
+```
+1. Make changes locally
+2. Commit to git
+3. Deploy to STAGING only (/deploy-staging)
+4. Tell user: "Deployed to staging - please test at cfkstaging.org"
+5. WAIT for user to test
+6. WAIT for user to say "deploy to production"
+7. Only then use /deploy-production
+```
+
+**Even for "safe" changes:**
+- CSS/styling fixes → Ask first
+- Bug fixes → Ask first
+- Documentation updates → Ask first
+- Permission fixes → Ask first
+- ANY file change → Ask first
+
+**The ONLY exception:**
+- Emergency security fixes (must explain urgency and get retroactive confirmation)
+
+**If you deployed to production without asking:**
+1. Immediately inform user
+2. Offer to revert
+3. Document what was deployed
+4. Apologize for the process violation
+
+**Remember:** The user owns production. You are a helper, not a decision-maker.
+
 ---
 
 ## 🔧 Environment Configuration
