@@ -12,10 +12,11 @@ define('CFK_APP', true);
 
 // Load dependencies
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
+
+use CFK\Sponsorship\Manager as SponsorshipManager;
 
 // Clean up expired tokens
-$deleted = CFK_Sponsorship_Manager::cleanupExpiredPortalTokens();
+$deleted = SponsorshipManager::cleanupExpiredPortalTokens();
 
 // Log result
 $timestamp = date('Y-m-d H:i:s');
