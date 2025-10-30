@@ -14,8 +14,9 @@ ini_set('display_errors', '0');
 define('CFK_APP', true);
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/magic_link_manager.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
+
+use CFK\Auth\MagicLinkManager;
 
 // Log file path
 $logFile = __DIR__ . '/../logs/cron_cleanup_magic_links.log';
