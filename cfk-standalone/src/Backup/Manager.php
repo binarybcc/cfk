@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CFK\Backup;
 
-use CFK\Database\Connection;
 use CFK\CSV\Handler as CSVHandler;
+use CFK\Database\Connection;
 use Exception;
 
 /**
@@ -31,7 +31,7 @@ class Manager
     {
         try {
             // Ensure backup directory exists
-            if (!file_exists(self::BACKUP_DIR)) {
+            if (! file_exists(self::BACKUP_DIR)) {
                 mkdir(self::BACKUP_DIR, 0750, true);
             }
 
@@ -50,7 +50,7 @@ class Manager
             if ($success === false) {
                 return [
                     'success' => false,
-                    'message' => 'Failed to write backup file'
+                    'message' => 'Failed to write backup file',
                 ];
             }
 
@@ -63,7 +63,7 @@ class Manager
                 'reason' => $reason,
                 'file' => $filename,
                 'children_count' => self::getChildrenCount(),
-                'families_count' => self::getFamiliesCount()
+                'families_count' => self::getFamiliesCount(),
             ];
 
             file_put_contents(
@@ -76,13 +76,14 @@ class Manager
                 'message' => 'Backup created successfully',
                 'filename' => $filename,
                 'filepath' => $filepath,
-                'metadata' => $metadata
+                'metadata' => $metadata,
             ];
         } catch (Exception $e) {
             error_log('Backup creation failed: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Backup failed: ' . $e->getMessage()
+                'message' => 'Backup failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -94,7 +95,7 @@ class Manager
      */
     public static function listBackups(): array
     {
-        if (!file_exists(self::BACKUP_DIR)) {
+        if (! file_exists(self::BACKUP_DIR)) {
             return [];
         }
 
@@ -117,7 +118,7 @@ class Manager
                 'filepath' => $file,
                 'size' => filesize($file),
                 'created' => filectime($file),
-                'metadata' => $metadata
+                'metadata' => $metadata,
             ];
         }
 
@@ -135,10 +136,10 @@ class Manager
     {
         $filepath = self::BACKUP_DIR . $filename;
 
-        if (!file_exists($filepath)) {
+        if (! file_exists($filepath)) {
             return [
                 'success' => false,
-                'message' => 'Backup file not found'
+                'message' => 'Backup file not found',
             ];
         }
 
@@ -157,11 +158,11 @@ class Manager
             $handler = new CSVHandler();
             $result = $handler->importChildren($filepath);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 return [
                     'success' => false,
                     'message' => 'Restore failed: ' . $result['message'],
-                    'details' => $result
+                    'details' => $result,
                 ];
             }
 
@@ -169,13 +170,14 @@ class Manager
                 'success' => true,
                 'message' => "Successfully restored {$result['imported']} children from backup",
                 'imported' => $result['imported'],
-                'pre_restore_backup' => $preRestoreBackup['filename'] ?? null
+                'pre_restore_backup' => $preRestoreBackup['filename'] ?? null,
             ];
         } catch (Exception $e) {
             error_log('Restore failed: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Restore failed: ' . $e->getMessage()
+                'message' => 'Restore failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -190,7 +192,7 @@ class Manager
     {
         $filepath = self::BACKUP_DIR . $filename;
 
-        if (!file_exists($filepath)) {
+        if (! file_exists($filepath)) {
             http_response_code(404);
             die('Backup file not found');
         }
@@ -216,7 +218,7 @@ class Manager
             'max_backups' => self::MAX_BACKUPS,
             'most_recent' => $backups[0] ?? null,
             'total_size' => array_sum(array_column($backups, 'size')),
-            'backups' => $backups
+            'backups' => $backups,
         ];
     }
 
@@ -249,6 +251,7 @@ class Manager
     private static function getChildrenCount(): int
     {
         $result = Connection::fetchRow('SELECT COUNT(*) as count FROM children');
+
         return (int) ($result['count'] ?? 0);
     }
 
@@ -260,6 +263,7 @@ class Manager
     private static function getFamiliesCount(): int
     {
         $result = Connection::fetchRow('SELECT COUNT(*) as count FROM families');
+
         return (int) ($result['count'] ?? 0);
     }
 }

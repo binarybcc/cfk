@@ -7,11 +7,9 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
-
-global $cspNonce;
 }
 
 $pageTitle = 'Confirm Your Sponsorship';

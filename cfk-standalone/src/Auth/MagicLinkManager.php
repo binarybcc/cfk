@@ -26,6 +26,7 @@ class MagicLinkManager
     public static function generateToken(): string
     {
         $randomBytes = random_bytes(self::TOKEN_LENGTH);
+
         return bin2hex($randomBytes);
     }
 
@@ -66,19 +67,20 @@ class MagicLinkManager
                 'email' => $email,
                 'expires_at' => $expiresAt,
                 'ip_address' => $ipAddress,
-                'user_agent' => $userAgent
+                'user_agent' => $userAgent,
             ];
 
             Connection::execute($sql, $params);
 
             // Log the magic link request
             self::logEvent(null, 'magic_link_requested', $ipAddress, $userAgent, 'success', [
-                'email' => $email
+                'email' => $email,
             ]);
 
             return $token;
         } catch (Exception $e) {
             error_log('Magic link creation failed: ' . $e->getMessage());
+
             throw new RuntimeException('Failed to create magic link', $e->getCode(), $e);
         }
     }
@@ -114,20 +116,22 @@ class MagicLinkManager
 
             $result = Connection::fetchRow($sql, ['token_hash' => $tokenHash]);
 
-            if (!$result) {
+            if (! $result) {
                 $db->rollback();
                 self::logEvent(null, 'magic_link_validation_failed', $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'failed', [
-                    'reason' => 'token_not_found_or_expired'
+                    'reason' => 'token_not_found_or_expired',
                 ]);
+
                 return null;
             }
 
             // Use hash_equals for constant-time comparison (prevent timing attacks)
-            if (!hash_equals($result['token_hash'], $tokenHash)) {
+            if (! hash_equals($result['token_hash'], $tokenHash)) {
                 $db->rollback();
                 self::logEvent(null, 'magic_link_validation_failed', $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'failed', [
-                    'reason' => 'token_mismatch'
+                    'reason' => 'token_mismatch',
                 ]);
+
                 return null;
             }
 
@@ -144,6 +148,7 @@ class MagicLinkManager
                 $db->rollback();
             }
             error_log('Token validation error: ' . $e->getMessage());
+
             return null;
         }
     }
@@ -161,9 +166,11 @@ class MagicLinkManager
         try {
             $sql = "DELETE FROM admin_magic_links WHERE id = :id";
             Connection::execute($sql, ['id' => $tokenId]);
+
             return true;
         } catch (Exception $e) {
             error_log('Token consumption failed: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -198,7 +205,7 @@ class MagicLinkManager
                 'ip_address' => $ipAddress,
                 'user_agent' => substr($userAgent, 0, 1000),
                 'result' => $result,
-                'details' => json_encode($details)
+                'details' => json_encode($details),
             ];
 
             Connection::execute($sql, $params);
@@ -224,9 +231,11 @@ class MagicLinkManager
     {
         try {
             $sql = "DELETE FROM admin_magic_links WHERE expires_at < NOW() - INTERVAL 1 HOUR";
+
             return Connection::execute($sql, []);
         } catch (Exception $e) {
             error_log('Failed to cleanup expired tokens: ' . $e->getMessage());
+
             return 0;
         }
     }

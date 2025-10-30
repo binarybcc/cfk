@@ -6,7 +6,7 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -24,7 +24,7 @@ $childrenToSponsor = [];
 if ($isFamilySponsorship) {
     // Family sponsorship - get all available children in family
     $allFamilyMembers = getFamilyMembers($familyId);
-    $childrenToSponsor = array_filter($allFamilyMembers, fn($c): bool => $c['status'] === 'available');
+    $childrenToSponsor = array_filter($allFamilyMembers, fn ($c): bool => $c['status'] === 'available');
 
     if ($childrenToSponsor === []) {
         setMessage('No available children in this family to sponsor.', 'error');
@@ -36,7 +36,7 @@ if ($isFamilySponsorship) {
     $pageTitle = 'Sponsor Family ' . $child['family_number'];
 } else {
     // Individual child sponsorship
-    if (!$childId) {
+    if (! $childId) {
         setMessage('Please select a child to sponsor.', 'error');
         header('Location: ' . baseUrl('?page=children'));
         exit;
@@ -46,7 +46,7 @@ if ($isFamilySponsorship) {
     $availability = SponsorshipManager::isChildAvailable($childId);
     $child = $availability['child'];
 
-    if (!$child) {
+    if (! $child) {
         setMessage('Child not found.', 'error');
         header('Location: ' . baseUrl('?page=children'));
         exit;
@@ -61,7 +61,7 @@ $formData = [];
 // Handle form submission
 if ($_POST && isset($_POST['submit_sponsorship'])) {
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $errors[] = 'Security token invalid. Please try again.';
     } else {
         $formData = [
@@ -70,7 +70,7 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
             'phone' => $_POST['sponsor_phone'] ?? '',
             'address' => $_POST['sponsor_address'] ?? '',
             'gift_preference' => $_POST['gift_preference'] ?? 'shopping',
-            'message' => $_POST['special_message'] ?? ''
+            'message' => $_POST['special_message'] ?? '',
         ];
 
         // Attempt to create sponsorship(s)
@@ -122,7 +122,7 @@ if ($isFamilySponsorship) {
 }
 
 // Get full child details for display
-if (!$isFamilySponsorship) {
+if (! $isFamilySponsorship) {
     $fullChild = getChildById($childId);
     $siblings = getFamilyMembers($fullChild['family_id'], $childId);
 } else {
@@ -145,7 +145,7 @@ if (!$isFamilySponsorship) {
         <nav class="breadcrumb">
             <a href="<?php echo baseUrl('?page=children'); ?>">All Children</a>
             <span>&raquo;</span>
-            <?php if (!$isFamilySponsorship) : ?>
+            <?php if (! $isFamilySponsorship) : ?>
                 <a href="<?php echo baseUrl('?page=child&id=' . $childId); ?>">View Profile</a>
                 <span>&raquo;</span>
             <?php endif; ?>
@@ -153,7 +153,7 @@ if (!$isFamilySponsorship) {
         </nav>
     </div>
 
-    <?php if (!$isAvailable) : ?>
+    <?php if (! $isAvailable) : ?>
         <!-- Child Not Available -->
         <div class="unavailable-notice">
             <div class="alert alert-warning">
@@ -218,18 +218,18 @@ if (!$isFamilySponsorship) {
                     <div class="child-info">
                         <h3>Child <?php echo sanitizeString($fullChild['display_id']); ?></h3>
                         <p><strong>Age:</strong> <?php echo formatAge($fullChild['age']); ?></p>
-                        <?php if (!empty($fullChild['grade'])) : ?>
+                        <?php if (! empty($fullChild['grade'])) : ?>
                             <p><strong>Grade:</strong> <?php echo sanitizeString($fullChild['grade']); ?></p>
                         <?php endif; ?>
 
-                        <?php if (!empty($fullChild['interests'])) : ?>
+                        <?php if (! empty($fullChild['interests'])) : ?>
                             <div class="summary-section">
                                 <strong>Essential Needs:</strong>
                                 <p><?php echo sanitizeString($fullChild['interests']); ?></p>
                             </div>
                         <?php endif; ?>
 
-                        <?php if (!empty($fullChild['wishes'])) : ?>
+                        <?php if (! empty($fullChild['wishes'])) : ?>
                             <div class="summary-section">
                                 <strong>Christmas Wishes:</strong>
                                 <p><?php echo sanitizeString($fullChild['wishes']); ?></p>

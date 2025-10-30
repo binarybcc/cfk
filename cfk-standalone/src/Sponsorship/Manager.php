@@ -43,11 +43,11 @@ class Manager
             [$childId]
         );
 
-        if (!$child) {
+        if (! $child) {
             return [
                 'available' => false,
                 'reason' => 'Child not found',
-                'child' => null
+                'child' => null,
             ];
         }
 
@@ -56,14 +56,14 @@ class Manager
             return [
                 'available' => false,
                 'reason' => self::getStatusMessage((string) $child['status']),
-                'child' => $child
+                'child' => $child,
             ];
         }
 
         return [
             'available' => true,
             'reason' => 'Child is available for sponsorship',
-            'child' => $child
+            'child' => $child,
         ];
     }
 
@@ -81,12 +81,13 @@ class Manager
         try {
             // Double-check availability within transaction
             $availability = self::isChildAvailable($childId);
-            if (!$availability['available']) {
+            if (! $availability['available']) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
                     'message' => $availability['reason'],
-                    'child' => $availability['child']
+                    'child' => $availability['child'],
                 ];
             }
 
@@ -100,10 +101,11 @@ class Manager
             if ($updated === 0) {
                 // Another process got there first
                 Connection::rollback();
+
                 return [
                     'success' => false,
                     'message' => 'This child was just selected by another sponsor. Please choose a different child.',
-                    'child' => $availability['child']
+                    'child' => $availability['child'],
                 ];
             }
 
@@ -112,7 +114,7 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Child reserved successfully',
-                'child' => $availability['child']
+                'child' => $availability['child'],
             ];
         } catch (Exception $e) {
             Connection::rollback();
@@ -121,7 +123,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'System error occurred. Please try again.',
-                'child' => null
+                'child' => null,
             ];
         }
     }
@@ -137,19 +139,20 @@ class Manager
     {
         // First reserve the child
         $reservation = self::reserveChild($childId);
-        if (!$reservation['success']) {
+        if (! $reservation['success']) {
             return $reservation;
         }
 
         // Validate sponsor data
         $validation = self::validateSponsorData($sponsorData);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             // Release the reservation since validation failed
             self::releaseChild($childId);
+
             return [
                 'success' => false,
                 'message' => 'Please correct the following errors: ' . implode(', ', $validation['errors']),
-                'child' => $reservation['child']
+                'child' => $reservation['child'],
             ];
         }
 
@@ -163,7 +166,7 @@ class Manager
                 'sponsor_address' => sanitizeString((string) ($sponsorData['address'] ?? '')),
                 'gift_preference' => $sponsorData['gift_preference'] ?? 'shopping',
                 'special_message' => sanitizeString((string) ($sponsorData['message'] ?? '')),
-                'status' => self::STATUS_PENDING
+                'status' => self::STATUS_PENDING,
             ]);
 
             // Send email notifications if email manager is available
@@ -207,7 +210,7 @@ class Manager
                 'success' => true,
                 'message' => 'Sponsorship request submitted successfully! You will receive confirmation within 24 hours.',
                 'sponsorship_id' => $sponsorshipId,
-                'child' => $reservation['child']
+                'child' => $reservation['child'],
             ];
         } catch (Exception $e) {
             // Release the child reservation on error
@@ -217,7 +220,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'System error occurred. Please try again.',
-                'child' => $reservation['child']
+                'child' => $reservation['child'],
             ];
         }
     }
@@ -236,9 +239,11 @@ class Manager
                 ['status' => self::STATUS_AVAILABLE],
                 ['id' => $childId]
             );
+
             return $updated > 0;
         } catch (Exception $e) {
             error_log('Failed to release child ' . $childId . ': ' . $e->getMessage());
+
             return false;
         }
     }
@@ -263,8 +268,9 @@ class Manager
                 [$sponsorshipId]
             );
 
-            if (!$sponsorship) {
+            if (! $sponsorship) {
                 Connection::rollback();
+
                 return ['success' => false, 'message' => 'Sponsorship not found'];
             }
 
@@ -287,11 +293,12 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Sponsorship confirmed successfully',
-                'sponsorship' => $sponsorship
+                'sponsorship' => $sponsorship,
             ];
         } catch (Exception $e) {
             Connection::rollback();
             error_log('Failed to confirm sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
@@ -325,10 +332,12 @@ class Manager
             }
 
             Connection::commit();
+
             return ['success' => true, 'message' => 'Sponsorship marked as completed'];
         } catch (Exception $e) {
             Connection::rollback();
             error_log('Failed to complete sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
@@ -352,20 +361,22 @@ class Manager
                 [$sponsorshipId]
             );
 
-            if (!$sponsorship) {
+            if (! $sponsorship) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
-                    'message' => 'Sponsorship not found'
+                    'message' => 'Sponsorship not found',
                 ];
             }
 
             // Only allow transition from CONFIRMED to LOGGED
             if ($sponsorship['status'] !== self::STATUS_SPONSORED) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
-                    'message' => 'Can only log confirmed sponsorships. Current status: ' . $sponsorship['status']
+                    'message' => 'Can only log confirmed sponsorships. Current status: ' . $sponsorship['status'],
                 ];
             }
 
@@ -374,7 +385,7 @@ class Manager
                 'sponsorships',
                 [
                     'status' => self::STATUS_LOGGED,
-                    'logged_date' => date('Y-m-d H:i:s')
+                    'logged_date' => date('Y-m-d H:i:s'),
                 ],
                 ['id' => $sponsorshipId]
             );
@@ -389,15 +400,15 @@ class Manager
 
             return [
                 'success' => true,
-                'message' => 'Sponsorship marked as logged successfully'
+                'message' => 'Sponsorship marked as logged successfully',
             ];
-
         } catch (Exception $e) {
             Connection::rollback();
             error_log('Error logging sponsorship: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Failed to log sponsorship: ' . $e->getMessage()
+                'message' => 'Failed to log sponsorship: ' . $e->getMessage(),
             ];
         }
     }
@@ -419,20 +430,22 @@ class Manager
                 [$sponsorshipId]
             );
 
-            if (!$sponsorship) {
+            if (! $sponsorship) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
-                    'message' => 'Sponsorship not found'
+                    'message' => 'Sponsorship not found',
                 ];
             }
 
             // Only allow transition from LOGGED back to CONFIRMED
             if ($sponsorship['status'] !== self::STATUS_LOGGED) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
-                    'message' => 'Can only unlog sponsorships in logged status. Current status: ' . $sponsorship['status']
+                    'message' => 'Can only unlog sponsorships in logged status. Current status: ' . $sponsorship['status'],
                 ];
             }
 
@@ -441,7 +454,7 @@ class Manager
                 'sponsorships',
                 [
                     'status' => self::STATUS_SPONSORED,
-                    'logged_date' => null
+                    'logged_date' => null,
                 ],
                 ['id' => $sponsorshipId]
             );
@@ -455,15 +468,15 @@ class Manager
 
             return [
                 'success' => true,
-                'message' => 'Sponsorship unmarked from logged status'
+                'message' => 'Sponsorship unmarked from logged status',
             ];
-
         } catch (Exception $e) {
             Connection::rollback();
             error_log('Error unlogging sponsorship: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'Failed to unlog sponsorship: ' . $e->getMessage()
+                'message' => 'Failed to unlog sponsorship: ' . $e->getMessage(),
             ];
         }
     }
@@ -499,10 +512,12 @@ class Manager
             }
 
             Connection::commit();
+
             return ['success' => true, 'message' => 'Sponsorship cancelled successfully'];
         } catch (Exception $e) {
             Connection::rollback();
             error_log('Failed to cancel sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+
             return ['success' => false, 'message' => 'System error occurred'];
         }
     }
@@ -552,6 +567,7 @@ class Manager
             return $cleaned;
         } catch (Exception $e) {
             error_log('Failed to cleanup expired sponsorships: ' . $e->getMessage());
+
             return 0;
         }
     }
@@ -680,7 +696,7 @@ class Manager
                 'sponsor_email' => $email,
                 'expires_at' => $expiresAt,
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
             ]);
         } catch (Exception $e) {
             error_log('Failed to store portal token: ' . $e->getMessage());
@@ -701,7 +717,7 @@ class Manager
             return [
                 'valid' => false,
                 'message' => 'Access token is required.',
-                'email' => null
+                'email' => null,
             ];
         }
 
@@ -724,7 +740,7 @@ class Manager
                         return [
                             'valid' => false,
                             'message' => 'Access token has expired. Please request a new access link.',
-                            'email' => null
+                            'email' => null,
                         ];
                     }
 
@@ -738,7 +754,7 @@ class Manager
                     return [
                         'valid' => true,
                         'message' => 'Token valid',
-                        'email' => $tokenRecord['sponsor_email']
+                        'email' => $tokenRecord['sponsor_email'],
                     ];
                 }
             }
@@ -746,14 +762,15 @@ class Manager
             return [
                 'valid' => false,
                 'message' => 'Invalid or expired access token.',
-                'email' => null
+                'email' => null,
             ];
         } catch (Exception $e) {
             error_log('Failed to verify portal token: ' . $e->getMessage());
+
             return [
                 'valid' => false,
                 'message' => 'System error occurred.',
-                'email' => null
+                'email' => null,
             ];
         }
     }
@@ -780,6 +797,7 @@ class Manager
             return true;
         } catch (Exception $e) {
             error_log('Failed to revoke portal tokens: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -815,25 +833,26 @@ class Manager
                 if ($success) {
                     return [
                         'success' => true,
-                        'message' => 'Access link sent successfully'
+                        'message' => 'Access link sent successfully',
                     ];
                 } else {
                     return [
                         'success' => false,
-                        'message' => 'Failed to send email. Please try again.'
+                        'message' => 'Failed to send email. Please try again.',
                     ];
                 }
             }
 
             return [
                 'success' => false,
-                'message' => 'Email service unavailable. Please contact support.'
+                'message' => 'Email service unavailable. Please contact support.',
             ];
         } catch (Exception $e) {
             error_log('Failed to send portal access email: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'System error occurred. Please try again.'
+                'message' => 'System error occurred. Please try again.',
             ];
         }
     }
@@ -851,7 +870,7 @@ class Manager
         if ($childIds === []) {
             return [
                 'success' => false,
-                'message' => 'No children selected'
+                'message' => 'No children selected',
             ];
         }
 
@@ -880,19 +899,20 @@ class Manager
                     'success' => true,
                     'message' => 'Successfully added ' . count($addedChildren) . ' child(ren) to your sponsorship!',
                     'added_children' => $addedChildren,
-                    'errors' => $errors
+                    'errors' => $errors,
                 ];
             } else {
                 return [
                     'success' => false,
-                    'message' => 'Failed to add children: ' . implode(', ', $errors)
+                    'message' => 'Failed to add children: ' . implode(', ', $errors),
                 ];
             }
         } catch (Exception $e) {
             error_log('Failed to add children to sponsorship: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'System error occurred. Please try again.'
+                'message' => 'System error occurred. Please try again.',
             ];
         }
     }
@@ -906,7 +926,7 @@ class Manager
     private static function validateSponsorData(array $data): array
     {
         // Load validator if not already included
-        if (!class_exists('Validator')) {
+        if (! class_exists('Validator')) {
             require_once __DIR__ . '/../../includes/validator.php';
         }
 
@@ -916,12 +936,12 @@ class Manager
             'phone' => 'max:20',
             'address' => 'max:500',
             'gift_preference' => 'in:shopping,gift_card,cash_donation',
-            'message' => 'max:1000'
+            'message' => 'max:1000',
         ]);
 
         return [
             'valid' => $validator->passes(),
-            'errors' => $validator->allErrors()
+            'errors' => $validator->allErrors(),
         ];
     }
 

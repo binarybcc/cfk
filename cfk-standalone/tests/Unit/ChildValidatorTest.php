@@ -25,7 +25,7 @@ class ChildValidatorTest extends TestCase
             'age' => 10,
             'gender' => 'M',
             'grade' => '5th',
-            'interests' => 'Soccer, reading'
+            'interests' => 'Soccer, reading',
         ];
 
         $isValid = $this->validator->validate($data);
@@ -55,7 +55,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertFalse($this->validator->validate($data1));
         $this->assertStringContainsString('Family ID must be in format', $this->validator->getFirstError());
@@ -65,7 +65,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertTrue($this->validator->validate($data2));
     }
@@ -78,7 +78,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'A',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertFalse($this->validator->validate($data1));
         $this->assertStringContainsString('at least 2 characters', $this->validator->getFirstError());
@@ -88,7 +88,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => str_repeat('A', 101),
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertFalse($this->validator->validate($data2));
         $this->assertStringContainsString('too long', $this->validator->getFirstError());
@@ -101,7 +101,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'John123',  // Contains numbers
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
 
         $isValid = $this->validator->validate($data);
@@ -116,7 +116,7 @@ class ChildValidatorTest extends TestCase
         $names = [
             "Mary-Jane O'Connor",
             "José García",
-            "Li Wei-Chen"
+            "Li Wei-Chen",
         ];
 
         foreach ($names as $name) {
@@ -124,7 +124,7 @@ class ChildValidatorTest extends TestCase
                 'family_id' => '175A',
                 'name' => $name,
                 'age' => 10,
-                'gender' => 'M'
+                'gender' => 'M',
             ];
             $this->assertTrue($this->validator->validate($data), "Failed for name: {$name}");
         }
@@ -138,7 +138,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 0,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertFalse($this->validator->validate($data1));
         $this->assertStringContainsString('positive number', $this->validator->getFirstError());
@@ -148,7 +148,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 26,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertFalse($this->validator->validate($data2));
         $this->assertStringContainsString('cannot be greater than 25', $this->validator->getFirstError());
@@ -158,7 +158,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
         $this->assertTrue($this->validator->validate($data3));
     }
@@ -173,7 +173,7 @@ class ChildValidatorTest extends TestCase
                 'family_id' => '175A',
                 'name' => 'Test',
                 'age' => 10,
-                'gender' => $gender
+                'gender' => $gender,
             ];
             $this->assertTrue($this->validator->validate($data), "Failed for gender: {$gender}");
         }
@@ -183,7 +183,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'other'
+            'gender' => 'other',
         ];
         $this->assertFalse($this->validator->validate($data));
     }
@@ -196,7 +196,7 @@ class ChildValidatorTest extends TestCase
             'name' => 'Test',
             'age' => 10,
             'gender' => 'M',
-            'interests' => str_repeat('A', 501)
+            'interests' => str_repeat('A', 501),
         ];
 
         $isValid = $this->validator->validate($data);
@@ -212,7 +212,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => 'invalid',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
         ];
 
         $isValid = $this->validator->validateCsvRow($row, 5);
@@ -230,7 +230,7 @@ class ChildValidatorTest extends TestCase
             'age' => '10',
             'gender' => ' M ',
             'grade' => '  5th  ',
-            'interests' => '  Soccer  '
+            'interests' => '  Soccer  ',
         ];
 
         $sanitized = ChildValidator::sanitize($data);
@@ -275,7 +275,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '',  // Missing
             'name' => 'A',      // Too short
             'age' => 0,         // Invalid
-            'gender' => ''      // Missing
+            'gender' => '',      // Missing
         ];
 
         $this->validator->validate($data);
@@ -295,7 +295,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '',
             'name' => 'A',
             'age' => 0,
-            'gender' => ''
+            'gender' => '',
         ];
 
         $this->validator->validate($data);
@@ -313,7 +313,7 @@ class ChildValidatorTest extends TestCase
             'family_id' => '175A',
             'name' => 'Test',
             'age' => 10,
-            'gender' => 'M'
+            'gender' => 'M',
             // grade and interests are optional
         ];
 

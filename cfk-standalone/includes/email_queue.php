@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -17,15 +17,15 @@ use CFK\Email\Manager as EmailManager;
 
 class CFK_Email_Queue
 {
-    const STATUS_QUEUED = 'queued';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_SENT = 'sent';
-    const STATUS_FAILED = 'failed';
+    public const STATUS_QUEUED = 'queued';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_SENT = 'sent';
+    public const STATUS_FAILED = 'failed';
 
-    const PRIORITY_LOW = 'low';
-    const PRIORITY_NORMAL = 'normal';
-    const PRIORITY_HIGH = 'high';
-    const PRIORITY_URGENT = 'urgent';
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_NORMAL = 'normal';
+    public const PRIORITY_HIGH = 'high';
+    public const PRIORITY_URGENT = 'urgent';
 
     /**
      * Add email to queue
@@ -48,13 +48,14 @@ class CFK_Email_Queue
             'reference_type' => $options['reference_type'] ?? null,
             'reference_id' => $options['reference_id'] ?? null,
             'metadata' => empty($options['metadata']) ? null : json_encode($options['metadata']),
-            'status' => self::STATUS_QUEUED
+            'status' => self::STATUS_QUEUED,
         ];
 
         try {
             return Database::insert('email_queue', $data);
         } catch (Exception $e) {
             error_log('Failed to queue email: ' . $e->getMessage());
+
             throw $e;
         }
     }
@@ -68,7 +69,7 @@ class CFK_Email_Queue
             'processed' => 0,
             'sent' => 0,
             'failed' => 0,
-            'errors' => []
+            'errors' => [],
         ];
 
         try {
@@ -120,7 +121,7 @@ class CFK_Email_Queue
 
         return Database::fetchAll($sql, [
             'status' => self::STATUS_QUEUED,
-            'limit' => $limit
+            'limit' => $limit,
         ]);
     }
 
@@ -143,7 +144,7 @@ class CFK_Email_Queue
     {
         Database::update('email_queue', [
             'status' => self::STATUS_SENT,
-            'sent_at' => date('Y-m-d H:i:s')
+            'sent_at' => date('Y-m-d H:i:s'),
         ], ['id' => $id]);
     }
 
@@ -164,7 +165,7 @@ class CFK_Email_Queue
             'attempts' => $newAttempts,
             'error_count' => Database::fetchRow("SELECT error_count FROM email_queue WHERE id = ?", [$id])['error_count'] + 1,
             'last_error' => substr($error, 0, 500),
-            'next_attempt_at' => $nextAttempt
+            'next_attempt_at' => $nextAttempt,
         ];
 
         // If max attempts reached, mark as failed
@@ -212,12 +213,12 @@ class CFK_Email_Queue
 
             return [
                 'success' => $success,
-                'error' => $success ? null : 'Failed to send email'
+                'error' => $success ? null : 'Failed to send email',
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
@@ -243,7 +244,7 @@ class CFK_Email_Queue
             'processing' => 0,
             'sent' => 0,
             'failed' => 0,
-            'total' => 0
+            'total' => 0,
         ];
 
         foreach ($results as $row) {
@@ -270,7 +271,7 @@ class CFK_Email_Queue
         ", [
             'queued' => self::STATUS_QUEUED,
             'failed' => self::STATUS_FAILED,
-            'limit' => $limit
+            'limit' => $limit,
         ]);
     }
 
@@ -301,7 +302,7 @@ class CFK_Email_Queue
                 'recipient_name' => $sponsorship['sponsor_name'],
                 'priority' => self::PRIORITY_HIGH,
                 'reference_type' => 'sponsorship',
-                'reference_id' => $sponsorship['id']
+                'reference_id' => $sponsorship['id'],
             ]
         );
     }
@@ -318,7 +319,7 @@ class CFK_Email_Queue
             [
                 'priority' => self::PRIORITY_NORMAL,
                 'reference_type' => $data['reference_type'] ?? null,
-                'reference_id' => $data['reference_id'] ?? null
+                'reference_id' => $data['reference_id'] ?? null,
             ]
         );
     }

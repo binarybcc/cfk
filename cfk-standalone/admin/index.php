@@ -18,7 +18,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -40,7 +40,7 @@ $stats = [
     'available_children' => getChildrenCount(['status' => 'available']),
     'pending_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'pending'")['total'] ?? 0,
     'completed_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'completed'")['total'] ?? 0,
-    'total_families' => Database::fetchRow("SELECT COUNT(*) as total FROM families")['total'] ?? 0
+    'total_families' => Database::fetchRow("SELECT COUNT(*) as total FROM families")['total'] ?? 0,
 ];
 
 // Get recent activity

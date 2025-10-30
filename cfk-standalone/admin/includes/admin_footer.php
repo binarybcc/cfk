@@ -2,7 +2,7 @@
 
     <?php
     // Ensure CSP nonce is defined (should be set by admin_header.php)
-    if (!isset($cspNonce)) {
+    if (! isset($cspNonce)) {
         $cspNonce = bin2hex(random_bytes(16));
     }
     ?>

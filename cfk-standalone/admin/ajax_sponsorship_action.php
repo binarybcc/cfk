@@ -24,7 +24,7 @@ use CFK\Sponsorship\Manager as SponsorshipManager;
 header('Content-Type: application/json');
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Verify CSRF token
-if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid security token']);
     exit;
@@ -48,7 +48,7 @@ if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
 $action = $_POST['action'] ?? '';
 $sponsorshipId = sanitizeInt($_POST['sponsorship_id'] ?? 0);
 
-if (!$sponsorshipId) {
+if (! $sponsorshipId) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Invalid sponsorship ID']);
     exit;

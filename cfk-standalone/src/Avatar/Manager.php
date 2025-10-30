@@ -22,7 +22,7 @@ class Manager
         'male_child' => 'Male Child (6-10)',
         'female_child' => 'Female Child (6-10)',
         'male_teen' => 'Male Teen (11-18)',
-        'female_teen' => 'Female Teen (11-18)'
+        'female_teen' => 'Female Teen (11-18)',
     ];
 
     /**
@@ -34,6 +34,7 @@ class Manager
     public static function getAvatarForChild(array $child): string
     {
         $category = self::determineAvatarCategory((int) $child['age_months'], (string) $child['gender']);
+
         return self::getAvatarImagePath($category);
     }
 
@@ -82,7 +83,7 @@ class Manager
             'male_middle' => 'middleboysm.png',         // Boys 11-13
             'female_middle' => 'middlegirlsm.png',      // Girls 11-13
             'male_highschool' => 'hsboysm.png',         // Boys 14+
-            'female_highschool' => 'hsgirlsm.png'       // Girls 14+
+            'female_highschool' => 'hsgirlsm.png',       // Girls 14+
         ];
 
         // Get the image filename
@@ -101,6 +102,7 @@ class Manager
     private static function generateSilhouettedAvatar(string $category): string
     {
         $svgData = self::getSvgData($category);
+
         return 'data:image/svg+xml;base64,' . base64_encode($svgData);
     }
 
@@ -402,6 +404,7 @@ SVG;
         foreach (array_keys(self::CATEGORIES) as $category) {
             $avatars[$category] = self::generateSilhouettedAvatar($category);
         }
+
         return $avatars;
     }
 }

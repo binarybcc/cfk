@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Test Script for Sponsor Portal Functionality
  * Run from command line to test the portal features
@@ -52,7 +54,7 @@ if (empty($existingSponsorships)) {
         'phone' => '555-123-4567',
         'address' => '123 Test Street, Test City, TC 12345',
         'gift_preference' => 'shopping',
-        'message' => 'Test sponsorship for portal testing'
+        'message' => 'Test sponsorship for portal testing',
     ];
 
     $created = 0;
@@ -70,7 +72,7 @@ if (empty($existingSponsorships)) {
                     'sponsor_address' => $sponsorData['address'],
                     'gift_preference' => $sponsorData['gift_preference'],
                     'special_message' => $sponsorData['message'],
-                    'status' => 'pending'
+                    'status' => 'pending',
                 ]);
                 echo "   ✓ Created sponsorship for child {$child['display_id']} (ID: {$sponsorshipId})\n";
                 $created++;
@@ -105,10 +107,10 @@ echo "   Found " . count($detailedSponsorships) . " detailed sponsorships\n";
 $families = [];
 foreach ($detailedSponsorships as $child) {
     $familyId = $child['family_id'];
-    if (!isset($families[$familyId])) {
+    if (! isset($families[$familyId])) {
         $families[$familyId] = [
             'family_number' => $child['family_number'],
-            'children' => []
+            'children' => [],
         ];
     }
     $families[$familyId]['children'][] = $child['child_display_id'];
@@ -137,7 +139,7 @@ echo "\n";
 // Step 6: Test invalid token
 echo "6. Testing invalid token...\n";
 $badVerification = CFK_Sponsorship_Manager::verifyPortalToken('invalid_token_12345');
-if (!$badVerification['valid']) {
+if (! $badVerification['valid']) {
     echo "   ✓ Invalid token correctly rejected: {$badVerification['message']}\n";
 } else {
     echo "   ✗ ERROR: Invalid token was accepted\n";
@@ -152,7 +154,7 @@ echo "   {$portalUrl}\n\n";
 // Step 8: Test add children functionality (dry run)
 echo "8. Testing add children functionality...\n";
 $moreChildren = getChildren(['status' => 'available'], 1, 2);
-if (!empty($moreChildren)) {
+if (! empty($moreChildren)) {
     $childIds = array_column($moreChildren, 'id');
     echo "   Found " . count($childIds) . " more available children\n";
     echo "   Would add children: " . implode(', ', array_column($moreChildren, 'display_id')) . "\n";

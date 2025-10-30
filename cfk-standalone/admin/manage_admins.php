@@ -18,7 +18,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Check if user is logged in and is an admin
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -35,7 +35,7 @@ $error = '';
 // Handle form submissions
 if ($_POST !== []) {
     // Validate CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $error = 'Security token invalid. Please try again.';
     } elseif (isset($_POST['add_admin'])) {
         // Add new admin
@@ -51,7 +51,7 @@ if ($_POST !== []) {
             $error = 'Passwords do not match.';
         } elseif (strlen((string) $password) < 8) {
             $error = 'Password must be at least 8 characters long.';
-        } elseif (!in_array($role, ['admin', 'editor'])) {
+        } elseif (! in_array($role, ['admin', 'editor'])) {
             $error = 'Invalid role selected.';
         } else {
             // Check if username already exists
@@ -72,7 +72,7 @@ if ($_POST !== []) {
                     'email' => $email,
                     'full_name' => $fullName,
                     'role' => $role,
-                    'created_at' => date('Y-m-d H:i:s')
+                    'created_at' => date('Y-m-d H:i:s'),
                 ]);
 
                 $message = "Administrator '{$username}' has been created successfully.";
@@ -88,18 +88,18 @@ if ($_POST !== []) {
 
         if ($adminId <= 0 || empty($email)) {
             $error = 'Invalid admin ID or email.';
-        } elseif (!in_array($role, ['admin', 'editor'])) {
+        } elseif (! in_array($role, ['admin', 'editor'])) {
             $error = 'Invalid role selected.';
         } else {
             $updateData = [
                 'email' => $email,
                 'full_name' => $fullName,
                 'role' => $role,
-                'updated_at' => date('Y-m-d H:i:s')
+                'updated_at' => date('Y-m-d H:i:s'),
             ];
 
             // Update password if provided
-            if (!empty($newPassword)) {
+            if (! empty($newPassword)) {
                 if (strlen((string) $newPassword) < 8) {
                     $error = 'New password must be at least 8 characters long.';
                 } else {

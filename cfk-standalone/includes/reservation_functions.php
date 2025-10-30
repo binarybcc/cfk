@@ -7,7 +7,7 @@ declare(strict_types=1);
  * v1.5 - Manages temporary reservations with 24-48 hour expiration
  */
 
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -27,15 +27,15 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
         if (empty($sponsorData['name']) || empty($sponsorData['email']) || $childrenIds === []) {
             return [
                 'success' => false,
-                'message' => 'Missing required information: name, email, and at least one child selection.'
+                'message' => 'Missing required information: name, email, and at least one child selection.',
             ];
         }
 
         // Validate email
-        if (!filter_var($sponsorData['email'], FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($sponsorData['email'], FILTER_VALIDATE_EMAIL)) {
             return [
                 'success' => false,
-                'message' => 'Invalid email address.'
+                'message' => 'Invalid email address.',
             ];
         }
 
@@ -45,7 +45,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
             return [
                 'success' => false,
                 'message' => 'Some children are no longer available: ' . implode(', ', $unavailableChildren),
-                'unavailable' => $unavailableChildren
+                'unavailable' => $unavailableChildren,
             ];
         }
 
@@ -72,15 +72,16 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
                 'status' => 'pending',
                 'expires_at' => $expiresAt,
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
             ]
         );
 
         if ($reservationId === 0) {
             Database::rollback();
+
             return [
                 'success' => false,
-                'message' => 'Failed to create reservation.'
+                'message' => 'Failed to create reservation.',
             ];
         }
 
@@ -92,7 +93,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
                 [
                     'status' => 'pending',
                     'reservation_id' => $reservationId,
-                    'reservation_expires_at' => $expiresAt
+                    'reservation_expires_at' => $expiresAt,
                 ]
             );
         }
@@ -104,7 +105,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
             'token' => $token,
             'reservation_id' => $reservationId,
             'expires_at' => $expiresAt,
-            'message' => 'Reservation created successfully!'
+            'message' => 'Reservation created successfully!',
         ];
     } catch (Exception $e) {
         // Only rollback if transaction was started
@@ -114,9 +115,10 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation creation error: ' . $e->getMessage());
+
         return [
             'success' => false,
-            'message' => 'An error occurred while creating your reservation. Please try again.'
+            'message' => 'An error occurred while creating your reservation. Please try again.',
         ];
     }
 }
@@ -142,7 +144,7 @@ function getReservation(string $token): ?array
         $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
 
         // Get children details
-        if (!empty($reservation['children_ids'])) {
+        if (! empty($reservation['children_ids'])) {
             $placeholders = implode(',', array_fill(0, count($reservation['children_ids']), '?'));
             $reservation['children'] = Database::fetchAll(
                 "SELECT * FROM children WHERE id IN ($placeholders)",
@@ -165,24 +167,24 @@ function confirmReservation(string $token): array
     try {
         $reservation = getReservation($token);
 
-        if (!$reservation) {
+        if (! $reservation) {
             return [
                 'success' => false,
-                'message' => 'Reservation not found.'
+                'message' => 'Reservation not found.',
             ];
         }
 
         if ($reservation['status'] === 'confirmed') {
             return [
                 'success' => false,
-                'message' => 'This reservation has already been confirmed.'
+                'message' => 'This reservation has already been confirmed.',
             ];
         }
 
         if ($reservation['is_expired']) {
             return [
                 'success' => false,
-                'message' => 'This reservation has expired.'
+                'message' => 'This reservation has expired.',
             ];
         }
 
@@ -194,7 +196,7 @@ function confirmReservation(string $token): array
             ['reservation_token' => $token],
             [
                 'status' => 'confirmed',
-                'confirmed_at' => gmdate('Y-m-d H:i:s')
+                'confirmed_at' => gmdate('Y-m-d H:i:s'),
             ]
         );
 
@@ -205,7 +207,7 @@ function confirmReservation(string $token): array
                 ['id' => $childId],
                 [
                     'status' => 'sponsored',
-                    'reservation_expires_at' => null
+                    'reservation_expires_at' => null,
                 ]
             );
         }
@@ -214,7 +216,7 @@ function confirmReservation(string $token): array
 
         return [
             'success' => true,
-            'message' => 'Reservation confirmed successfully!'
+            'message' => 'Reservation confirmed successfully!',
         ];
     } catch (Exception $e) {
         try {
@@ -223,9 +225,10 @@ function confirmReservation(string $token): array
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation confirmation error: ' . $e->getMessage());
+
         return [
             'success' => false,
-            'message' => 'An error occurred while confirming your reservation.'
+            'message' => 'An error occurred while confirming your reservation.',
         ];
     }
 }
@@ -241,17 +244,17 @@ function cancelReservation(string $token): array
     try {
         $reservation = getReservation($token);
 
-        if (!$reservation) {
+        if (! $reservation) {
             return [
                 'success' => false,
-                'message' => 'Reservation not found.'
+                'message' => 'Reservation not found.',
             ];
         }
 
         if ($reservation['status'] === 'confirmed') {
             return [
                 'success' => false,
-                'message' => 'Cannot cancel a confirmed reservation. Please contact support.'
+                'message' => 'Cannot cancel a confirmed reservation. Please contact support.',
             ];
         }
 
@@ -263,7 +266,7 @@ function cancelReservation(string $token): array
             ['reservation_token' => $token],
             [
                 'status' => 'cancelled',
-                'cancelled_at' => gmdate('Y-m-d H:i:s')
+                'cancelled_at' => gmdate('Y-m-d H:i:s'),
             ]
         );
 
@@ -275,7 +278,7 @@ function cancelReservation(string $token): array
                 [
                     'status' => 'available',
                     'reservation_id' => null,
-                    'reservation_expires_at' => null
+                    'reservation_expires_at' => null,
                 ]
             );
         }
@@ -284,7 +287,7 @@ function cancelReservation(string $token): array
 
         return [
             'success' => true,
-            'message' => 'Reservation cancelled successfully.'
+            'message' => 'Reservation cancelled successfully.',
         ];
     } catch (Exception $e) {
         try {
@@ -293,9 +296,10 @@ function cancelReservation(string $token): array
             // Transaction might not have been started yet, ignore
         }
         error_log('Reservation cancellation error: ' . $e->getMessage());
+
         return [
             'success' => false,
-            'message' => 'An error occurred while cancelling your reservation.'
+            'message' => 'An error occurred while cancelling your reservation.',
         ];
     }
 }
@@ -341,7 +345,7 @@ function cleanupExpiredReservations(): array
                     [
                         'status' => 'available',
                         'reservation_id' => null,
-                        'reservation_expires_at' => null
+                        'reservation_expires_at' => null,
                     ]
                 );
                 $freedChildren++;
@@ -354,7 +358,7 @@ function cleanupExpiredReservations(): array
 
         return [
             'expired_count' => $expiredCount,
-            'freed_children' => $freedChildren
+            'freed_children' => $freedChildren,
         ];
     } catch (Exception $e) {
         try {
@@ -363,6 +367,7 @@ function cleanupExpiredReservations(): array
             // Transaction might not have been started yet, ignore
         }
         error_log('Cleanup expired reservations error: ' . $e->getMessage());
+
         return ['expired_count' => 0, 'freed_children' => 0];
     }
 }

@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Verify CSRF token
         $csrfToken = $_POST['csrf_token'] ?? '';
-        if (empty($csrfToken) || !hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
+        if (empty($csrfToken) || ! hash_equals($_SESSION['csrf_token'] ?? '', $csrfToken)) {
             MagicLinkManager::logEvent(null, 'magic_link_csrf_failure', $ipAddress, $userAgent, 'failed');
             setMessage('Security validation failed. Please try again.', 'error');
             header('Location: ' . baseUrl('admin/'));
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Validate token
         $tokenData = MagicLinkManager::validateToken($token);
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             MagicLinkManager::logEvent(null, 'magic_link_validation_failed', $ipAddress, $userAgent, 'failed');
             setMessage('Invalid or expired magic link. Please request a new one.', 'error');
             header('Location: ' . baseUrl('admin/'));
@@ -144,9 +144,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $adminSql = "SELECT id, email, username FROM admin_users WHERE email = :email LIMIT 1";
         $adminUser = Database::fetchRow($adminSql, ['email' => $tokenData['email']]);
 
-        if (!$adminUser) {
+        if (! $adminUser) {
             MagicLinkManager::logEvent(null, 'magic_link_no_admin_account', $ipAddress, $userAgent, 'failed', [
-                'email' => $tokenData['email']
+                'email' => $tokenData['email'],
             ]);
             setMessage('No admin account found for this email', 'error');
             header('Location: ' . baseUrl('admin/'));
@@ -213,5 +213,6 @@ function parseUserAgent(string $userAgent): string
     } elseif (str_contains($userAgent, 'Android')) {
         return 'Android';
     }
+
     return 'Unknown Device';
 }

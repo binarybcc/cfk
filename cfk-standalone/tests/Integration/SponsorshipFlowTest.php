@@ -20,7 +20,7 @@ class SponsorshipFlowTest extends TestCase
             'name' => 'John Sponsor',
             'email' => 'john@example.com',
             'phone' => '555-1234',
-            'gift_preference' => 'shopping'
+            'gift_preference' => 'shopping',
         ];
 
         // Verify sponsor data structure
@@ -36,7 +36,7 @@ class SponsorshipFlowTest extends TestCase
         $validEmails = [
             'test@example.com',
             'user.name@domain.co.uk',
-            'sponsor+tag@email.com'
+            'sponsor+tag@email.com',
         ];
 
         foreach ($validEmails as $email) {
@@ -47,7 +47,7 @@ class SponsorshipFlowTest extends TestCase
             'invalid',
             '@example.com',
             'test@',
-            'test @example.com'
+            'test @example.com',
         ];
 
         foreach ($invalidEmails as $email) {
@@ -83,9 +83,9 @@ class SponsorshipFlowTest extends TestCase
             ['child_id' => 2, 'status' => 'confirmed'],
         ];
 
-        $hasPendingSponsorship = !empty(array_filter(
+        $hasPendingSponsorship = ! empty(array_filter(
             $existingSponsorships,
-            fn($s) => $s['child_id'] === $childId && in_array($s['status'], ['pending', 'confirmed'])
+            fn ($s) => $s['child_id'] === $childId && in_array($s['status'], ['pending', 'confirmed'])
         ));
 
         $this->assertTrue($hasPendingSponsorship);
@@ -100,7 +100,7 @@ class SponsorshipFlowTest extends TestCase
             ['id' => 3, 'family_id' => 175, 'status' => 'available'],
         ];
 
-        $availableChildren = array_filter($familyChildren, fn($c) => $c['status'] === 'available');
+        $availableChildren = array_filter($familyChildren, fn ($c) => $c['status'] === 'available');
 
         $this->assertCount(3, $availableChildren);
 
@@ -116,7 +116,7 @@ class SponsorshipFlowTest extends TestCase
         $childrenIds = [1, 2, 3];
         $sponsorData = [
             'name' => 'Family Sponsor',
-            'email' => 'family@example.com'
+            'email' => 'family@example.com',
         ];
 
         $sponsorships = [];
@@ -125,7 +125,7 @@ class SponsorshipFlowTest extends TestCase
                 'child_id' => $childId,
                 'sponsor_name' => $sponsorData['name'],
                 'sponsor_email' => $sponsorData['email'],
-                'status' => 'pending'
+                'status' => 'pending',
             ];
         }
 
@@ -172,7 +172,7 @@ class SponsorshipFlowTest extends TestCase
         $sponsorship = [
             'id' => 1,
             'child_id' => 1,
-            'status' => 'pending'
+            'status' => 'pending',
         ];
 
         // Cancel sponsorship
@@ -193,7 +193,7 @@ class SponsorshipFlowTest extends TestCase
         $sponsorship = [
             'request_date' => $now,
             'confirmation_date' => null,
-            'completion_date' => null
+            'completion_date' => null,
         ];
 
         $this->assertIsInt($sponsorship['request_date']);

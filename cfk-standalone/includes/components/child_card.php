@@ -18,14 +18,15 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 
 // Validate required parameter
-if (!isset($child) || !is_array($child)) {
+if (! isset($child) || ! is_array($child)) {
     trigger_error('Child card component requires $child array parameter', E_USER_WARNING);
+
     return;
 }
 
@@ -51,7 +52,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
     <div class="child-info">
         <h3 class="child-name">Family Code: <?php echo sanitizeString($child['display_id']); ?></h3>
 
-        <?php if ($showId && !empty($child['display_id'])) : ?>
+        <?php if ($showId && ! empty($child['display_id'])) : ?>
             <p class="child-id">ID: <?php echo sanitizeString($child['display_id']); ?></p>
         <?php endif; ?>
 
@@ -63,7 +64,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             <?php echo formatAge($child['age_months']); ?>
         </p>
 
-        <?php if ($showInterests && !empty($child['interests'])) : ?>
+        <?php if ($showInterests && ! empty($child['interests'])) : ?>
             <div class="child-interests">
                 <strong>Likes:</strong>
                 <?php echo sanitizeString(substr((string) $child['interests'], 0, 100)); ?>
@@ -73,7 +74,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             </div>
         <?php endif; ?>
 
-        <?php if ($showWishes && !empty($child['wishes'])) : ?>
+        <?php if ($showWishes && ! empty($child['wishes'])) : ?>
             <div class="child-wishes">
                 <?php if ($showInterests) : ?>
                     <strong>Wishes for:</strong>
@@ -87,17 +88,17 @@ $showFamilyButton = $options['show_family_button'] ?? false;
             </div>
         <?php endif; ?>
 
-        <?php if ($showSiblings && !empty($siblings)) : ?>
+        <?php if ($showSiblings && ! empty($siblings)) : ?>
             <div class="family-info">
                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
                 <?php
-                $siblingCodes = array_map(fn($s) => sanitizeString($s['display_id']), $siblings);
+                $siblingCodes = array_map(fn ($s) => sanitizeString($s['display_id']), $siblings);
                 echo implode(', ', $siblingCodes);
                 ?>
             </div>
         <?php endif; ?>
 
-        <?php if (!$showActions) : ?>
+        <?php if (! $showActions) : ?>
             <?php echo renderButton(
                 $buttonText,
                 baseUrl('?page=child&id=' . $child['id']),
@@ -114,7 +115,7 @@ $showFamilyButton = $options['show_family_button'] ?? false;
                 'primary'
             ); ?>
 
-            <?php if ($showFamilyButton && !empty($siblings)) : ?>
+            <?php if ($showFamilyButton && ! empty($siblings)) : ?>
                 <?php echo renderButton(
                     'View Family',
                     baseUrl('?page=children&family_id=' . $child['family_id']),

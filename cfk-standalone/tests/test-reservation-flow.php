@@ -36,7 +36,8 @@ function isChildAvailable(int $childId): bool
             LIMIT 1";
 
     $result = Database::fetchRow($sql, ['id' => $childId]);
-    return !empty($result);
+
+    return ! empty($result);
 }
 
 /**
@@ -46,6 +47,7 @@ function getChildStatus(int $childId): string
 {
     $sql = "SELECT status FROM children WHERE id = :id";
     $result = Database::fetchRow($sql, ['id' => $childId]);
+
     return $result['status'] ?? 'not found';
 }
 
@@ -56,6 +58,7 @@ function addToCart(int $childId): bool
 {
     try {
         Database::update('children', ['status' => 'pending'], ['id' => $childId]);
+
         return true;
     } catch (Exception $e) {
         return false;
@@ -79,13 +82,15 @@ function confirmSponsorship(int $childId, string $sponsorEmail): bool
             'sponsor_name' => 'Test Sponsor',
             'sponsor_email' => $sponsorEmail,
             'status' => 'confirmed',
-            'confirmation_date' => date('Y-m-d H:i:s')
+            'confirmation_date' => date('Y-m-d H:i:s'),
         ]);
 
         Database::commit();
+
         return true;
     } catch (Exception $e) {
         Database::rollback();
+
         return false;
     }
 }
@@ -107,9 +112,10 @@ for ($i = 1; $i <= $testIterations; $i++) {
 
     $child = Database::fetchRow($sql);
 
-    if (!$child) {
+    if (! $child) {
         echo "   ❌ No available children found for testing\n\n";
         $testResults[$i] = ['success' => false, 'error' => 'No available children'];
+
         continue;
     }
 
@@ -123,9 +129,10 @@ for ($i = 1; $i <= $testIterations; $i++) {
     // Step 2: Add to cart (mark as pending)
     echo "2️⃣  Adding to cart (marking as pending)...\n";
 
-    if (!addToCart($childId)) {
+    if (! addToCart($childId)) {
         echo "   ❌ Failed to add to cart\n\n";
         $testResults[$i] = ['success' => false, 'error' => 'Failed to add to cart'];
+
         continue;
     }
 
@@ -144,21 +151,23 @@ for ($i = 1; $i <= $testIterations; $i++) {
             'success' => false,
             'error' => 'Child still visible or status incorrect after adding to cart',
             'child_id' => $childId,
-            'status' => $statusAfterCart
+            'status' => $statusAfterCart,
         ];
         // Clean up - reset to available
         Database::update('children', ['status' => 'available'], ['id' => $childId]);
+
         continue;
     }
 
     // Step 4: Confirm sponsorship
     echo "3️⃣  Confirming sponsorship...\n";
 
-    if (!confirmSponsorship($childId, $testEmail)) {
+    if (! confirmSponsorship($childId, $testEmail)) {
         echo "   ❌ Failed to confirm sponsorship\n\n";
         $testResults[$i] = ['success' => false, 'error' => 'Failed to confirm sponsorship'];
         // Clean up
         Database::update('children', ['status' => 'available'], ['id' => $childId]);
+
         continue;
     }
 
@@ -173,16 +182,16 @@ for ($i = 1; $i <= $testIterations; $i++) {
     echo "   👁️  Visible in browse: " . ($availableAfterConfirm ? '❌ FAIL - Should be hidden' : '✅ PASS - Hidden') . "\n\n";
 
     // Determine test result
-    $success = !$availableAfterConfirm && $finalStatus === 'sponsored';
+    $success = ! $availableAfterConfirm && $finalStatus === 'sponsored';
 
     $testResults[$i] = [
         'success' => $success,
         'child_id' => $childId,
         'display_id' => $displayId,
         'email' => $testEmail,
-        'hidden_in_cart' => !$availableAfterCart,
-        'hidden_after_confirm' => !$availableAfterConfirm,
-        'final_status' => $finalStatus
+        'hidden_in_cart' => ! $availableAfterCart,
+        'hidden_after_confirm' => ! $availableAfterConfirm,
+        'final_status' => $finalStatus,
     ];
 
     if ($success) {
@@ -193,7 +202,7 @@ for ($i = 1; $i <= $testIterations; $i++) {
         Database::update('children', ['status' => 'available'], ['id' => $childId]);
         Database::execute("DELETE FROM sponsorships WHERE child_id = :id AND sponsor_email = :email", [
             'id' => $childId,
-            'email' => $testEmail
+            'email' => $testEmail,
         ]);
     }
 

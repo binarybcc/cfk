@@ -7,7 +7,7 @@ declare(strict_types=1);
  * HTML and plain text templates for magic link authentication emails
  */
 
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }

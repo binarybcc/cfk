@@ -71,7 +71,7 @@ class EagerLoadingTest extends TestCase
         ];
 
         $excludeChildId = 2;
-        $filtered = array_filter($allSiblings, fn($s) => $s['id'] !== $excludeChildId);
+        $filtered = array_filter($allSiblings, fn ($s) => $s['id'] !== $excludeChildId);
 
         $this->assertCount(2, $filtered);
         $this->assertFalse(in_array($excludeChildId, array_column($filtered, 'id')));
@@ -85,7 +85,7 @@ class EagerLoadingTest extends TestCase
             'family_id' => 175,
             'name' => 'Test Child',
             'age' => 10,
-            'display_id' => '175A'
+            'display_id' => '175A',
         ];
 
         $this->assertArrayHasKey('id', $child);

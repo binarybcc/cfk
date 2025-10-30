@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -27,6 +27,7 @@ function cleanWishesText(string $wishes): string
 {
     // Remove .Wishlist: or Wishlist: prefix (case-insensitive, with or without dot)
     $cleaned = preg_replace('/^\.?\s*wish\s*list\s*:\s*/i', '', trim($wishes));
+
     return $cleaned;
 }
 
@@ -54,7 +55,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     $params = [];
 
     // Apply filters
-    if (!empty($filters['search'])) {
+    if (! empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
         $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
@@ -62,7 +63,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         $params['search3'] = $searchValue;
     }
 
-    if (!empty($filters['age_category'])) {
+    if (! empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
@@ -73,23 +74,23 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         }
     }
 
-    if (!empty($filters['gender'])) {
+    if (! empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
 
-    if (!empty($filters['status'])) {
+    if (! empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
 
-    if (!empty($filters['family_id'])) {
+    if (! empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
 
     // Default to available children only
-    if (!isset($filters['status'])) {
+    if (! isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
 
@@ -116,7 +117,7 @@ function getChildrenCount(array $filters = []): int
     $params = [];
 
     // Apply same filters as getChildren()
-    if (!empty($filters['search'])) {
+    if (! empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
         $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
@@ -124,7 +125,7 @@ function getChildrenCount(array $filters = []): int
         $params['search3'] = $searchValue;
     }
 
-    if (!empty($filters['age_category'])) {
+    if (! empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
@@ -135,27 +136,28 @@ function getChildrenCount(array $filters = []): int
         }
     }
 
-    if (!empty($filters['gender'])) {
+    if (! empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
 
-    if (!empty($filters['status'])) {
+    if (! empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
 
-    if (!empty($filters['family_id'])) {
+    if (! empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
 
     // Default to available children only
-    if (!isset($filters['status'])) {
+    if (! isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
 
     $result = Database::fetchRow($sql, $params);
+
     return (int) ($result['total'] ?? 0);
 }
 
@@ -211,6 +213,7 @@ function getSiblingCount(int $familyId): int
     ";
 
     $result = Database::fetchRow($sql, ['family_id' => $familyId]);
+
     return (int) ($result['count'] ?? 0);
 }
 
@@ -239,6 +242,7 @@ function getPlaceholderImage(int $age, string $gender): string
 function getFamilyById(int $familyId): ?array
 {
     $sql = "SELECT * FROM families WHERE id = :family_id";
+
     return Database::fetchRow($sql, ['family_id' => $familyId]);
 }
 
@@ -248,6 +252,7 @@ function getFamilyById(int $familyId): ?array
 function getFamilyByNumber(string $familyNumber): ?array
 {
     $sql = "SELECT * FROM families WHERE family_number = :family_number";
+
     return Database::fetchRow($sql, ['family_number' => $familyNumber]);
 }
 
@@ -344,7 +349,7 @@ function createSponsorship(int $childId, array $sponsorData): int
         'sponsor_address' => sanitizeString($sponsorData['address'] ?? ''),
         'gift_preference' => $sponsorData['gift_preference'] ?? 'shopping',
         'special_message' => sanitizeString($sponsorData['message'] ?? ''),
-        'status' => 'pending'
+        'status' => 'pending',
     ];
 
     return Database::insert('sponsorships', $sponsorshipData);
@@ -391,6 +396,7 @@ function displayAge(int $ageMonths): string
     } else {
         // 36+ months: display as years
         $years = (int)floor($ageMonths / 12);
+
         return $years . ' year' . ($years !== 1 ? 's' : '');
     }
 }
@@ -489,8 +495,10 @@ function getMessage(): ?array
     if (isset($_SESSION['cfk_message'])) {
         $message = $_SESSION['cfk_message'];
         unset($_SESSION['cfk_message']);
+
         return $message;
     }
+
     return null;
 }
 
@@ -521,7 +529,7 @@ function regenerateSessionIfNeeded(): void
         // Regenerate every 30 minutes
         $regenerateInterval = 1800; // 30 minutes
 
-        if (!isset($_SESSION['last_regeneration'])) {
+        if (! isset($_SESSION['last_regeneration'])) {
             $_SESSION['last_regeneration'] = time();
         } elseif (time() - $_SESSION['last_regeneration'] > $regenerateInterval) {
             session_regenerate_id(true); // Delete old session
@@ -533,12 +541,13 @@ function regenerateSessionIfNeeded(): void
 function isLoggedIn(): bool
 {
     regenerateSessionIfNeeded();
-    return isset($_SESSION['cfk_admin_id']) && !empty($_SESSION['cfk_admin_id']);
+
+    return isset($_SESSION['cfk_admin_id']) && ! empty($_SESSION['cfk_admin_id']);
 }
 
 function requireLogin(): void
 {
-    if (!isLoggedIn()) {
+    if (! isLoggedIn()) {
         header('Location: ' . baseUrl('admin/login.php'));
         exit;
     }
@@ -560,6 +569,7 @@ function validateRequired(array $data, array $requiredFields): array
             $errors[] = ucfirst($field) . ' is required';
         }
     }
+
     return $errors;
 }
 
@@ -625,7 +635,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     }
 
     // Add size class
-    if (!empty($options['size'])) {
+    if (! empty($options['size'])) {
         $validSizes = ['small', 'large'];
         if (in_array($options['size'], $validSizes)) {
             $classes[] = 'btn-' . $options['size'];
@@ -633,12 +643,12 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     }
 
     // Add block class
-    if (!empty($options['block'])) {
+    if (! empty($options['block'])) {
         $classes[] = 'btn-block';
     }
 
     // Add custom classes
-    if (!empty($options['class'])) {
+    if (! empty($options['class'])) {
         $classes[] = sanitizeString($options['class']);
     }
 
@@ -648,17 +658,17 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     $attrs = [];
 
     // Add ID if provided
-    if (!empty($options['id'])) {
+    if (! empty($options['id'])) {
         $attrs['id'] = sanitizeString($options['id']);
     }
 
     // Add onclick if provided
-    if (!empty($options['onclick'])) {
+    if (! empty($options['onclick'])) {
         $attrs['onclick'] = sanitizeString($options['onclick']);
     }
 
     // Add custom attributes
-    if (!empty($options['attributes']) && is_array($options['attributes'])) {
+    if (! empty($options['attributes']) && is_array($options['attributes'])) {
         foreach ($options['attributes'] as $key => $value) {
             // Allow data-* and zeffy-* attributes without sanitization
             if (str_starts_with($key, 'data-') || str_starts_with($key, 'zeffy-')) {
@@ -679,7 +689,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     if ($url !== null) {
         // Render as <a> tag
         $target = '';
-        if (!empty($options['target'])) {
+        if (! empty($options['target'])) {
             $target = ' target="' . sanitizeString($options['target']) . '"';
         }
 
@@ -693,7 +703,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
         );
     } else {
         // Render as <button> tag
-        $buttonType = !empty($options['submit']) ? 'submit' : 'button';
+        $buttonType = ! empty($options['submit']) ? 'submit' : 'button';
 
         return sprintf(
             '<button type="%s" class="%s"%s>%s</button>',
@@ -713,8 +723,10 @@ function formatDateTime(?string $datetime): string
     if (empty($datetime)) {
         return "";
     }
+
     try {
         $dt = new DateTime($datetime);
+
         return $dt->format("M j, Y g:i A");
     } catch (Exception $e) {
         return $datetime;
@@ -729,8 +741,10 @@ function formatDate(?string $date): string
     if (empty($date)) {
         return "";
     }
+
     try {
         $dt = new DateTime($date);
+
         return $dt->format("M j, Y");
     } catch (Exception $e) {
         return $date;

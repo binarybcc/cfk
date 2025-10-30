@@ -18,12 +18,12 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Use namespaced classes
-use CFK\CSV\Handler as CSVHandler;
 use CFK\Backup\Manager as BackupManager;
+use CFK\CSV\Handler as CSVHandler;
 use CFK\Import\Analyzer as ImportAnalyzer;
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -39,7 +39,7 @@ $previewData = null;
 
 // Handle file upload and import
 if ($_POST && isset($_POST['action'])) {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
     } else {
@@ -54,6 +54,7 @@ if ($_POST && isset($_POST['action'])) {
                     $message = $result['message'];
                     $messageType = 'error';
                 }
+
                 break;
 
             case 'confirm_import':
@@ -63,26 +64,31 @@ if ($_POST && isset($_POST['action'])) {
                 if ($result['success'] && isset($result['results'])) {
                     $importResults = $result['results'];
                 }
+
                 break;
 
             case 'download_template':
                 downloadTemplate();
+
                 break;
 
             case 'delete_all_children':
                 $result = handleDeleteAllChildren();
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'restore_backup':
                 $result = handleRestoreBackup();
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'download_backup':
                 handleDownloadBackup();
+
                 break;
         }
     }
@@ -92,14 +98,14 @@ function handlePreviewImport(): array
 {
     try {
         // Check if file was uploaded
-        if (!isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
+        if (! isset($_FILES['csv_file']) || $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK) {
             return ['success' => false, 'message' => 'Please select a valid CSV file to upload.'];
         }
 
         $file = $_FILES['csv_file'];
 
         // Validate file type
-        if ($file['type'] !== 'text/csv' && !in_array(pathinfo((string) $file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
+        if ($file['type'] !== 'text/csv' && ! in_array(pathinfo((string) $file['name'], PATHINFO_EXTENSION), ['csv', 'txt'])) {
             return ['success' => false, 'message' => 'Please upload a CSV file (.csv extension).'];
         }
 
@@ -110,12 +116,12 @@ function handlePreviewImport(): array
 
         // Save file to temp location for confirmation step
         $tempDir = sys_get_temp_dir() . '/cfk_uploads';
-        if (!file_exists($tempDir)) {
+        if (! file_exists($tempDir)) {
             mkdir($tempDir, 0700, true);
         }
 
         $tempFile = $tempDir . '/upload_' . session_id() . '.csv';
-        if (!move_uploaded_file($file['tmp_name'], $tempFile)) {
+        if (! move_uploaded_file($file['tmp_name'], $tempFile)) {
             return ['success' => false, 'message' => 'Failed to process uploaded file.'];
         }
 
@@ -123,11 +129,12 @@ function handlePreviewImport(): array
         $handler = new CSVHandler();
         $parseResult = $handler->parseCSVForPreview($tempFile);
 
-        if (!$parseResult['success']) {
+        if (! $parseResult['success']) {
             @unlink($tempFile);
+
             return [
                 'success' => false,
-                'message' => 'CSV parsing failed: ' . implode(', ', $parseResult['errors'] ?? ['Unknown error'])
+                'message' => 'CSV parsing failed: ' . implode(', ', $parseResult['errors'] ?? ['Unknown error']),
             ];
         }
 
@@ -144,11 +151,12 @@ function handlePreviewImport(): array
                 'analysis' => $analysis,
                 'filename' => $file['name'],
                 'total_rows' => count($parseResult['children']),
-                'parse_warnings' => $parseResult['warnings'] ?? []
-            ]
+                'parse_warnings' => $parseResult['warnings'] ?? [],
+            ],
         ];
     } catch (Exception $e) {
         error_log('CSV preview error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred during preview. Please try again.'];
     }
 }
@@ -157,7 +165,7 @@ function handleConfirmImport(): array
 {
     try {
         // Check if we have a file in session
-        if (!isset($_SESSION['cfk_import_file']) || !file_exists($_SESSION['cfk_import_file'])) {
+        if (! isset($_SESSION['cfk_import_file']) || ! file_exists($_SESSION['cfk_import_file'])) {
             return ['success' => false, 'message' => 'No file to import. Please upload again.'];
         }
 
@@ -167,14 +175,14 @@ function handleConfirmImport(): array
 
         // CREATE AUTOMATIC BACKUP BEFORE IMPORT
         $backupResult = BackupManager::createAutoBackup('csv_import');
-        if (!$backupResult['success']) {
+        if (! $backupResult['success']) {
             error_log('Backup creation failed: ' . $backupResult['message']);
         }
 
         // Apply import with sponsorship preservation
         $result = ImportAnalyzer::applyImportWithPreservation($tempFile, [
             'keep_inactive' => $keepInactive,
-            'import_mode' => $importMode
+            'import_mode' => $importMode,
         ]);
 
         // Clean up temp file
@@ -190,16 +198,17 @@ function handleConfirmImport(): array
             return [
                 'success' => true,
                 'message' => "Successfully imported {$result['imported']} children!{$sponsorMsg}",
-                'results' => $result
+                'results' => $result,
             ];
         } else {
             return [
                 'success' => false,
-                'message' => $result['message'] ?? 'Import failed'
+                'message' => $result['message'] ?? 'Import failed',
             ];
         }
     } catch (Exception $e) {
         error_log('CSV confirm import error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred during import. Please try again.'];
     }
 }
@@ -208,7 +217,7 @@ function handleDeleteAllChildren(): array
 {
     try {
         // Require confirmation
-        if (!isset($_POST['confirm_delete']) || $_POST['confirm_delete'] !== 'DELETE') {
+        if (! isset($_POST['confirm_delete']) || $_POST['confirm_delete'] !== 'DELETE') {
             return ['success' => false, 'message' => 'Please type "DELETE" in the confirmation box to proceed.'];
         }
 
@@ -236,10 +245,11 @@ function handleDeleteAllChildren(): array
 
         return [
             'success' => true,
-            'message' => "Successfully deleted {$count} children records and all related data."
+            'message' => "Successfully deleted {$count} children records and all related data.",
         ];
     } catch (Exception $e) {
         error_log('Delete all children error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred during deletion. Please try again.'];
     }
 }
@@ -257,6 +267,7 @@ function handleRestoreBackup(): array
         return BackupManager::restoreFromBackup($filename, $clearExisting);
     } catch (Exception $e) {
         error_log('Restore backup error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred during restore. Please try again.'];
     }
 }
@@ -298,7 +309,7 @@ function downloadTemplate(): void
             'greatest_need',
             'wish_list',
             'special_needs',
-            'family_situation'
+            'family_situation',
         ];
 
         header('Content-Type: text/csv');
@@ -312,21 +323,21 @@ function downloadTemplate(): void
         fputcsv($output, [
             '001A', 24, '', 'F', 'Toddler 3T', 'Toddler 3T', '7', 'Toddler 3T',
             'Cocomelon Toys, Baby Shark', 'Diapers Size 5, Baby Wipes', 'Toy Laptop, Shopping Cart', 'None',
-            'Single mother, low income'
+            'Single mother, low income',
         ]);
 
         // Row 2: Using age_years (8 year old)
         fputcsv($output, [
             '001B', '', 8, 'M', 'Boys 8', 'Boys 8', 'Youth 2', 'Boys 8',
             'Soccer, Video Games', 'Winter Coat, Socks', 'Soccer Ball, Nintendo Games', 'None',
-            'Single mother, low income'
+            'Single mother, low income',
         ]);
 
         // Row 3: Another age_years example (16 year old)
         fputcsv($output, [
             '002A', '', 16, 'F', 'Ladies Medium', 'Ladies 10', '9', 'Ladies Large',
             'Music, Art, Reading', 'Shoes, Winter Coat', 'Art Supplies, Books', 'None',
-            'Grandmother raising grandchildren'
+            'Grandmother raising grandchildren',
         ]);
 
         fclose($output);
@@ -336,7 +347,7 @@ function downloadTemplate(): void
 
 // Get current statistics
 $stats = [
-    'total_children' => getChildrenCount([])
+    'total_children' => getChildrenCount([]),
 ];
 
 // Get backup information
@@ -1080,7 +1091,7 @@ include __DIR__ . '/includes/admin_header.php';
                     </div>
 
                     <!-- Warnings -->
-                    <?php if (!empty($previewData['analysis']['warnings'])) : ?>
+                    <?php if (! empty($previewData['analysis']['warnings'])) : ?>
                         <div class="alert alert-warning" style="margin-top: 1.5rem;">
                             <h4 style="margin-bottom: 1rem;">⚠️ Important Changes Detected:</h4>
                             <ul style="margin: 0; padding-left: 1.5rem;">

@@ -23,7 +23,7 @@ $logFile = __DIR__ . '/../logs/cron_cleanup_magic_links.log';
 
 try {
     // Create logs directory if not exists
-    if (!is_dir(__DIR__ . '/../logs')) {
+    if (! is_dir(__DIR__ . '/../logs')) {
         mkdir(__DIR__ . '/../logs', 0755, true);
     }
 

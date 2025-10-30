@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * PHPUnit Bootstrap File
  * Sets up testing environment
@@ -23,6 +25,6 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 // Session handling for tests
-if (!isset($_SESSION)) {
+if (! isset($_SESSION)) {
     $_SESSION = [];
 }

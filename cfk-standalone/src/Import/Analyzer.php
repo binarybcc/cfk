@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace CFK\Import;
 
-use CFK\Database\Connection;
 use CFK\CSV\Handler as CSVHandler;
+use CFK\Database\Connection;
 
 /**
  * Import Analyzer - Analyzes CSV imports and detects important changes
@@ -35,8 +35,8 @@ class Analyzer
                 'total_new' => 0,
                 'total_updated' => 0,
                 'total_removed' => 0,
-                'total_unchanged' => 0
-            ]
+                'total_unchanged' => 0,
+            ],
         ];
 
         // Build lookup of current children by family_id + child_letter
@@ -57,7 +57,7 @@ class Analyzer
         foreach ($newChildren as $newChild) {
             $key = $newChild['family_id'] . '_' . $newChild['child_letter'];
 
-            if (!isset($currentLookup[$key])) {
+            if (! isset($currentLookup[$key])) {
                 // New child
                 $analysis['new_children'][] = $newChild;
                 $analysis['stats']['total_new']++;
@@ -70,7 +70,7 @@ class Analyzer
                     $analysis['updated_children'][] = [
                         'old' => $oldChild,
                         'new' => $newChild,
-                        'changes' => $changes
+                        'changes' => $changes,
                     ];
                     $analysis['stats']['total_updated']++;
 
@@ -89,7 +89,7 @@ class Analyzer
         foreach ($currentChildren as $oldChild) {
             $key = $oldChild['family_id'] . '_' . $oldChild['child_letter'];
 
-            if (!isset($newLookup[$key])) {
+            if (! isset($newLookup[$key])) {
                 $analysis['removed_children'][] = $oldChild;
                 $analysis['stats']['total_removed']++;
 
@@ -99,7 +99,7 @@ class Analyzer
                         'type' => 'sponsored_child_removed',
                         'severity' => 'high',
                         'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}) is {$oldChild['status']} but not in new upload",
-                        'child' => $oldChild
+                        'child' => $oldChild,
                     ];
                 }
             }
@@ -128,7 +128,7 @@ class Analyzer
             if ($oldValue != $newValue) {
                 $changes[$field] = [
                     'old' => $oldValue,
-                    'new' => $newValue
+                    'new' => $newValue,
                 ];
             }
         }
@@ -150,13 +150,13 @@ class Analyzer
 
         // Check for data becoming blank
         foreach ($changes as $field => $change) {
-            if (!empty($change['old']) && empty($change['new'])) {
+            if (! empty($change['old']) && empty($change['new'])) {
                 $warnings[] = [
                     'type' => 'data_loss',
                     'severity' => 'medium',
                     'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}): {$field} will be cleared (was: {$change['old']})",
                     'child' => $oldChild,
-                    'field' => $field
+                    'field' => $field,
                 ];
             }
         }
@@ -171,7 +171,7 @@ class Analyzer
                     'type' => 'age_decreased',
                     'severity' => 'medium',
                     'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}): Age decreased from {$oldAge} to {$newAge} (possible error?)",
-                    'child' => $oldChild
+                    'child' => $oldChild,
                 ];
             }
         }
@@ -182,7 +182,7 @@ class Analyzer
                 'type' => 'gender_changed',
                 'severity' => 'low',
                 'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}): Gender changed from {$changes['gender']['old']} to {$changes['gender']['new']}",
-                'child' => $oldChild
+                'child' => $oldChild,
             ];
         }
 
@@ -233,7 +233,7 @@ class Analyzer
         $handler = new CSVHandler();
         $parseResult = $handler->parseCSVForPreview($csvPath);
 
-        if (!$parseResult['success']) {
+        if (! $parseResult['success']) {
             return $parseResult;
         }
 
@@ -263,7 +263,7 @@ class Analyzer
         $keepInactive = $options['keep_inactive'] ?? true;
 
         // Clear existing data (unless keeping inactive)
-        if (!$keepInactive) {
+        if (! $keepInactive) {
             Connection::query('DELETE FROM children WHERE 1=1');
             Connection::query('DELETE FROM families WHERE 1=1');
         }
@@ -272,7 +272,7 @@ class Analyzer
         $handler = new CSVHandler();
         $result = $handler->importChildren($csvPath, ['dry_run' => false]);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return $result;
         }
 
@@ -312,13 +312,15 @@ class Analyzer
 
             if (isset($existingLookup[$key])) {
                 $skipped++;
+
                 continue; // Skip existing children
             }
 
             // Ensure family exists
             $familyId = self::ensureFamilyExists($childData);
-            if (!$familyId) {
+            if (! $familyId) {
                 $errors[] = "Failed to create family for {$childData['name']}";
+
                 continue;
             }
 
@@ -339,7 +341,7 @@ class Analyzer
             'skipped' => $skipped,
             'errors' => $errors,
             'message' => "Appended {$imported} new children ({$skipped} existing children skipped)",
-            'import_mode' => 'append'
+            'import_mode' => 'append',
         ];
     }
 
@@ -371,8 +373,9 @@ class Analyzer
 
             // Ensure family exists
             $familyId = self::ensureFamilyExists($childData);
-            if (!$familyId) {
+            if (! $familyId) {
                 $errors[] = "Failed to create family for {$childData['name']}";
+
                 continue;
             }
 
@@ -407,7 +410,7 @@ class Analyzer
             'updated' => $updated,
             'errors' => $errors,
             'message' => "Updated {$updated} existing children, inserted {$inserted} new children",
-            'import_mode' => 'update'
+            'import_mode' => 'update',
         ];
     }
 
@@ -456,10 +459,11 @@ class Analyzer
         try {
             return Connection::insert('families', [
                 'family_number' => $familyNumber,
-                'notes' => $childData['family_situation'] ?? ''
+                'notes' => $childData['family_situation'] ?? '',
             ]);
         } catch (\Exception $e) {
             error_log("Failed to create family {$familyNumber}: " . $e->getMessage());
+
             return null;
         }
     }
@@ -484,7 +488,7 @@ class Analyzer
             'interests' => $childData['greatest_need'] ?? '',
             'wishes' => ($childData['interests'] ?? '') . (($childData['wish_list'] ?? '') ? '. Wish List: ' . $childData['wish_list'] : ''),
             'special_needs' => $childData['special_needs'] ?? 'None',
-            'status' => 'available'
+            'status' => 'available',
         ]);
     }
 
@@ -507,11 +511,11 @@ class Analyzer
             'jacket_size' => $childData['jacket_size'] ?? '',
             'interests' => $childData['greatest_need'] ?? '',
             'wishes' => ($childData['interests'] ?? '') . (($childData['wish_list'] ?? '') ? '. Wish List: ' . $childData['wish_list'] : ''),
-            'special_needs' => $childData['special_needs'] ?? 'None'
+            'special_needs' => $childData['special_needs'] ?? 'None',
         ];
 
         // Don't update status if preserving sponsorships
-        if (!$preserveStatus) {
+        if (! $preserveStatus) {
             $updateData['status'] = 'available';
         }
 

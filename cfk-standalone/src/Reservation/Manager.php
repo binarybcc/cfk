@@ -32,15 +32,15 @@ class Manager
             if (empty($sponsorData['name']) || empty($sponsorData['email']) || $childrenIds === []) {
                 return [
                     'success' => false,
-                    'message' => 'Missing required information: name, email, and at least one child selection.'
+                    'message' => 'Missing required information: name, email, and at least one child selection.',
                 ];
             }
 
             // Validate email
-            if (!filter_var($sponsorData['email'], FILTER_VALIDATE_EMAIL)) {
+            if (! filter_var($sponsorData['email'], FILTER_VALIDATE_EMAIL)) {
                 return [
                     'success' => false,
-                    'message' => 'Invalid email address.'
+                    'message' => 'Invalid email address.',
                 ];
             }
 
@@ -50,7 +50,7 @@ class Manager
                 return [
                     'success' => false,
                     'message' => 'Some children are no longer available: ' . implode(', ', $unavailableChildren),
-                    'unavailable' => $unavailableChildren
+                    'unavailable' => $unavailableChildren,
                 ];
             }
 
@@ -77,15 +77,16 @@ class Manager
                     'status' => 'pending',
                     'expires_at' => $expiresAt,
                     'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+                    'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
                 ]
             );
 
             if ($reservationId === 0) {
                 Connection::rollback();
+
                 return [
                     'success' => false,
-                    'message' => 'Failed to create reservation.'
+                    'message' => 'Failed to create reservation.',
                 ];
             }
 
@@ -96,7 +97,7 @@ class Manager
                     [
                         'status' => 'pending',
                         'reservation_id' => $reservationId,
-                        'reservation_expires_at' => $expiresAt
+                        'reservation_expires_at' => $expiresAt,
                     ],
                     ['id' => $childId]
                 );
@@ -109,7 +110,7 @@ class Manager
                 'token' => $token,
                 'reservation_id' => $reservationId,
                 'expires_at' => $expiresAt,
-                'message' => 'Reservation created successfully!'
+                'message' => 'Reservation created successfully!',
             ];
         } catch (Exception $e) {
             // Only rollback if transaction was started
@@ -119,9 +120,10 @@ class Manager
                 // Transaction might not have been started yet, ignore
             }
             error_log('Reservation creation error: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'An error occurred while creating your reservation. Please try again.'
+                'message' => 'An error occurred while creating your reservation. Please try again.',
             ];
         }
     }
@@ -147,7 +149,7 @@ class Manager
             $reservation['is_expired'] = strtotime((string) $reservation['expires_at']) < time();
 
             // Get children details
-            if (!empty($reservation['children_ids'])) {
+            if (! empty($reservation['children_ids'])) {
                 $placeholders = implode(',', array_fill(0, count($reservation['children_ids']), '?'));
                 $reservation['children'] = Connection::fetchAll(
                     "SELECT * FROM children WHERE id IN ($placeholders)",
@@ -170,24 +172,24 @@ class Manager
         try {
             $reservation = self::getReservation($token);
 
-            if (!$reservation) {
+            if (! $reservation) {
                 return [
                     'success' => false,
-                    'message' => 'Reservation not found.'
+                    'message' => 'Reservation not found.',
                 ];
             }
 
             if ($reservation['status'] === 'confirmed') {
                 return [
                     'success' => false,
-                    'message' => 'This reservation has already been confirmed.'
+                    'message' => 'This reservation has already been confirmed.',
                 ];
             }
 
             if ($reservation['is_expired']) {
                 return [
                     'success' => false,
-                    'message' => 'This reservation has expired.'
+                    'message' => 'This reservation has expired.',
                 ];
             }
 
@@ -198,7 +200,7 @@ class Manager
                 'reservations',
                 [
                     'status' => 'confirmed',
-                    'confirmed_at' => gmdate('Y-m-d H:i:s')
+                    'confirmed_at' => gmdate('Y-m-d H:i:s'),
                 ],
                 ['reservation_token' => $token]
             );
@@ -209,7 +211,7 @@ class Manager
                     'children',
                     [
                         'status' => 'sponsored',
-                        'reservation_expires_at' => null
+                        'reservation_expires_at' => null,
                     ],
                     ['id' => $childId]
                 );
@@ -219,7 +221,7 @@ class Manager
 
             return [
                 'success' => true,
-                'message' => 'Reservation confirmed successfully!'
+                'message' => 'Reservation confirmed successfully!',
             ];
         } catch (Exception $e) {
             try {
@@ -228,9 +230,10 @@ class Manager
                 // Transaction might not have been started yet, ignore
             }
             error_log('Reservation confirmation error: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'An error occurred while confirming your reservation.'
+                'message' => 'An error occurred while confirming your reservation.',
             ];
         }
     }
@@ -246,17 +249,17 @@ class Manager
         try {
             $reservation = self::getReservation($token);
 
-            if (!$reservation) {
+            if (! $reservation) {
                 return [
                     'success' => false,
-                    'message' => 'Reservation not found.'
+                    'message' => 'Reservation not found.',
                 ];
             }
 
             if ($reservation['status'] === 'confirmed') {
                 return [
                     'success' => false,
-                    'message' => 'Cannot cancel a confirmed reservation. Please contact support.'
+                    'message' => 'Cannot cancel a confirmed reservation. Please contact support.',
                 ];
             }
 
@@ -267,7 +270,7 @@ class Manager
                 'reservations',
                 [
                     'status' => 'cancelled',
-                    'cancelled_at' => gmdate('Y-m-d H:i:s')
+                    'cancelled_at' => gmdate('Y-m-d H:i:s'),
                 ],
                 ['reservation_token' => $token]
             );
@@ -279,7 +282,7 @@ class Manager
                     [
                         'status' => 'available',
                         'reservation_id' => null,
-                        'reservation_expires_at' => null
+                        'reservation_expires_at' => null,
                     ],
                     ['id' => $childId]
                 );
@@ -289,7 +292,7 @@ class Manager
 
             return [
                 'success' => true,
-                'message' => 'Reservation cancelled successfully.'
+                'message' => 'Reservation cancelled successfully.',
             ];
         } catch (Exception $e) {
             try {
@@ -298,9 +301,10 @@ class Manager
                 // Transaction might not have been started yet, ignore
             }
             error_log('Reservation cancellation error: ' . $e->getMessage());
+
             return [
                 'success' => false,
-                'message' => 'An error occurred while cancelling your reservation.'
+                'message' => 'An error occurred while cancelling your reservation.',
             ];
         }
     }
@@ -345,7 +349,7 @@ class Manager
                         [
                             'status' => 'available',
                             'reservation_id' => null,
-                            'reservation_expires_at' => null
+                            'reservation_expires_at' => null,
                         ],
                         ['id' => $childId]
                     );
@@ -359,7 +363,7 @@ class Manager
 
             return [
                 'expired_count' => $expiredCount,
-                'freed_children' => $freedChildren
+                'freed_children' => $freedChildren,
             ];
         } catch (Exception $e) {
             try {
@@ -368,6 +372,7 @@ class Manager
                 // Transaction might not have been started yet, ignore
             }
             error_log('Cleanup expired reservations error: ' . $e->getMessage());
+
             return ['expired_count' => 0, 'freed_children' => 0];
         }
     }

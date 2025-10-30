@@ -25,7 +25,7 @@ use CFK\Sponsorship\Manager as SponsorshipManager;
 header('Content-Type: application/json');
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Not authenticated']);
     exit;
@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Verify CSRF token
-if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Invalid security token']);
     exit;
@@ -62,7 +62,7 @@ try {
     http_response_code(500);
     echo json_encode([
         'success' => false,
-        'message' => config('app_debug') ? $e->getMessage() : 'An error occurred'
+        'message' => config('app_debug') ? $e->getMessage() : 'An error occurred',
     ]);
 }
 
@@ -73,7 +73,7 @@ function handleSponsorshipAction(string $action, array $data): array
 {
     $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);
 
-    if (!$sponsorshipId) {
+    if (! $sponsorshipId) {
         return ['success' => false, 'message' => 'Invalid sponsorship ID'];
     }
 
@@ -97,7 +97,7 @@ function handleChildAction(string $action, array $data): array
 {
     $childId = sanitizeInt($data['child_id'] ?? 0);
 
-    if (!$childId) {
+    if (! $childId) {
         return ['success' => false, 'message' => 'Invalid child ID'];
     }
 
@@ -134,7 +134,7 @@ function toggleChildStatus(int $childId): array
 {
     $child = Database::fetchRow("SELECT status FROM children WHERE id = ?", [$childId]);
 
-    if (!$child) {
+    if (! $child) {
         return ['success' => false, 'message' => 'Child not found'];
     }
 
@@ -145,11 +145,11 @@ function toggleChildStatus(int $childId): array
         [$newStatus, $childId]
     );
 
-    if ($success) {
+    if ($success !== 0) {
         return [
             'success' => true,
             'message' => 'Child status updated to ' . $newStatus,
-            'new_status' => $newStatus
+            'new_status' => $newStatus,
         ];
     }
 
@@ -173,7 +173,7 @@ function deleteChild(int $childId): array
 
     $success = Database::execute("DELETE FROM children WHERE id = ?", [$childId]);
 
-    if ($success) {
+    if ($success !== 0) {
         return ['success' => true, 'message' => 'Child deleted successfully'];
     }
 
@@ -203,13 +203,13 @@ function editSponsorship(array $data): array
 {
     try {
         $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);
-        if (!$sponsorshipId) {
+        if (! $sponsorshipId) {
             return ['success' => false, 'message' => 'Invalid sponsorship ID'];
         }
 
         // Validate email
         $email = sanitizeEmail($data['sponsor_email'] ?? '');
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'message' => 'Invalid email address'];
         }
 
@@ -218,12 +218,13 @@ function editSponsorship(array $data): array
             'sponsor_name' => sanitizeString($data['sponsor_name'] ?? ''),
             'sponsor_email' => $email,
             'sponsor_phone' => sanitizeString($data['sponsor_phone'] ?? ''),
-            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? '')
+            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? ''),
         ], ['id' => $sponsorshipId]);
 
         return ['success' => true, 'message' => 'Sponsorship updated successfully'];
     } catch (Exception $e) {
         error_log('Update sponsorship error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'Failed to update sponsorship'];
     }
 }
@@ -235,19 +236,19 @@ function editChild(array $data): array
 {
     try {
         $childId = sanitizeInt($data['child_id'] ?? 0);
-        if (!$childId) {
+        if (! $childId) {
             return ['success' => false, 'message' => 'Invalid child ID'];
         }
 
         // Validate required fields
         $validation = validateChildData($data);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
 
         // Check if child exists
         $child = Database::fetchRow("SELECT id, family_id, child_letter FROM children WHERE id = ?", [$childId]);
-        if (!$child) {
+        if (! $child) {
             return ['success' => false, 'message' => 'Child not found'];
         }
 
@@ -275,12 +276,13 @@ function editChild(array $data): array
             'jacket_size' => sanitizeString($data['jacket_size'] ?? ''),
             'interests' => sanitizeString($data['interests'] ?? ''),
             'wishes' => sanitizeString($data['wishes'] ?? ''),
-            'special_needs' => sanitizeString($data['special_needs'] ?? '')
+            'special_needs' => sanitizeString($data['special_needs'] ?? ''),
         ], ['id' => $childId]);
 
         return ['success' => true, 'message' => 'Child updated successfully'];
     } catch (Exception $e) {
         error_log('Failed to edit child: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
@@ -299,11 +301,11 @@ function validateChildData(array $data): array
         $errors[] = 'Age must be between 1 and 18';
     }
 
-    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
+    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || ! in_array($data['gender'], ['M', 'F'])) {
         $errors[] = 'Valid gender is required';
     }
 
-    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || !preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
+    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || ! preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
         $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
     }
 
@@ -313,6 +315,6 @@ function validateChildData(array $data): array
 
     return [
         'valid' => $errors === [],
-        'errors' => $errors
+        'errors' => $errors,
     ];
 }

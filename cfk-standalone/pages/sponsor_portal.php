@@ -6,7 +6,7 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -18,7 +18,7 @@ use CFK\Sponsorship\Manager as SponsorshipManager;
 $token = $_GET['token'] ?? '';
 $verificationResult = SponsorshipManager::verifyPortalToken($token);
 
-if (!$verificationResult['valid']) {
+if (! $verificationResult['valid']) {
     // Token invalid or expired
     ?>
     <div class="portal-page">
@@ -41,10 +41,10 @@ $sponsorships = SponsorshipManager::getSponsorshipsWithDetails($sponsorEmail);
 $families = [];
 foreach ($sponsorships as $sponsorship) {
     $familyId = $sponsorship['family_id'];
-    if (!isset($families[$familyId])) {
+    if (! isset($families[$familyId])) {
         $families[$familyId] = [
             'family_number' => $sponsorship['family_number'],
-            'children' => []
+            'children' => [],
         ];
     }
     $families[$familyId]['children'][] = $sponsorship;
@@ -57,7 +57,7 @@ $showAddChildren = isset($_GET['add_children']) && $_GET['add_children'] === '1'
 $addChildrenResult = null;
 if ($_POST && isset($_POST['add_children'])) {
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $addChildrenResult = ['success' => false, 'message' => 'Security token invalid. Please try again.'];
     } else {
         $selectedChildIds = $_POST['child_ids'] ?? [];
@@ -73,7 +73,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 'phone' => $firstSponsorship['sponsor_phone'] ?? '',
                 'address' => $firstSponsorship['sponsor_address'] ?? '',
                 'gift_preference' => $firstSponsorship['gift_preference'],
-                'message' => 'Additional children added to existing sponsorship'
+                'message' => 'Additional children added to existing sponsorship',
             ];
 
             $addChildrenResult = SponsorshipManager::addChildrenToSponsorship($selectedChildIds, $sponsorData, $sponsorEmail);
@@ -100,7 +100,7 @@ if ($_POST && isset($_POST['add_children'])) {
     require_once __DIR__ . '/../includes/components/page_header.php';
     ?>
 
-    <?php if (!$showAddChildren) : ?>
+    <?php if (! $showAddChildren) : ?>
         <!-- Display Sponsorships -->
         <div class="sponsorships-container">
             <div class="portal-actions">
@@ -155,21 +155,21 @@ if ($_POST && isset($_POST['add_children'])) {
                                     </div>
                                 </div>
 
-                                <?php if (!empty($child['interests'])) : ?>
+                                <?php if (! empty($child['interests'])) : ?>
                                     <div class="child-section">
                                         <h5>Essential Needs:</h5>
                                         <p><?php echo sanitizeString($child['interests']); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['wishes'])) : ?>
+                                <?php if (! empty($child['wishes'])) : ?>
                                     <div class="child-section wishes">
                                         <h5>🎁 Christmas Wishes:</h5>
                                         <p><?php echo sanitizeString($child['wishes']); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['special_needs'])) : ?>
+                                <?php if (! empty($child['special_needs'])) : ?>
                                     <div class="child-section special-needs">
                                         <h5>⚠️ Special Notes:</h5>
                                         <p><?php echo sanitizeString($child['special_needs']); ?></p>
@@ -201,7 +201,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <p>Select additional children you'd like to sponsor. They'll be added to your existing sponsorship.</p>
             </div>
 
-            <?php if ($addChildrenResult && !$addChildrenResult['success']) : ?>
+            <?php if ($addChildrenResult && ! $addChildrenResult['success']) : ?>
                 <div class="alert alert-error">
                     <?php echo sanitizeString($addChildrenResult['message']); ?>
                 </div>
@@ -211,7 +211,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                 <?php
-                // Get available children
+            // Get available children
                 $availableChildren = getChildren(['status' => 'available'], 1, 100);
 
                 if ($availableChildren === []) : ?>
@@ -220,7 +220,7 @@ if ($_POST && isset($_POST['add_children'])) {
                     </div>
                 <?php else : ?>
                     <div class="available-children-grid">
-                        <?php foreach ($availableChildren as $child) : ?>
+                                    <?php foreach ($availableChildren as $child) : ?>
                             <label class="child-checkbox-card">
                                 <input type="checkbox" name="child_ids[]" value="<?php echo $child['id']; ?>">
                                 <div class="checkbox-card-content">
@@ -235,7 +235,7 @@ if ($_POST && isset($_POST['add_children'])) {
                                     </div>
                                 </div>
                             </label>
-                        <?php endforeach; ?>
+                                    <?php endforeach; ?>
                     </div>
 
                     <div class="form-actions">

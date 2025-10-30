@@ -7,7 +7,7 @@ declare(strict_types=1);
  * v1.5 - Handles email notifications for reservation system
  */
 
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -54,7 +54,7 @@ function sendReservationConfirmationEmail(array $reservation): array
 
             return [
                 'success' => true,
-                'message' => 'Confirmation email sent successfully'
+                'message' => 'Confirmation email sent successfully',
             ];
         } else {
             throw new Exception('Failed to send email');
@@ -73,7 +73,7 @@ function sendReservationConfirmationEmail(array $reservation): array
 
         return [
             'success' => false,
-            'message' => 'Failed to send confirmation email: ' . $e->getMessage()
+            'message' => 'Failed to send confirmation email: ' . $e->getMessage(),
         ];
     }
 }
@@ -98,6 +98,7 @@ function sendAdminReservationNotification(array $reservation): bool
         return $mailer->send();
     } catch (Exception $e) {
         error_log('Admin notification error: ' . $e->getMessage());
+
         return false;
     }
 }
@@ -170,7 +171,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                 </table>';
 
         // Interests/Essential Needs
-        if (!empty($child['interests'])) {
+        if (! empty($child['interests'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #2c5530;">💙 Essential Needs/Interests:</strong>
@@ -179,7 +180,7 @@ function generateReservationConfirmationHTML(array $reservation): string
         }
 
         // Christmas Wishes
-        if (!empty($child['wishes'])) {
+        if (! empty($child['wishes'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #c41e3a;">🎁 Christmas Wish List:</strong>
@@ -188,7 +189,7 @@ function generateReservationConfirmationHTML(array $reservation): string
         }
 
         // Special Needs
-        if (!empty($child['special_needs'])) {
+        if (! empty($child['special_needs'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #856404;">⚠️ Special Needs/Considerations:</strong>
@@ -202,7 +203,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                     <strong style="color: #2c5530; font-size: 16px;">👕 Clothing Sizes:</strong>
                                     <table width="100%" cellpadding="5" style="margin-top: 10px;">';
 
-        if (!empty($child['shirt_size'])) {
+        if (! empty($child['shirt_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0; width: 40%;">Shirt:</td>
@@ -210,7 +211,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                         </tr>';
         }
 
-        if (!empty($child['pant_size'])) {
+        if (! empty($child['pant_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Pants:</td>
@@ -218,7 +219,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                         </tr>';
         }
 
-        if (!empty($child['jacket_size'])) {
+        if (! empty($child['jacket_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Jacket:</td>
@@ -226,7 +227,7 @@ function generateReservationConfirmationHTML(array $reservation): string
                                         </tr>';
         }
 
-        if (!empty($child['shoe_size'])) {
+        if (! empty($child['shoe_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Shoes:</td>
@@ -342,32 +343,32 @@ function generateReservationConfirmationText(array $reservation): string
         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
 
         // Essential Needs/Interests
-        if (!empty($child['interests'])) {
+        if (! empty($child['interests'])) {
             $text .= "ESSENTIAL NEEDS/INTERESTS:\n" . $child['interests'] . "\n\n";
         }
 
         // Christmas Wish List
-        if (!empty($child['wishes'])) {
+        if (! empty($child['wishes'])) {
             $text .= "CHRISTMAS WISH LIST:\n" . cleanWishesText($child['wishes']) . "\n\n";
         }
 
         // Special Needs
-        if (!empty($child['special_needs'])) {
+        if (! empty($child['special_needs'])) {
             $text .= "SPECIAL NEEDS/CONSIDERATIONS:\n" . $child['special_needs'] . "\n\n";
         }
 
         // Clothing Sizes
         $text .= "CLOTHING SIZES:\n";
-        if (!empty($child['shirt_size'])) {
+        if (! empty($child['shirt_size'])) {
             $text .= "  Shirt: " . $child['shirt_size'] . "\n";
         }
-        if (!empty($child['pant_size'])) {
+        if (! empty($child['pant_size'])) {
             $text .= "  Pants: " . $child['pant_size'] . "\n";
         }
-        if (!empty($child['jacket_size'])) {
+        if (! empty($child['jacket_size'])) {
             $text .= "  Jacket: " . $child['jacket_size'] . "\n";
         }
-        if (!empty($child['shoe_size'])) {
+        if (! empty($child['shoe_size'])) {
             $text .= "  Shoes: " . $child['shoe_size'] . "\n";
         }
         $text .= "\n" . str_repeat('-', 50) . "\n\n";
@@ -436,7 +437,7 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
             'status' => $status,
             'error_message' => $error ?: null,
             'reservation_id' => $reservationId,
-            'sent_at' => gmdate('Y-m-d H:i:s')
+            'sent_at' => gmdate('Y-m-d H:i:s'),
         ]);
     } catch (Exception $e) {
         error_log('Failed to log email: ' . $e->getMessage());
@@ -452,6 +453,7 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
 function sendAccessLinkEmail(string $email): array
 {
     error_log("ACCESS LINK: Function called for email: " . $email);
+
     try {
         // Get sponsorships for this email with full child details
         error_log("ACCESS LINK: Fetching sponsorships from database");
@@ -474,9 +476,10 @@ function sendAccessLinkEmail(string $email): array
 
         if ($sponsorships === []) {
             error_log("ACCESS LINK: No sponsorships found");
+
             return [
                 'success' => false,
-                'message' => 'No confirmed sponsorships found for this email address'
+                'message' => 'No confirmed sponsorships found for this email address',
             ];
         }
 
@@ -518,7 +521,7 @@ function sendAccessLinkEmail(string $email): array
 
             return [
                 'success' => true,
-                'message' => 'Access link email sent successfully'
+                'message' => 'Access link email sent successfully',
             ];
         } else {
             throw new Exception('Failed to send email');
@@ -537,7 +540,7 @@ function sendAccessLinkEmail(string $email): array
 
         return [
             'success' => false,
-            'message' => 'Failed to send access link email: ' . $e->getMessage()
+            'message' => 'Failed to send access link email: ' . $e->getMessage(),
         ];
     }
 }
@@ -549,7 +552,7 @@ function generateAccessToken(string $email): string
 {
     $data = [
         'email' => $email,
-        'expires' => time() + (24 * 60 * 60) // 24 hours
+        'expires' => time() + (24 * 60 * 60), // 24 hours
     ];
 
     $json = json_encode($data);
@@ -565,7 +568,7 @@ function verifyAccessToken(string $token): ?string
 {
     try {
         $decoded = base64_decode($token);
-        if (!str_contains($decoded, '|')) {
+        if (! str_contains($decoded, '|')) {
             return null;
         }
 
@@ -573,7 +576,7 @@ function verifyAccessToken(string $token): ?string
 
         $expectedSignature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
 
-        if (!hash_equals($expectedSignature, $signature)) {
+        if (! hash_equals($expectedSignature, $signature)) {
             return null;
         }
 
@@ -652,7 +655,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                 </table>';
 
         // Interests/Essential Needs
-        if (!empty($child['interests'])) {
+        if (! empty($child['interests'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #2c5530;">💙 Essential Needs/Interests:</strong>
@@ -661,7 +664,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
         }
 
         // Christmas Wishes
-        if (!empty($child['wishes'])) {
+        if (! empty($child['wishes'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #c41e3a;">🎁 Christmas Wish List:</strong>
@@ -670,7 +673,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
         }
 
         // Special Needs
-        if (!empty($child['special_needs'])) {
+        if (! empty($child['special_needs'])) {
             $html .= '
                                 <div style="margin-top: 15px;">
                                     <strong style="color: #856404;">⚠️ Special Needs/Considerations:</strong>
@@ -684,7 +687,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                     <strong style="color: #2c5530; font-size: 16px;">👕 Clothing Sizes:</strong>
                                     <table width="100%" cellpadding="5" style="margin-top: 10px;">';
 
-        if (!empty($child['shirt_size'])) {
+        if (! empty($child['shirt_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0; width: 40%;">Shirt:</td>
@@ -692,7 +695,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                         </tr>';
         }
 
-        if (!empty($child['pant_size'])) {
+        if (! empty($child['pant_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Pants:</td>
@@ -700,7 +703,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                         </tr>';
         }
 
-        if (!empty($child['jacket_size'])) {
+        if (! empty($child['jacket_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Jacket:</td>
@@ -708,7 +711,7 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
                                         </tr>';
         }
 
-        if (!empty($child['shoe_size'])) {
+        if (! empty($child['shoe_size'])) {
             $html .= '
                                         <tr>
                                             <td style="color: #2c5530; font-weight: bold; padding: 5px 0;">Shoes:</td>
@@ -822,32 +825,32 @@ function generateAccessLinkText(string $email, string $name, array $sponsorships
         $text .= "Gender: " . ($child['gender'] === 'M' ? 'Boy' : 'Girl') . "\n\n";
 
         // Essential Needs/Interests
-        if (!empty($child['interests'])) {
+        if (! empty($child['interests'])) {
             $text .= "ESSENTIAL NEEDS/INTERESTS:\n" . $child['interests'] . "\n\n";
         }
 
         // Christmas Wish List
-        if (!empty($child['wishes'])) {
+        if (! empty($child['wishes'])) {
             $text .= "CHRISTMAS WISH LIST:\n" . cleanWishesText($child['wishes']) . "\n\n";
         }
 
         // Special Needs
-        if (!empty($child['special_needs'])) {
+        if (! empty($child['special_needs'])) {
             $text .= "SPECIAL NEEDS/CONSIDERATIONS:\n" . $child['special_needs'] . "\n\n";
         }
 
         // Clothing Sizes
         $text .= "CLOTHING SIZES:\n";
-        if (!empty($child['shirt_size'])) {
+        if (! empty($child['shirt_size'])) {
             $text .= "  Shirt: " . $child['shirt_size'] . "\n";
         }
-        if (!empty($child['pant_size'])) {
+        if (! empty($child['pant_size'])) {
             $text .= "  Pants: " . $child['pant_size'] . "\n";
         }
-        if (!empty($child['jacket_size'])) {
+        if (! empty($child['jacket_size'])) {
             $text .= "  Jacket: " . $child['jacket_size'] . "\n";
         }
-        if (!empty($child['shoe_size'])) {
+        if (! empty($child['shoe_size'])) {
             $text .= "  Shoes: " . $child['shoe_size'] . "\n";
         }
         $text .= "\n" . str_repeat('-', 50) . "\n\n";

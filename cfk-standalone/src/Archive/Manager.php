@@ -6,9 +6,9 @@ namespace CFK\Archive;
 
 use CFK\Database\Connection;
 use Exception;
-use RuntimeException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 
 /**
  * Archive Manager - Year-End Data Archiving and Reset
@@ -32,7 +32,7 @@ class Manager
             $archiveDir = __DIR__ . '/../../archives/' . $year;
 
             // Create archive directory if it doesn't exist
-            if (!file_exists($archiveDir)) {
+            if (! file_exists($archiveDir)) {
                 mkdir($archiveDir, 0755, true);
             }
 
@@ -62,20 +62,20 @@ class Manager
                     'success' => true,
                     'message' => 'Database backup created successfully',
                     'file' => $backupFile,
-                    'size' => filesize($backupFile)
+                    'size' => filesize($backupFile),
                 ];
             }
 
             return [
                 'success' => false,
-                'message' => 'Database backup failed: ' . implode("\n", $output)
+                'message' => 'Database backup failed: ' . implode("\n", $output),
             ];
         } catch (Exception $e) {
             error_log('Database backup failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Backup error: ' . $e->getMessage()
+                'message' => 'Backup error: ' . $e->getMessage(),
             ];
         }
     }
@@ -92,7 +92,7 @@ class Manager
             $timestamp = date('Y-m-d_H-i-s');
             $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-            if (!file_exists($archiveDir)) {
+            if (! file_exists($archiveDir)) {
                 mkdir($archiveDir, 0755, true);
             }
 
@@ -139,14 +139,14 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'All data exported successfully',
-                'files' => $exports
+                'files' => $exports,
             ];
         } catch (Exception $e) {
             error_log('CSV export failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Export error: ' . $e->getMessage()
+                'message' => 'Export error: ' . $e->getMessage(),
             ];
         }
     }
@@ -195,7 +195,7 @@ class Manager
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
                 'families' => Connection::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
                 'sponsorships' => Connection::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
-                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0
+                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
             ];
 
             $sponsorshipStats = Connection::fetchAll("
@@ -248,14 +248,14 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Archive summary created',
-                'file' => $summaryFile
+                'file' => $summaryFile,
             ];
         } catch (Exception $e) {
             error_log('Archive summary creation failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Summary creation error: ' . $e->getMessage()
+                'message' => 'Summary creation error: ' . $e->getMessage(),
             ];
         }
     }
@@ -275,7 +275,7 @@ class Manager
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
                 'families' => Connection::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
                 'sponsorships' => Connection::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
-                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0
+                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
             ];
 
             // Delete in correct order (respecting foreign keys)
@@ -295,7 +295,7 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Seasonal data cleared successfully',
-                'deleted' => $beforeCounts
+                'deleted' => $beforeCounts,
             ];
         } catch (Exception $e) {
             Connection::rollback();
@@ -303,7 +303,7 @@ class Manager
 
             return [
                 'success' => false,
-                'message' => 'Data clearing error: ' . $e->getMessage()
+                'message' => 'Data clearing error: ' . $e->getMessage(),
             ];
         }
     }
@@ -322,7 +322,7 @@ class Manager
         if ($confirmationCode !== $expectedCode) {
             return [
                 'success' => false,
-                'message' => 'Invalid confirmation code. Expected: ' . $expectedCode
+                'message' => 'Invalid confirmation code. Expected: ' . $expectedCode,
             ];
         }
 
@@ -332,28 +332,28 @@ class Manager
         // Step 1: Create database backup
         $backupResult = self::createDatabaseBackup($year);
         $results['backup'] = $backupResult;
-        if (!$backupResult['success']) {
+        if (! $backupResult['success']) {
             $errors[] = 'Database backup failed';
 
             return [
                 'success' => false,
                 'message' => 'Year-end reset aborted: Database backup failed',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
         // Step 2: Export all data to CSV
         $exportResult = self::exportAllDataToCSV($year);
         $results['export'] = $exportResult;
-        if (!$exportResult['success']) {
+        if (! $exportResult['success']) {
             $errors[] = 'CSV export failed';
 
             return [
                 'success' => false,
                 'message' => 'Year-end reset aborted: CSV export failed',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
@@ -364,14 +364,14 @@ class Manager
         // Step 4: Clear seasonal data
         $clearResult = self::clearSeasonalData();
         $results['clear'] = $clearResult;
-        if (!$clearResult['success']) {
+        if (! $clearResult['success']) {
             $errors[] = 'Data clearing failed - Data may be partially deleted!';
 
             return [
                 'success' => false,
                 'message' => 'WARNING: Data clearing failed. Check database state!',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
@@ -379,7 +379,7 @@ class Manager
             'success' => true,
             'message' => 'Year-end reset completed successfully',
             'results' => $results,
-            'deleted_counts' => $clearResult['deleted']
+            'deleted_counts' => $clearResult['deleted'],
         ];
     }
 
@@ -392,7 +392,7 @@ class Manager
     {
         $archivesDir = __DIR__ . '/../../archives';
 
-        if (!file_exists($archivesDir)) {
+        if (! file_exists($archivesDir)) {
             return [];
         }
 
@@ -409,7 +409,7 @@ class Manager
             // Find all backup files in this year to identify individual archives
             $backupFiles = glob($yearDir . '/database_backup_*.sql');
 
-            if (!$backupFiles) {
+            if (! $backupFiles) {
                 continue;
             }
 
@@ -461,18 +461,19 @@ class Manager
                         'has_summary' => $hasSummary,
                         'has_data' => $hasData,
                         'file_count' => $fileCount,
-                        'size' => $size
+                        'size' => $size,
                     ];
                 }
             }
         }
 
         // Sort by year and timestamp descending (newest first)
-        usort($archives, function($a, $b) {
+        usort($archives, function ($a, $b) {
             $yearCompare = strcmp((string) $b['year'], (string) $a['year']);
             if ($yearCompare !== 0) {
                 return $yearCompare;
             }
+
             return strcmp((string) $b['timestamp'], (string) $a['timestamp']);
         });
 
@@ -546,14 +547,14 @@ class Manager
             $backupPath = $archiveDir . '/' . $backupFile;
 
             // Validate backup file exists
-            if (!file_exists($backupPath)) {
+            if (! file_exists($backupPath)) {
                 $debugLog[] = "ERROR: Backup file not found at: {$backupPath}";
                 error_log("Archive restore failed: Backup file not found - {$backupPath}");
 
                 return [
                     'success' => false,
                     'message' => 'Backup file not found',
-                    'debug_log' => $debugLog
+                    'debug_log' => $debugLog,
                 ];
             }
 
@@ -596,7 +597,7 @@ class Manager
                     'message' => 'Database restored successfully',
                     'duration' => $duration,
                     'file_size' => $fileSize,
-                    'debug_log' => $debugLog
+                    'debug_log' => $debugLog,
                 ];
             }
 
@@ -607,7 +608,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Database restore failed: ' . implode("\n", $output),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         } catch (Exception $e) {
             $debugLog[] = "EXCEPTION: " . $e->getMessage();
@@ -616,7 +617,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Restore error: ' . $e->getMessage(),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
     }
@@ -631,10 +632,10 @@ class Manager
     {
         $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-        if (!file_exists($archiveDir)) {
+        if (! file_exists($archiveDir)) {
             return [
                 'success' => false,
-                'message' => 'Archive not found'
+                'message' => 'Archive not found',
             ];
         }
 
@@ -685,7 +686,7 @@ class Manager
         }
 
         // Fallback to newest backup if no match found
-        if (!$latestBackup) {
+        if (! $latestBackup) {
             $backupFiles = glob($archiveDir . '/database_backup_*.sql');
             if ($backupFiles) {
                 usort($backupFiles, function ($a, $b) {
@@ -724,7 +725,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Invalid confirmation code. Expected: ' . $expectedCode,
-                'debug_log' => ['Confirmation code mismatch']
+                'debug_log' => ['Confirmation code mismatch'],
             ];
         }
 
@@ -733,22 +734,24 @@ class Manager
 
         // Get preview to find backup file
         $preview = self::getRestorePreview($year);
-        if (!$preview['success']) {
+        if (! $preview['success']) {
             $debugLog[] = "ERROR: Archive not found";
+
             return [
                 'success' => false,
                 'message' => 'Archive not found for year: ' . $year,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
         $backupFile = $preview['backup_file'];
-        if (!$backupFile) {
+        if (! $backupFile) {
             $debugLog[] = "ERROR: No backup file found in archive";
+
             return [
                 'success' => false,
                 'message' => 'No database backup found in archive',
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -764,19 +767,20 @@ class Manager
             $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
         }
 
-        if (!$restoreResult['success']) {
+        if (! $restoreResult['success']) {
             $debugLog[] = "❌ DATABASE RESTORE FAILED";
             error_log("Archive restoration failed for {$year}: " . $restoreResult['message']);
 
             return [
                 'success' => false,
                 'message' => 'Archive restoration failed: ' . $restoreResult['message'],
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
         // Verify restoration by counting records
         $debugLog[] = "--- Verifying Restoration ---";
+
         try {
             $verifyStats = [
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
@@ -800,7 +804,7 @@ class Manager
                 'message' => 'Archive restored successfully',
                 'restored_counts' => $verifyStats,
                 'duration' => $restoreResult['duration'] ?? 0,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         } catch (Exception $e) {
             $debugLog[] = "ERROR during verification: " . $e->getMessage();
@@ -808,7 +812,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Restore completed but verification failed: ' . $e->getMessage(),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
     }
@@ -832,6 +836,7 @@ class Manager
             if ($a['year'] !== $b['year']) {
                 return $b['year'] <=> $a['year'];
             }
+
             return $b['timestamp'] <=> $a['timestamp'];
         });
 
@@ -850,7 +855,7 @@ class Manager
             'to_delete' => $toDelete,
             'delete_count' => count($toDelete),
             'total_size' => $totalSize,
-            'total_size_mb' => round($totalSize / 1024 / 1024, 2)
+            'total_size_mb' => round($totalSize / 1024 / 1024, 2),
         ];
     }
 
@@ -867,11 +872,11 @@ class Manager
         $debugLog = [];
         $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-        if (!is_dir($archiveDir)) {
+        if (! is_dir($archiveDir)) {
             return [
                 'success' => false,
                 'message' => "Archive directory not found for year: {$year}",
-                'debug_log' => ['Archive directory does not exist']
+                'debug_log' => ['Archive directory does not exist'],
             ];
         }
 
@@ -929,7 +934,7 @@ class Manager
                 'deleted_files' => $deletedFiles,
                 'deleted_size' => $deletedSize,
                 'errors' => $errors,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -945,7 +950,7 @@ class Manager
             'deleted_files' => $deletedFiles,
             'deleted_size' => $deletedSize,
             'deleted_size_mb' => round($deletedSize / 1024 / 1024, 2),
-            'debug_log' => $debugLog
+            'debug_log' => $debugLog,
         ];
     }
 
@@ -965,7 +970,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Invalid confirmation code. Expected: DELETE OLD ARCHIVES',
-                'debug_log' => ['Confirmation code mismatch']
+                'debug_log' => ['Confirmation code mismatch'],
             ];
         }
 
@@ -977,12 +982,13 @@ class Manager
 
         if ($deletionInfo['delete_count'] === 0) {
             $debugLog[] = "No archives to delete (keeping last 2 with data)";
+
             return [
                 'success' => true,
                 'message' => 'No archives to delete',
                 'deleted_count' => 0,
                 'kept_count' => count($deletionInfo['to_keep']),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -1029,7 +1035,7 @@ class Manager
             'kept_count' => count($deletionInfo['to_keep']),
             'total_deleted_mb' => round($totalDeleted / 1024 / 1024, 2),
             'errors' => $errors,
-            'debug_log' => $debugLog
+            'debug_log' => $debugLog,
         ];
     }
 }

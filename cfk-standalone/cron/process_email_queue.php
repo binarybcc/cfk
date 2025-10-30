@@ -28,7 +28,7 @@ try {
     echo "Sent: {$stats['sent']}\n";
     echo "Failed: {$stats['failed']}\n";
 
-    if (!empty($stats['errors'])) {
+    if (! empty($stats['errors'])) {
         echo "Errors:\n";
         foreach ($stats['errors'] as $error) {
             echo "  - $error\n";

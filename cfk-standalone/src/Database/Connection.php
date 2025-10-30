@@ -48,6 +48,7 @@ class Connection
             );
         } catch (PDOException $e) {
             error_log('Database connection failed: ' . $e->getMessage());
+
             throw new RuntimeException('Database connection failed', (int) $e->getCode(), $e);
         }
     }
@@ -60,7 +61,7 @@ class Connection
      */
     public static function getConnection(): PDO
     {
-        if (!self::$connection instanceof PDO) {
+        if (! self::$connection instanceof PDO) {
             throw new RuntimeException('Database not initialized. Call Connection::init() first.');
         }
 
@@ -267,6 +268,7 @@ class Connection
         if ($statement === false) {
             throw new RuntimeException('Query execution failed: ' . $sql);
         }
+
         return $statement;
     }
 }

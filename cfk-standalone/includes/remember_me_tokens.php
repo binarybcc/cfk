@@ -8,16 +8,16 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 
 class RememberMeTokens
 {
-    const TOKEN_LENGTH = 32; // 256 bits
-    const TOKEN_EXPIRY_DAYS = 30;
-    const COOKIE_NAME = 'cfk_remember_token';
+    public const TOKEN_LENGTH = 32; // 256 bits
+    public const TOKEN_EXPIRY_DAYS = 30;
+    public const COOKIE_NAME = 'cfk_remember_token';
 
     /**
      * Generate and store a new remember-me token
@@ -42,7 +42,7 @@ class RememberMeTokens
             'token_hash' => $tokenHash,
             'expires_at' => $expiresAt,
             'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
-            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
         ]);
 
         return $token;
@@ -68,7 +68,7 @@ class RememberMeTokens
             [$tokenHash]
         );
 
-        if (!$tokenRecord) {
+        if (! $tokenRecord) {
             return null;
         }
 
@@ -91,7 +91,7 @@ class RememberMeTokens
             'id' => $tokenRecord['user_id'],
             'username' => $tokenRecord['username'],
             'role' => $tokenRecord['role'],
-            'email' => $tokenRecord['email']
+            'email' => $tokenRecord['email'],
         ];
     }
 
@@ -114,7 +114,7 @@ class RememberMeTokens
                 'domain' => '',
                 'secure' => $isProduction, // HTTPS only in production
                 'httponly' => true, // Prevent JavaScript access
-                'samesite' => 'Strict' // CSRF protection
+                'samesite' => 'Strict', // CSRF protection
             ]
         );
     }
@@ -130,7 +130,7 @@ class RememberMeTokens
             [
                 'expires' => time() - 3600,
                 'path' => '/',
-                'httponly' => true
+                'httponly' => true,
             ]
         );
     }
@@ -146,7 +146,7 @@ class RememberMeTokens
         $tokenHash = hash('sha256', $token);
 
         $deleted = Database::delete('admin_remember_tokens', [
-            'token_hash' => $tokenHash
+            'token_hash' => $tokenHash,
         ]);
 
         return $deleted > 0;
@@ -161,7 +161,7 @@ class RememberMeTokens
     public static function revokeAllUserTokens(int $userId): int
     {
         return Database::delete('admin_remember_tokens', [
-            'user_id' => $userId
+            'user_id' => $userId,
         ]);
     }
 
@@ -183,6 +183,7 @@ class RememberMeTokens
     public static function cleanupExpiredTokens(): int
     {
         $sql = "DELETE FROM admin_remember_tokens WHERE expires_at < NOW()";
+
         return Database::execute($sql);
     }
 

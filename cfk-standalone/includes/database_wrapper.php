@@ -7,7 +7,7 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -40,6 +40,7 @@ class Database
             );
         } catch (PDOException $e) {
             error_log('Database connection failed: ' . $e->getMessage());
+
             throw new RuntimeException('Database connection failed', $e->getCode(), $e);
         }
     }
@@ -49,9 +50,10 @@ class Database
      */
     public static function getConnection(): PDO
     {
-        if (!self::$connection instanceof PDO) {
+        if (! self::$connection instanceof PDO) {
             throw new RuntimeException('Database not initialized. Call Database::init() first.');
         }
+
         return self::$connection;
     }
 
@@ -63,6 +65,7 @@ class Database
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
@@ -75,6 +78,7 @@ class Database
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
         return $result ?: null;
     }
 
@@ -86,6 +90,7 @@ class Database
         $pdo = self::getConnection();
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
+
         return $stmt->rowCount();
     }
 

@@ -15,7 +15,7 @@ $csp = implode('; ', [
         "form-action 'self' https://www.zeffy.com https://*.zeffy.com",
         "frame-ancestors 'none'", // Prevent site from being iframed (replaces X-Frame-Options)
         "upgrade-insecure-requests",
-        "block-all-mixed-content"
+        "block-all-mixed-content",
     ]);
 
 header("Content-Security-Policy: {$csp}");
