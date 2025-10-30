@@ -139,25 +139,14 @@ class Handler
     }
 
     /**
-     * Static wrapper for importChildren (for backward compatibility)
-     *
-     * @param string $csvPath Path to CSV file
-     * @param array<string, mixed> $options Import options
-     * @return array<string, mixed> Import results
-     */
-    public static function importChildrenFromCsv(string $csvPath, array $options = []): array
-    {
-        $handler = new self();
-
-        return $handler->importChildren($csvPath, $options);
-    }
-
-    /**
      * Parse CSV and return children data without importing
      * Used for preview/analysis
      *
      * @param string $csvPath Path to CSV file
-     * @return array<string, mixed> Preview results
+     *
+     * @return ((array|string)[]|bool|string)[] Preview results
+     *
+     * @psalm-return array{success: bool, children?: list<non-empty-array<string, mixed>>, errors?: array<string>, warnings?: array<string>, error?: 'CSV file not found or not readable'|'Could not open CSV file'}
      */
     public function parseCSVForPreview(string $csvPath): array
     {
@@ -241,7 +230,9 @@ class Handler
     /**
      * Get import results
      *
-     * @return array<string, mixed> Results with success status and details
+     * @return ((array|string)[]|bool|int|string)[] Results with success status and details
+     *
+     * @psalm-return array{success: bool, imported: int<0, max>, errors: array<string>, warnings: array<string>, details: array<int, array<string, mixed>>, message: string}
      */
     public function getResults(): array
     {
@@ -354,7 +345,10 @@ class Handler
      *
      * @param array<string, mixed> $row Row data
      * @param int $rowNumber Current row number
-     * @return array<string, mixed> Cleaned row data
+     *
+     * @return (int|mixed|string)[] Cleaned row data
+     *
+     * @psalm-return array{age_months: int, gender: string, family_id?: int|mixed|string, child_letter?: mixed|string, greatest_need?: mixed|string, interests?: mixed|string, special_needs?: mixed|string, family_situation?: mixed|string, wish_list?: mixed|string, shirt_size?: mixed|string, pant_size?: mixed|string, shoe_size?: mixed|string, jacket_size?: mixed|string,...}
      */
     private function cleanRowData(array $row, int $rowNumber): array
     {
@@ -551,6 +545,7 @@ class Handler
      * Get next available child letter for family
      *
      * @param int $familyId Database family ID
+     *
      * @return string Next available letter (A-Z)
      */
     private function getNextChildLetter(int $familyId): string
@@ -614,7 +609,10 @@ class Handler
      * Format child data for CSV export
      *
      * @param array<string, mixed> $child Child data from database
-     * @return array<int, mixed> Formatted row for CSV
+     *
+     * @return (int|mixed|string)[] Formatted row for CSV
+     *
+     * @psalm-return list{string, 0|mixed, '', ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, 'None'|mixed, ''|mixed}
      */
     private function formatChildForExport(array $child): array
     {

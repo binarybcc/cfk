@@ -23,7 +23,10 @@ class Manager
      * @param array<string, mixed> $sponsorData Sponsor information (name, email, phone, address)
      * @param array<int> $childrenIds Array of child IDs to reserve
      * @param int $expirationHours Number of hours until expiration (default: 48)
-     * @return array<string, mixed> Result with success status, token, and reservation ID
+     *
+     * @return (bool|int|string|string[])[] Result with success status, token, and reservation ID
+     *
+     * @psalm-return array{success: bool, message: string, unavailable?: array<int, string>, token?: string, reservation_id?: int, expires_at?: string}
      */
     public static function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array
     {
@@ -165,7 +168,10 @@ class Manager
      * Confirm a reservation
      *
      * @param string $token Reservation token
-     * @return array<string, mixed> Result with success status and message
+     *
+     * @return (bool|string)[] Result with success status and message
+     *
+     * @psalm-return array{success: bool, message: string}
      */
     public static function confirmReservation(string $token): array
     {
@@ -242,7 +248,10 @@ class Manager
      * Cancel a reservation
      *
      * @param string $token Reservation token
-     * @return array<string, mixed> Result with success status and message
+     *
+     * @return (bool|string)[] Result with success status and message
+     *
+     * @psalm-return array{success: bool, message: string}
      */
     public static function cancelReservation(string $token): array
     {
@@ -312,7 +321,9 @@ class Manager
     /**
      * Clean up expired reservations (for cron job)
      *
-     * @return array<string, int> Cleanup statistics
+     * @return int[] Cleanup statistics
+     *
+     * @psalm-return array{expired_count: int<0, max>, freed_children: int<0, max>}
      */
     public static function cleanupExpiredReservations(): array
     {

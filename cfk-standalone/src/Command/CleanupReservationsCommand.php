@@ -25,6 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CleanupReservationsCommand extends Command
 {
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -62,6 +63,7 @@ class CleanupReservationsCommand extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

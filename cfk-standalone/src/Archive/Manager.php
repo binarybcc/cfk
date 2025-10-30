@@ -23,7 +23,10 @@ class Manager
      * Create full database backup
      *
      * @param string $year Year for archiving (e.g., "2024")
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (bool|int|string)[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, file?: string, size?: false|int}
      */
     public static function createDatabaseBackup(string $year): array
     {
@@ -84,7 +87,10 @@ class Manager
      * Export all data to CSV files
      *
      * @param string $year Year for archiving
-     * @return array<string, mixed> Result with success status and file list
+     *
+     * @return (bool|string|string[])[] Result with success status and file list
+     *
+     * @psalm-return array{success: bool, message: string, files?: array{children: string, families: string, sponsorships: string, email_log: string}}
      */
     public static function exportAllDataToCSV(string $year): array
     {
@@ -182,7 +188,10 @@ class Manager
      * Create archive summary document
      *
      * @param string $year Year for archiving
-     * @return array<string, mixed> Result with success status and file path
+     *
+     * @return (bool|string)[] Result with success status and file path
+     *
+     * @psalm-return array{success: bool, message: string, file?: string}
      */
     public static function createArchiveSummary(string $year): array
     {
@@ -263,7 +272,9 @@ class Manager
     /**
      * Clear all seasonal data (DESTRUCTIVE - use with caution!)
      *
-     * @return array<string, mixed> Result with success status and deleted counts
+     * @return ((int|mixed)[]|bool|string)[] Result with success status and deleted counts
+     *
+     * @psalm-return array{success: bool, message: string, deleted?: array{children: 0|mixed, families: 0|mixed, sponsorships: 0|mixed, email_log: 0|mixed}}
      */
     public static function clearSeasonalData(): array
     {
@@ -313,7 +324,10 @@ class Manager
      *
      * @param string $year Year for archiving
      * @param string $confirmationCode Security confirmation code
-     * @return array<string, mixed> Result with success status and detailed results
+     *
+     * @return ((array|string)[]|bool|mixed|string)[] Result with success status and detailed results
+     *
+     * @psalm-return array{success: bool, message: string, results?: array{backup: array<string, mixed>, export?: array<string, mixed>, summary?: array<string, mixed>, clear?: array<string, mixed>}, deleted_counts?: mixed, errors?: list{'CSV export failed'|'Data clearing failed - Data may be partially deleted!'|'Database backup failed'}}
      */
     public static function performYearEndReset(string $year, string $confirmationCode): array
     {
@@ -386,7 +400,9 @@ class Manager
     /**
      * Get list of available archives (individual archive sets by timestamp)
      *
-     * @return array<int, array<string, mixed>> List of available archives
+     * @return (bool|int|string)[][] List of available archives
+     *
+     * @psalm-return list<array{backup_file: non-empty-string, date: string, file_count: int<0, max>, has_data: bool, has_summary: bool, path: non-empty-string, size: int<min, max>, timestamp: string, year: non-empty-string}>
      */
     public static function getAvailableArchives(): array
     {
@@ -510,6 +526,7 @@ class Manager
      * Format bytes to human readable
      *
      * @param int $bytes Size in bytes
+     *
      * @return string Formatted size string
      */
     public static function formatBytes(int $bytes): string
@@ -535,7 +552,10 @@ class Manager
      * @param string $year Archive year
      * @param string $backupFile Backup filename (not full path)
      * @param bool $debug Enable detailed debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (scalar|string[])[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, debug_log: list{0: string, 1?: string, 2?: string, 3?: string, 4?: string, 5?: string, 6?: string, 7?: string, 8?: string}, duration?: float, file_size?: false|int}
      */
     public static function restoreDatabase(string $year, string $backupFile, bool $debug = true): array
     {
@@ -626,7 +646,10 @@ class Manager
      * Get restore preview - what data would be restored
      *
      * @param string $year Archive year
-     * @return array<string, mixed> Preview data
+     *
+     * @return (bool|int|int[]|null|string)[] Preview data
+     *
+     * @psalm-return array{success: bool, year?: string, summary?: false|null|string, counts?: array{children: int<0, max>, families: int<0, max>, sponsorships: int<0, max>, email_log: int<0, max>}, backup_file?: null|string, backup_size?: false|int, backup_date?: null|string, message?: 'Archive not found'}
      */
     public static function getRestorePreview(string $year): array
     {
@@ -713,7 +736,10 @@ class Manager
      * @param string $year Year to restore
      * @param string $confirmationCode Must be "RESTORE [YEAR]"
      * @param bool $debug Enable debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (array|bool|int|mixed|string)[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, debug_log: array, restored_counts?: array{children: 0|mixed, families: 0|mixed, sponsorships: 0|mixed, email_log: 0|mixed}, duration?: 0|mixed}
      */
     public static function performArchiveRestore(string $year, string $confirmationCode, bool $debug = true): array
     {
@@ -820,7 +846,9 @@ class Manager
     /**
      * Get list of archives that will be deleted (all but last 2 with data)
      *
-     * @return array<string, mixed> Array with archives to keep and delete
+     * @return (array[]|float|int|mixed)[] Array with archives to keep and delete
+     *
+     * @psalm-return array{to_keep: list<array<string, mixed>>, to_delete: list<array<string, mixed>>, delete_count: int<0, max>, total_size: mixed, total_size_mb: float}
      */
     public static function getArchivesForDeletion(): array
     {
@@ -865,7 +893,10 @@ class Manager
      * @param string $year Year of archive
      * @param string $timestamp Timestamp of archive (YYYY-MM-DD_HH-MM-SS)
      * @param bool $debug Enable debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (scalar|string[])[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, deleted_files?: list<non-falsy-string>, deleted_size?: int<min, max>, deleted_size_mb?: float, debug_log: list{0?: string,...}, errors?: non-empty-list<non-falsy-string>}
      */
     public static function deleteArchive(string $year, string $timestamp, bool $debug = false): array
     {
@@ -959,7 +990,10 @@ class Manager
      *
      * @param string $confirmationCode Must be "DELETE OLD ARCHIVES"
      * @param bool $debug Enable debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (array|scalar)[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, deleted_count?: int<0, max>, kept_count?: int<0, max>, total_deleted_mb?: float, errors?: list{0?: string,...}, debug_log: array}
      */
     public static function deleteOldArchives(string $confirmationCode, bool $debug = true): array
     {

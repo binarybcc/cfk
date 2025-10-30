@@ -91,9 +91,12 @@ class MagicLinkManager
      * Uses row-level locking to prevent race conditions
      *
      * @param string $token The token to validate
-     * @return array<string, mixed>|null Token data if valid, null otherwise
+     *
+     * @return array|null Token data if valid, null otherwise
+     *
+     * @psalm-return array<string, mixed>|null
      */
-    public static function validateToken(string $token): ?array
+    public static function validateToken(string $token): array|null
     {
         $db = Connection::getConnection();
 
@@ -216,6 +219,8 @@ class MagicLinkManager
 
     /**
      * Get expiration time in minutes
+     *
+     * @psalm-return 5
      */
     public static function getExpirationMinutes(): int
     {

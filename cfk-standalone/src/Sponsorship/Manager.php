@@ -30,7 +30,10 @@ class Manager
      * Check if a child is available for sponsorship
      *
      * @param int $childId Child ID to check
-     * @return array<string, mixed> Availability status with details
+     *
+     * @return (array|bool|null|string)[] Availability status with details
+     *
+     * @psalm-return array{available: bool, reason: string, child: array<string, mixed>|null}
      */
     public static function isChildAvailable(int $childId): array
     {
@@ -71,7 +74,10 @@ class Manager
      * Reserve a child for sponsorship (sets to pending)
      *
      * @param int $childId Child ID to reserve
-     * @return array<string, mixed> Reservation result
+     *
+     * @return (bool|mixed|null|string)[] Reservation result
+     *
+     * @psalm-return array{success: bool, message: 'Child reserved successfully'|'System error occurred. Please try again.'|'This child was just selected by another sponsor. Please choose a different child.'|mixed, child: mixed|null}
      */
     public static function reserveChild(int $childId): array
     {
@@ -133,7 +139,10 @@ class Manager
      *
      * @param int $childId Child ID to sponsor
      * @param array<string, mixed> $sponsorData Sponsor information
-     * @return array<string, mixed> Creation result
+     *
+     * @return (bool|int|mixed|string)[] Creation result
+     *
+     * @psalm-return array{success: bool|mixed, message?: mixed|string, child?: mixed, sponsorship_id?: int|mixed,...}
      */
     public static function createSponsorshipRequest(int $childId, array $sponsorData): array
     {
@@ -252,7 +261,10 @@ class Manager
      * Confirm sponsorship (admin action)
      *
      * @param int $sponsorshipId Sponsorship ID to confirm
-     * @return array<string, mixed> Confirmation result
+     *
+     * @return (array|bool|string)[] Confirmation result
+     *
+     * @psalm-return array{success: bool, message: 'Sponsorship confirmed successfully'|'Sponsorship not found'|'System error occurred', sponsorship?: array<string, mixed>}
      */
     public static function confirmSponsorship(int $sponsorshipId): array
     {
@@ -307,7 +319,10 @@ class Manager
      * Complete sponsorship (gifts delivered)
      *
      * @param int $sponsorshipId Sponsorship ID to complete
-     * @return array<string, mixed> Completion result
+     *
+     * @return (bool|string)[] Completion result
+     *
+     * @psalm-return array{success: bool, message: 'Sponsorship marked as completed'|'System error occurred'}
      */
     public static function completeSponsorship(int $sponsorshipId): array
     {
@@ -348,7 +363,10 @@ class Manager
      * Sponsors maintain access to "My Sponsorships" page in this status
      *
      * @param int $sponsorshipId The sponsorship ID to log
-     * @return array<string, mixed> Result with success status and message
+     *
+     * @return (bool|string)[] Result with success status and message
+     *
+     * @psalm-return array{success: bool, message: string}
      */
     public static function logSponsorship(int $sponsorshipId): array
     {
@@ -418,7 +436,10 @@ class Manager
      * Allows staff to undo if they logged something by mistake
      *
      * @param int $sponsorshipId The sponsorship ID to unlog
-     * @return array<string, mixed> Result with success status and message
+     *
+     * @return (bool|string)[] Result with success status and message
+     *
+     * @psalm-return array{success: bool, message: string}
      */
     public static function unlogSponsorship(int $sponsorshipId): array
     {
@@ -486,7 +507,10 @@ class Manager
      *
      * @param int $sponsorshipId Sponsorship ID to cancel
      * @param string $reason Cancellation reason
-     * @return array<string, mixed> Cancellation result
+     *
+     * @return (bool|string)[] Cancellation result
+     *
+     * @psalm-return array{success: bool, message: 'Sponsorship cancelled successfully'|'System error occurred'}
      */
     public static function cancelSponsorship(int $sponsorshipId, string $reason = ''): array
     {
@@ -526,6 +550,8 @@ class Manager
      * Clean up expired pending sponsorships
      *
      * @return int Number of cleaned up sponsorships
+     *
+     * @psalm-return int<0, max>
      */
     public static function cleanupExpiredPendingSponsorships(): int
     {
@@ -681,6 +707,7 @@ class Manager
      * Generate portal access token for sponsor email (DATABASE STORED)
      *
      * @param string $email Sponsor email address
+     *
      * @return string Generated token (plain text, only sent once)
      */
     public static function generatePortalToken(string $email): string
@@ -709,7 +736,10 @@ class Manager
      * Verify portal access token (DATABASE VERIFIED)
      *
      * @param string $token Token to verify
-     * @return array<string, mixed> Verification result with email if valid
+     *
+     * @return (bool|mixed|null|string)[] Verification result with email if valid
+     *
+     * @psalm-return array{valid: bool, message: string, email: mixed|null}
      */
     public static function verifyPortalToken(string $token): array
     {
@@ -806,7 +836,10 @@ class Manager
      * Send portal access email to sponsor
      *
      * @param string $email Sponsor email address
-     * @return array<string, mixed> Send result
+     *
+     * @return (bool|string)[] Send result
+     *
+     * @psalm-return array{success: bool, message: string}
      */
     public static function sendPortalAccessEmail(string $email): array
     {
@@ -863,7 +896,10 @@ class Manager
      * @param array<int> $childIds List of child IDs to add
      * @param array<string, mixed> $sponsorData Sponsor information
      * @param string $sponsorEmail Sponsor email address
-     * @return array<string, mixed> Addition result
+     *
+     * @return (array|bool|string)[] Addition result
+     *
+     * @psalm-return array{success: bool, message: string, added_children?: list{mixed,...}, errors?: list{0?: mixed,...}}
      */
     public static function addChildrenToSponsorship(array $childIds, array $sponsorData, string $sponsorEmail): array
     {
@@ -891,7 +927,7 @@ class Manager
             if ($addedChildren !== []) {
                 // Send updated email with ALL children
                 if (class_exists('CFK_Email_Manager')) {
-                    $allSponsorships = self::getSponsorshipsWithDetails($sponsorEmail);
+                    self::getSponsorshipsWithDetails($sponsorEmail);
                     \CFK_Email_Manager::sendMultiChildSponsorshipEmail($sponsorEmail, $allSponsorships);
                 }
 
@@ -921,7 +957,10 @@ class Manager
      * Validate sponsor data using centralized validator
      *
      * @param array<string, mixed> $data Sponsor data to validate
-     * @return array<string, mixed> Validation result
+     *
+     * @return (array|bool)[] Validation result
+     *
+     * @psalm-return array{valid: bool, errors: array}
      */
     private static function validateSponsorData(array $data): array
     {
@@ -949,6 +988,7 @@ class Manager
      * Get user-friendly status message
      *
      * @param string $status Child status
+     *
      * @return string Human-readable message
      */
     private static function getStatusMessage(string $status): string
@@ -967,6 +1007,7 @@ class Manager
      *
      * @param string $sponsorName Sponsor name
      * @param string $portalUrl Portal access URL with token
+     *
      * @return string HTML email template
      */
     private static function getPortalAccessEmailTemplate(string $sponsorName, string $portalUrl): string

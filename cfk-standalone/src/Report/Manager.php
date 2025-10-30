@@ -378,7 +378,9 @@ class Manager
     /**
      * Get statistics summary
      *
-     * @return array<string, mixed> Statistics summary
+     * @return (array|int|mixed|null)[] Statistics summary
+     *
+     * @psalm-return array{children: array<string, mixed>|null, sponsorships: array<string, mixed>|null, unique_sponsors: 0|mixed, families: array<string, mixed>|null}
      */
     public static function getStatisticsSummary(): array
     {

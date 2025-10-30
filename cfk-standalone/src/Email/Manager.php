@@ -309,7 +309,9 @@ class Manager
     /**
      * Test email configuration
      *
-     * @return array<string, mixed> Test result with success status and message
+     * @return (false|mixed|string)[] Test result with success status and message
+     *
+     * @psalm-return array{success: false|mixed, message: string}
      */
     public static function testEmailConfig(): array
     {
@@ -339,6 +341,7 @@ class Manager
      * Get sponsor confirmation email template (public for email queue access)
      *
      * @param array<string, mixed> $sponsorship Sponsorship data
+     *
      * @return string HTML email template
      */
     public static function getSponsorConfirmationTemplate(array $sponsorship): string
@@ -474,6 +477,7 @@ class Manager
      * @param string $subject Email subject
      * @param string $message Email message
      * @param array<string, mixed> $sponsorship Optional sponsorship data
+     *
      * @return string HTML email template
      */
     public static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship = []): string
@@ -508,6 +512,7 @@ class Manager
      *
      * @param string $sponsorName Sponsor name
      * @param array<int, array<string, mixed>> $sponsorships List of sponsorships
+     *
      * @return string HTML email template
      */
     private static function getMultiChildSponsorshipTemplate(string $sponsorName, array $sponsorships): string
@@ -671,6 +676,7 @@ class Manager
      * @param string $name Sponsor name
      * @param string $accessUrl Access URL with token
      * @param int $childCount Number of sponsored children
+     *
      * @return string HTML email template
      */
     private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string
@@ -743,6 +749,7 @@ class Manager
      * Generate secure access token for sponsor
      *
      * @param string $email Sponsor email address
+     *
      * @return string Base64 encoded token
      */
     private static function generateAccessToken(string $email): string

@@ -19,7 +19,10 @@ class Analyzer
      * Analyze CSV import and generate change report
      *
      * @param array<int, array<string, mixed>> $newChildren Array of new child data
-     * @return array<string, mixed> Analysis results
+     *
+     * @return (array|int)[][] Analysis results
+     *
+     * @psalm-return array{new_children: list<array<string, mixed>>, updated_children: list<array{changes: non-empty-array<string, array<string, mixed>>, new: array<string, mixed>, old: array<string, mixed>}>, removed_children: list<array<string, mixed>>, warnings: list{0?: array<string, mixed>,...}, errors: array<never, never>, stats: array{total_new: 0|1|2, total_updated: 0|1|2, total_removed: 0|1|2, total_unchanged: 0|1|2}}
      */
     public static function analyzeImport(array $newChildren): array
     {
@@ -113,7 +116,10 @@ class Analyzer
      *
      * @param array<string, mixed> $oldChild Old child data
      * @param array<string, mixed> $newChild New child data
-     * @return array<string, array<string, mixed>> Changes detected
+     *
+     * @return (mixed|string)[][] Changes detected
+     *
+     * @psalm-return array{special_needs?: array{old: ''|mixed, new: ''|mixed}, wishes?: array{old: ''|mixed, new: ''|mixed}, interests?: array{old: ''|mixed, new: ''|mixed}, jacket_size?: array{old: ''|mixed, new: ''|mixed}, shoe_size?: array{old: ''|mixed, new: ''|mixed}, pant_size?: array{old: ''|mixed, new: ''|mixed}, shirt_size?: array{old: ''|mixed, new: ''|mixed}, grade?: array{old: ''|mixed, new: ''|mixed}, gender?: array{old: ''|mixed, new: ''|mixed}, age?: array{old: ''|mixed, new: ''|mixed}, name?: array{old: ''|mixed, new: ''|mixed}}
      */
     private static function detectChanges(array $oldChild, array $newChild): array
     {
@@ -142,7 +148,10 @@ class Analyzer
      * @param array<string, mixed> $oldChild Old child data
      * @param array<string, mixed> $newChild New child data (unused but kept for consistency)
      * @param array<string, array<string, mixed>> $changes Detected changes
-     * @return array<int, array<string, mixed>> Warnings
+     *
+     * @return (array|string)[][] Warnings
+     *
+     * @psalm-return list{0?: array{type: 'age_decreased'|'data_loss'|'gender_changed', severity: 'low'|'medium', message: string, child: array<string, mixed>, field?: string},...}
      */
     private static function checkForWarnings(array $oldChild, array $newChild, array $changes): array
     {
@@ -257,6 +266,10 @@ class Analyzer
 
     /**
      * Replace mode: Delete all, insert new (current behavior)
+     *
+     * @return (int|mixed|string)[]
+     *
+     * @psalm-return array{success: mixed, sponsorships_preserved?: int|mixed, import_mode?: 'replace'|mixed,...}
      */
     private static function applyReplaceMode(string $csvPath, array $sponsorshipLookup, array $options): array
     {
@@ -286,6 +299,10 @@ class Analyzer
 
     /**
      * Append mode: Only insert children that don't exist
+     *
+     * @return (bool|int|string|string[])[]
+     *
+     * @psalm-return array{success: bool, imported: int<0, max>, skipped: int<0, max>, errors: list{0?: string,...}, message: string, import_mode: 'append'}
      */
     private static function applyAppendMode(array $newChildren, array $sponsorshipLookup): array
     {
@@ -347,6 +364,10 @@ class Analyzer
 
     /**
      * Update mode: Update existing children, insert new ones
+     *
+     * @return (bool|int|string|string[])[]
+     *
+     * @psalm-return array{success: bool, imported: int<0, max>, inserted: int<0, max>, updated: int<0, max>, errors: list{0?: string,...}, message: string, import_mode: 'update'}
      */
     private static function applyUpdateMode(array $newChildren, array $sponsorshipLookup): array
     {
@@ -416,6 +437,8 @@ class Analyzer
 
     /**
      * Restore sponsorship statuses for matching children
+     *
+     * @psalm-return int<0, max>
      */
     private static function restoreSponsorshipStatuses(array $sponsorshipLookup): int
     {
@@ -471,7 +494,7 @@ class Analyzer
     /**
      * Insert a new child
      */
-    private static function insertChild(array $childData, int $familyId): ?int
+    private static function insertChild(array $childData, int $familyId): int
     {
         return Connection::insert('children', [
             'family_id' => $familyId,

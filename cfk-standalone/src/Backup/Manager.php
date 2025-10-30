@@ -25,7 +25,10 @@ class Manager
      * Create automatic backup before import
      *
      * @param string $reason Backup reason identifier
-     * @return array<string, mixed> Backup result with success status and details
+     *
+     * @return ((int|string)[]|bool|string)[] Backup result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, filename?: string, filepath?: string, metadata?: array{created_at: string, reason: string, file: string, children_count: int, families_count: int}}
      */
     public static function createAutoBackup(string $reason = 'csv_import'): array
     {
@@ -91,7 +94,9 @@ class Manager
     /**
      * List available backups
      *
-     * @return array<int, array<string, mixed>> List of available backups
+     * @return (false|int|mixed|null|string)[][] List of available backups
+     *
+     * @psalm-return list{0?: array{filename: string, filepath: string, size: false|int, created: false|int, metadata: mixed|null},...}
      */
     public static function listBackups(): array
     {
@@ -130,7 +135,10 @@ class Manager
      *
      * @param string $filename Backup filename
      * @param bool $clearExisting Whether to clear existing data before restore
-     * @return array<string, mixed> Restore result
+     *
+     * @return (array|bool|mixed|null|string)[] Restore result
+     *
+     * @psalm-return array{success: bool, message: string, details?: array{success: mixed,...}, imported?: mixed, pre_restore_backup?: mixed|null}
      */
     public static function restoreFromBackup(string $filename, bool $clearExisting = true): array
     {
@@ -207,7 +215,9 @@ class Manager
     /**
      * Get backup statistics
      *
-     * @return array<string, mixed> Backup statistics
+     * @return ((array|mixed)[]|float|int|null)[] Backup statistics
+     *
+     * @psalm-return array{total_backups: int<0, max>, max_backups: 2, most_recent: array<string, mixed>|null, total_size: float|int, backups: array<int, array<string, mixed>>}
      */
     public static function getBackupStats(): array
     {
