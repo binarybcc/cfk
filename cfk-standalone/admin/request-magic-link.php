@@ -10,12 +10,12 @@ declare(strict_types=1);
 define('CFK_APP', true);
 
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../includes/email_manager.php';
 require_once __DIR__ . '/../includes/rate_limiter.php';
 require_once __DIR__ . '/../includes/magic_link_email_template.php';
 
 use CFK\Auth\MagicLinkManager;
 use CFK\Database\Connection as Database;
+use CFK\Email\Manager as EmailManager;
 
 header('Content-Type: application/json');
 
@@ -98,7 +98,7 @@ try {
 
         // Send email (only for valid admins) - Use working pattern from reservation_emails.php
         try {
-            $mailer = CFK_Email_Manager::getMailer();
+            $mailer = EmailManager::getMailer();
             $mailer->clearAddresses();
             $mailer->isHTML(true);
             $mailer->addAddress($email);
