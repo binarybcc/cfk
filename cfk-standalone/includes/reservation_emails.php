@@ -12,8 +12,9 @@ if (!defined('CFK_APP')) {
     die('Direct access not permitted');
 }
 
-require_once __DIR__ . '/email_manager.php';
 require_once __DIR__ . '/functions.php'; // For cleanWishesText()
+
+use CFK\Email\Manager as EmailManager;
 
 /**
  * Send reservation confirmation email to sponsor
@@ -24,7 +25,7 @@ require_once __DIR__ . '/functions.php'; // For cleanWishesText()
 function sendReservationConfirmationEmail(array $reservation): array
 {
     try {
-        $mailer = CFK_Email_Manager::getMailer();
+        $mailer = EmailManager::getMailer();
 
         // Clear any previous recipients
         $mailer->clearAddresses();
@@ -85,7 +86,7 @@ function sendReservationConfirmationEmail(array $reservation): array
 function sendAdminReservationNotification(array $reservation): bool
 {
     try {
-        $mailer = CFK_Email_Manager::getMailer();
+        $mailer = EmailManager::getMailer();
 
         $mailer->clearAddresses();
         $mailer->addAddress(config('admin_email'), 'CFK Admin');
@@ -480,7 +481,7 @@ function sendAccessLinkEmail(string $email): array
         }
 
         error_log("ACCESS LINK: Getting mailer");
-        $mailer = CFK_Email_Manager::getMailer();
+        $mailer = EmailManager::getMailer();
 
         // Clear any previous recipients
         error_log("ACCESS LINK: Clearing addresses");
