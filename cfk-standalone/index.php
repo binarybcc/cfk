@@ -37,7 +37,7 @@ if (!in_array($page, $validPages)) {
 }
 
 // ============================================================================
-// TEMPORARY LANDING PAGE LOGIC - Active until Nov 1, 2025 00:01 ET
+// TEMPORARY LANDING PAGE LOGIC - Active until Oct 31, 2025 11:00 AM ET
 // ============================================================================
 // Check if we should show temporary landing page (only for home page)
 // Preview modes: ?preview=temp (force temp page) or ?preview=normal (force normal page)
@@ -53,7 +53,7 @@ if ($page === 'home') {
         $showTempLanding = false;
     } else {
         // Automatic mode - check current date/time
-        $launchTime = new DateTime('2025-11-01 00:01:00', new DateTimeZone('America/New_York'));
+        $launchTime = new DateTime('2025-10-31 11:00:00', new DateTimeZone('America/New_York'));
         $now = new DateTime('now', new DateTimeZone('America/New_York'));
         $showTempLanding = ($now < $launchTime);
     }
