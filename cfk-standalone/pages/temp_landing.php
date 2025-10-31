@@ -14,8 +14,8 @@ if (!defined('CFK_APP')) {
 global $cspNonce;
 $pageTitle = 'Christmas for Kids - Opening October 31, 2025';
 
-// Calculate countdown to Oct 31, 2025 11:00 AM ET
-$launchTime = new DateTime('2025-10-31 11:00:00', new DateTimeZone('America/New_York'));
+// Calculate countdown to Oct 31, 2025 10:00 AM ET
+$launchTime = new DateTime('2025-10-31 10:00:00', new DateTimeZone('America/New_York'));
 $now = new DateTime('now', new DateTimeZone('America/New_York'));
 $interval = $now->diff($launchTime);
 ?>
@@ -548,8 +548,8 @@ $interval = $now->diff($launchTime);
 <!-- Live Countdown JavaScript -->
 <script nonce="<?php echo $cspNonce; ?>">
 (function() {
-    // Countdown to Oct 31, 2025 11:00:00 ET (EST is UTC-5)
-    const launchDate = new Date('2025-10-31T11:00:00-05:00');
+    // Countdown to Oct 31, 2025 10:00:00 ET (EST is UTC-5)
+    const launchDate = new Date('2025-10-31T10:00:00-05:00');
 
     function updateCountdown() {
         const now = new Date();

@@ -53,7 +53,7 @@ if ($page === 'home') {
         $showTempLanding = false;
     } else {
         // Automatic mode - check current date/time
-        $launchTime = new DateTime('2025-10-31 11:00:00', new DateTimeZone('America/New_York'));
+        $launchTime = new DateTime('2025-10-31 10:00:00', new DateTimeZone('America/New_York'));
         $now = new DateTime('now', new DateTimeZone('America/New_York'));
         $showTempLanding = ($now < $launchTime);
     }
