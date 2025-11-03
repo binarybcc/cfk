@@ -67,7 +67,7 @@ class Manager
             $params['email'] = '%' . $filters['sponsor_email'] . '%';
         }
 
-        $sql .= " ORDER BY s.sponsor_name, f.family_number, c.child_letter";
+        $sql .= " ORDER BY s.sponsor_name, CAST(f.family_number AS UNSIGNED), c.child_letter";
 
         return Connection::fetchAll($sql, $params);
     }
@@ -115,7 +115,7 @@ class Manager
             $params['child_id'] = '%' . $childId . '%';
         }
 
-        $sql .= " ORDER BY f.family_number, c.child_letter";
+        $sql .= " ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter";
 
         return Connection::fetchAll($sql, $params);
     }
@@ -143,7 +143,7 @@ class Manager
             FROM families f
             LEFT JOIN children c ON f.id = c.family_id
             GROUP BY f.id, f.family_number
-            ORDER BY f.family_number
+            ORDER BY CAST(f.family_number AS UNSIGNED)
         ");
     }
 
@@ -236,7 +236,7 @@ class Manager
             $params['gender'] = $filters['gender'];
         }
 
-        $sql .= " ORDER BY f.family_number, c.child_letter";
+        $sql .= " ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter";
 
         return Connection::fetchAll($sql, $params);
     }
@@ -309,7 +309,7 @@ class Manager
             JOIN families f ON c.family_id = f.id
             WHERE s.sponsor_email = :email
             AND s.status != 'cancelled'
-            ORDER BY f.family_number, c.child_letter
+            ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter
         ", ['email' => $sponsorEmail]);
     }
 
@@ -370,7 +370,7 @@ class Manager
             $sql .= " AND s.id IS NOT NULL";
         }
 
-        $sql .= " ORDER BY f.family_number, c.child_letter";
+        $sql .= " ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter";
 
         return Connection::fetchAll($sql, $params);
     }

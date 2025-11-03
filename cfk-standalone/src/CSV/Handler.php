@@ -587,7 +587,7 @@ class Handler
             $params['age_max'] = $filters['age_max'];
         }
 
-        $sql .= " ORDER BY f.family_number, c.child_letter";
+        $sql .= " ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter";
 
         return Connection::fetchAll($sql, $params);
     }

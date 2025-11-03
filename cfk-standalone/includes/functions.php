@@ -93,8 +93,8 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         $sql .= " AND c.status = 'available'";
     }
 
-    // Order by family, then by child letter
-    $sql .= " ORDER BY f.family_number, c.child_letter";
+    // Order by family (numerically), then by child letter
+    $sql .= " ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter";
     // Note: Using literal values for LIMIT/OFFSET to avoid PDO binding issues
     $sql .= " LIMIT " . (int)$limit . " OFFSET " . (int)$offset;
 
@@ -217,16 +217,23 @@ function getSiblingCount(int $familyId): int
 /**
  * Get age/gender-appropriate placeholder avatar image path
  */
-function getPlaceholderImage(int $age, string $gender): string
+function getPlaceholderImage(?int $age, string $gender): string
 {
     $baseUrl = baseUrl('assets/images/');
 
-    // Age categories
-    if ($age <= 5) {
-        return $baseUrl . ($gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
-    } elseif ($age <= 11) {
+    // Handle null age (defensive coding - default to elementary)
+    if ($age === null) {
         return $baseUrl . ($gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
-    } elseif ($age <= 14) {
+    }
+
+    // Age categories (age in months)
+    $ageYears = floor($age / 12);
+
+    if ($ageYears <= 5) {
+        return $baseUrl . ($gender === 'M' ? 'b-4boysm.png' : 'b-4girlsm.png');
+    } elseif ($ageYears <= 11) {
+        return $baseUrl . ($gender === 'M' ? 'elementaryboysm.png' : 'elementarygirlsm.png');
+    } elseif ($ageYears <= 14) {
         return $baseUrl . ($gender === 'M' ? 'middleboysm.png' : 'middlegirlsm.png');
     } else {
         return $baseUrl . ($gender === 'M' ? 'hsboysm.png' : 'hsgirlsm.png');
@@ -309,7 +316,7 @@ function eagerLoadFamilyMembers(array $children): array
         FROM children c
         JOIN families f ON c.family_id = f.id
         WHERE c.family_id IN ($placeholderString)
-        ORDER BY f.family_number, c.child_letter
+        ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter
     ";
 
     $allSiblings = Database::fetchAll($sql, $params);
@@ -377,11 +384,16 @@ function getSponsorshipById(int $sponsorshipId): ?array
 /**
  * Display age in appropriate format (months or years)
  *
- * @param int $ageMonths Age in months
+ * @param int|null $ageMonths Age in months (can be null if only age_years provided)
  * @return string Formatted age display (e.g., "15 months", "2 years", "5 years")
  */
-function displayAge(int $ageMonths): string
+function displayAge(?int $ageMonths): string
 {
+    // Handle null age (defensive coding)
+    if ($ageMonths === null) {
+        return 'Age not specified';
+    }
+
     if ($ageMonths < 25) {
         // Under 25 months: display as months (matches 24-month clothing sizes)
         return $ageMonths . ' month' . ($ageMonths !== 1 ? 's' : '');
@@ -399,7 +411,7 @@ function displayAge(int $ageMonths): string
  * Legacy alias for displayAge() - for backwards compatibility
  * @deprecated Use displayAge() instead
  */
-function formatAge(int $ageMonths): string
+function formatAge(?int $ageMonths): string
 {
     return displayAge($ageMonths);
 }
@@ -407,12 +419,17 @@ function formatAge(int $ageMonths): string
 /**
  * Get age category for a given age in months
  *
- * @param int $ageMonths Age in months
+ * @param int|null $ageMonths Age in months (can be null if only age_years provided)
  * @return string Age category label
  */
-function getAgeCategory(int $ageMonths): string
+function getAgeCategory(?int $ageMonths): string
 {
     global $ageCategories;
+
+    // Handle null age (defensive coding)
+    if ($ageMonths === null) {
+        return 'Age not specified';
+    }
 
     // Convert months to years for category matching
     $ageYears = (int)floor($ageMonths / 12);

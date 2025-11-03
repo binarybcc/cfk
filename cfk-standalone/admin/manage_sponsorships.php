@@ -239,7 +239,7 @@ $whereClause = $whereConditions === [] ? '' : 'WHERE ' . implode(' AND ', $where
 $orderBy = match ($sortBy) {
     'oldest' => 'ORDER BY s.request_date ASC',
     'name' => 'ORDER BY s.sponsor_name ASC',
-    'child' => 'ORDER BY f.family_number ASC, c.child_letter ASC',
+    'child' => 'ORDER BY CAST(f.family_number AS UNSIGNED) ASC, c.child_letter ASC',
     default => 'ORDER BY s.request_date DESC'
 };
 

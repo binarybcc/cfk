@@ -200,7 +200,7 @@ class Analyzer
             SELECT c.*, f.family_number
             FROM children c
             LEFT JOIN families f ON c.family_id = f.id
-            ORDER BY f.family_number, c.child_letter
+            ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter
         ");
     }
 

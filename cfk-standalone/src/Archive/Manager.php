@@ -105,14 +105,14 @@ class Manager
                        CONCAT(f.family_number, c.child_letter) as display_id
                 FROM children c
                 JOIN families f ON c.family_id = f.id
-                ORDER BY f.family_number, c.child_letter
+                ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter
             ");
             self::writeCSV($childrenFile, $children);
             $exports['children'] = $childrenFile;
 
             // Export families
             $familiesFile = $archiveDir . '/families_' . $timestamp . '.csv';
-            $families = Connection::fetchAll("SELECT * FROM families ORDER BY family_number");
+            $families = Connection::fetchAll("SELECT * FROM families ORDER BY CAST(family_number AS UNSIGNED)");
             self::writeCSV($familiesFile, $families);
             $exports['families'] = $familiesFile;
 

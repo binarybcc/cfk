@@ -56,7 +56,7 @@ $isAvailable = $child['status'] === 'available';
                 
                 <div class="basic-details">
                     <div class="detail-item">
-                        <strong>Age:</strong> <?php echo formatAge($child['age_months']); ?>
+                        <strong>Age:</strong> <?php echo formatAge($child['age_months'] ?? null); ?>
                     </div>
                     
                     <div class="detail-item">
@@ -64,7 +64,7 @@ $isAvailable = $child['status'] === 'available';
                     </div>
                     
                     <div class="detail-item">
-                        <strong>Age Group:</strong> <?php echo getAgeCategory($child['age_months']); ?>
+                        <strong>Age Group:</strong> <?php echo getAgeCategory($child['age_months'] ?? null); ?>
                     </div>
                     
                     <?php if (!empty($child['school'])) : ?>

@@ -656,7 +656,7 @@ class Manager
              JOIN families f ON c.family_id = f.id
              WHERE s.sponsor_email = ?
              AND s.status != 'cancelled'
-             ORDER BY f.family_number, c.child_letter",
+             ORDER BY CAST(f.family_number AS UNSIGNED), c.child_letter",
             [$email]
         );
     }

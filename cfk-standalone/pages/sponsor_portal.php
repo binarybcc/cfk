@@ -230,7 +230,7 @@ if ($_POST && isset($_POST['add_children'])) {
                                     </div>
                                     <div class="checkbox-child-info">
                                         <h4><?php echo sanitizeString($child['display_id']); ?></h4>
-                                        <p><?php echo formatAge($child['age_months']); ?></p>
+                                        <p><?php echo formatAge($child['age_months'] ?? null); ?></p>
                                         <p><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></p>
                                     </div>
                                 </div>

@@ -308,7 +308,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                         <div class="child-top-section">
                             <!-- Child Avatar (Age/Gender-Appropriate Generic Image) -->
                             <div class="child-photo-compact">
-                                <img src="<?php echo getPlaceholderImage($child['age_months'], $child['gender']); ?>"
+                                <img src="<?php echo getPlaceholderImage($child['age_months'] ?? null, $child['gender']); ?>"
                                      alt="Child <?php echo htmlspecialchars((string) $child['display_id']); ?>">
                             </div>
 
@@ -318,7 +318,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                     <strong>Child:</strong> <span><?php echo htmlspecialchars((string) $child['display_id']); ?></span>
                                 </div>
                                 <div class="child-meta-item">
-                                    <strong>Age:</strong> <span><?php echo displayAge($child['age_months']); ?></span>
+                                    <strong>Age:</strong> <span><?php echo displayAge($child['age_months'] ?? null); ?></span>
                                 </div>
                                 <div class="child-meta-item">
                                     <strong></strong> <span><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>

@@ -155,12 +155,12 @@ $children = Database::fetchAll("
     FROM children c
     JOIN families f ON c.family_id = f.id
     $whereClause
-    ORDER BY f.family_number ASC, c.child_letter ASC
+    ORDER BY CAST(f.family_number AS UNSIGNED) ASC, c.child_letter ASC
     LIMIT $perPage OFFSET $offset
 ", $params);
 
 // Get families for dropdowns
-$families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY family_number ASC");
+$families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY CAST(family_number AS UNSIGNED) ASC");
 
 // Functions for CRUD operations
 function addChild($data): array
