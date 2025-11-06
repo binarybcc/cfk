@@ -106,28 +106,20 @@ if ($exportFormat === 'csv') {
             $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
             ReportManager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
 
-            break;
-
         case 'child_sponsor':
             $data = ReportManager::getChildSponsorLookup();
             $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
             ReportManager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
-
-            break;
 
         case 'family_report':
             $data = ReportManager::getFamilySponsorshipReport();
             $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
             ReportManager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
 
-            break;
-
         case 'available_children':
             $data = ReportManager::getAvailableChildrenReport();
             $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
             ReportManager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
-
-            break;
 
         case 'complete_export':
             $data = ReportManager::getCompleteChildSponsorReport();
@@ -140,8 +132,6 @@ if ($exportFormat === 'csv') {
                 'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date',
             ];
             ReportManager::exportToCSV($data, $headers, 'complete-children-sponsors-' . date('Y-m-d') . '.csv');
-
-            break;
     }
 }
 
@@ -971,7 +961,7 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 </div>
 
-<script nonce="<?php echo $cspNonce ?? ''; ?>">
+<script nonce="<?php echo $cspNonce; ?>">
 document.addEventListener('DOMContentLoaded', function() {
     const editModal = document.getElementById('editSponsorModal');
     const editButtons = document.querySelectorAll('.btn-edit-sponsor');
