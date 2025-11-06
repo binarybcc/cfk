@@ -298,6 +298,9 @@ function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = nu
 /**
  * Eager load family members for multiple children (prevents N+1 queries)
  * Returns array indexed by family_id containing arrays of siblings
+ *
+ * @param array<int, array<string, mixed>> $children Array of child records
+ * @return array<int, array<int, array<string, mixed>>> Family members grouped by family_id
  */
 function eagerLoadFamilyMembers(array $children): array
 {
@@ -349,6 +352,8 @@ function eagerLoadFamilyMembers(array $children): array
 
 /**
  * Create a sponsorship request
+ *
+ * @param array<string, mixed> $sponsorData Sponsor information (name, email, phone, address, etc.)
  */
 function createSponsorship(int $childId, array $sponsorData): int
 {
@@ -372,6 +377,8 @@ function createSponsorship(int $childId, array $sponsorData): int
 
 /**
  * Get sponsorship by ID
+ *
+ * @return array<string, mixed>|null Sponsorship record with child info or null if not found
  */
 function getSponsorshipById(int $sponsorshipId): ?array
 {
@@ -505,6 +512,11 @@ function setMessage(string $message, string $type = 'success'): void
     $_SESSION['cfk_message'] = ['text' => $message, 'type' => $type];
 }
 
+/**
+ * Get flash message from session
+ *
+ * @return array<string, string>|null Message array with 'text' and 'type' keys, or null
+ */
 function getMessage(): ?array
 {
     if (isset($_SESSION['cfk_message'])) {
@@ -519,6 +531,8 @@ function getMessage(): ?array
 
 /**
  * Photo handling - Uses avatar system instead of real photos for privacy
+ *
+ * @param array<string, mixed>|null $child Child data (age_months, gender required for avatar selection)
  */
 function getPhotoUrl(string $filename = null, array $child = null): string
 {
@@ -576,6 +590,13 @@ function validateEmail(string $email): bool
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+/**
+ * Validate required fields in data array
+ *
+ * @param array<string, mixed> $data Data to validate
+ * @param array<int, string> $requiredFields List of required field names
+ * @return array<int, string> Array of error messages (empty if valid)
+ */
 function validateRequired(array $data, array $requiredFields): array
 {
     $errors = [];
@@ -601,7 +622,7 @@ function validateRequired(array $data, array $requiredFields): array
  * @param string $text Button text (will be sanitized)
  * @param string|null $url URL for link buttons (null for form buttons)
  * @param string $type Button type: 'primary', 'secondary', 'success', 'danger', 'outline', 'info', 'warning'
- * @param array $options Additional options:
+ * @param array<string, mixed> $options Additional options:
  *   - 'size': 'large', 'small', or default (string)
  *   - 'id': Element ID (string)
  *   - 'class': Additional CSS classes (string)
