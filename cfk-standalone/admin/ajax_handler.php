@@ -68,6 +68,9 @@ try {
 
 /**
  * Handle sponsorship-related actions
+ *
+ * @param array<string, mixed> $data Request data
+ * @return array<string, mixed> JSON response with 'success' and 'message' keys
  */
 function handleSponsorshipAction(string $action, array $data): array
 {
@@ -92,6 +95,9 @@ function handleSponsorshipAction(string $action, array $data): array
 
 /**
  * Handle child-related actions
+ *
+ * @param array<string, mixed> $data Request data
+ * @return array<string, mixed> JSON response with 'success' and 'message' keys
  */
 function handleChildAction(string $action, array $data): array
 {
@@ -111,6 +117,9 @@ function handleChildAction(string $action, array $data): array
 
 /**
  * Handle admin user actions
+ *
+ * @param array<string, mixed> $data Request data
+ * @return array<string, mixed> JSON response with 'success' and 'message' keys
  */
 function handleAdminAction(string $action, array $data): array
 {
@@ -129,6 +138,8 @@ function handleAdminAction(string $action, array $data): array
 
 /**
  * Toggle child status between available and inactive
+ *
+ * @return array<string, mixed> JSON response with 'success' and 'message' keys
  */
 function toggleChildStatus(int $childId): array
 {
@@ -289,6 +300,9 @@ function editChild(array $data): array
 
 /**
  * Validate child data
+ *
+ * @param array<string, mixed> $data Child data to validate
+ * @return array<int, string> Array of validation error messages
  */
 function validateChildData(array $data): array
 {
