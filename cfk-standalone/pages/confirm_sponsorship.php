@@ -14,7 +14,8 @@ if (! defined('CFK_APP')) {
 
 $pageTitle = 'Confirm Your Sponsorship';
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="confirm-sponsorship-page" x-data="confirmSponsorshipApp()">

@@ -25,6 +25,12 @@ $pageTitle = 'Database Diagnostic';
 // Generate CSP nonce for inline scripts
 $cspNonce = bin2hex(random_bytes(16));
 
+// Initialize variables in case of exception
+$childCount = 0;
+$familyCount = 0;
+$sampleChildren = [];
+$familyRange = ['min' => 0, 'max' => 0];
+
 try {
     $db = Connection::getConnection();
 
@@ -33,9 +39,6 @@ try {
 
     // Check families table
     $familyCount = $db->query('SELECT COUNT(*) FROM cfk_families')->fetchColumn();
-
-    $sampleChildren = [];
-    $familyRange = ['min' => 0, 'max' => 0];
 
     if ($childCount > 0) {
         $sampleChildren = $db->query('

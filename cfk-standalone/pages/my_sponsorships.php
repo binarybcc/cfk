@@ -110,6 +110,9 @@ if ($_POST && isset($_POST['resend_email'])) {
 }
 
 $pageTitle = 'My Sponsorships';
+
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="my-sponsorships-page" x-data="mySponsorshipsApp()">

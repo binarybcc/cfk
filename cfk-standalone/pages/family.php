@@ -47,7 +47,8 @@ $available_count = count(array_filter($family_members, fn ($member): bool => $me
 
 $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="family-page">

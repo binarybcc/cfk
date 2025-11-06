@@ -13,7 +13,8 @@ if (! defined('CFK_APP')) {
 
 $pageTitle = 'About Us';
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="about-page">

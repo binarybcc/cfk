@@ -19,6 +19,8 @@ use CFK\Sponsorship\Manager as SponsorshipManager;
 // Log start
 error_log('CFK Cleanup: Starting expired sponsorship cleanup');
 
+$cleaned = 0; // Initialize in case of exception
+
 try {
     // Clean up expired sponsorships
     $cleaned = SponsorshipManager::cleanupExpiredPendingSponsorships();
