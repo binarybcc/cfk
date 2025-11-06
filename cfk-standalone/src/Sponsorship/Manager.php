@@ -927,7 +927,7 @@ class Manager
             if ($addedChildren !== []) {
                 // Send updated email with ALL children
                 if (class_exists('CFK_Email_Manager')) {
-                    self::getSponsorshipsWithDetails($sponsorEmail);
+                    $allSponsorships = self::getSponsorshipsWithDetails($sponsorEmail);
                     \CFK_Email_Manager::sendMultiChildSponsorshipEmail($sponsorEmail, $allSponsorships);
                 }
 
@@ -1082,5 +1082,27 @@ class Manager
             </div>
         </body>
         </html>";
+    }
+
+    /**
+     * Cleanup expired portal access tokens
+     * Removes tokens older than 7 days to keep database clean
+     *
+     * @return int Number of deleted tokens
+     */
+    public static function cleanupExpiredPortalTokens(): int
+    {
+        try {
+            // Delete tokens that expired more than 7 days ago
+            $result = Connection::execute(
+                "DELETE FROM portal_access_tokens
+                 WHERE expires_at < DATE_SUB(NOW(), INTERVAL 7 DAY)"
+            );
+
+            return $result; // Returns number of affected rows
+        } catch (Exception $e) {
+            error_log('Failed to cleanup expired portal tokens: ' . $e->getMessage());
+            return 0;
+        }
     }
 }
