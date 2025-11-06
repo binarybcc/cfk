@@ -2,27 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# 🚨 PENDING ACTION ITEM - REMIND EVERY SESSION
+# ✅ COMPLETED: Dead Code Cleanup (2025-11-06)
 
-**Dead Code Cleanup - Awaiting User Approval**
-
-**Status:** Ready to execute, waiting for user go-ahead
-**Date Created:** 2025-10-24
-**Report Location:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
+**Status:** COMPLETED
+**Completion Date:** 2025-11-06
+**Branch:** v1.8.1-cleanup
+**Report:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
 
 **Summary:**
-- 3,624 lines of deprecated wrapper files ready for deletion
-- 9 files in `includes/` directory (all have replacements in `src/`)
-- Risk: LOW - all deprecated files have functional namespaced replacements
-- Estimated time: 15-20 minutes to execute
+- ✅ 9 deprecated wrapper files successfully deleted (3,624 lines removed)
+- ✅ All files in `includes/` directory had functional namespaced replacements in `src/`
+- ✅ No references to deleted files found in codebase
+- ✅ Test suite verified: 35/36 tests passing (v1.7.3 baseline maintained)
 
-**Action Plan:**
-1. Fix 1 reference in `includes/functions.php` (line 471) - avatar_manager
-2. Delete 9 deprecated wrapper files (safe, low risk)
-3. Run test suite to verify (35/36 tests should pass)
-4. Commit and deploy
-
-**Files to Delete:**
+**Deleted Files:**
 - includes/sponsorship_manager.php (830 lines)
 - includes/email_manager.php (763 lines)
 - includes/csv_handler.php (561 lines)
@@ -33,13 +26,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - includes/import_analyzer.php (29 lines)
 - includes/magic_link_manager.php (29 lines)
 
-**When to Execute:**
-- User will explicitly say "proceed with dead code cleanup" or similar
-- DO NOT execute automatically
-- Remind user at start of each session until completed
-
-**To Remove This Reminder:**
-User must explicitly say "remove the dead code reminder from CLAUDE.md"
+**Impact:**
+- Codebase reduction: 3,624 lines
+- Improved code clarity: Single source of truth in `src/` namespace
+- Reduced maintenance burden: No duplicate code paths
 
 ---
 
