@@ -37,6 +37,9 @@ function cleanWishesText(string $wishes): string
 
 /**
  * Get children with optional filtering and pagination
+ *
+ * @param array<string, mixed> $filters Filter criteria (search, age_category, gender, status, family_id)
+ * @return array<int, array<string, mixed>> Array of child records with family information
  */
 function getChildren(array $filters = [], int $page = 1, int $limit = null): array
 {
@@ -104,6 +107,8 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
 
 /**
  * Get total count of children matching filters
+ *
+ * @param array<string, mixed> $filters Filter criteria (same as getChildren)
  */
 function getChildrenCount(array $filters = []): int
 {
@@ -163,6 +168,8 @@ function getChildrenCount(array $filters = []): int
 
 /**
  * Get single child by ID with family information
+ *
+ * @return array<string, mixed>|null Child record with family info or null if not found
  */
 function getChildById(int $childId): ?array
 {
@@ -179,6 +186,8 @@ function getChildById(int $childId): ?array
 
 /**
  * Get family members (siblings) for a child
+ *
+ * @return array<int, array<string, mixed>> Array of family member records
  */
 function getFamilyMembers(int $familyId, int $excludeChildId = null): array
 {
@@ -238,6 +247,8 @@ function getPlaceholderImage(int $age, string $gender): string
 
 /**
  * Get family information by family ID
+ *
+ * @return array<string, mixed>|null Family record or null if not found
  */
 function getFamilyById(int $familyId): ?array
 {
@@ -248,6 +259,8 @@ function getFamilyById(int $familyId): ?array
 
 /**
  * Get family information by family number (user-facing ID like 201, 202, etc.)
+ *
+ * @return array<string, mixed>|null Family record or null if not found
  */
 function getFamilyByNumber(string $familyNumber): ?array
 {
@@ -258,6 +271,8 @@ function getFamilyByNumber(string $familyNumber): ?array
 
 /**
  * Get all family members by family number
+ *
+ * @return array<int, array<string, mixed>> Array of family member records
  */
 function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array
 {

@@ -18,6 +18,8 @@ class Database
 
     /**
      * Initialize database connection
+     *
+     * @param array<string, string> $config Database configuration (host, database, username, password)
      */
     public static function init(array $config): void
     {
@@ -59,6 +61,9 @@ class Database
 
     /**
      * Execute a query and fetch all results
+     *
+     * @param array<int|string, mixed> $params Query parameters
+     * @return array<int, array<string, mixed>> Array of associative arrays
      */
     public static function fetchAll(string $sql, array $params = []): array
     {
@@ -71,6 +76,9 @@ class Database
 
     /**
      * Execute a query and fetch a single row
+     *
+     * @param array<int|string, mixed> $params Query parameters
+     * @return array<string, mixed>|null Associative array or null if no row found
      */
     public static function fetchRow(string $sql, array $params = []): ?array
     {
@@ -84,6 +92,8 @@ class Database
 
     /**
      * Execute a query and return number of affected rows
+     *
+     * @param array<int|string, mixed> $params Query parameters
      */
     public static function execute(string $sql, array $params = []): int
     {
@@ -96,6 +106,8 @@ class Database
 
     /**
      * Insert data into a table
+     *
+     * @param array<string, mixed> $data Column => value pairs
      */
     public static function insert(string $table, array $data): int
     {
@@ -113,6 +125,9 @@ class Database
 
     /**
      * Update data in a table
+     *
+     * @param array<string, mixed> $data Column => value pairs to update
+     * @param array<string, mixed> $where Column => value pairs for WHERE clause
      */
     public static function update(string $table, array $data, array $where): int
     {
@@ -153,6 +168,8 @@ class Database
 
     /**
      * Delete data from a table
+     *
+     * @param array<string, mixed> $where Column => value pairs for WHERE clause
      */
     public static function delete(string $table, array $where): int
     {
