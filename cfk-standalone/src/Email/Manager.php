@@ -249,7 +249,7 @@ class Manager
                  JOIN children c ON s.child_id = c.id
                  JOIN families f ON c.family_id = f.id
                  WHERE s.sponsor_email = ?
-                 AND s.status = 'confirmed'
+                 AND s.status IN ('confirmed', 'logged')
                  ORDER BY s.confirmation_date DESC",
                 [$email]
             );
