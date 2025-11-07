@@ -958,7 +958,7 @@ class Manager
      *
      * @param array<string, mixed> $data Sponsor data to validate
      *
-     * @return (array|bool)[] Validation result
+     * @return array{valid: bool, errors: array<string, mixed>} Validation result
      *
      * @psalm-return array{valid: bool, errors: array}
      */

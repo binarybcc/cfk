@@ -94,6 +94,9 @@ if ($_POST && isset($_POST['action'])) {
     }
 }
 
+/**
+ * @return array{success: bool, message?: string, children?: array<int, array<string, mixed>>, errors?: array<string>, warnings?: array<string>}
+ */
 function handlePreviewImport(): array
 {
     try {
@@ -161,6 +164,9 @@ function handlePreviewImport(): array
     }
 }
 
+/**
+ * @return array{success: bool, message?: string, count?: int}
+ */
 function handleConfirmImport(): array
 {
     try {
@@ -213,6 +219,9 @@ function handleConfirmImport(): array
     }
 }
 
+/**
+ * @return array{success: bool, message: string}
+ */
 function handleDeleteAllChildren(): array
 {
     try {
@@ -254,6 +263,9 @@ function handleDeleteAllChildren(): array
     }
 }
 
+/**
+ * @return array{success: bool, message: string}
+ */
 function handleRestoreBackup(): array
 {
     try {

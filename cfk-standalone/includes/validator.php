@@ -15,14 +15,19 @@ if (! defined('CFK_APP')) {
 
 class Validator
 {
+    /** @var array<string, array<int, string>> */
     private array $errors = [];
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __construct(private array $data)
     {
     }
 
     /**
      * Validate required fields
+     * @param array<int, string> $fields
      */
     public function required(array $fields): self
     {
@@ -103,6 +108,7 @@ class Validator
 
     /**
      * Validate value is in array
+     * @param array<int|string, mixed> $allowed
      */
     public function in(string $field, array $allowed): self
     {
@@ -118,7 +124,7 @@ class Validator
     /**
      * Validate minimum numeric value
      */
-    public function min(string $field, $min): self
+    public function min(string $field, int|float $min): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value < $min) {
@@ -131,7 +137,7 @@ class Validator
     /**
      * Validate maximum numeric value
      */
-    public function max(string $field, $max): self
+    public function max(string $field, int|float $max): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value > $max) {

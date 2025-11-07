@@ -1,0 +1,210 @@
+Note: Using configuration file /home/user/cfk/cfk-standalone/phpstan.neon.
+  0/59 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 20/59 [▓▓▓▓▓▓▓▓▓░░░░░░░░░░░░░░░░░░░]  33%[1G[2K 40/59 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░]  67%[1G[2K 59/59 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ --------------------------------------------------------- 
+  Line   admin/debug_db_check.php                                 
+ ------ --------------------------------------------------------- 
+  38     Cannot call method fetchColumn() on PDOStatement|false.  
+  41     Cannot call method fetchColumn() on PDOStatement|false.  
+  44     Cannot call method fetchAll() on PDOStatement|false.     
+  52     Cannot call method fetch() on PDOStatement|false.        
+ ------ --------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   admin/import_csv.php                                                                  
+ ------ -------------------------------------------------------------------------------------- 
+  97     Function handlePreviewImport() return type has no value type                          
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  142    Offset 'children' does not exist on array{success: true, children?:                   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,                   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file                     
+         not found…'}.                                                                         
+  153    Offset 'children' does not exist on array{success: true, children?:                   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,                   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file                     
+         not found…'}.                                                                         
+  164    Function handleConfirmImport() return type has no value type                          
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  216    Function handleDeleteAllChildren() return type has no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  257    Function handleRestoreBackup() return type has no value type                          
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  319    Parameter #1 $stream of function fputcsv expects resource,                            
+         resource|false given.                                                                 
+  323    Parameter #1 $stream of function fputcsv expects resource,                            
+         resource|false given.                                                                 
+  330    Parameter #1 $stream of function fputcsv expects resource,                            
+         resource|false given.                                                                 
+  337    Parameter #1 $stream of function fputcsv expects resource,                            
+         resource|false given.                                                                 
+  343    Parameter #1 $stream of function fclose expects resource,                             
+         resource|false given.                                                                 
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/index.php                                                       
+ ------ ---------------------------------------------------------------------- 
+  160    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+  193    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   admin/logout.php                                                       
+ ------ ----------------------------------------------------------------------- 
+  35     Parameter #1 $name of function setcookie expects string, string|false  
+         given.                                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/manage_admins.php                                               
+ ------ ---------------------------------------------------------------------- 
+  129    Offset 'username' does not exist on array<string, mixed>|null.        
+  130    Offset 'username' does not exist on array<string, mixed>|null.        
+  294    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+  295    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------- 
+  Line   admin/manage_children.php                                    
+ ------ ------------------------------------------------------------- 
+  384    Offset 'count' does not exist on array<string, mixed>|null.  
+ ------ ------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   admin/manage_sponsorships.php                                                         
+ ------ -------------------------------------------------------------------------------------- 
+  183    Function updateSponsorship() has parameter $data with no type                         
+         specified.                                                                            
+  183    Function updateSponsorship() return type has no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   admin/reports.php                                                      
+ ------ ----------------------------------------------------------------------- 
+  187    Offset 'total' does not exist on array<string, mixed>|null.            
+  188    Offset 'available' does not exist on array<string, mixed>|null.        
+  189    Offset 'pending' does not exist on array<string, mixed>|null.          
+  190    Offset 'sponsored' does not exist on array<string, mixed>|null.        
+  197    Offset 'total' does not exist on array<string, mixed>|null.            
+  198    Offset 'pending' does not exist on array<string, mixed>|null.          
+  199    Offset 'confirmed' does not exist on array<string, mixed>|null.        
+  200    Offset 'completed' does not exist on array<string, mixed>|null.        
+  207    Offset 'total' does not exist on array<string, mixed>|null.            
+  208    Offset 'fully_sponsored' does not exist on array<string, mixed>|null.  
+  209    Offset 'fully_sponsored' does not exist on array<string, mixed>|null.  
+  209    Offset 'total' does not exist on array<string, mixed>|null.            
+  217    Offset 'total' does not exist on array<string, mixed>|null.            
+  581    Parameter #2 $timestamp of function date expects int|null, int|false   
+         given.                                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------- 
+  Line   admin/request-magic-link.php                                              
+ ------ -------------------------------------------------------------------------- 
+  106    Call to an undefined method object::isHTML().                             
+  115    Access to an undefined property object::$ErrorInfo.                       
+         💡 Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  116    Parameter #1 $adminUserId of static method                                
+         CFK\Auth\MagicLinkManager::logEvent() expects int|null,                   
+         bool|float|int|string|null given.                                         
+  118    Access to an undefined property object::$ErrorInfo.                       
+         💡 Learn more:                                                            
+            https://phpstan.org/blog/solving-phpstan-access-to-undefined-property  
+  122    Parameter #1 $adminUserId of static method                                
+         CFK\Auth\MagicLinkManager::logEvent() expects int|null,                   
+         bool|float|int|string|null given.                                         
+  128    Parameter #1 $adminUserId of static method                                
+         CFK\Auth\MagicLinkManager::logEvent() expects int|null,                   
+         bool|float|int|string|null given.                                         
+ ------ -------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------- 
+  Line   admin/verify-magic-link.php                              
+ ------ --------------------------------------------------------- 
+  170    Parameter #1 $adminUserId of static method               
+         CFK\Auth\MagicLinkManager::logEvent() expects int|null,  
+         bool|float|int|string|null given.                        
+ ------ --------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   admin/year_end_reset.php                                               
+ ------ ----------------------------------------------------------------------- 
+  73     Variable $_POST on left side of ?? always exists and is not nullable.  
+  162    Offset 'count' does not exist on array<string,                         
+         bool|float|int|string|null>|null.                                      
+  163    Offset 'count' does not exist on array<string,                         
+         bool|float|int|string|null>|null.                                      
+  164    Offset 'count' does not exist on array<string,                         
+         bool|float|int|string|null>|null.                                      
+  165    Offset 'count' does not exist on array<string,                         
+         bool|float|int|string|null>|null.                                      
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   includes/email_queue.php                                              
+ ------ ---------------------------------------------------------------------- 
+  170    Offset 'attempts' does not exist on array<string, mixed>|null.        
+  174    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+  178    Offset 'error_count' does not exist on array<string, mixed>|null.     
+  184    Offset 'max_attempts' does not exist on array<string, mixed>|null.    
+  205    Call to an undefined method object::clearReplyTos().                  
+  217    Call to an undefined method object::addCC().                          
+  222    Call to an undefined method object::addBCC().                         
+  300    Parameter #2 $timestamp of function date expects int|null, int|false  
+         given.                                                                
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------- 
+  Line   includes/functions.php                                       
+ ------ ------------------------------------------------------------- 
+  31     Function cleanWishesText() should return string but returns  
+         string|null.                                                 
+ ------ ------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   includes/reservation_emails.php                                        
+ ------ ----------------------------------------------------------------------- 
+  343    Parameter #2 $timestamp of function date expects int|null, int|false   
+         given.                                                                 
+  572    Parameter #2 $data of function hash_hmac expects string, string|false  
+         given.                                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   includes/validator.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  18     Property Validator::$errors type has no value type specified in                       
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  20     Method Validator::__construct() has parameter $data with no value                     
+         type specified in iterable type array.                                                
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  27     Method Validator::required() has parameter $fields with no value type                 
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  107    Method Validator::in() has parameter $allowed with no value type                      
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  121    Method Validator::min() has parameter $min with no type specified.                    
+  134    Method Validator::max() has parameter $max with no type specified.                    
