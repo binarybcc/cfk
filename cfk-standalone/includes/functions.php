@@ -41,7 +41,7 @@ function cleanWishesText(string $wishes): string
  * @param array<string, mixed> $filters Filter criteria (search, age_category, gender, status, family_id)
  * @return array<int, array<string, mixed>> Array of child records with family information
  */
-function getChildren(array $filters = [], int $page = 1, int $limit = null): array
+function getChildren(array $filters = [], int $page = 1, ?int $limit = null): array
 {
     $limit = $limit ?? config('children_per_page', 12);
     $offset = ($page - 1) * $limit;
@@ -189,7 +189,7 @@ function getChildById(int $childId): ?array
  *
  * @return array<int, array<string, mixed>> Array of family member records
  */
-function getFamilyMembers(int $familyId, int $excludeChildId = null): array
+function getFamilyMembers(int $familyId, ?int $excludeChildId = null): array
 {
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
@@ -274,7 +274,7 @@ function getFamilyByNumber(string $familyNumber): ?array
  *
  * @return array<int, array<string, mixed>> Array of family member records
  */
-function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array
+function getFamilyMembersByNumber(string $familyNumber, ?int $excludeChildId = null): array
 {
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
@@ -534,7 +534,7 @@ function getMessage(): ?array
  *
  * @param array<string, mixed>|null $child Child data (age_months, gender required for avatar selection)
  */
-function getPhotoUrl(string $filename = null, array $child = null): string
+function getPhotoUrl(?string $filename = null, ?array $child = null): string
 {
     // ALWAYS use avatars - no real photos for privacy protection
     if ($child && isset($child['age_months']) && isset($child['gender'])) {
