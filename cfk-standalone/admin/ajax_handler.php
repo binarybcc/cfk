@@ -169,6 +169,9 @@ function toggleChildStatus(int $childId): array
 
 /**
  * Delete a child
+ *
+ * @param int $childId Child ID to delete
+ * @return array<string, mixed> Result with success status and message
  */
 function deleteChild(int $childId): array
 {
@@ -191,17 +194,34 @@ function deleteChild(int $childId): array
     return ['success' => false, 'message' => 'Failed to delete child'];
 }
 
-// Placeholder functions for admin management (implement as needed)
+/**
+ * Create admin (placeholder - not implemented)
+ *
+ * @param array<string, mixed> $data Admin data
+ * @return array<string, mixed> Result with success status and message
+ */
 function createAdmin(array $data): array
 {
     return ['success' => false, 'message' => 'Not implemented yet'];
 }
 
+/**
+ * Update admin (placeholder - not implemented)
+ *
+ * @param array<string, mixed> $data Admin data
+ * @return array<string, mixed> Result with success status and message
+ */
 function updateAdmin(array $data): array
 {
     return ['success' => false, 'message' => 'Not implemented yet'];
 }
 
+/**
+ * Delete admin (placeholder - not implemented)
+ *
+ * @param array<string, mixed> $data Admin data
+ * @return array<string, mixed> Result with success status and message
+ */
 function deleteAdmin(array $data): array
 {
     return ['success' => false, 'message' => 'Not implemented yet'];
@@ -209,6 +229,9 @@ function deleteAdmin(array $data): array
 
 /**
  * Edit sponsorship details
+ *
+ * @param array<string, mixed> $data Sponsorship data to update
+ * @return array<string, mixed> Result with success status and message
  */
 function editSponsorship(array $data): array
 {
@@ -242,6 +265,9 @@ function editSponsorship(array $data): array
 
 /**
  * Edit child details
+ *
+ * @param array<string, mixed> $data Child data to update
+ * @return array<string, mixed> Result with success status and message
  */
 function editChild(array $data): array
 {
@@ -302,7 +328,7 @@ function editChild(array $data): array
  * Validate child data
  *
  * @param array<string, mixed> $data Child data to validate
- * @return array<int, string> Array of validation error messages
+ * @return array{valid: bool, errors: array<int, string>} Validation result with valid flag and errors array
  */
 function validateChildData(array $data): array
 {
