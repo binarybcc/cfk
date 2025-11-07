@@ -52,7 +52,7 @@ class RememberMeTokens
      * Validate a remember-me token
      *
      * @param string $token The token from cookie
-     * @return array|null User data if valid, null if invalid
+     * @return array<string, mixed>|null User data if valid, null if invalid
      */
     public static function validateToken(string $token): ?array
     {
@@ -191,7 +191,7 @@ class RememberMeTokens
      * Get all active tokens for a user (for admin interface)
      *
      * @param int $userId The user ID
-     * @return array List of active tokens with metadata
+     * @return array<int, array<string, mixed>> List of active tokens with metadata
      */
     public static function getUserTokens(int $userId): array
     {
