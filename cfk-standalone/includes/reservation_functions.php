@@ -15,10 +15,10 @@ if (! defined('CFK_APP')) {
 /**
  * Create a new reservation
  *
- * @param array $sponsorData ['name', 'email', 'phone', 'address']
- * @param array $childrenIds Array of child IDs to reserve
+ * @param array<string, mixed> $sponsorData Sponsor data ['name', 'email', 'phone', 'address']
+ * @param array<int, int> $childrenIds Array of child IDs to reserve
  * @param int $expirationHours Number of hours until expiration (default: 48)
- * @return array ['success' => bool, 'token' => string, 'message' => string, 'reservation_id' => int]
+ * @return array<string, mixed> Result array with success flag, token, and reservation details
  */
 function createReservation(array $sponsorData, array $childrenIds, int $expirationHours = 48): array
 {
@@ -127,7 +127,7 @@ function createReservation(array $sponsorData, array $childrenIds, int $expirati
  * Get reservation details by token
  *
  * @param string $token Reservation token
- * @return array|null Reservation data or null if not found
+ * @return array<string, mixed>|null Reservation data or null if not found
  */
 function getReservation(string $token): ?array
 {
@@ -160,7 +160,7 @@ function getReservation(string $token): ?array
  * Confirm a reservation
  *
  * @param string $token Reservation token
- * @return array ['success' => bool, 'message' => string]
+ * @return array<string, mixed> Result array with success flag and message
  */
 function confirmReservation(string $token): array
 {
@@ -237,7 +237,7 @@ function confirmReservation(string $token): array
  * Cancel a reservation
  *
  * @param string $token Reservation token
- * @return array ['success' => bool, 'message' => string]
+ * @return array<string, mixed> Result array with success flag and message
  */
 function cancelReservation(string $token): array
 {
@@ -307,7 +307,7 @@ function cancelReservation(string $token): array
 /**
  * Clean up expired reservations (for cron job)
  *
- * @return array ['expired_count' => int, 'freed_children' => int]
+ * @return array<string, int> Result array with expired_count and freed_children counts
  */
 function cleanupExpiredReservations(): array
 {
@@ -375,8 +375,8 @@ function cleanupExpiredReservations(): array
 /**
  * Check if children are available for reservation
  *
- * @param array $childrenIds Array of child IDs
- * @return array Array of unavailable child display IDs
+ * @param array<int, int> $childrenIds Array of child IDs
+ * @return array<int, string> Array of unavailable child display IDs
  */
 function checkChildrenAvailability(array $childrenIds): array
 {
@@ -405,9 +405,9 @@ function generateReservationToken(): string
 /**
  * Get all reservations for admin view
  *
- * @param string $status Filter by status (optional)
+ * @param string|null $status Filter by status (optional)
  * @param int $limit Number of results (default: 50)
- * @return array Array of reservations
+ * @return array<int, array<string, mixed>> Array of reservation records
  */
 function getAllReservations(?string $status = null, int $limit = 50): array
 {
