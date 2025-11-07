@@ -267,7 +267,9 @@ class Analyzer
     /**
      * Replace mode: Delete all, insert new (current behavior)
      *
-     * @return (int|mixed|string)[]
+     * @param array<string, string> $sponsorshipLookup Existing sponsorships (family_number_childLetter => status)
+     * @param array<string, mixed> $options Import options (keep_inactive, etc.)
+     * @return array<string, mixed> Result array with success status and counts
      *
      * @psalm-return array{success: mixed, sponsorships_preserved?: int|mixed, import_mode?: 'replace'|mixed,...}
      */
@@ -300,7 +302,9 @@ class Analyzer
     /**
      * Append mode: Only insert children that don't exist
      *
-     * @return (bool|int|string|string[])[]
+     * @param array<int, array<string, mixed>> $newChildren Array of new child records to import
+     * @param array<string, string> $sponsorshipLookup Existing sponsorships (family_number_childLetter => status)
+     * @return array<string, mixed> Result array with success status and counts
      *
      * @psalm-return array{success: bool, imported: int<0, max>, skipped: int<0, max>, errors: list{0?: string,...}, message: string, import_mode: 'append'}
      */
@@ -365,7 +369,9 @@ class Analyzer
     /**
      * Update mode: Update existing children, insert new ones
      *
-     * @return (bool|int|string|string[])[]
+     * @param array<int, array<string, mixed>> $newChildren Array of new child records to import
+     * @param array<string, string> $sponsorshipLookup Existing sponsorships (family_number_childLetter => status)
+     * @return array<string, mixed> Result array with success status and counts
      *
      * @psalm-return array{success: bool, imported: int<0, max>, inserted: int<0, max>, updated: int<0, max>, errors: list{0?: string,...}, message: string, import_mode: 'update'}
      */
@@ -438,6 +444,9 @@ class Analyzer
     /**
      * Restore sponsorship statuses for matching children
      *
+     * @param array<string, string> $sponsorshipLookup Existing sponsorships (family_number_childLetter => status)
+     * @return int Number of sponsorships restored
+     *
      * @psalm-return int<0, max>
      */
     private static function restoreSponsorshipStatuses(array $sponsorshipLookup): int
@@ -463,6 +472,9 @@ class Analyzer
 
     /**
      * Ensure family exists, return family DB ID
+     *
+     * @param array<string, mixed> $childData Child data including family_id
+     * @return int|null Family database ID or null on error
      */
     private static function ensureFamilyExists(array $childData): ?int
     {
@@ -493,6 +505,9 @@ class Analyzer
 
     /**
      * Insert a new child
+     *
+     * @param array<string, mixed> $childData Child data from CSV
+     * @return int Inserted child ID
      */
     private static function insertChild(array $childData, int $familyId): int
     {
@@ -517,6 +532,8 @@ class Analyzer
 
     /**
      * Update an existing child
+     *
+     * @param array<string, mixed> $childData Child data from CSV
      */
     private static function updateChild(int $childId, array $childData, int $familyId, bool $preserveStatus): void
     {
