@@ -171,7 +171,13 @@ $children = Database::fetchAll("
 $families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY family_number ASC");
 
 // Functions for CRUD operations
-function addChild($data): array
+/**
+ * Add a new child record
+ *
+ * @param array<string, mixed> $data Child data
+ * @return array<string, mixed> Result with success status and message
+ */
+function addChild(array $data): array
 {
     try {
         // Validate required fields
@@ -287,7 +293,13 @@ function addChild($data): array
     }
 }
 
-function editChild($data): array
+/**
+ * Edit an existing child record
+ *
+ * @param array<string, mixed> $data Child data
+ * @return array<string, mixed> Result with success status and message
+ */
+function editChild(array $data): array
 {
     try {
         $childId = sanitizeInt($data['child_id'] ?? 0);
@@ -350,7 +362,13 @@ function editChild($data): array
     }
 }
 
-function deleteChild($childId): array
+/**
+ * Delete a child record
+ *
+ * @param int $childId Child ID to delete
+ * @return array<string, mixed> Result with success status and message
+ */
+function deleteChild(int $childId): array
 {
     try {
         if (! $childId) {
@@ -377,7 +395,14 @@ function deleteChild($childId): array
     }
 }
 
-function updateChildStatus($childId, $newStatus): array
+/**
+ * Update child status
+ *
+ * @param int $childId Child ID
+ * @param string $newStatus New status value
+ * @return array<string, mixed> Result with success status and message
+ */
+function updateChildStatus(int $childId, string $newStatus): array
 {
     try {
         if (! $childId || ! in_array($newStatus, ['available', 'pending', 'sponsored', 'inactive'])) {
@@ -394,7 +419,13 @@ function updateChildStatus($childId, $newStatus): array
     }
 }
 
-function validateChildData($data): array
+/**
+ * Validate child data
+ *
+ * @param array<string, mixed> $data Child data to validate
+ * @return array<string, mixed> Validation result with 'valid' boolean and 'errors' array
+ */
+function validateChildData(array $data): array
 {
     $errors = [];
 
