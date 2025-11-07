@@ -171,7 +171,7 @@ class CFK_Email_Queue
 
         // Calculate next retry time (exponential backoff)
         $retryMinutes = min(60, 2 ** $newAttempts); // 2, 4, 8, 16, 32, 60 minutes
-        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes"));
+        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes") ?: 0);
 
         $updates = [
             'attempts' => $newAttempts,
@@ -297,7 +297,7 @@ class CFK_Email_Queue
      */
     public static function cleanup(int $daysOld = 30): int
     {
-        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
+        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days") ?: 0);
 
         return Database::execute("
             DELETE FROM email_queue
