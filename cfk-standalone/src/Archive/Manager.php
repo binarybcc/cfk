@@ -501,6 +501,7 @@ class Manager
      *
      * @param string $dir Directory path
      * @return int Size in bytes
+     * @phpstan-ignore-next-line method.unused
      */
     private static function getDirectorySize(string $dir): int
     {
@@ -736,10 +737,7 @@ class Manager
      * @param string $year Year to restore
      * @param string $confirmationCode Must be "RESTORE [YEAR]"
      * @param bool $debug Enable debug logging
-     *
-     * @return (array|bool|int|mixed|string)[] Result with success status and details
-     *
-     * @psalm-return array{success: bool, message: string, debug_log: array, restored_counts?: array{children: 0|mixed, families: 0|mixed, sponsorships: 0|mixed, email_log: 0|mixed}, duration?: 0|mixed}
+     * @return array<string, mixed> Result with success status and details
      */
     public static function performArchiveRestore(string $year, string $confirmationCode, bool $debug = true): array
     {
@@ -788,10 +786,8 @@ class Manager
         $debugLog[] = "--- Starting Database Restore ---";
         $restoreResult = self::restoreDatabase($year, $backupFile, $debug);
 
-        // Merge debug logs
-        if (isset($restoreResult['debug_log'])) {
-            $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
-        }
+        // Merge debug logs (debug_log always exists in return array)
+        $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
 
         if (! $restoreResult['success']) {
             $debugLog[] = "❌ DATABASE RESTORE FAILED";
@@ -990,10 +986,7 @@ class Manager
      *
      * @param string $confirmationCode Must be "DELETE OLD ARCHIVES"
      * @param bool $debug Enable debug logging
-     *
-     * @return (array|scalar)[] Result with success status and details
-     *
-     * @psalm-return array{success: bool, message: string, deleted_count?: int<0, max>, kept_count?: int<0, max>, total_deleted_mb?: float, errors?: list{0?: string,...}, debug_log: array}
+     * @return array<string, mixed> Result with success status and details
      */
     public static function deleteOldArchives(string $confirmationCode, bool $debug = true): array
     {
@@ -1048,10 +1041,8 @@ class Manager
                 $debugLog[] = "❌ Failed: " . $result['message'];
             }
 
-            // Merge individual delete logs
-            if (isset($result['debug_log'])) {
-                $debugLog = array_merge($debugLog, $result['debug_log']);
-            }
+            // Merge individual delete logs (debug_log always exists in return array)
+            $debugLog = array_merge($debugLog, $result['debug_log']);
         }
 
         $debugLog[] = "=== Deletion Complete ===";
