@@ -1102,6 +1102,7 @@ class Manager
             return $result; // Returns number of affected rows
         } catch (Exception $e) {
             error_log('Failed to cleanup expired portal tokens: ' . $e->getMessage());
+
             return 0;
         }
     }

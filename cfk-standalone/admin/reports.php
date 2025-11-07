@@ -106,21 +106,25 @@ if ($exportFormat === 'csv') {
             $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
             ReportManager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
 
+            // no break
         case 'child_sponsor':
             $data = ReportManager::getChildSponsorLookup();
             $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
             ReportManager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
 
+            // no break
         case 'family_report':
             $data = ReportManager::getFamilySponsorshipReport();
             $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
             ReportManager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
 
+            // no break
         case 'available_children':
             $data = ReportManager::getAvailableChildrenReport();
             $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
             ReportManager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
 
+            // no break
         case 'complete_export':
             $data = ReportManager::getCompleteChildSponsorReport();
             $headers = [

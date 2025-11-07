@@ -78,7 +78,7 @@
         if ($displayMessage && $displayMessage['type'] === 'error') : ?>
             <div class="persistent-alert persistent-alert-error">
                 <strong>❌ Error: </strong>
-                    <?php echo sanitizeString($displayMessage['text']); ?>
+                        <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
         <?php elseif ($displayMessage) : ?>
             <!-- Toast notification for success/info messages -->

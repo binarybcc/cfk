@@ -211,7 +211,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                 <?php
-            // Get available children
+        // Get available children
                 $availableChildren = getChildren(['status' => 'available'], 1, 100);
 
                 if ($availableChildren === []) : ?>
