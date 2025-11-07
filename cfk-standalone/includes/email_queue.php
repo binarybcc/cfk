@@ -29,6 +29,12 @@ class CFK_Email_Queue
 
     /**
      * Add email to queue
+     *
+     * @param string $recipient Email recipient
+     * @param string $subject Email subject
+     * @param string $body Email body (HTML)
+     * @param array<string, mixed> $options Optional settings (recipient_name, from_email, priority, etc.)
+     * @return int Queue ID
      */
     public static function queue(
         string $recipient,
@@ -62,6 +68,9 @@ class CFK_Email_Queue
 
     /**
      * Process queued emails (called by cron)
+     *
+     * @param int $limit Maximum emails to process
+     * @return array<string, mixed> Processing statistics (processed, sent, failed, errors)
      */
     public static function processQueue(int $limit = 10): array
     {
@@ -104,6 +113,9 @@ class CFK_Email_Queue
 
     /**
      * Get emails ready to process
+     *
+     * @param int $limit Maximum emails to retrieve
+     * @return array<int, array<string, mixed>> Array of email records
      */
     private static function getEmailsToProcess(int $limit): array
     {
@@ -180,6 +192,9 @@ class CFK_Email_Queue
 
     /**
      * Send individual email
+     *
+     * @param array<string, mixed> $email Email record from database
+     * @return array<string, mixed> Result with success flag and error message
      */
     private static function sendEmail(array $email): array
     {
@@ -225,6 +240,8 @@ class CFK_Email_Queue
 
     /**
      * Get queue statistics
+     *
+     * @return array<string, int> Statistics by status (queued, processing, sent, failed, total)
      */
     public static function getStats(): array
     {
@@ -291,6 +308,9 @@ class CFK_Email_Queue
 
     /**
      * Quick helper to queue sponsor confirmation
+     *
+     * @param array<string, mixed> $sponsorship Sponsorship record with sponsor details
+     * @return int Queue ID
      */
     public static function queueSponsorConfirmation(array $sponsorship): int
     {
@@ -309,6 +329,11 @@ class CFK_Email_Queue
 
     /**
      * Quick helper to queue admin notification
+     *
+     * @param string $subject Email subject
+     * @param string $message Email message body
+     * @param array<string, mixed> $data Additional data (reference_type, reference_id, etc.)
+     * @return int Queue ID
      */
     public static function queueAdminNotification(string $subject, string $message, array $data = []): int
     {
