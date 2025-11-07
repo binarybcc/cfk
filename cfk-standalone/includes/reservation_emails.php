@@ -19,8 +19,8 @@ use CFK\Email\Manager as EmailManager;
 /**
  * Send reservation confirmation email to sponsor
  *
- * @param array $reservation Reservation data from database
- * @return array ['success' => bool, 'message' => string]
+ * @param array<string, mixed> $reservation Reservation data from database
+ * @return array<string, mixed> Result array with success flag and message
  */
 function sendReservationConfirmationEmail(array $reservation): array
 {
@@ -81,7 +81,8 @@ function sendReservationConfirmationEmail(array $reservation): array
 /**
  * Send reservation notification to admin
  *
- * @param array $reservation Reservation data
+ * @param array<string, mixed> $reservation Reservation data
+ * @return bool True if sent successfully, false otherwise
  */
 function sendAdminReservationNotification(array $reservation): bool
 {
@@ -105,6 +106,9 @@ function sendAdminReservationNotification(array $reservation): bool
 
 /**
  * Generate HTML email for reservation confirmation
+ *
+ * @param array<string, mixed> $reservation Reservation data with children array
+ * @return string HTML email content
  */
 function generateReservationConfirmationHTML(array $reservation): string
 {
@@ -323,6 +327,9 @@ function generateReservationConfirmationHTML(array $reservation): string
 
 /**
  * Generate plain text version of confirmation email
+ *
+ * @param array<string, mixed> $reservation Reservation data with children array
+ * @return string Plain text email content
  */
 function generateReservationConfirmationText(array $reservation): string
 {
@@ -410,6 +417,9 @@ function generateReservationConfirmationText(array $reservation): string
 
 /**
  * Generate admin notification HTML
+ *
+ * @param array<string, mixed> $reservation Reservation data
+ * @return string HTML email content
  */
 function generateAdminNotificationHTML(array $reservation): string
 {
@@ -418,6 +428,9 @@ function generateAdminNotificationHTML(array $reservation): string
 
 /**
  * Generate admin notification text
+ *
+ * @param array<string, mixed> $reservation Reservation data
+ * @return string Plain text email content
  */
 function generateAdminNotificationText(array $reservation): string
 {
@@ -448,7 +461,7 @@ function logReservationEmail(int $reservationId, string $email, string $type, st
  * Send access link email to sponsor (using same pattern as reservation emails)
  *
  * @param string $email Sponsor email address
- * @return array ['success' => bool, 'message' => string]
+ * @return array<string, mixed> Result array with success flag and message
  */
 function sendAccessLinkEmail(string $email): array
 {
@@ -532,7 +545,7 @@ function sendAccessLinkEmail(string $email): array
         // Log failed attempt
         logReservationEmail(
             0,
-            $email ?? 'unknown',
+            $email,
             'access_link',
             'failed',
             $e->getMessage()
@@ -594,6 +607,11 @@ function verifyAccessToken(string $token): ?string
 
 /**
  * Generate HTML email for access link
+ *
+ * @param string $email Sponsor email
+ * @param string $name Sponsor name
+ * @param array<int, array<string, mixed>> $sponsorships Array of sponsorship records with child details
+ * @return string HTML email content
  */
 function generateAccessLinkHTML(string $email, string $name, array $sponsorships): string
 {
@@ -807,6 +825,11 @@ function generateAccessLinkHTML(string $email, string $name, array $sponsorships
 
 /**
  * Generate plain text version of access link email
+ *
+ * @param string $email Sponsor email
+ * @param string $name Sponsor name
+ * @param array<int, array<string, mixed>> $sponsorships Array of sponsorship records with child details
+ * @return string Plain text email content
  */
 function generateAccessLinkText(string $email, string $name, array $sponsorships): string
 {
