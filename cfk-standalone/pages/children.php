@@ -26,6 +26,8 @@ if ($viewingFamily) {
     $totalCount = count($children);
     $totalPages = 1;
     $currentPage = 1;
+    $perPageOptions = [12, 24, 48]; // Not used in family view, but needed for consistency
+    $perPage = 12;
 
     // Get family info for display
     $familyInfo = $children === [] ? null : getFamilyById($familyId);
@@ -405,7 +407,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                     View Family
                                 </a>
                                 <button class="btn btn-primary btn-sponsor"
-                                        data-child='<?php echo htmlspecialchars(json_encode($child)); ?>'>
+                                        data-child='<?php echo htmlspecialchars(json_encode($child) ?: '{}'); ?>'>
                                     SPONSOR
                                 </button>
                             </div>
