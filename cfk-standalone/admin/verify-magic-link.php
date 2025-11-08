@@ -167,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['login_ip'] = $ipAddress;
 
         // Log successful login
-        MagicLinkManager::logEvent($adminUser['id'], 'admin_login_success', $ipAddress, $userAgent, 'success');
+        MagicLinkManager::logEvent(isset($adminUser['id']) ? (int)$adminUser['id'] : null, 'admin_login_success', $ipAddress, $userAgent, 'success');
 
         // Redirect to admin dashboard
         header('Location: ' . baseUrl('admin/'));
