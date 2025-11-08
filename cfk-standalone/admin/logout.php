@@ -31,8 +31,9 @@ error_log("CFK Admin: User '$username' logged out from IP: " . ($_SERVER['REMOTE
 $_SESSION = [];
 
 // Destroy the session cookie
-if (isset($_COOKIE[session_name()])) {
-    setcookie(session_name(), '', ['expires' => time() - 3600, 'path' => '/']);
+$sessionName = session_name();
+if ($sessionName && isset($_COOKIE[$sessionName])) {
+    setcookie($sessionName, '', ['expires' => time() - 3600, 'path' => '/']);
 }
 
 // Destroy session

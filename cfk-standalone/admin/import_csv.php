@@ -328,6 +328,10 @@ function downloadTemplate(): void
         header('Content-Disposition: attachment; filename="cfk-import-template.csv"');
 
         $output = fopen('php://output', 'w');
+        if ($output === false) {
+            die('Failed to open output stream');
+        }
+
         fputcsv($output, $headers);
 
         // Add sample rows showing both age formats
