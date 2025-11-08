@@ -70,7 +70,7 @@ $deletionPreview = null;
 
 // Debug: Log all requests (only in debug mode)
 if (config('app_debug', false)) {
-    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST)));
 }
 
 // Get deletion preview for display
@@ -326,7 +326,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['children'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['children']; ?></h3>
                     <p>Children</p>
                 </div>
             </div>
@@ -334,7 +334,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👨‍👩‍👧‍👦</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['families'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['families']; ?></h3>
                     <p>Families</p>
                 </div>
             </div>
@@ -342,7 +342,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['sponsorships'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['sponsorships']; ?></h3>
                     <p>Sponsorships</p>
                 </div>
             </div>
@@ -350,7 +350,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['email_log'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['email_log']; ?></h3>
                     <p>Email Logs</p>
                 </div>
             </div>
