@@ -129,7 +129,7 @@ class MagicLinkManager
             }
 
             // Use hash_equals for constant-time comparison (prevent timing attacks)
-            if (! hash_equals($result['token_hash'], $tokenHash)) {
+            if (! hash_equals((string)$result['token_hash'], $tokenHash)) {
                 $db->rollback();
                 self::logEvent(null, 'magic_link_validation_failed', $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'failed', [
                     'reason' => 'token_mismatch',

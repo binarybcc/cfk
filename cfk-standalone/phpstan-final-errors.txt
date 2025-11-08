@@ -1,0 +1,319 @@
+Note: Using configuration file /home/user/cfk/cfk-standalone/phpstan.neon.
+  0/59 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 59/59 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/import_csv.php                                                  
+ ------ ---------------------------------------------------------------------- 
+  52     Offset 'preview' does not exist on array{success: true, message?:     
+         string, children?: array<int, array<string, mixed>>, errors?:         
+         array<string>, warnings?: array<string>}.                             
+  54     Offset 'message' does not exist on array{success: false, message?:    
+         string, children?: array<int, array<string, mixed>>, errors?:         
+         array<string>, warnings?: array<string>}.                             
+  62     Offset 'message' does not exist on array{success: bool, message?:     
+         string, count?: int}.                                                 
+  64     Offset 'results' on array{success: true, message?: string, count?:    
+         int} in isset() does not exist.                                       
+  64     Result of && is always false.                                         
+         💡 Because the type is coming from a PHPDoc, you can turn off this    
+            check by setting treatPhpDocTypesAsCertain: false in your          
+            phpstan.neon.                                                      
+  145    Offset 'children' does not exist on array{success: true, children?:   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file     
+         not found…'}.                                                         
+  156    Offset 'children' does not exist on array{success: true, children?:   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file     
+         not found…'}.                                                         
+  1195   If condition is always false.                                         
+  1208   Offset 'imported' on *NEVER* on left side of ?? always exists and is  
+         not nullable.                                                         
+  1211   Offset 'sponsorships…' on *NEVER* in isset() always exists and is     
+         not nullable.                                                         
+  1403   Variable $importResults in isset() always exists and is always null.  
+  1412   Variable $importResults in isset() always exists and is always null.  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/reports.php                                                     
+ ------ ---------------------------------------------------------------------- 
+  217    Offset 'unique_sponsors' on array{children: array<string,             
+         mixed>|null, sponsorships: array<string, mixed>|null,                 
+         unique_sponsors: mixed, families: array<string, mixed>|null} on left  
+         side of ?? always exists and is not nullable.                         
+ ------ ---------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   includes/validator.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  304    Method Validator::make() has parameter $data with no value type                       
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  313    Function validate() has parameter $data with no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  313    Function validate() has parameter $rules with no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------- 
+  Line   pages/children.php                                                 
+ ------ ------------------------------------------------------------------- 
+  272    Variable $perPageOptions might not be defined.                     
+  273    Variable $perPage might not be defined.                            
+  408    Parameter #1 $string of function htmlspecialchars expects string,  
+         string|false given.                                                
+ ------ ------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   pages/sponsor.php                                                     
+ ------ ---------------------------------------------------------------------- 
+  88     Offset 'message' does not exist on array{success:                     
+         0|0.0|''|'0'|array{}|false|null, message?: mixed, child?: mixed,      
+         sponsorship_id?: mixed}.                                              
+  104    Offset 'message' does not exist on array{success: mixed, message?:    
+         mixed, child?: mixed, sponsorship_id?: mixed}.                        
+  108    Offset 'message' does not exist on array{success:                     
+         0|0.0|''|'0'|array{}|false|null, message?: mixed, child?: mixed,      
+         sponsorship_id?: mixed}.                                              
+  117    Ternary operator condition is always true.                            
+  121    Offset 'reason' on array{available: bool, reason: string, child:      
+         array<string, mixed>|null} on left side of ?? always exists and is    
+         not nullable.                                                         
+  127    Offset 'family_id' does not exist on array<string, mixed>|null.       
+  176    Offset 'family_id' does not exist on array<string, mixed>|null.       
+  215    Offset 'photo_filename' does not exist on array<string, mixed>|null.  
+  216    Offset 'display_id' does not exist on array<string, mixed>|null.      
+  219    Offset 'display_id' does not exist on array<string, mixed>|null.      
+  220    Offset 'age' does not exist on array<string, mixed>|null.             
+ ------ ---------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------- 
+  Line   pages/sponsor_portal.php                                            
+ ------ -------------------------------------------------------------------- 
+  204    Negated boolean expression is always true.                          
+         💡 Because the type is coming from a PHPDoc, you can turn off this  
+            check by setting treatPhpDocTypesAsCertain: false in your        
+            phpstan.neon.                                                    
+ ------ -------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   src/Archive/Manager.php                                                
+ ------ ----------------------------------------------------------------------- 
+  396    Offset 'deleted' does not exist on array{success: true, message:       
+         string, deleted?: array{children: mixed, families: mixed,              
+         sponsorships: mixed, email_log: mixed}}.                               
+  496    Method CFK\Archive\Manager::getAvailableArchives() should return       
+         array<int, array{backup_file: non-empty-string, date: string,          
+         file_count: int<0, max>, has_data: bool, has_summary: bool, path:      
+         non-empty-string, size: int, timestamp: string, ...}> but returns      
+         array<int, array{year: string, timestamp: non-falsy-string, date:      
+         non-falsy-string, path: string, backup_file: string, has_summary:      
+         bool, has_data: bool, file_count: int<0, max>, ...}>.                  
+         💡 Offset 'backup_file' (non-empty-string) does not accept type        
+            string.                                                             
+         💡 Offset 'path' (non-empty-string) does not accept type string.       
+         💡 Offset 'year' (non-empty-string) does not accept type string.       
+                                                                                
+  583    Parameter #1 $bytes of static method                                   
+         CFK\Archive\Manager::formatBytes() expects int, int<0, max>|false      
+         given.                                                                 
+  673    Parameter #1 $array of function usort expects TArray of                
+         array<string>, array<int, string>|false given.                         
+  696    Parameter #1 $value of function count expects array|Countable,         
+         array<int, string>|false given.                                        
+  723    Method CFK\Archive\Manager::getRestorePreview() should return          
+         array{success: bool, year?: string, summary?: string|false|null,       
+         counts?: array{children: int<0, max>, families: int<0, max>,           
+         sponsorships: int<0, max>, email_log: int<0, max>}, backup_file?:      
+         string|null, backup_size?: int|false, backup_date?: string|null,       
+         message?: 'Archive not found'} but returns array{success: true, year:  
+         string, summary: string|false|null, counts:                            
+         non-empty-array<'children'|'email_log'|'families'|'sponsorships',      
+         float|int<0, max>>, backup_file: string|null, backup_size: int<0,      
+         max>|false, backup_date: non-falsy-string|null}.                       
+         💡 Offset 'counts' (array{children: int<0, max>, families: int<0,      
+            max>, sponsorships: int<0, max>, email_log: int<0, max>}) does not  
+            accept type                                                         
+            non-empty-array<'children'|'email_log'|'families'|'sponsorships',   
+            float|int<0, max>>.                                                 
+  730    Parameter #2 $timestamp of function date expects int|null, int|false   
+         given.                                                                 
+  771    Offset 'backup_file' does not exist on array{success: true, year?:     
+         string, summary?: string|false|null, counts?: array{children: int<0,   
+         max>, families: int<0, max>, sponsorships: int<0, max>, email_log:     
+         int<0, max>}, backup_file?: string|null, backup_size?: int|false,      
+         backup_date?: string|null, message?: 'Archive not found'}.             
+  783    Offset 'counts' does not exist on array{success: true, year?: string,  
+         summary?: string|false|null, counts?: array{children: int<0, max>,     
+         families: int<0, max>, sponsorships: int<0, max>, email_log: int<0,    
+         max>}, backup_file?: string|null, backup_size?: int|false,             
+         backup_date?: string|null, message?: 'Archive not found'}.             
+  783    Offset 'counts' does not exist on array{success: true, year?: string,  
+         summary?: string|false|null, counts?: array{children: int<0, max>,     
+         families: int<0, max>, sponsorships: int<0, max>, email_log: int<0,    
+         max>}, backup_file?: string|null, backup_size?: int|false,             
+         backup_date?: string|null, message?: 'Archive not found'}.             
+  958    Method CFK\Archive\Manager::deleteArchive() should return              
+         array{success: bool, message: string, deleted_files?: array<int,       
+         non-falsy-string>, deleted_size?: int, deleted_size_mb?: float,        
+         debug_log: array{0?: string}, errors?: non-empty-array<int,            
+         non-falsy-string>} but returns array{success: false, message: 'Some    
+         files could…', deleted_files: array<int<0, max>, string>,              
+         deleted_size: int<0, max>, errors: non-empty-array<int<0, max>,        
+         non-falsy-string>, debug_log: array<int<0, max>, non-falsy-string>}.   
+         💡 Offset 'deleted_files' (array<int, non-falsy-string>) does not      
+            accept type array<int<0, max>, string>.                             
+  974    Method CFK\Archive\Manager::deleteArchive() should return              
+         array{success: bool, message: string, deleted_files?: array<int,       
+         non-falsy-string>, deleted_size?: int, deleted_size_mb?: float,        
+         debug_log: array{0?: string}, errors?: non-empty-array<int,            
+         non-falsy-string>} but returns array{success: true, message: 'Archive  
+         deleted…', deleted_files: array<int<0, max>, string>, deleted_size:    
+         int<0, max>, deleted_size_mb: float, debug_log: array<int<0, max>,     
+         non-falsy-string>}.                                                    
+         💡 Offset 'deleted_files' (array<int, non-falsy-string>) does not      
+            accept type array<int<0, max>, string>.                             
+  1037   Offset 'deleted_size' does not exist on array{success: true, message:  
+         string, deleted_files?: array<int, non-falsy-string>, deleted_size?:   
+         int, deleted_size_mb?: float, debug_log: array{0?: string}, errors?:   
+         non-empty-array<int, non-falsy-string>}.                               
+  1038   Offset 'deleted_size_mb' does not exist on array{success: true,        
+         message: string, deleted_files?: array<int, non-falsy-string>,         
+         deleted_size?: int, deleted_size_mb?: float, debug_log: array{0?:      
+         string}, errors?: non-empty-array<int, non-falsy-string>}.             
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------- 
+  Line   src/Auth/MagicLinkManager.php                                       
+ ------ -------------------------------------------------------------------- 
+  132    Parameter #1 $known_string of function hash_equals expects string,  
+         bool|float|int|string|null given.                                   
+ ------ -------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------------------------------------------------- 
+  Line   src/Avatar/Manager.php                                                                                           
+ ------ ----------------------------------------------------------------------------------------------------------------- 
+  422    Method CFK\Avatar\Manager::generateTestAvatars() should return                                                   
+         array{infant: string, male_toddler: string, female_toddler: string,                                              
+         male_child: string, female_child: string, male_teen: string,                                                     
+         female_teen: string} but returns                                                                                 
+         non-empty-array<'female_child'|'female_teen'|'female_toddler'|'infant'|'male_child'|'male_teen'|'male_toddler',  
+         string>.                                                                                                         
+ ------ ----------------------------------------------------------------------------------------------------------------- 
+
+ ------ --------------------------------------------------------------- 
+  Line   src/Email/Manager.php                                          
+ ------ --------------------------------------------------------------- 
+  29     Method CFK\Email\Manager::getMailer() has invalid return type  
+         PHPMailer\PHPMailer\PHPMailer.                                 
+  42     Method CFK\Email\Manager::getMailer() should return            
+         PHPMailer\PHPMailer\PHPMailer but returns object.              
+ ------ --------------------------------------------------------------- 
+
+ ------ ------------------------------------------------------------------------ 
+  Line   src/Import/Analyzer.php                                                 
+ ------ ------------------------------------------------------------------------ 
+  111    Method CFK\Import\Analyzer::analyzeImport() should return               
+         array{new_children: array<int, array<string, mixed>>,                   
+         updated_children: array<int, array{changes: non-empty-array<string,     
+         array<string, mixed>>, new: array<string, mixed>, old: array<string,    
+         mixed>}>, removed_children: array<int, array<string, mixed>>,           
+         warnings: array{0?: array<string, mixed>}, errors: array, stats:        
+         array{total_new: 0|1|2, total_updated: 0|1|2, total_removed: 0|1|2,     
+         total_unchanged: 0|1|2}} but returns array{new_children: array<int<0,   
+         max>, array<string, mixed>>, updated_children: array<int<0, max>,       
+         array{old: array<string, mixed>, new: array<string, mixed>, changes:    
+         array{special_needs?: array{old: mixed, new: mixed}, wishes?:           
+         array{old: mixed, new: mixed}, interests?: array{old: mixed, new:       
+         mixed}, jacket_size?: array{old: mixed, new: mixed}, shoe_size?:        
+         array{old: mixed, new: mixed}, pant_size?: array{old: mixed, new:       
+         mixed}, shirt_size?: array{old: mixed, new: mixed}, grade?:             
+         array{old: mixed, new: mixed}, ...}&non-empty-array}>,                  
+         removed_children: array<int<0, max>, array<string, mixed>>, warnings:   
+         array<int<0, max>, array{type:                                          
+         'age_decreased'|'data_loss'|'gender_changed', severity:                 
+         'low'|'medium', message: string, child: array<string, mixed>, field?:   
+         string}|array{type: 'sponsored_child…', severity: 'high', message:      
+         non-falsy-string, child: array<string, mixed>}>, errors: array{},       
+         stats: array{total_new: int<0, max>, total_removed: int<0, max>,        
+         total_unchanged: int<0, max>, total_updated: int<0, max>}}.             
+         💡 Offset 'stats' (array{total_new: 0|1|2, total_updated: 0|1|2,        
+            total_removed: 0|1|2, total_unchanged: 0|1|2}) does not accept type  
+            array{total_new: int<0, max>, total_removed: int<0, max>,            
+            total_unchanged: int<0, max>, total_updated: int<0, max>}: Offset    
+            'total_new' (0|1|2) does not accept type int<0, max>.                
+         💡 Offset 'stats' (array{total_new: 0|1|2, total_updated: 0|1|2,        
+            total_removed: 0|1|2, total_unchanged: 0|1|2}) does not accept type  
+            array{total_new: int<0, max>, total_removed: int<0, max>,            
+            total_unchanged: int<0, max>, total_updated: int<0, max>}: Offset    
+            'total_updated' (0|1|2) does not accept type int<0, max>.            
+         💡 Offset 'stats' (array{total_new: 0|1|2, total_updated: 0|1|2,        
+            total_removed: 0|1|2, total_unchanged: 0|1|2}) does not accept type  
+            array{total_new: int<0, max>, total_removed: int<0, max>,            
+            total_unchanged: int<0, max>, total_updated: int<0, max>}: Offset    
+            'total_removed' (0|1|2) does not accept type int<0, max>.            
+         💡 Offset 'stats' (array{total_new: 0|1|2, total_updated: 0|1|2,        
+            total_removed: 0|1|2, total_unchanged: 0|1|2}) does not accept type  
+            array{total_new: int<0, max>, total_removed: int<0, max>,            
+            total_unchanged: int<0, max>, total_updated: int<0, max>}: Offset    
+            'total_unchanged' (0|1|2) does not accept type int<0, max>.          
+                                                                                 
+  249    Offset 'children' does not exist on array{success: true, children?:     
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,     
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file       
+         not found…'}.                                                           
+  254    Parameter #2 $sponsorshipLookup of static method                        
+         CFK\Import\Analyzer::applyReplaceMode() expects array<string,           
+         string>, array<string, bool|float|int|string|null> given.               
+  257    Parameter #2 $sponsorshipLookup of static method                        
+         CFK\Import\Analyzer::applyAppendMode() expects array<string, string>,   
+         array<string, bool|float|int|string|null> given.                        
+  260    Parameter #2 $sponsorshipLookup of static method                        
+         CFK\Import\Analyzer::applyUpdateMode() expects array<string, string>,   
+         array<string, bool|float|int|string|null> given.                        
+  415    Parameter #1 $childId of static method                                  
+         CFK\Import\Analyzer::updateChild() expects int,                         
+         bool|float|int|string|null given.                                       
+ ------ ------------------------------------------------------------------------ 
+
+ ------ -------------------------------------------------------------------- 
+  Line   src/Reservation/Manager.php                                         
+ ------ -------------------------------------------------------------------- 
+  410    Method CFK\Reservation\Manager::checkChildrenAvailability() should  
+         return array<int, string> but returns array<int,                    
+         bool|float|int|string|null>.                                        
+ ------ -------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   src/Sponsorship/Manager.php                                                           
+ ------ -------------------------------------------------------------------------------------- 
+  628    Method CFK\Sponsorship\Manager::getStats() should return                              
+         array<string, array<string, int>> but returns array<string,                           
+         array<int|string, int>>.                                                              
+  921    Offset 'child' does not exist on array{success: mixed, message?:                      
+         mixed, child?: mixed, sponsorship_id?: mixed}.                                        
+  923    Offset 'message' does not exist on array{success:                                     
+         0|0.0|''|'0'|array{}|false|null, message?: mixed, child?: mixed,                      
+         sponsorship_id?: mixed}.                                                              
+  934    Method CFK\Sponsorship\Manager::addChildrenToSponsorship() should                     
+         return array{success: bool, message: string, added_children?:                         
+         array{mixed}, errors?: array{0?: mixed}} but returns array{success:                   
+         true, message: non-falsy-string, added_children:                                      
+         non-empty-array<int<0, max>, mixed>, errors: array<int<0, max>,                       
+         mixed>}.                                                                              
+         💡 Offset 'added_children' (array{mixed}) does not accept type                        
+            non-empty-array<int<0, max>, mixed>.                                               
+  965    Method CFK\Sponsorship\Manager::validateSponsorData() return type has                 
+         no value type specified in iterable type array.                                       
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+ ------ -------------------------------------------------------------------------------------- 
+
+ [ERROR] Found 61 errors                                                        
+
