@@ -184,37 +184,37 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="stat-card">
                         <h3>Children</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['children']['total']; ?></p>
-                            <p><strong>Available:</strong> <?php echo $stats['children']['available']; ?></p>
-                            <p><strong>Pending:</strong> <?php echo $stats['children']['pending']; ?></p>
-                            <p><strong>Sponsored:</strong> <?php echo $stats['children']['sponsored']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['children']['total'] ?? 0; ?></p>
+                            <p><strong>Available:</strong> <?php echo $stats['children']['available'] ?? 0; ?></p>
+                            <p><strong>Pending:</strong> <?php echo $stats['children']['pending'] ?? 0; ?></p>
+                            <p><strong>Sponsored:</strong> <?php echo $stats['children']['sponsored'] ?? 0; ?></p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <h3>Sponsorships</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['sponsorships']['total']; ?></p>
-                            <p><strong>Pending:</strong> <?php echo $stats['sponsorships']['pending']; ?></p>
-                            <p><strong>Confirmed:</strong> <?php echo $stats['sponsorships']['confirmed']; ?></p>
-                            <p><strong>Completed:</strong> <?php echo $stats['sponsorships']['completed']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['sponsorships']['total'] ?? 0; ?></p>
+                            <p><strong>Pending:</strong> <?php echo $stats['sponsorships']['pending'] ?? 0; ?></p>
+                            <p><strong>Confirmed:</strong> <?php echo $stats['sponsorships']['confirmed'] ?? 0; ?></p>
+                            <p><strong>Completed:</strong> <?php echo $stats['sponsorships']['completed'] ?? 0; ?></p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <h3>Families</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['families']['total']; ?></p>
-                            <p><strong>Fully Sponsored:</strong> <?php echo $stats['families']['fully_sponsored']; ?></p>
-                            <p><strong>Partially Sponsored:</strong> <?php echo $stats['families']['total'] - $stats['families']['fully_sponsored']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['families']['total'] ?? 0; ?></p>
+                            <p><strong>Fully Sponsored:</strong> <?php echo $stats['families']['fully_sponsored'] ?? 0; ?></p>
+                            <p><strong>Partially Sponsored:</strong> <?php echo ($stats['families']['total'] ?? 0) - ($stats['families']['fully_sponsored'] ?? 0); ?></p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <h3>Sponsors</h3>
                         <div class="stat-details">
-                            <p><strong>Unique Sponsors:</strong> <?php echo $stats['unique_sponsors']; ?></p>
-                            <p><strong>Avg Children/Sponsor:</strong> <?php echo $stats['unique_sponsors'] > 0 ? round($stats['sponsorships']['total'] / $stats['unique_sponsors'], 1) : 0; ?></p>
+                            <p><strong>Unique Sponsors:</strong> <?php echo $stats['unique_sponsors'] ?? 0; ?></p>
+                            <p><strong>Avg Children/Sponsor:</strong> <?php echo ($stats['unique_sponsors'] ?? 0) > 0 ? round(($stats['sponsorships']['total'] ?? 0) / ($stats['unique_sponsors'] ?? 0), 1) : 0; ?></p>
                         </div>
                     </div>
                 </div>
@@ -578,7 +578,7 @@ include __DIR__ . '/includes/admin_header.php';
                             </td>
                             <td>
                                 <?php if ($row['sponsorship_date']) : ?>
-                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date'])); ?>
+                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date']) ?: 0); ?>
                                 <?php else : ?>
                                     -
                                 <?php endif; ?>

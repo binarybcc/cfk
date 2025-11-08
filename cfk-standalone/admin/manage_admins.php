@@ -126,8 +126,8 @@ if ($_POST !== []) {
             $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
 
             Database::delete('admin_users', ['id' => $adminId]);
-            $message = "Administrator '{$admin['username']}' has been deleted.";
-            error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
+            $message = "Administrator '" . ($admin['username'] ?? 'Unknown') . "' has been deleted.";
+            error_log("CFK Admin: Admin user deleted: " . ($admin['username'] ?? 'Unknown') . " by " . $_SESSION['cfk_admin_username']);
         }
     }
 }

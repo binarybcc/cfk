@@ -159,10 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
                 // Refresh stats to show restored data
                 try {
                     $currentStats = [
-                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'],
+                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
+                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
+                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
+                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
                     ];
                 } catch (Exception) {
                     // Keep existing stats
