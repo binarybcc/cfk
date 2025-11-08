@@ -177,7 +177,7 @@ if ($_POST && isset($_POST['add_children'])) {
                                 <?php endif; ?>
 
                                 <div class="child-meta">
-                                    <small>Requested: <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?></small>
+                                    <small>Requested: <?php echo date('M j, Y', strtotime((string) $child['request_date']) ?: 0); ?></small>
                                 </div>
                             </div>
                         <?php endforeach; ?>

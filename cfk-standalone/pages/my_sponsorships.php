@@ -239,7 +239,7 @@ global $cspNonce;
                                     <?php endif; ?>
                                     <div class="info-item">
                                         <strong>Confirmed:</strong>
-                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date'])); ?></span>
+                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date']) ?: 0); ?></span>
                                     </div>
                                 </div>
 
