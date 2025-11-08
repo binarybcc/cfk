@@ -213,8 +213,8 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="stat-card">
                         <h3>Sponsors</h3>
                         <div class="stat-details">
-                            <p><strong>Unique Sponsors:</strong> <?php echo $stats['unique_sponsors'] ?? 0; ?></p>
-                            <p><strong>Avg Children/Sponsor:</strong> <?php echo ($stats['unique_sponsors'] ?? 0) > 0 ? round(($stats['sponsorships']['total'] ?? 0) / ($stats['unique_sponsors'] ?? 0), 1) : 0; ?></p>
+                            <p><strong>Unique Sponsors:</strong> <?php echo $stats['unique_sponsors']; ?></p>
+                            <p><strong>Avg Children/Sponsor:</strong> <?php echo $stats['unique_sponsors'] > 0 ? round(($stats['sponsorships']['total'] ?? 0) / $stats['unique_sponsors'], 1) : 0; ?></p>
                         </div>
                     </div>
                 </div>
