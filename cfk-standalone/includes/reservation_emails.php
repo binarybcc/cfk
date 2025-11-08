@@ -340,7 +340,7 @@ function generateReservationConfirmationText(array $reservation): string
     $text .= "Your sponsorship is now confirmed!\n";
     $text .= "These children are reserved for you.\n";
     $text .= "Only Christmas for Kids admin can cancel this sponsorship.\n";
-    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime((string) $reservation['created_at'])) . "\n\n";
+    $text .= "Confirmation Date: " . date('F j, Y g:i A', strtotime((string) $reservation['created_at']) ?: 0) . "\n\n";
     $text .= "YOUR SPONSORED CHILDREN (" . count($children) . ")\n";
     $text .= str_repeat('-', 50) . "\n\n";
 
@@ -569,6 +569,9 @@ function generateAccessToken(string $email): string
     ];
 
     $json = json_encode($data);
+    if ($json === false) {
+        throw new Exception('Failed to encode data');
+    }
     $signature = hash_hmac('sha256', $json, config('secret_key', 'cfk-default-secret'));
 
     return base64_encode($json . '|' . $signature);

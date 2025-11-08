@@ -251,6 +251,7 @@ class Validator
 
     /**
      * Get all errors
+     * @return array<string, array<int, string>>
      */
     public function errors(): array
     {
@@ -267,6 +268,7 @@ class Validator
 
     /**
      * Get all errors as flat array
+     * @return array<int, string>
      */
     public function allErrors(): array
     {
@@ -282,6 +284,7 @@ class Validator
 
     /**
      * Get validated data (only fields that passed validation)
+     * @return array<string, mixed>
      */
     public function validated(): array
     {

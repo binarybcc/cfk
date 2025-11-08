@@ -35,24 +35,28 @@ try {
     $db = Connection::getConnection();
 
     // Check children table
-    $childCount = $db->query('SELECT COUNT(*) FROM cfk_children')->fetchColumn();
+    $stmt = $db->query('SELECT COUNT(*) FROM cfk_children');
+    $childCount = $stmt !== false ? $stmt->fetchColumn() : 0;
 
     // Check families table
-    $familyCount = $db->query('SELECT COUNT(*) FROM cfk_families')->fetchColumn();
+    $stmt = $db->query('SELECT COUNT(*) FROM cfk_families');
+    $familyCount = $stmt !== false ? $stmt->fetchColumn() : 0;
 
     if ($childCount > 0) {
-        $sampleChildren = $db->query('
+        $stmt = $db->query('
             SELECT c.id, f.family_number, c.child_letter, c.name, c.status
             FROM cfk_children c
             JOIN cfk_families f ON c.family_id = f.id
             ORDER BY f.family_number, c.child_letter
             LIMIT 20
-        ')->fetchAll(PDO::FETCH_ASSOC);
+        ');
+        $sampleChildren = $stmt !== false ? $stmt->fetchAll(PDO::FETCH_ASSOC) : [];
 
-        $familyRange = $db->query('
+        $stmt = $db->query('
             SELECT MIN(family_number) as min, MAX(family_number) as max
             FROM cfk_families
-        ')->fetch(PDO::FETCH_ASSOC);
+        ');
+        $familyRange = $stmt !== false ? $stmt->fetch(PDO::FETCH_ASSOC) : ['min' => 0, 'max' => 0];
     }
 } catch (Exception $e) {
     $error = $e->getMessage();
