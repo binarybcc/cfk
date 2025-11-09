@@ -113,12 +113,13 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
 
 // Check availability
 if ($isFamilySponsorship) {
-    $isAvailable = $childrenToSponsor !== [];
-    $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
+    // If we reached here, childrenToSponsor is guaranteed to be non-empty (would have exited otherwise)
+    $isAvailable = true;
+    $unavailableReason = '';
 } else {
     $availability = SponsorshipManager::isChildAvailable($childId);
     $isAvailable = $availability['available'];
-    $unavailableReason = $availability['reason'] ?? '';
+    $unavailableReason = $availability['reason']; // Always exists per PHPDoc return type
 }
 
 // Get full child details for display
