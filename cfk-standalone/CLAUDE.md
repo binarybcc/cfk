@@ -223,7 +223,7 @@ vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
 ./tests/security-functional-tests.sh
 ```
 
-**Expected:** 35/36 functional tests pass (v1.7.3 baseline)
+**Expected:** 36/36 functional tests pass (v1.7.3 baseline)
 
 ### 3. One Change at a Time
 
@@ -291,13 +291,13 @@ After ANY code change:
 # 1. Static analysis (must pass - no new errors)
 vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
 
-# 2. Functional tests (must pass - 35/36)
+# 2. Functional tests (must pass - 36/36)
 ./tests/security-functional-tests.sh
 ```
 
 **Expected baseline:**
 - PHPStan: 161 errors (no increase acceptable)
-- Functional tests: 35/36 passing
+- Functional tests: 36/36 passing
 
 ### Available Analysis Tools
 
@@ -387,7 +387,7 @@ open docs/metrics/index.html
 - PHPStan: 161 errors (44% improved from 287)
 - PHPCS: 655 violations (19 auto-fixed)
 - Psalm: 117 errors
-- Functional tests: 35/36 passing
+- Functional tests: 36/36 passing
 - Code formatted: 64 files improved
 - Auto-refactored: 13 files modernized
 
@@ -453,7 +453,7 @@ open docs/metrics/index.html
 
 - [ ] All deprecated wrapper files deleted (3,624 lines)
 - [ ] PHPStan critical errors reduced by 50%+
-- [ ] Functional tests: 35/36 pass (no regression)
+- [ ] Functional tests: 36/36 pass (no regression)
 - [ ] All production code scanned and clean
 - [ ] Documentation complete and current
 - [ ] Lessons learned documented for future production branches
