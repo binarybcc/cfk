@@ -21,6 +21,15 @@ You are deploying to the **STAGING** server. This is a safe testing environment.
 source .env.staging
 ```
 
+**Expected credentials in .env.staging:**
+- SSH_HOST: 10ce79bd48.nxcli.io
+- SSH_PORT: 22
+- SSH_USER: ac6c9a98_1
+- SSH_PASSWORD: (stored in .env.staging - NOT in git)
+- SSH_REMOTE_PATH: /home/ac6c9a98/10ce79bd48.nxcli.io/html
+- ENVIRONMENT: staging
+- SITE_URL: https://cfkstaging.org
+
 **Verify loaded credentials:**
 - SSH_HOST should be: 10ce79bd48.nxcli.io
 - ENVIRONMENT should be: staging
