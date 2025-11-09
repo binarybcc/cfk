@@ -27,6 +27,10 @@ if ($viewingFamily) {
     $totalPages = 1;
     $currentPage = 1;
 
+    // Define per-page variables (not used in family view, but prevents undefined variable warnings)
+    $perPageOptions = [12, 24, 48];
+    $perPage = config('children_per_page', 12);
+
     // Get family info for display
     $familyInfo = $children === [] ? null : getFamilyById($familyId);
 
