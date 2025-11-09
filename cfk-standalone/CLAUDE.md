@@ -1,16 +1,20 @@
-# CLAUDE.md - v1.8.1 Cleanup Branch
+# CLAUDE.md - Project Architecture Guide
 
 ## 🚨 ABSOLUTE RULE - READ THIS FIRST
 
-**⛔ THIS BRANCH NEVER GOES TO PRODUCTION ⛔**
+**⛔ VERSION-SPECIFIC DEPLOYMENT RULES ⛔**
 
-**v1.8.x branches are DEVELOPMENT/EXPERIMENTAL ONLY**
-
+### v1.8.x branches are DEVELOPMENT/EXPERIMENTAL ONLY
 - ❌ **NEVER deploy v1.8.x to production**
 - ❌ **NEVER suggest deploying this branch to production**
 - ❌ **NEVER merge this branch to production branches**
 - ✅ **ONLY deploy to staging (https://10ce79bd48.nxcli.io/)**
 - ✅ **This is a learning/modernization branch only**
+
+### v1.9.x branches enforce STRICT ARCHITECTURE
+- ⚠️ **ALL code MUST follow modern OOP patterns (see Architecture Enforcement below)**
+- ❌ **NO procedural code allowed in v1.9.x**
+- ✅ **Framework-enforced architecture (Slim + Symfony Components)**
 
 **Production branch:** v1.7.3-production-hardening (cforkids.org)
 
@@ -18,13 +22,165 @@
 
 ---
 
-**Branch Purpose:** Systematic code modernization using Production-First methodology
-**Base Branch:** v1.7.3-production-hardening
+## 🏗️ ARCHITECTURE ENFORCEMENT - v1.9.x ONLY
+
+### ⚠️ CRITICAL: Historical Context
+
+**In 2024, we unintentionally drifted from OOP to procedural code during development.**
+
+The original v1.x codebase was built with 173 iterations, starting with OOP intentions but gradually becoming procedural without realizing it. This drift happened because:
+- AI assistance accepted whatever worked without enforcing patterns
+- No framework constraints to prevent procedural code
+- Developer was learning and didn't recognize the drift until near deployment
+
+**v1.9.x exists specifically to prevent this from happening again.**
+
+---
+
+### 🎯 v1.9.x Architecture Requirements
+
+**When working in v1.9.x branches, EVERY code change MUST use:**
+
+#### ✅ REQUIRED Architecture (v1.9.x)
+
+| Component | Requirement | Why |
+|-----------|-------------|-----|
+| **Routing** | Slim Framework only | NO direct PHP file access |
+| **Dependency Injection** | Symfony DI Container | NO global variables/functions |
+| **Templates** | Twig only | NO inline PHP/HTML mixing |
+| **Autoloading** | PSR-4 via Composer | Proper namespacing |
+| **Classes** | All logic in classes | NO standalone functions |
+| **Database** | Injected service classes | NO direct connections |
+
+#### ❌ REJECTED in v1.9.x
+
+These patterns are **FORBIDDEN** in v1.9.x branches:
+
+- ❌ Procedural functions outside classes
+- ❌ Direct `$_GET`/`$_POST`/`$_REQUEST` access
+- ❌ Global variables or `$GLOBALS`
+- ❌ Mixed PHP/HTML files (`.php` with HTML)
+- ❌ Direct database connections (use injected service)
+- ❌ `include`/`require` for code loading (use autoloading)
+- ❌ Standalone function files
+
+#### 🛑 STOP AND REFRAME
+
+**If Claude suggests ANY of the rejected patterns above in v1.9.x:**
+
+1. **STOP immediately**
+2. Explain: "This is procedural code. v1.9.x requires OOP architecture."
+3. Ask: "How should this be implemented using Slim routing / DI container / Twig?"
+4. Reframe the solution using required architecture
+
+---
+
+### 📋 Decision Tree for v1.9.x Code
+
+**Before writing ANY code in v1.9.x, ask:**
+
+```
+1. Is this handling a request?
+   → Use Slim routing + Controller class
+
+2. Does this need dependencies (DB, email, etc.)?
+   → Use Symfony DI Container injection
+
+3. Is this generating output?
+   → Use Twig template
+
+4. Is this business logic?
+   → Service class with constructor injection
+
+5. Is this data access?
+   → Repository class with injected connection
+```
+
+**If none of these patterns fit, you're probably thinking procedurally. Rethink the approach.**
+
+---
+
+### 🏗️ v1.9.x Stack (Approved)
+
+**What Was Considered and Decided:**
+
+| Option | Decision | Reason |
+|--------|----------|--------|
+| **NestJS** | ❌ Rejected | Would require complete TypeScript rewrite |
+| **Laravel** | ❌ Rejected | Too opinionated, forces complete rewrite |
+| **Full Symfony** | ❌ Rejected | Too complex for this scale |
+| **Slim + Symfony Components** | ✅ CHOSEN | Lightweight, incremental, learnable |
+
+**Approved Stack for v1.9.x:**
+- **Slim Framework** - Lightweight routing and middleware (PSR-7)
+- **Symfony DI Container** - Best-in-class dependency injection
+- **Twig** - Template engine with auto-escaping
+- **Existing CFK classes** - Migrate gradually, keep business logic
+
+**Why This Combination:**
+- ✅ Lightweight (not a full framework)
+- ✅ Incremental migration (avoid parallel systems mistake)
+- ✅ Single entry point throughout migration
+- ✅ Gradual learning curve
+- ✅ Can add more Symfony components as needed
+- ✅ Framework enforces OOP patterns (prevents drift)
+
+---
+
+### 📁 v1.9.x Directory Structure
+
+```
+/src
+  /Controller     (Slim route handlers)
+  /Service        (Business logic classes)
+  /Repository     (Database access classes)
+  /Model          (Data objects - Child, Reservation, Donation)
+  /Middleware     (Slim middleware)
+/templates        (Twig templates)
+/config          (DI container configuration)
+/public          (Single entry point: index.php)
+composer.json    (Slim, Symfony Components, Twig)
+```
+
+**Key principle:** Framework structure prevents accidental procedural drift.
+
+---
+
+## 🎯 Branch-Specific Rules Summary
+
+### v1.7.3-production-hardening
+- ✅ Production deployment allowed
+- ✅ Procedural code acceptable (existing codebase)
+- ✅ Stability is priority #1
+- ✅ Magic-link authentication only
+
+### v1.8.x (Current: v1.8.1-cleanup)
+- ❌ **NEVER production deployment**
+- ✅ Procedural code acceptable (cleanup phase)
+- ✅ Focus: organization, optimization, dead code removal
+- ✅ Staging deployment only (https://10ce79bd48.nxcli.io/)
+- ✅ Learning and validation branch
+
+### v1.9.x (Future)
+- ❌ **Architecture strictly enforced**
+- ❌ **NO procedural code**
+- ✅ **MUST use Slim + Symfony DI + Twig**
+- ✅ Framework prevents drift
+- ✅ Modern OOP patterns required
+
+---
+
+## 📍 Current Branch Context
+
+**Working on:** v1.8.1-cleanup (DEVELOPMENT ONLY)
+
+**Branch Purpose:** Systematic code modernization using Production-First methodology  
+**Base Branch:** v1.7.3-production-hardening  
 **Created:** October 30, 2025
 
 ---
 
-## 🎯 Branch Mission
+## 🎯 Branch Mission (v1.8.1)
 
 Apply lessons learned from v1.8-cleanup to properly modernize the codebase:
 - Remove 3,624 lines of deprecated wrapper files
@@ -46,7 +202,7 @@ This comprehensive plan includes:
 
 ---
 
-## 🚨 Critical Rules for This Branch
+## 🚨 Critical Rules for v1.8.x Branches
 
 ### 1. Production First Principle (ALWAYS)
 
@@ -86,8 +242,6 @@ After ANY code change:
 ### 5. 🚨 DEPLOYMENT RULE (MANDATORY)
 
 **⛔ THIS BRANCH (v1.8.x) NEVER GOES TO PRODUCTION - EVER ⛔**
-
-**See absolute rule at top of this file. v1.8.x is DEVELOPMENT ONLY.**
 
 **Allowed deployments for this branch:**
 - ✅ **Staging only:** https://10ce79bd48.nxcli.io/
@@ -283,13 +437,19 @@ open docs/metrics/index.html
 4. ❌ **Don't document afterward** - Document as you code
 5. ❌ **Don't prioritize architecture over production safety** - Production first, always
 
+**Additional mistakes from 2024 to avoid in v1.9.x:**
+
+6. ❌ **Don't accept procedural code in v1.9.x** - Framework must enforce OOP
+7. ❌ **Don't build parallel systems** - Single entry point throughout migration
+8. ❌ **Don't drift from architectural intentions** - Be explicit about patterns
+
 ---
 
 ## ✅ Success Criteria
 
-**⛔ REMINDER: This branch NEVER goes to production ⛔**
+**⛔ REMINDER: v1.8.x branches NEVER go to production ⛔**
 
-**This branch is successful when these learning/modernization goals are achieved:**
+**v1.8.1 branch is successful when these learning/modernization goals are achieved:**
 
 - [ ] All deprecated wrapper files deleted (3,624 lines)
 - [ ] PHPStan critical errors reduced by 50%+
@@ -301,9 +461,11 @@ open docs/metrics/index.html
 
 **Purpose:** Learn and validate modernization patterns for future use in production branches
 
+**v1.9.x branches will have different success criteria** focused on OOP architecture compliance and framework integration.
+
 ---
 
-## 🔄 Git Workflow
+## 📄 Git Workflow
 
 ```bash
 # Feature branches
@@ -331,7 +493,10 @@ git push origin cleanup/remove-archive-wrapper
 3. **PHPStan errors**: Run with `--level 0` first, then increase
 4. **Functional test failures**: Check `tests/security-functional-tests.sh` for details
 5. **Deployment questions**: See `docs/v1.8.1-cleanup-plan.md` Phase 4
+6. **Architecture questions (v1.9.x)**: See Architecture Enforcement section above
 
 ---
 
-**Remember:** This cleanup follows the Production-First methodology. Every decision prioritizes production stability over architectural elegance.
+**Remember:** 
+- **v1.8.x:** Production-First methodology - stability over elegance
+- **v1.9.x:** Architecture-First methodology - framework prevents drift
