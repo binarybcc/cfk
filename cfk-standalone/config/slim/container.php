@@ -31,33 +31,30 @@ $container->register('db.connection', Connection::class)
 /**
  * Twig Template Engine
  * Auto-escaping enabled for XSS prevention
+ * Note: Factory closures not supported in Symfony DI - using manual registration
  */
-$container->register('twig', Twig::class)
-    ->setFactory(function () {
-        // Create Twig environment
-        $twig = Twig::create(__DIR__ . '/../../templates', [
-            'cache' => false, // Disable cache during development
-            'debug' => config('environment') !== 'production',
-            'auto_reload' => true,
-        ]);
+$twig = Twig::create(__DIR__ . '/../../templates', [
+    'cache' => false, // Disable cache during development
+    'debug' => \config('environment') !== 'production',
+    'auto_reload' => true,
+]);
 
-        // Get Twig environment to add functions
-        $env = $twig->getEnvironment();
+// Get Twig environment to add functions
+$env = $twig->getEnvironment();
 
-        // Add PHP helper functions as Twig functions
-        $env->addFunction(new \Twig\TwigFunction('getPhotoUrl', 'getPhotoUrl'));
-        $env->addFunction(new \Twig\TwigFunction('formatAge', 'formatAge'));
-        $env->addFunction(new \Twig\TwigFunction('getAgeCategory', 'getAgeCategory'));
-        $env->addFunction(new \Twig\TwigFunction('baseUrl', 'baseUrl'));
-        $env->addFunction(new \Twig\TwigFunction('sanitizeString', 'sanitizeString'));
+// Add PHP helper functions as Twig functions
+$env->addFunction(new \Twig\TwigFunction('getPhotoUrl', 'getPhotoUrl'));
+$env->addFunction(new \Twig\TwigFunction('formatAge', 'formatAge'));
+$env->addFunction(new \Twig\TwigFunction('getAgeCategory', 'getAgeCategory'));
+$env->addFunction(new \Twig\TwigFunction('baseUrl', 'baseUrl'));
+$env->addFunction(new \Twig\TwigFunction('sanitizeString', 'sanitizeString'));
 
-        // Add global variables
-        global $childStatusOptions;
-        $env->addGlobal('childStatusOptions', $childStatusOptions ?? []);
+// Add global variables
+global $childStatusOptions;
+$env->addGlobal('childStatusOptions', $childStatusOptions ?? []);
 
-        return $twig;
-    })
-    ->setPublic(true);
+// Register Twig as a service (using instance directly since we can't use closure factory)
+$container->set('twig', $twig);
 
 // =============================================================================
 // Controllers
