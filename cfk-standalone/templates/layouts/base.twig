@@ -12,6 +12,9 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ baseUrl('assets/images/favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ baseUrl('assets/images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ baseUrl('assets/images/favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ baseUrl('assets/images/apple-touch-icon.png') }}">
 
     <!-- Alpine.js v3.14.1 -->
     <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
@@ -20,8 +23,21 @@
     <!-- Selections System -->
     <script src="{{ baseUrl('assets/js/selections.js') }}"></script>
 
+    <!-- Zeffy donation integration -->
+    <script src="https://zeffy-scripts.s3.ca-central-1.amazonaws.com/embed-form-script.min.js"></script>
+
     <style>
-        /* Logo Styling - match header.php sizing */
+        /* Alpine.js Cloak - Prevent Flash of Unstyled Content */
+        [x-cloak] {
+            display: none !important;
+        }
+
+        /* Logo Styling */
+        .logo-link {
+            display: block;
+            text-decoration: none;
+        }
+
         .logo-image {
             height: 70px;
             width: auto;
@@ -29,47 +45,112 @@
             display: block;
         }
 
+        .logo-text-fallback {
+            margin: 0;
+            color: #2c5530;
+            font-size: 1.8em;
+        }
+
+        .logo-text-fallback a {
+            color: #2c5530;
+            text-decoration: none;
+        }
+
+        /* Mobile Logo - More compact */
         @media (max-width: 768px) {
             .logo-image {
                 height: 45px;
+            }
+
+            .tagline {
+                font-size: 0.75rem;
+                margin-top: 0.25rem;
+            }
+        }
+
+        /* Hamburger Menu Button */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: 2px solid #2c5530;
+            padding: 0.5rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-toggle:hover {
+            background: #f8f9fa;
+        }
+
+        .mobile-menu-toggle span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: #2c5530;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 968px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+
+        /* Selections Badge */
+        .selections-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #c41e3a;
+            color: white;
+            border-radius: 12px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 6px;
+            line-height: 1;
+        }
+
+        .selections-link a {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Footer Logo Styling */
+        .footer-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .footer-logo {
+            height: 60px;
+            width: auto;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .footer-logo {
+                height: 50px;
             }
         }
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="container">
-            <div class="header-content">
-                <div class="logo">
-                    <a href="{{ baseUrl('') }}" class="logo-link">
-                        <img src="{{ baseUrl('assets/images/cfk-horizontal.png') }}" alt="Christmas for Kids" class="logo-image">
-                    </a>
-                    <p class="tagline">Bringing Christmas joy to local children in need</p>
-                </div>
-                <nav class="main-nav">
-                    <a href="{{ baseUrl('') }}" class="nav-link">Home</a>
-                    <a href="{{ baseUrl('slim.php/children') }}" class="nav-link">Children</a>
-                    <a href="{{ baseUrl('?page=how_to_apply') }}" class="nav-link">How to Apply</a>
-                    <a href="{{ baseUrl('slim.php/sponsor/lookup') }}" class="nav-link">My Sponsorships</a>
-                    <a href="{{ baseUrl('?page=about') }}" class="nav-link">About</a>
-                </nav>
-            </div>
-        </div>
-    </header>
+    {# Include Public Header Component #}
+    {% include 'components/header.twig' %}
 
-    <main class="main-content">
+    <main id="main-content" class="main-content" tabindex="-1">
         <div class="container">
             {% block content %}{% endblock %}
         </div>
     </main>
 
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; {{ "now"|date('Y') }} Christmas for Kids. All rights reserved.</p>
-                <p>Bringing Christmas joy to families in need.</p>
-            </div>
-        </div>
-    </footer>
+    {# Include Shared Footer Component #}
+    {% include 'components/footer.twig' %}
 </body>
 </html>

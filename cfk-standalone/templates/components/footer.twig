@@ -1,0 +1,69 @@
+{# Shared Footer Component - Used by all pages #}
+<footer class="main-footer">
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-section footer-brand">
+                <img src="{{ baseUrl('assets/images/cfk-horizontal.png') }}"
+                     alt="Christmas for Kids"
+                     class="footer-logo"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                <h3 style="display:none;">Christmas for Kids</h3>
+                <p>Connecting generous hearts with children in need during the Christmas season.</p>
+                <p>Making the holidays brighter, one child at a time.</p>
+            </div>
+
+            <div class="footer-section">
+                <h3>How It Works</h3>
+                <ul>
+                    <li>Browse children who need sponsorship</li>
+                    <li>Select a child or family to sponsor</li>
+                    <li>Provide gifts</li>
+                    <li>Make a child's Christmas special</li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Support Our Mission</h3>
+                <p>Your donation helps us reach more children and families in need.</p>
+
+                <!-- Zeffy Donation Button Integration -->
+                <div class="donation-section">
+                    <a href="{{ baseUrl('?page=donate') }}" class="btn btn-success donate-btn">
+                        Donate Now
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <p>Email: <a href="mailto:christmasforkids@upstatetoday.com">christmasforkids@upstatetoday.com</a></p>
+                <p>Questions about sponsorship? We're here to help!</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; {{ "now"|date('Y') }} Christmas for Kids. All rights reserved.</p>
+            <p class="version">Version 1.9.2</p>
+            <p class="ai-attribution">This site was created with <a href="https://claude.ai" target="_blank" rel="noopener noreferrer">Claude AI</a> under human direction. If you'd like to see what AI can do for you and your business, <a href="mailto:help@edwards-group.com">email help@edwards-group.com</a>.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- JavaScript -->
+<script src="{{ baseUrl('assets/js/main.js') }}"></script>
+
+<!-- Initialize Sticky Cart Bar -->
+<script>
+// Initialize sticky bar on page load
+if (typeof StickyBarManager !== 'undefined') {
+    StickyBarManager.init('{{ baseUrl('') }}');
+
+    // Hide sticky bar on cart pages (my_sponsorships, confirm_sponsorship, reservation_review)
+    const currentPage = new URLSearchParams(window.location.search).get('page');
+    const cartPages = ['my_sponsorships', 'confirm_sponsorship', 'reservation_review'];
+
+    if (cartPages.includes(currentPage)) {
+        StickyBarManager.hide();
+    }
+}
+</script>
