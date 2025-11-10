@@ -23,20 +23,21 @@ class Manager
     /**
      * Initialize PHPMailer instance (public for email queue access)
      *
-     * @return object PHPMailer instance or fallback mailer
+     * @return PHPMailer|object PHPMailer instance or fallback mailer
      */
     public static function getMailer(): object
     {
-        if (!self::$mailer instanceof PHPMailer) {
+        if (! self::$mailer instanceof PHPMailer) {
             // Auto-load PHPMailer if available via Composer
             if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
                 require_once __DIR__ . '/../../vendor/autoload.php';
             }
 
             // Fallback: Use basic PHP mail() function
-            if (!class_exists('PHPMailer\PHPMailer\PHPMailer')) {
+            if (! class_exists('PHPMailer\PHPMailer\PHPMailer')) {
                 $fallback = self::getFallbackMailer();
                 $fallback->setFrom((string) config('from_email'), (string) config('from_name'));
+
                 return $fallback;
             }
 
@@ -72,7 +73,7 @@ class Manager
      */
     private static function getFallbackMailer(): object
     {
-        return new class {
+        return new class () {
             public string $Subject = '';
             public string $Body = '';
             public string $AltBody = '';
@@ -93,6 +94,21 @@ class Manager
                 $this->to = [];
             }
 
+            public function clearReplyTos(): void
+            {
+                // Fallback mailer doesn't support reply-to
+            }
+
+            public function addCC(string $email, string $name = ''): void
+            {
+                // Fallback mailer doesn't support CC
+            }
+
+            public function addBCC(string $email, string $name = ''): void
+            {
+                // Fallback mailer doesn't support BCC
+            }
+
             public function setFrom(string $email, string $name = ''): void
             {
                 $this->from = ['email' => $email, 'name' => $name];
@@ -105,7 +121,7 @@ class Manager
 
                 foreach ($this->to as $recipient) {
                     $toAddress = $recipient['name'] ? $recipient['name'] . ' <' . $recipient['email'] . '>' : $recipient['email'];
-                    if (!mail($toAddress, $this->Subject, $this->Body, $headers)) {
+                    if (! mail($toAddress, $this->Subject, $this->Body, $headers)) {
                         return false;
                     }
                 }
@@ -155,6 +171,7 @@ class Manager
                 (int) ($sponsorship['id'] ?? 0),
                 $e->getMessage()
             );
+
             return false;
         }
     }
@@ -190,6 +207,7 @@ class Manager
             return $success;
         } catch (Exception $e) {
             error_log('Failed to send admin notification email: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -228,6 +246,7 @@ class Manager
             return $success;
         } catch (Exception $e) {
             error_log('Failed to send multi-child sponsorship email: ' . $e->getMessage());
+
             return false;
         }
     }
@@ -297,6 +316,7 @@ class Manager
                 0,
                 $e->getMessage()
             );
+
             return false;
         }
     }
@@ -304,7 +324,9 @@ class Manager
     /**
      * Test email configuration
      *
-     * @return array<string, mixed> Test result with success status and message
+     * @return (false|mixed|string)[] Test result with success status and message
+     *
+     * @psalm-return array{success: false|mixed, message: string}
      */
     public static function testEmailConfig(): array
     {
@@ -320,12 +342,12 @@ class Manager
 
             return [
                 'success' => $success,
-                'message' => $success ? 'Test email sent successfully' : 'Failed to send test email'
+                'message' => $success ? 'Test email sent successfully' : 'Failed to send test email',
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'message' => 'Email test failed: ' . $e->getMessage()
+                'message' => 'Email test failed: ' . $e->getMessage(),
             ];
         }
     }
@@ -334,6 +356,7 @@ class Manager
      * Get sponsor confirmation email template (public for email queue access)
      *
      * @param array<string, mixed> $sponsorship Sponsorship data
+     *
      * @return string HTML email template
      */
     public static function getSponsorConfirmationTemplate(array $sponsorship): string
@@ -436,7 +459,7 @@ class Manager
                         <p><strong>{$wishes}</strong></p>
                     </div>
 
-                    " . (!empty($specialNeeds) && $specialNeeds !== 'None' ? "
+                    " . (! empty($specialNeeds) && $specialNeeds !== 'None' ? "
                     <div class='info-section'>
                         <h3>⚠️ Special Notes</h3>
                         <p style='background: #fff3cd; padding: 10px; border-radius: 4px;'>{$specialNeeds}</p>
@@ -469,6 +492,7 @@ class Manager
      * @param string $subject Email subject
      * @param string $message Email message
      * @param array<string, mixed> $sponsorship Optional sponsorship data
+     *
      * @return string HTML email template
      */
     public static function getAdminNotificationTemplate(string $subject, string $message, array $sponsorship = []): string
@@ -503,6 +527,7 @@ class Manager
      *
      * @param string $sponsorName Sponsor name
      * @param array<int, array<string, mixed>> $sponsorships List of sponsorships
+     *
      * @return string HTML email template
      */
     private static function getMultiChildSponsorshipTemplate(string $sponsorName, array $sponsorships): string
@@ -513,10 +538,10 @@ class Manager
         $families = [];
         foreach ($sponsorships as $child) {
             $familyId = (int) $child['family_id'];
-            if (!isset($families[$familyId])) {
+            if (! isset($families[$familyId])) {
                 $families[$familyId] = [
                     'family_number' => $child['family_number'],
-                    'children' => []
+                    'children' => [],
                 ];
             }
             $families[$familyId]['children'][] = $child;
@@ -623,7 +648,7 @@ class Manager
                             <p><strong>{$wishes}</strong></p>
                         </div>";
 
-                if (!empty($specialNeeds)) {
+                if (! empty($specialNeeds)) {
                     $html .= "
                         <div class='special-needs-box'>
                             <h4 style='color: #c41e3a; margin-top: 0;'>⚠️ Special Notes</h4>
@@ -666,6 +691,7 @@ class Manager
      * @param string $name Sponsor name
      * @param string $accessUrl Access URL with token
      * @param int $childCount Number of sponsored children
+     *
      * @return string HTML email template
      */
     private static function getAccessLinkTemplate(string $email, string $name, string $accessUrl, int $childCount): string
@@ -738,6 +764,7 @@ class Manager
      * Generate secure access token for sponsor
      *
      * @param string $email Sponsor email address
+     *
      * @return string Base64 encoded token
      */
     private static function generateAccessToken(string $email): string
@@ -745,7 +772,7 @@ class Manager
         // Create a token that expires in 24 hours
         $data = [
             'email' => $email,
-            'expires' => time() + (24 * 60 * 60)
+            'expires' => time() + (24 * 60 * 60),
         ];
 
         $json = json_encode($data);
@@ -768,7 +795,7 @@ class Manager
 
             $expectedSignature = hash_hmac('sha256', $json, (string) config('secret_key', 'cfk-default-secret'));
 
-            if (!hash_equals($expectedSignature, $signature)) {
+            if (! hash_equals($expectedSignature, $signature)) {
                 return null; // Invalid signature
             }
 
@@ -802,7 +829,7 @@ class Manager
                 'status' => $status,
                 'sponsorship_id' => $sponsorshipId ?: null,
                 'error_message' => $error ?: null,
-                'sent_date' => date('Y-m-d H:i:s')
+                'sent_date' => date('Y-m-d H:i:s'),
             ]);
         } catch (Exception $e) {
             error_log('Failed to log email: ' . $e->getMessage());

@@ -2,27 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# 🚨 PENDING ACTION ITEM - REMIND EVERY SESSION
+# ✅ COMPLETED: Dead Code Cleanup (2025-11-06)
 
-**Dead Code Cleanup - Awaiting User Approval**
-
-**Status:** Ready to execute, waiting for user go-ahead
-**Date Created:** 2025-10-24
-**Report Location:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
+**Status:** COMPLETED
+**Completion Date:** 2025-11-06
+**Branch:** v1.8.1-cleanup
+**Report:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
 
 **Summary:**
-- 3,624 lines of deprecated wrapper files ready for deletion
-- 9 files in `includes/` directory (all have replacements in `src/`)
-- Risk: LOW - all deprecated files have functional namespaced replacements
-- Estimated time: 15-20 minutes to execute
+- ✅ 9 deprecated wrapper files successfully deleted (3,624 lines removed)
+- ✅ All files in `includes/` directory had functional namespaced replacements in `src/`
+- ✅ No references to deleted files found in codebase
+- ✅ Test suite verified: 35/36 tests passing (v1.7.3 baseline maintained)
 
-**Action Plan:**
-1. Fix 1 reference in `includes/functions.php` (line 471) - avatar_manager
-2. Delete 9 deprecated wrapper files (safe, low risk)
-3. Run test suite to verify (35/36 tests should pass)
-4. Commit and deploy
-
-**Files to Delete:**
+**Deleted Files:**
 - includes/sponsorship_manager.php (830 lines)
 - includes/email_manager.php (763 lines)
 - includes/csv_handler.php (561 lines)
@@ -33,13 +26,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - includes/import_analyzer.php (29 lines)
 - includes/magic_link_manager.php (29 lines)
 
-**When to Execute:**
-- User will explicitly say "proceed with dead code cleanup" or similar
-- DO NOT execute automatically
-- Remind user at start of each session until completed
-
-**To Remove This Reminder:**
-User must explicitly say "remove the dead code reminder from CLAUDE.md"
+**Impact:**
+- Codebase reduction: 3,624 lines
+- Improved code clarity: Single source of truth in `src/` namespace
+- Reduced maintenance burden: No duplicate code paths
 
 ---
 
@@ -226,8 +216,8 @@ cfk-standalone/
 
 To prevent confusion about which environment we're working in:
 
-- 🏠 **LOCAL** = Your development machine
-- 🐳 **DOCKER** = OrbStack/Docker containers (PHP 8.2)
+- 🏠 **LOCAL** = Your development machine (code editing only)
+- 🧪 **STAGING** = https://10ce79bd48.nxcli.io/ (testing environment)
 - 🌐 **PRODUCTION** = Live cforkids.org server
 
 Always use these markers when working on files or running commands.
@@ -246,48 +236,39 @@ Always use these markers when working on files or running commands.
    ```bash
    🏠 LOCAL:
    cp .env.example .env
-   # Edit .env with your Docker/local settings
+   # Edit .env with your local settings
    chmod 600 .env
 
    # Verify .env is NOT tracked by git
    git status  # Should not show .env
    ```
 
-3. **Start Docker Environment**
-   ```bash
-   🐳 DOCKER:
-   docker-compose up -d
-   # Access: http://localhost:8082
-   ```
-
-4. **Run Automated Tests**
-   ```bash
-   🐳 DOCKER:
-   ./tests/security-functional-tests.sh
-   # Should show: 35/36 tests passing
-   ```
+3. **Testing Setup**
+   - All testing done on staging environment: https://10ce79bd48.nxcli.io/
+   - Deploy changes to staging using `/deploy-staging` command
+   - Manual verification required for all changes
 
 ### Daily Development Workflow
 
 1. **Before Starting Work**
    ```bash
    🏠 LOCAL:
-   git pull origin v1.5-reservation-system
-   docker-compose ps  # Verify containers running
+   git pull origin v1.7.3-production-hardening
    ```
 
 2. **During Development**
-   - Test changes in Docker before deploying
-   - Run functional tests: `./tests/security-functional-tests.sh`
-   - Check logs: `docker-compose logs web`
+   - Make changes locally
+   - Run PHPStan for static analysis
+   - Deploy to staging for testing: `/deploy-staging`
+   - Test on staging: https://10ce79bd48.nxcli.io/
 
 3. **Before Committing**
    ```bash
    🏠 LOCAL:
-   ./tests/security-functional-tests.sh  # All tests must pass
+   vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
    git add -A
    git commit -m "description"
-   git push origin v1.5-reservation-system
+   git push origin [branch-name]
    ```
 
 ### Technical Details
@@ -346,7 +327,7 @@ This project uses environment variables for all sensitive configuration. **NEVER
 
 **Local Development (.env):**
 ```ini
-DB_HOST=db                        # Docker: 'db', Local: 'localhost'
+DB_HOST=localhost                 # Local database host
 DB_NAME=cfk_sponsorship_dev
 DB_USER=cfk_user
 DB_PASSWORD=cfk_pass              # Local dev password

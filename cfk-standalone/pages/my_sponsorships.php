@@ -7,11 +7,9 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
-
-global $cspNonce;
 }
 
 require_once __DIR__ . '/../includes/reservation_functions.php';
@@ -31,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Check for token-based access
 $token = $_GET['token'] ?? '';
-if (!empty($token)) {
+if (! empty($token)) {
     $verifiedEmail = verifyAccessToken($token);
 
     if ($verifiedEmail) {
@@ -66,7 +64,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
     error_log("MY_SPONSORSHIPS: POST data: " . print_r($_POST, true));
 
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         error_log("MY_SPONSORSHIPS: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
@@ -78,7 +76,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
         if (empty($email)) {
             error_log("MY_SPONSORSHIPS: Email is empty");
             $errors[] = 'Please enter your email address.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        } elseif (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             error_log("MY_SPONSORSHIPS: Email validation failed");
             $errors[] = 'Please enter a valid email address.';
         } else {
@@ -103,7 +101,7 @@ if ($_POST && isset($_POST['lookup_email'])) {
 if ($_POST && isset($_POST['resend_email'])) {
     $email = sanitizeEmail($_POST['resend_to_email'] ?? '');
 
-    if (!empty($email)) {
+    if (! empty($email)) {
         $result = sendAccessLinkEmail($email);
         if ($result['success']) {
             $emailSent = true;
@@ -112,6 +110,9 @@ if ($_POST && isset($_POST['resend_email'])) {
 }
 
 $pageTitle = 'My Sponsorships';
+
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="my-sponsorships-page" x-data="mySponsorshipsApp()">
@@ -230,7 +231,7 @@ $pageTitle = 'My Sponsorships';
                                         <strong>Gender:</strong>
                                         <span><?php echo $sponsorship['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
                                     </div>
-                                    <?php if (!empty($sponsorship['grade'])) : ?>
+                                    <?php if (! empty($sponsorship['grade'])) : ?>
                                         <div class="info-item">
                                             <strong>Grade:</strong>
                                             <span>Grade <?php echo (int)$sponsorship['grade']; ?></span>
@@ -238,23 +239,23 @@ $pageTitle = 'My Sponsorships';
                                     <?php endif; ?>
                                     <div class="info-item">
                                         <strong>Confirmed:</strong>
-                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date'])); ?></span>
+                                        <span><?php echo date('M j, Y', strtotime((string) $sponsorship['confirmation_date']) ?: 0); ?></span>
                                     </div>
                                 </div>
 
-                                <?php if (!empty($sponsorship['wishes'])) : ?>
+                                <?php if (! empty($sponsorship['wishes'])) : ?>
                                     <div class="child-wishes">
                                         <strong>Wishes:</strong>
                                         <p><?php echo nl2br(sanitizeString($sponsorship['wishes'])); ?></p>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($sponsorship['clothing_sizes']) || !empty($sponsorship['shoe_size'])) : ?>
+                                <?php if (! empty($sponsorship['clothing_sizes']) || ! empty($sponsorship['shoe_size'])) : ?>
                                     <div class="child-sizes">
-                                        <?php if (!empty($sponsorship['clothing_sizes'])) : ?>
+                                        <?php if (! empty($sponsorship['clothing_sizes'])) : ?>
                                             <span><strong>Clothing:</strong> <?php echo sanitizeString($sponsorship['clothing_sizes']); ?></span>
                                         <?php endif; ?>
-                                        <?php if (!empty($sponsorship['shoe_size'])) : ?>
+                                        <?php if (! empty($sponsorship['shoe_size'])) : ?>
                                             <span><strong>Shoes:</strong> <?php echo sanitizeString($sponsorship['shoe_size']); ?></span>
                                         <?php endif; ?>
                                     </div>

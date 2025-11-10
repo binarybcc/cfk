@@ -6,16 +6,15 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
-
-global $cspNonce;
 }
 
 $pageTitle = 'About Us';
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="about-page">
@@ -121,7 +120,7 @@ $pageTitle = 'About Us';
                     <div class="stat-label">Local Community Focus</div>
                 </div>
             </div>
-            
+
             <div class="testimonial">
                 <blockquote>
                     "Christmas for Kids helped make the holidays magical for our family during a difficult time. 

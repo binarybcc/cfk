@@ -22,7 +22,7 @@ class Manager
         'male_child' => 'Male Child (6-10)',
         'female_child' => 'Female Child (6-10)',
         'male_teen' => 'Male Teen (11-18)',
-        'female_teen' => 'Female Teen (11-18)'
+        'female_teen' => 'Female Teen (11-18)',
     ];
 
     /**
@@ -34,6 +34,7 @@ class Manager
     public static function getAvatarForChild(array $child): string
     {
         $category = self::determineAvatarCategory((int) $child['age_months'], (string) $child['gender']);
+
         return self::getAvatarImagePath($category);
     }
 
@@ -42,6 +43,7 @@ class Manager
      *
      * @param int $age Child age
      * @param string $gender Child gender (M/F)
+     *
      * @return string Avatar category identifier
      */
     private static function determineAvatarCategory(int $age, string $gender): string
@@ -82,7 +84,7 @@ class Manager
             'male_middle' => 'middleboysm.png',         // Boys 11-13
             'female_middle' => 'middlegirlsm.png',      // Girls 11-13
             'male_highschool' => 'hsboysm.png',         // Boys 14+
-            'female_highschool' => 'hsgirlsm.png'       // Girls 14+
+            'female_highschool' => 'hsgirlsm.png',       // Girls 14+
         ];
 
         // Get the image filename
@@ -96,11 +98,13 @@ class Manager
      * Generate silhouetted avatar SVG
      *
      * @param string $category Avatar category
+     *
      * @return string Data URI with base64 encoded SVG
      */
     private static function generateSilhouettedAvatar(string $category): string
     {
         $svgData = self::getSvgData($category);
+
         return 'data:image/svg+xml;base64,' . base64_encode($svgData);
     }
 
@@ -132,6 +136,7 @@ class Manager
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getInfantSvg(string $color, string $bg): string
@@ -164,6 +169,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getMaleToddlerSvg(string $color, string $bg): string
@@ -196,6 +202,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getFemaleToddlerSvg(string $color, string $bg): string
@@ -230,6 +237,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getMaleChildSvg(string $color, string $bg): string
@@ -262,6 +270,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getFemaleChildSvg(string $color, string $bg): string
@@ -295,6 +304,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getMaleTeenSvg(string $color, string $bg): string
@@ -327,6 +337,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getFemaleTeenSvg(string $color, string $bg): string
@@ -360,6 +371,7 @@ SVG;
      *
      * @param string $color Silhouette color
      * @param string $bg Background color
+     *
      * @return string SVG markup
      */
     private static function getDefaultSvg(string $color, string $bg): string
@@ -384,7 +396,9 @@ SVG;
     /**
      * Get all available avatar categories
      *
-     * @return array<string, string> Category identifier => description mapping
+     * @return string[] Category identifier => description mapping
+     *
+     * @psalm-return array{infant: 'Infant (0-2)', male_toddler: 'Male Toddler (3-5)', female_toddler: 'Female Toddler (3-5)', male_child: 'Male Child (6-10)', female_child: 'Female Child (6-10)', male_teen: 'Male Teen (11-18)', female_teen: 'Female Teen (11-18)'}
      */
     public static function getAvailableCategories(): array
     {
@@ -394,7 +408,9 @@ SVG;
     /**
      * Test function to generate all avatar types
      *
-     * @return array<string, string> Category => SVG data URI mapping
+     * @return string[] Category => SVG data URI mapping
+     *
+     * @psalm-return array{infant: string, male_toddler: string, female_toddler: string, male_child: string, female_child: string, male_teen: string, female_teen: string}
      */
     public static function generateTestAvatars(): array
     {
@@ -402,6 +418,7 @@ SVG;
         foreach (array_keys(self::CATEGORIES) as $category) {
             $avatars[$category] = self::generateSilhouettedAvatar($category);
         }
+
         return $avatars;
     }
 }

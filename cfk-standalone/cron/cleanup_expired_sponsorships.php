@@ -13,14 +13,17 @@ define('CFK_APP', true);
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
-require_once __DIR__ . '/../includes/sponsorship_manager.php';
+
+use CFK\Sponsorship\Manager as SponsorshipManager;
 
 // Log start
 error_log('CFK Cleanup: Starting expired sponsorship cleanup');
 
+$cleaned = 0; // Initialize in case of exception
+
 try {
     // Clean up expired sponsorships
-    $cleaned = CFK_Sponsorship_Manager::cleanupExpiredPendingSponsorships();
+    $cleaned = SponsorshipManager::cleanupExpiredPendingSponsorships();
 
     if ($cleaned > 0) {
         error_log("CFK Cleanup: Successfully cleaned up $cleaned expired sponsorships");

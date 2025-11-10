@@ -7,16 +7,15 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
-
-global $cspNonce;
 }
 
 $pageTitle = 'Review Your Sponsorship';
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="reservation-review-page" x-data="reservationReviewApp()">

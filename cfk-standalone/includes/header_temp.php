@@ -14,7 +14,7 @@ $csp = implode('; ', [
         "connect-src 'self' https://www.zeffy.com https://*.zeffy.com https://zeffy-scripts.s3.ca-central-1.amazonaws.com",
         "base-uri 'self'",
         "form-action 'self' https://www.zeffy.com https://*.zeffy.com",
-        "frame-ancestors 'none'" // Prevent site from being iframed (replaces X-Frame-Options)
+        "frame-ancestors 'none'", // Prevent site from being iframed (replaces X-Frame-Options)
         // Note: upgrade-insecure-requests and block-all-mixed-content removed for local development compatibility
     ]);
 

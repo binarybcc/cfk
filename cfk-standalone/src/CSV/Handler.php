@@ -20,19 +20,19 @@ class Handler
 {
     /** @var array<string> Required CSV columns */
     public const REQUIRED_COLUMNS = [
-        'gender'  // age_months OR age_years required (validated separately)
+        'gender',  // age_months OR age_years required (validated separately)
     ];
 
     /** @var array<string> All possible CSV columns */
     public const ALL_COLUMNS = [
         'name', 'age_months', 'age_years', 'gender',
         'shirt_size', 'pant_size', 'shoe_size', 'jacket_size',
-        'greatest_need', 'wish_list', 'special_needs', 'family_situation'
+        'greatest_need', 'wish_list', 'special_needs', 'family_situation',
     ];
 
     /** @var array<string> Optional CSV columns (can be missing or empty) */
     public const OPTIONAL_COLUMNS = [
-        'jacket_size', 'family_situation', 'special_needs'
+        'jacket_size', 'family_situation', 'special_needs',
     ];
 
     /** @var array<string, int> Maximum lengths for text fields */
@@ -44,7 +44,7 @@ class Handler
         'shirt_size' => 10,
         'pant_size' => 10,
         'shoe_size' => 10,
-        'jacket_size' => 10
+        'jacket_size' => 10,
     ];
 
     /** @var array<string> Import errors */
@@ -67,21 +67,24 @@ class Handler
     {
         $this->resetCounters();
 
-        if (!file_exists($csvPath) || !is_readable($csvPath)) {
+        if (! file_exists($csvPath) || ! is_readable($csvPath)) {
             $this->errors[] = 'CSV file not found or not readable';
+
             return $this->getResults();
         }
 
         $handle = fopen($csvPath, 'r');
-        if (!$handle) {
+        if (! $handle) {
             $this->errors[] = 'Could not open CSV file';
+
             return $this->getResults();
         }
 
         // Read and validate header
         $headers = fgetcsv($handle);
-        if (!is_array($headers) || !$this->validateHeaders($headers)) {
+        if (! is_array($headers) || ! $this->validateHeaders($headers)) {
             fclose($handle);
+
             return $this->getResults();
         }
 
@@ -96,7 +99,7 @@ class Handler
             }
 
             $row = $this->parseRow($headers, $data, $rowNumber);
-            if (!$row) {
+            if (! $row) {
                 continue;
             }
 
@@ -108,12 +111,12 @@ class Handler
                     'name' => $row['name'],
                     'age' => $row['age'],
                     'family_id' => $familyId,
-                    'child_id' => 999 // Fake ID for dry run
+                    'child_id' => 999, // Fake ID for dry run
                 ];
             } else {
                 // Normal operation: create family and child
                 $familyId = $this->ensureFamilyExists($row, $familiesCreated);
-                if (!$familyId) {
+                if (! $familyId) {
                     continue;
                 }
 
@@ -124,27 +127,15 @@ class Handler
                         'name' => $row['name'],
                         'age' => $row['age'],
                         'family_id' => $familyId,
-                        'child_id' => $childId
+                        'child_id' => $childId,
                     ];
                 }
             }
         }
 
         fclose($handle);
-        return $this->getResults();
-    }
 
-    /**
-     * Static wrapper for importChildren (for backward compatibility)
-     *
-     * @param string $csvPath Path to CSV file
-     * @param array<string, mixed> $options Import options
-     * @return array<string, mixed> Import results
-     */
-    public static function importChildrenFromCsv(string $csvPath, array $options = []): array
-    {
-        $handler = new self();
-        return $handler->importChildren($csvPath, $options);
+        return $this->getResults();
     }
 
     /**
@@ -152,26 +143,30 @@ class Handler
      * Used for preview/analysis
      *
      * @param string $csvPath Path to CSV file
-     * @return array<string, mixed> Preview results
+     *
+     * @return ((array|string)[]|bool|string)[] Preview results
+     *
+     * @psalm-return array{success: bool, children?: list<non-empty-array<string, mixed>>, errors?: array<string>, warnings?: array<string>, error?: 'CSV file not found or not readable'|'Could not open CSV file'}
      */
     public function parseCSVForPreview(string $csvPath): array
     {
         $this->resetCounters();
         $children = [];
 
-        if (!file_exists($csvPath) || !is_readable($csvPath)) {
+        if (! file_exists($csvPath) || ! is_readable($csvPath)) {
             return ['success' => false, 'error' => 'CSV file not found or not readable'];
         }
 
         $handle = fopen($csvPath, 'r');
-        if (!$handle) {
+        if (! $handle) {
             return ['success' => false, 'error' => 'Could not open CSV file'];
         }
 
         // Read and validate header
         $headers = fgetcsv($handle);
-        if (!is_array($headers) || !$this->validateHeaders($headers)) {
+        if (! is_array($headers) || ! $this->validateHeaders($headers)) {
             fclose($handle);
+
             return ['success' => false, 'errors' => $this->errors];
         }
 
@@ -196,7 +191,7 @@ class Handler
             'success' => $this->errors === [],
             'children' => $children,
             'errors' => $this->errors,
-            'warnings' => $this->warnings
+            'warnings' => $this->warnings,
         ];
     }
 
@@ -235,7 +230,9 @@ class Handler
     /**
      * Get import results
      *
-     * @return array<string, mixed> Results with success status and details
+     * @return ((array|string)[]|bool|int|string)[] Results with success status and details
+     *
+     * @psalm-return array{success: bool, imported: int<0, max>, errors: array<string>, warnings: array<string>, details: array<int, array<string, mixed>>, message: string}
      */
     public function getResults(): array
     {
@@ -250,7 +247,7 @@ class Handler
             'details' => $this->imported,
             'message' => $success
                 ? "Successfully imported {$imported_count} children"
-                : "Import failed with " . count($this->errors) . " error(s)"
+                : "Import failed with " . count($this->errors) . " error(s)",
         ];
     }
 
@@ -264,19 +261,21 @@ class Handler
     {
         if ($headers === []) {
             $this->errors[] = 'Empty CSV file or no headers found';
+
             return false;
         }
 
         // Check for required columns
         $missing = [];
         foreach (self::REQUIRED_COLUMNS as $required) {
-            if (!in_array($required, $headers)) {
+            if (! in_array($required, $headers)) {
                 $missing[] = $required;
             }
         }
 
         if ($missing !== []) {
             $this->errors[] = 'Missing required columns: ' . implode(', ', $missing);
+
             return false;
         }
 
@@ -295,12 +294,14 @@ class Handler
     {
         if (count($headers) !== count($data)) {
             $this->errors[] = "Row $rowNumber: Column count mismatch";
+
             return null;
         }
 
         $row = array_combine($headers, $data);
-        if (!is_array($row)) {
+        if (! is_array($row)) {
             $this->errors[] = "Row $rowNumber: Failed to combine headers and data";
+
             return null;
         }
 
@@ -309,6 +310,7 @@ class Handler
             $value = trim((string) ($row[$field] ?? ''));
             if ($value === '' || $value === '0') {
                 $this->errors[] = "Row $rowNumber: Missing required field '$field'";
+
                 return null;
             }
         }
@@ -320,13 +322,15 @@ class Handler
         $hasMonths = $ageMonths !== '' && $ageMonths !== '0';
         $hasYears = $ageYears !== '' && $ageYears !== '0';
 
-        if (!$hasMonths && !$hasYears) {
+        if (! $hasMonths && ! $hasYears) {
             $this->errors[] = "Row $rowNumber: Must provide either age_months OR age_years";
+
             return null;
         }
 
         if ($hasMonths && $hasYears) {
             $this->errors[] = "Row $rowNumber: Cannot provide both age_months AND age_years - use only ONE";
+
             return null;
         }
 
@@ -341,7 +345,10 @@ class Handler
      *
      * @param array<string, mixed> $row Row data
      * @param int $rowNumber Current row number
-     * @return array<string, mixed> Cleaned row data
+     *
+     * @return (int|mixed|string)[] Cleaned row data
+     *
+     * @psalm-return array{age_months: int, gender: string, family_id?: int|mixed|string, child_letter?: mixed|string, greatest_need?: mixed|string, interests?: mixed|string, special_needs?: mixed|string, family_situation?: mixed|string, wish_list?: mixed|string, shirt_size?: mixed|string, pant_size?: mixed|string, shoe_size?: mixed|string, jacket_size?: mixed|string,...}
      */
     private function cleanRowData(array $row, int $rowNumber): array
     {
@@ -373,6 +380,7 @@ class Handler
             $row['child_letter'] = $matches[2];
         } else {
             $this->errors[] = "Row $rowNumber: Invalid name format '{$row['name']}' (use format: 123A)";
+
             return $row;
         }
 
@@ -406,13 +414,13 @@ class Handler
         // Validate final converted age_months value
         // Note: parseRow() already validated that exactly ONE age field was provided
         // cleanRowData() already converted the age to months
-        if (!isset($row['age_months']) || $row['age_months'] < 0 || $row['age_months'] > 216) {
+        if (! isset($row['age_months']) || $row['age_months'] < 0 || $row['age_months'] > 216) {
             $this->errors[] = "Row $rowNumber: Age must be between 0-24 months or 0-18 years (max 216 months)";
             $valid = false;
         }
 
         // Gender validation
-        if (!in_array($row['gender'], ['M', 'F'])) {
+        if (! in_array($row['gender'], ['M', 'F'])) {
             $this->errors[] = "Row $rowNumber: Gender must be 'M' or 'F'";
             $valid = false;
         }
@@ -432,7 +440,7 @@ class Handler
         }
 
         // Age/grade consistency check (convert months to years for checking)
-        if (!empty($row['grade']) && isset($row['age_months'])) {
+        if (! empty($row['grade']) && isset($row['age_months'])) {
             $ageYears = (int) floor($row['age_months'] / 12);
             if ($this->isAgeGradeMismatch($ageYears, (string) $row['grade'])) {
                 $this->warnings[] = "Row $rowNumber: Age " . displayAge($row['age_months']) . " and grade '{$row['grade']}' may not match";
@@ -440,7 +448,7 @@ class Handler
         }
 
         // Shoe size date conversion check (common Excel error)
-        if (!empty($row['shoe_size']) && preg_match('/\d+-[A-Z][a-z]{2}/', (string) $row['shoe_size'])) {
+        if (! empty($row['shoe_size']) && preg_match('/\d+-[A-Z][a-z]{2}/', (string) $row['shoe_size'])) {
             $this->warnings[] = "Row $rowNumber: Shoe size '{$row['shoe_size']}' looks like a date (Excel auto-conversion). Import CSV as 'Text' format to prevent this.";
         }
 
@@ -470,6 +478,7 @@ class Handler
 
         if ($existing) {
             $familiesCreated[$familyId] = (int) $existing['id'];
+
             return (int) $existing['id'];
         }
 
@@ -477,13 +486,15 @@ class Handler
         try {
             $dbFamilyId = Connection::insert('families', [
                 'family_number' => (string) $familyId,
-                'notes' => $row['family_situation'] ?? ''
+                'notes' => $row['family_situation'] ?? '',
             ]);
 
             $familiesCreated[$familyId] = $dbFamilyId;
+
             return $dbFamilyId;
         } catch (Exception $e) {
             $this->errors[] = "Failed to create family {$familyId}: " . $e->getMessage();
+
             return null;
         }
     }
@@ -515,7 +526,7 @@ class Handler
             'interests' => $row['interests'] ?? '', // CSV 'greatest_need' mapped to this in cleanRowData
             'wishes' => $row['wish_list'] ?? '', // CSV 'wish_list' → DB 'wishes' (displays as "Christmas Wishes")
             'special_needs' => $row['special_needs'] ?? 'None',
-            'status' => 'available'
+            'status' => 'available',
         ];
 
         try {
@@ -525,6 +536,7 @@ class Handler
             $familyInfo = Connection::fetchRow("SELECT family_number FROM families WHERE id = ?", [$familyId]);
             $familyNumber = $familyInfo ? $familyInfo['family_number'] : $familyId;
             $this->errors[] = "Failed to create child (family {$familyNumber}{$childLetter}): " . $e->getMessage();
+
             return null;
         }
     }
@@ -533,6 +545,7 @@ class Handler
      * Get next available child letter for family
      *
      * @param int $familyId Database family ID
+     *
      * @return string Next available letter (A-Z)
      */
     private function getNextChildLetter(int $familyId): string
@@ -546,7 +559,7 @@ class Handler
 
         for ($i = 0; $i < 26; $i++) {
             $letter = chr(65 + $i); // A, B, C...
-            if (!in_array($letter, $usedLetters)) {
+            if (! in_array($letter, $usedLetters)) {
                 return $letter;
             }
         }
@@ -572,17 +585,17 @@ class Handler
         $params = [];
 
         // Apply filters
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND c.status = :status";
             $params['status'] = $filters['status'];
         }
 
-        if (!empty($filters['age_min'])) {
+        if (! empty($filters['age_min'])) {
             $sql .= " AND c.age_months >= :age_min";
             $params['age_min'] = $filters['age_min'];
         }
 
-        if (!empty($filters['age_max'])) {
+        if (! empty($filters['age_max'])) {
             $sql .= " AND c.age_months <= :age_max";
             $params['age_max'] = $filters['age_max'];
         }
@@ -596,7 +609,10 @@ class Handler
      * Format child data for CSV export
      *
      * @param array<string, mixed> $child Child data from database
-     * @return array<int, mixed> Formatted row for CSV
+     *
+     * @return (int|mixed|string)[] Formatted row for CSV
+     *
+     * @psalm-return list{string, 0|mixed, '', ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, ''|mixed, 'None'|mixed, ''|mixed}
      */
     private function formatChildForExport(array $child): array
     {
@@ -623,7 +639,7 @@ class Handler
             $child['interests'] ?? '', // DB 'interests' → CSV 'greatest_need' (Essential Needs)
             $child['wishes'] ?? '', // DB 'wishes' → CSV 'wish_list' (Christmas Wishes)
             $child['special_needs'] ?? 'None',
-            $child['family_notes'] ?? ''
+            $child['family_notes'] ?? '',
         ];
     }
 
@@ -650,14 +666,14 @@ class Handler
             '9th' => [13, 14, 15],
             '10th' => [14, 15, 16],
             '11th' => [15, 16, 17],
-            '12th' => [16, 17, 18]
+            '12th' => [16, 17, 18],
         ];
 
-        if (!isset($gradeMap[$grade])) {
+        if (! isset($gradeMap[$grade])) {
             return false; // Unknown grade, can't validate
         }
 
-        return !in_array($age, $gradeMap[$grade]);
+        return ! in_array($age, $gradeMap[$grade]);
     }
 
     /**

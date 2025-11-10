@@ -28,10 +28,12 @@ Thumbs.db
 *.log
 logs/
 
-# Environment files with secrets
+# Environment files with secrets (NEVER commit these!)
 .env
 .env.local
 .env.*.local
+.env.production
+.env.staging
 
 # Temporary files
 tmp/

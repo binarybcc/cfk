@@ -6,7 +6,7 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -15,7 +15,7 @@ global $cspNonce;
 $pageTitle = 'Children Needing Sponsorship';
 
 // Check if viewing a specific family
-$viewingFamily = !empty($_GET['family_id']);
+$viewingFamily = ! empty($_GET['family_id']);
 $familyId = $viewingFamily ? sanitizeInt($_GET['family_id']) : null;
 $familyInfo = null; // Initialize to prevent undefined variable warning
 
@@ -26,6 +26,8 @@ if ($viewingFamily) {
     $totalCount = count($children);
     $totalPages = 1;
     $currentPage = 1;
+    $perPageOptions = [12, 24, 48]; // Not used in family view, but needed for consistency
+    $perPage = 12;
 
     // Get family info for display
     $familyInfo = $children === [] ? null : getFamilyById($familyId);
@@ -35,13 +37,13 @@ if ($viewingFamily) {
 } else {
     // Normal browsing mode with filters
     $filters = [];
-    if (!empty($_GET['search'])) {
+    if (! empty($_GET['search'])) {
         $filters['search'] = sanitizeString($_GET['search']);
     }
-    if (!empty($_GET['age_category'])) {
+    if (! empty($_GET['age_category'])) {
         $filters['age_category'] = sanitizeString($_GET['age_category']);
     }
-    if (!empty($_GET['gender'])) {
+    if (! empty($_GET['gender'])) {
         $filters['gender'] = sanitizeString($_GET['gender']);
     }
 
@@ -69,13 +71,13 @@ if ($viewingFamily) {
 
 // Build query string for pagination
 $queryParams = [];
-if (!empty($filters['search'])) {
+if (! empty($filters['search'])) {
     $queryParams['search'] = $filters['search'];
 }
-if (!empty($filters['age_category'])) {
+if (! empty($filters['age_category'])) {
     $queryParams['age_category'] = $filters['age_category'];
 }
-if (!empty($filters['gender'])) {
+if (! empty($filters['gender'])) {
     $queryParams['gender'] = $filters['gender'];
 }
 $queryString = http_build_query($queryParams);
@@ -110,7 +112,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
     ?>
 
     <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
-    <?php if (!$viewingFamily) : ?>
+    <?php if (! $viewingFamily) : ?>
     <script nonce="<?php echo $cspNonce; ?>">
     // Define children data for Alpine.js
     window.childrenData = <?php echo json_encode($children, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP); ?>;
@@ -258,7 +260,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         <div class="results-summary" style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <p style="margin: 0; font-weight: 600; color: #2c5530;">
                 Showing <?php echo count($children); ?> of <?php echo $totalCount; ?> children
-                <?php if (!empty($filters)) : ?>
+                <?php if (! empty($filters)) : ?>
                     <span style="color: #666; font-weight: normal;">(filtered)</span>
                 <?php endif; ?>
             </p>
@@ -323,7 +325,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                 <div class="child-meta-item">
                                     <strong></strong> <span><?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></span>
                                 </div>
-                                <?php if (!empty($child['grade'])) : ?>
+                                <?php if (! empty($child['grade'])) : ?>
                                     <div class="child-meta-item">
                                         <strong>Age Group:</strong> <span><?php echo htmlspecialchars((string) $child['grade']); ?></span>
                                     </div>
@@ -334,14 +336,14 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                         <!-- Middle Section: Details -->
                         <div class="child-info">
                             <!-- Essential Needs & Wishes -->
-                            <?php if (!empty($child['interests'])) : ?>
+                            <?php if (! empty($child['interests'])) : ?>
                                 <div style="margin-bottom: 6px;">
                                     <strong style="color: #2c5530; font-size: 0.9rem;">💙 Essential Needs:</strong>
                                     <p style="margin: 3px 0 0 0; padding: 5px; background-color: #f8f9fa; border-left: 2px solid #3a6f3f; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars((string) $child['interests'])); ?></p>
                                 </div>
                             <?php endif; ?>
 
-                            <?php if (!empty($child['wishes'])) : ?>
+                            <?php if (! empty($child['wishes'])) : ?>
                                 <div style="margin-bottom: 6px;">
                                     <strong style="color: #c41e3a; font-size: 0.9rem;">🎁 Wishes:</strong>
                                     <p style="margin: 3px 0 0 0; padding: 5px; background-color: #fef5f5; border-left: 2px solid #c41e3a; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars(cleanWishesText((string) $child['wishes']))); ?></p>
@@ -349,7 +351,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                             <?php endif; ?>
 
                             <!-- Special Needs -->
-                            <?php if (!empty($child['special_needs'])) : ?>
+                            <?php if (! empty($child['special_needs'])) : ?>
                                 <div style="margin-bottom: 6px;">
                                     <strong style="color: #856404; font-size: 0.9rem;">⚠️ Special Needs:</strong>
                                     <p style="margin: 3px 0 0 0; padding: 5px; background-color: #fff3cd; border-left: 2px solid #f5b800; border-radius: 3px; color: #666; font-size: 0.85rem; line-height: 1.3;"><?php echo nl2br(htmlspecialchars((string) $child['special_needs'])); ?></p>
@@ -357,29 +359,29 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                             <?php endif; ?>
 
                             <!-- Clothing Sizes Section -->
-                            <?php if (!empty($child['shirt_size']) || !empty($child['pant_size']) || !empty($child['jacket_size']) || !empty($child['shoe_size'])) : ?>
+                            <?php if (! empty($child['shirt_size']) || ! empty($child['pant_size']) || ! empty($child['jacket_size']) || ! empty($child['shoe_size'])) : ?>
                                 <div style="margin-bottom: 6px; background-color: #e7f3ff; padding: 6px; border-radius: 3px;">
                                     <strong style="color: #2c5530; font-size: 0.9rem;">👕 Sizes:</strong>
                                     <div style="margin-top: 4px; font-size: 0.85rem; line-height: 1.3;">
-                                        <?php if (!empty($child['shirt_size'])) : ?>
+                                        <?php if (! empty($child['shirt_size'])) : ?>
                                             <div style="display: flex; justify-content: space-between; padding: 2px 0;">
                                                 <span style="color: #2c5530; font-weight: bold;">Shirt:</span>
                                                 <span style="color: #666;"><?php echo htmlspecialchars((string) $child['shirt_size']); ?></span>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (!empty($child['pant_size'])) : ?>
+                                        <?php if (! empty($child['pant_size'])) : ?>
                                             <div style="display: flex; justify-content: space-between; padding: 2px 0;">
                                                 <span style="color: #2c5530; font-weight: bold;">Pants:</span>
                                                 <span style="color: #666;"><?php echo htmlspecialchars((string) $child['pant_size']); ?></span>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (!empty($child['jacket_size'])) : ?>
+                                        <?php if (! empty($child['jacket_size'])) : ?>
                                             <div style="display: flex; justify-content: space-between; padding: 2px 0;">
                                                 <span style="color: #2c5530; font-weight: bold;">Jacket:</span>
                                                 <span style="color: #666;"><?php echo htmlspecialchars((string) $child['jacket_size']); ?></span>
                                             </div>
                                         <?php endif; ?>
-                                        <?php if (!empty($child['shoe_size'])) : ?>
+                                        <?php if (! empty($child['shoe_size'])) : ?>
                                             <div style="display: flex; justify-content: space-between; padding: 2px 0;">
                                                 <span style="color: #2c5530; font-weight: bold;">Shoes:</span>
                                                 <span style="color: #666;"><?php echo htmlspecialchars((string) $child['shoe_size']); ?></span>
@@ -405,7 +407,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                                     View Family
                                 </a>
                                 <button class="btn btn-primary btn-sponsor"
-                                        data-child='<?php echo htmlspecialchars(json_encode($child)); ?>'>
+                                        data-child='<?php echo htmlspecialchars(json_encode($child) ?: '{}'); ?>'>
                                     SPONSOR
                                 </button>
                             </div>
@@ -426,12 +428,12 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 $baseQuery = http_build_query($queryParams);
                 $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
 
-                // Calculate page range to display
+            // Calculate page range to display
                 $delta = 2; // Number of pages to show on each side of current page
                 $rangeStart = max(1, $currentPage - $delta);
                 $rangeEnd = min($totalPages, $currentPage + $delta);
 
-                // Adjust range if we're near the start or end
+            // Adjust range if we're near the start or end
                 if ($rangeEnd - $rangeStart < $delta * 2) {
                     if ($currentPage < $totalPages / 2) {
                         $rangeEnd = min($totalPages, $rangeStart + ($delta * 2));
@@ -530,7 +532,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 'success',
                 [
                     'size' => 'large',
-                    'id' => 'cta-donate-btn'
+                    'id' => 'cta-donate-btn',
                 ]
             ); ?>
         </div>

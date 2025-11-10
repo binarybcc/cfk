@@ -21,7 +21,7 @@ require_once __DIR__ . '/../includes/functions.php';
 use CFK\Report\Manager as ReportManager;
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -32,14 +32,14 @@ $messageType = '';
 
 // Handle sponsor edit action
 if ($_POST !== [] && isset($_POST['action']) && $_POST['action'] === 'edit_sponsor') {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
     } else {
         $sponsorEmail = sanitizeEmail($_POST['sponsor_email'] ?? '');
         $newEmail = sanitizeEmail($_POST['new_email'] ?? '');
 
-        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($newEmail, FILTER_VALIDATE_EMAIL)) {
             $message = 'Invalid email address';
             $messageType = 'error';
         } else {
@@ -57,7 +57,7 @@ if ($_POST !== [] && isset($_POST['action']) && $_POST['action'] === 'edit_spons
                         $newEmail,
                         sanitizeString($_POST['sponsor_phone'] ?? ''),
                         sanitizeString($_POST['sponsor_address'] ?? ''),
-                        $sponsorEmail
+                        $sponsorEmail,
                     ]
                 );
                 $message = 'Sponsor information updated successfully';
@@ -105,26 +105,26 @@ if ($exportFormat === 'csv') {
             $data = ReportManager::getSponsorDirectoryReport();
             $headers = ['Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Child Display ID', 'Child Name', 'Child Age', 'Status'];
             ReportManager::exportToCSV($data, $headers, 'sponsor-directory-' . date('Y-m-d') . '.csv');
-            break;
 
+            // no break
         case 'child_sponsor':
             $data = ReportManager::getChildSponsorLookup();
             $headers = ['Child ID', 'Child Display ID', 'Child Name', 'Age', 'Gender', 'Child Status', 'Sponsor Name', 'Sponsor Email', 'Sponsorship Status'];
             ReportManager::exportToCSV($data, $headers, 'child-sponsor-lookup-' . date('Y-m-d') . '.csv');
-            break;
 
+            // no break
         case 'family_report':
             $data = ReportManager::getFamilySponsorshipReport();
             $headers = ['Family Number', 'Total Children', 'Available', 'Pending', 'Sponsored'];
             ReportManager::exportToCSV($data, $headers, 'family-report-' . date('Y-m-d') . '.csv');
-            break;
 
+            // no break
         case 'available_children':
             $data = ReportManager::getAvailableChildrenReport();
             $headers = ['Display ID', 'Name', 'Age', 'Gender', 'Family Number', 'Family Size', 'Available Siblings'];
             ReportManager::exportToCSV($data, $headers, 'available-children-' . date('Y-m-d') . '.csv');
-            break;
 
+            // no break
         case 'complete_export':
             $data = ReportManager::getCompleteChildSponsorReport();
             $headers = [
@@ -133,10 +133,9 @@ if ($exportFormat === 'csv') {
                 'Essential Needs', 'Wishes', 'Special Needs', 'Child Status',
                 'Family Number',
                 'Sponsor Name', 'Sponsor Email', 'Sponsor Phone', 'Sponsor Address',
-                'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date'
+                'Sponsorship Status', 'Sponsorship Date', 'Request Date', 'Confirmation Date', 'Completion Date',
             ];
             ReportManager::exportToCSV($data, $headers, 'complete-children-sponsors-' . date('Y-m-d') . '.csv');
-            break;
     }
 }
 
@@ -185,29 +184,29 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="stat-card">
                         <h3>Children</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['children']['total']; ?></p>
-                            <p><strong>Available:</strong> <?php echo $stats['children']['available']; ?></p>
-                            <p><strong>Pending:</strong> <?php echo $stats['children']['pending']; ?></p>
-                            <p><strong>Sponsored:</strong> <?php echo $stats['children']['sponsored']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['children']['total'] ?? 0; ?></p>
+                            <p><strong>Available:</strong> <?php echo $stats['children']['available'] ?? 0; ?></p>
+                            <p><strong>Pending:</strong> <?php echo $stats['children']['pending'] ?? 0; ?></p>
+                            <p><strong>Sponsored:</strong> <?php echo $stats['children']['sponsored'] ?? 0; ?></p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <h3>Sponsorships</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['sponsorships']['total']; ?></p>
-                            <p><strong>Pending:</strong> <?php echo $stats['sponsorships']['pending']; ?></p>
-                            <p><strong>Confirmed:</strong> <?php echo $stats['sponsorships']['confirmed']; ?></p>
-                            <p><strong>Completed:</strong> <?php echo $stats['sponsorships']['completed']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['sponsorships']['total'] ?? 0; ?></p>
+                            <p><strong>Pending:</strong> <?php echo $stats['sponsorships']['pending'] ?? 0; ?></p>
+                            <p><strong>Confirmed:</strong> <?php echo $stats['sponsorships']['confirmed'] ?? 0; ?></p>
+                            <p><strong>Completed:</strong> <?php echo $stats['sponsorships']['completed'] ?? 0; ?></p>
                         </div>
                     </div>
 
                     <div class="stat-card">
                         <h3>Families</h3>
                         <div class="stat-details">
-                            <p><strong>Total:</strong> <?php echo $stats['families']['total']; ?></p>
-                            <p><strong>Fully Sponsored:</strong> <?php echo $stats['families']['fully_sponsored']; ?></p>
-                            <p><strong>Partially Sponsored:</strong> <?php echo $stats['families']['total'] - $stats['families']['fully_sponsored']; ?></p>
+                            <p><strong>Total:</strong> <?php echo $stats['families']['total'] ?? 0; ?></p>
+                            <p><strong>Fully Sponsored:</strong> <?php echo $stats['families']['fully_sponsored'] ?? 0; ?></p>
+                            <p><strong>Partially Sponsored:</strong> <?php echo ($stats['families']['total'] ?? 0) - ($stats['families']['fully_sponsored'] ?? 0); ?></p>
                         </div>
                     </div>
 
@@ -215,7 +214,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <h3>Sponsors</h3>
                         <div class="stat-details">
                             <p><strong>Unique Sponsors:</strong> <?php echo $stats['unique_sponsors']; ?></p>
-                            <p><strong>Avg Children/Sponsor:</strong> <?php echo $stats['unique_sponsors'] > 0 ? round($stats['sponsorships']['total'] / $stats['unique_sponsors'], 1) : 0; ?></p>
+                            <p><strong>Avg Children/Sponsor:</strong> <?php echo $stats['unique_sponsors'] > 0 ? round(($stats['sponsorships']['total'] ?? 0) / $stats['unique_sponsors'], 1) : 0; ?></p>
                         </div>
                     </div>
                 </div>
@@ -236,13 +235,13 @@ include __DIR__ . '/includes/admin_header.php';
             $groupedSponsors = [];
             foreach ($sponsors as $row) {
                 $email = $row['sponsor_email'];
-                if (!isset($groupedSponsors[$email])) {
+                if (! isset($groupedSponsors[$email])) {
                     $groupedSponsors[$email] = [
                         'name' => $row['sponsor_name'],
                         'email' => $row['sponsor_email'],
                         'phone' => $row['sponsor_phone'],
                         'address' => $row['sponsor_address'],
-                        'children' => []
+                        'children' => [],
                     ];
                 }
                 $groupedSponsors[$email]['children'][] = $row;
@@ -254,7 +253,7 @@ include __DIR__ . '/includes/admin_header.php';
                 <a href="?type=sponsor_directory&export=csv" class="btn btn-primary">Export to CSV</a>
             </div>
 
-            <?php if ($message) : ?>
+            <?php if ($message !== '' && $message !== '0') : ?>
                 <div class="alert alert-<?php echo $messageType; ?>" style="margin-bottom: 1rem;">
                     <?php echo sanitizeString($message); ?>
                 </div>
@@ -273,16 +272,16 @@ include __DIR__ . '/includes/admin_header.php';
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h3><?php echo sanitizeString($sponsor['name']); ?></h3>
                                 <button class="btn btn-small btn-edit-sponsor"
-                                        data-sponsor-email="<?php echo htmlspecialchars($sponsor['email'], ENT_QUOTES, 'UTF-8'); ?>"
+                                        data-sponsor-email="<?php echo htmlspecialchars((string) $sponsor['email'], ENT_QUOTES, 'UTF-8'); ?>"
                                         style="background: #0d6efd; color: white; padding: 0.5rem 1rem; border: none; border-radius: 4px; cursor: pointer;">
                                     ✏️ Edit Sponsor
                                 </button>
                             </div>
                             <p><strong>Email:</strong> <a href="mailto:<?php echo $sponsor['email']; ?>"><?php echo $sponsor['email']; ?></a></p>
-                            <?php if (!empty($sponsor['phone'])) : ?>
+                            <?php if (! empty($sponsor['phone'])) : ?>
                                 <p><strong>Phone:</strong> <a href="tel:<?php echo sanitizeString($sponsor['phone']); ?>">📞 <?php echo sanitizeString($sponsor['phone']); ?></a></p>
                             <?php endif; ?>
-                            <?php if (!empty($sponsor['address'])) : ?>
+                            <?php if (! empty($sponsor['address'])) : ?>
                                 <p><strong>Address:</strong> <?php echo sanitizeString($sponsor['address']); ?></p>
                             <?php endif; ?>
                         </div>
@@ -445,7 +444,7 @@ include __DIR__ . '/includes/admin_header.php';
             $filters = [
                 'age_min' => $_GET['age_min'] ?? '',
                 'age_max' => $_GET['age_max'] ?? '',
-                'gender' => $_GET['gender'] ?? ''
+                'gender' => $_GET['gender'] ?? '',
             ];
             $availableChildren = ReportManager::getAvailableChildrenReport($filters);
             ?>
@@ -514,7 +513,7 @@ include __DIR__ . '/includes/admin_header.php';
             $sponsoredCount = 0;
             $unsponsoredCount = 0;
             foreach ($completeData as $row) {
-                if (!empty($row['sponsor_name'])) {
+                if (! empty($row['sponsor_name'])) {
                     $sponsoredCount++;
                 } else {
                     $unsponsoredCount++;
@@ -579,7 +578,7 @@ include __DIR__ . '/includes/admin_header.php';
                             </td>
                             <td>
                                 <?php if ($row['sponsorship_date']) : ?>
-                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date'])); ?>
+                                    <?php echo date('M j, Y', strtotime((string) $row['sponsorship_date']) ?: 0); ?>
                                 <?php else : ?>
                                     -
                                 <?php endif; ?>
@@ -966,7 +965,7 @@ include __DIR__ . '/includes/admin_header.php';
     </div>
 </div>
 
-<script nonce="<?php echo $cspNonce ?? ''; ?>">
+<script nonce="<?php echo $cspNonce; ?>">
 document.addEventListener('DOMContentLoaded', function() {
     const editModal = document.getElementById('editSponsorModal');
     const editButtons = document.querySelectorAll('.btn-edit-sponsor');

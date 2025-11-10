@@ -66,23 +66,19 @@
         <?php
         // Display messages - support both session-based and direct variable approaches
         $displayMessage = getMessage(); // Check session first
-        if (!$displayMessage && isset($message) && !empty($message)) {
+        if (! $displayMessage && isset($message) && ! empty($message)) {
             // Fallback to direct variables (for pages not using session-based messaging)
             $displayMessage = [
-                'text' => $message,
-                'type' => $messageType ?? 'success'
+            'text' => $message,
+            'type' => $messageType ?? 'success',
             ];
         }
 
-        // Persistent error messages (for import errors and critical messages)
+    // Persistent error messages (for import errors and critical messages)
         if ($displayMessage && $displayMessage['type'] === 'error') : ?>
-            <div class="persistent-alert persistent-alert-<?php echo $displayMessage['type']; ?>">
-                <strong><?php
-                    if ($displayMessage['type'] === 'error') echo '❌ Error: ';
-                    if ($displayMessage['type'] === 'success') echo '✅ Success: ';
-                    if ($displayMessage['type'] === 'warning') echo '⚠️ Warning: ';
-                ?></strong>
-                <?php echo sanitizeString($displayMessage['text']); ?>
+            <div class="persistent-alert persistent-alert-error">
+                <strong>❌ Error: </strong>
+                        <?php echo sanitizeString($displayMessage['text']); ?>
             </div>
         <?php elseif ($displayMessage) : ?>
             <!-- Toast notification for success/info messages -->
@@ -92,9 +88,13 @@
                     var toast = document.createElement('div');
                     toast.className = 'cfk-toast cfk-toast-<?php echo $displayMessage['type']; ?>';
                     toast.innerHTML = '<span class="cfk-toast-icon"><?php
-                        if ($displayMessage['type'] === 'success') echo '✓';
-                        if ($displayMessage['type'] === 'error') echo '✕';
-                        if ($displayMessage['type'] === 'warning') echo '⚠';
+                    if ($displayMessage['type'] === 'success') {
+                        echo '✓';
+                    } elseif ($displayMessage['type'] === 'error') {
+                        echo '✕';
+                    } elseif ($displayMessage['type'] === 'warning') {
+                        echo '⚠';
+                    }
                     ?></span><span class="cfk-toast-text"><?php echo addslashes(sanitizeString($displayMessage['text'])); ?></span>';
 
                     document.body.appendChild(toast);

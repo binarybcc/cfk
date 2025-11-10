@@ -1,5 +1,12 @@
     </main>
 
+    <?php
+    // Ensure CSP nonce is defined (should be set by admin_header.php)
+    if (! isset($cspNonce)) {
+        $cspNonce = bin2hex(random_bytes(16));
+    }
+    ?>
+
     <footer class="admin-footer">
         <div class="admin-footer-content">
             <p>&copy; <?php echo date('Y'); ?> Christmas for Kids - Administration Panel</p>

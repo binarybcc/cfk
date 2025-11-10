@@ -22,7 +22,7 @@ require_once __DIR__ . '/../includes/functions.php';
 use CFK\Sponsorship\Manager as SponsorshipManager;
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -33,7 +33,7 @@ $messageType = '';
 
 // Handle bulk actions
 if ($_POST !== [] && isset($_POST['bulk_action']) && isset($_POST['sponsorship_ids'])) {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
     } else {
@@ -99,8 +99,8 @@ if ($_POST !== [] && isset($_POST['bulk_action']) && isset($_POST['sponsorship_i
 }
 
 // Handle individual actions
-if ($_POST !== [] && !isset($_POST['bulk_action'])) {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+if ($_POST !== [] && ! isset($_POST['bulk_action'])) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
     } else {
@@ -112,18 +112,21 @@ if ($_POST !== [] && !isset($_POST['bulk_action'])) {
                 $result = SponsorshipManager::completeSponsorship($sponsorshipId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'log':
                 $result = SponsorshipManager::logSponsorship($sponsorshipId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'unlog':
                 $result = SponsorshipManager::unlogSponsorship($sponsorshipId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'cancel':
@@ -131,6 +134,7 @@ if ($_POST !== [] && !isset($_POST['bulk_action'])) {
                 $result = SponsorshipManager::cancelSponsorship($sponsorshipId, $reason);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'release_child':
@@ -142,12 +146,14 @@ if ($_POST !== [] && !isset($_POST['bulk_action'])) {
                     $message = 'Failed to release child';
                     $messageType = 'error';
                 }
+
                 break;
 
             case 'edit_sponsorship':
                 $result = updateSponsorship($_POST);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
         }
     }
@@ -174,17 +180,21 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_sponsorship' && isset($_G
 }
 
 // Function to update sponsorship details
-function updateSponsorship($data): array
+/**
+ * @param array<string, mixed> $data
+ * @return array{success: bool, message: string}
+ */
+function updateSponsorship(array $data): array
 {
     try {
         $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);
-        if (!$sponsorshipId) {
+        if (! $sponsorshipId) {
             return ['success' => false, 'message' => 'Invalid sponsorship ID'];
         }
 
         // Validate email
         $email = sanitizeEmail($data['sponsor_email'] ?? '');
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ['success' => false, 'message' => 'Invalid email address'];
         }
 
@@ -193,12 +203,13 @@ function updateSponsorship($data): array
             'sponsor_name' => sanitizeString($data['sponsor_name'] ?? ''),
             'sponsor_email' => $email,
             'sponsor_phone' => sanitizeString($data['sponsor_phone'] ?? ''),
-            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? '')
+            'sponsor_address' => sanitizeString($data['sponsor_address'] ?? ''),
         ], ['id' => $sponsorshipId]);
 
         return ['success' => true, 'message' => 'Sponsorship updated successfully'];
     } catch (Exception $e) {
         error_log('Update sponsorship error: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'Failed to update sponsorship'];
     }
 }
@@ -220,7 +231,7 @@ if ($statusFilter !== 'all') {
 }
 
 // Hide cancelled by default unless toggled on
-if (!$showCancelled) {
+if (! $showCancelled) {
     $whereConditions[] = "s.status != 'cancelled'";
 }
 
@@ -870,7 +881,7 @@ include __DIR__ . '/includes/admin_header.php';
             <input type="text"
                    id="search-input"
                    placeholder="Sponsor name, email, or child ID..."
-                   value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8'); ?>">
+                   value="<?php echo htmlspecialchars((string) $searchQuery, ENT_QUOTES, 'UTF-8'); ?>">
         </div>
 
         <div class="filter-group">
@@ -971,46 +982,46 @@ include __DIR__ . '/includes/admin_header.php';
                                     <div class="child-meta">
                                         <?php echo displayAge($sponsorship['age_months']); ?>
                                         <?php echo $sponsorship['gender'] === 'M' ? '♂' : '♀'; ?>
-                                        <?php if (!empty($sponsorship['grade'])) : ?>
+                                        <?php if (! empty($sponsorship['grade'])) : ?>
                                             • <?php echo sanitizeString($sponsorship['grade']); ?>
                                         <?php endif; ?>
                                     </div>
 
-                                    <?php if (!empty($sponsorship['interests'])) : ?>
+                                    <?php if (! empty($sponsorship['interests'])) : ?>
                                         <div style="margin-top: 4px; font-size: 0.8rem;">
                                             <strong style="color: #2c5530;">Essential Needs:</strong>
                                             <div style="color: #666; margin-top: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['interests'])); ?></div>
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (!empty($sponsorship['wishes'])) : ?>
+                                    <?php if (! empty($sponsorship['wishes'])) : ?>
                                         <div style="margin-top: 4px; font-size: 0.8rem;">
                                             <strong style="color: #c41e3a;">Wishes:</strong>
                                             <div style="color: #666; margin-top: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['wishes'])); ?></div>
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (!empty($sponsorship['special_needs'])) : ?>
+                                    <?php if (! empty($sponsorship['special_needs'])) : ?>
                                         <div style="margin-top: 4px; font-size: 0.8rem;">
                                             <strong style="color: #856404;">⚠️ Special Needs:</strong>
                                             <div style="color: #666; margin-top: 2px; padding: 4px; background-color: #fff3cd; border-left: 2px solid #f5b800; border-radius: 2px; line-height: 1.3;"><?php echo nl2br(sanitizeString($sponsorship['special_needs'])); ?></div>
                                         </div>
                                     <?php endif; ?>
 
-                                    <?php if (!empty($sponsorship['shirt_size']) || !empty($sponsorship['pant_size']) || !empty($sponsorship['jacket_size']) || !empty($sponsorship['shoe_size'])) : ?>
+                                    <?php if (! empty($sponsorship['shirt_size']) || ! empty($sponsorship['pant_size']) || ! empty($sponsorship['jacket_size']) || ! empty($sponsorship['shoe_size'])) : ?>
                                         <div style="margin-top: 4px; font-size: 0.8rem; background-color: #e7f3ff; padding: 4px; border-radius: 2px;">
                                             <strong style="color: #2c5530;">Sizes:</strong>
                                             <div style="margin-top: 2px; color: #666; line-height: 1.3;">
-                                                <?php if (!empty($sponsorship['shirt_size'])) : ?>
+                                                <?php if (! empty($sponsorship['shirt_size'])) : ?>
                                                     Shirt: <?php echo sanitizeString($sponsorship['shirt_size']); ?><br>
                                                 <?php endif; ?>
-                                                <?php if (!empty($sponsorship['pant_size'])) : ?>
+                                                <?php if (! empty($sponsorship['pant_size'])) : ?>
                                                     Pants: <?php echo sanitizeString($sponsorship['pant_size']); ?><br>
                                                 <?php endif; ?>
-                                                <?php if (!empty($sponsorship['jacket_size'])) : ?>
+                                                <?php if (! empty($sponsorship['jacket_size'])) : ?>
                                                     Jacket: <?php echo sanitizeString($sponsorship['jacket_size']); ?><br>
                                                 <?php endif; ?>
-                                                <?php if (!empty($sponsorship['shoe_size'])) : ?>
+                                                <?php if (! empty($sponsorship['shoe_size'])) : ?>
                                                     Shoes: <?php echo sanitizeString($sponsorship['shoe_size']); ?>
                                                 <?php endif; ?>
                                             </div>
@@ -1026,7 +1037,7 @@ include __DIR__ . '/includes/admin_header.php';
                                    title="Click to send email">
                                     <?php echo sanitizeString($sponsorship['sponsor_email']); ?>
                                 </a>
-                                <?php if (!empty($sponsorship['sponsor_phone'])) : ?>
+                                <?php if (! empty($sponsorship['sponsor_phone'])) : ?>
                                     <a href="tel:<?php echo sanitizeString($sponsorship['sponsor_phone']); ?>"
                                        class="sponsor-phone"
                                        title="Click to call">
@@ -1118,7 +1129,7 @@ include __DIR__ . '/includes/admin_header.php';
                                     </button>
                                 <?php endif; ?>
 
-                                <?php if (!empty($sponsorship['special_message'])) : ?>
+                                <?php if (! empty($sponsorship['special_message'])) : ?>
                                     <button class="btn-action btn-view-message btn-view-message-btn"
                                             data-message="<?php echo htmlspecialchars((string) $sponsorship['special_message'], ENT_QUOTES, 'UTF-8'); ?>"
                                             title="View special message from sponsor">

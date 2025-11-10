@@ -6,7 +6,7 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -21,14 +21,14 @@ $emailSent = false;
 // Handle form submission
 if ($_POST && isset($_POST['lookup_email'])) {
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $errors[] = 'Security token invalid. Please try again.';
     } else {
         $email = sanitizeEmail($_POST['sponsor_email'] ?? '');
 
         if (empty($email)) {
             $errors[] = 'Please enter your email address.';
-        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        } elseif (! filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $errors[] = 'Please enter a valid email address.';
         } else {
             // Check if email has any sponsorships

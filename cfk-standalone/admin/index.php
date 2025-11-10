@@ -18,7 +18,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -36,11 +36,11 @@ $pageTitle = 'Admin Dashboard';
 
 // Get dashboard statistics
 $stats = [
-    'total_children' => getChildrenCount([]),
+    'total_children' => Database::fetchRow("SELECT COUNT(*) as total FROM children")['total'] ?? 0, // All children regardless of status
     'available_children' => getChildrenCount(['status' => 'available']),
     'pending_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'pending'")['total'] ?? 0,
     'completed_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'completed'")['total'] ?? 0,
-    'total_families' => Database::fetchRow("SELECT COUNT(*) as total FROM families")['total'] ?? 0
+    'total_families' => Database::fetchRow("SELECT COUNT(*) as total FROM families")['total'] ?? 0,
 ];
 
 // Get recent activity
@@ -157,7 +157,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="attention-info">
                         <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
                         <span class="attention-date">
-                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?>
+                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date']) ?: 0); ?>
                         </span>
                     </div>
                     <div class="attention-actions">
@@ -190,7 +190,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 Status: <span class="status status-<?php echo $sponsorship['status']; ?>">
                                     <?php echo ucfirst((string) $sponsorship['status']); ?>
                                 </span>
-                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date'])); ?>
+                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date']) ?: 0); ?>
                             </div>
                         </div>
                         <div class="activity-actions">

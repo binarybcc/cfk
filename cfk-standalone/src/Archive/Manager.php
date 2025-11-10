@@ -6,9 +6,9 @@ namespace CFK\Archive;
 
 use CFK\Database\Connection;
 use Exception;
-use RuntimeException;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 
 /**
  * Archive Manager - Year-End Data Archiving and Reset
@@ -23,7 +23,10 @@ class Manager
      * Create full database backup
      *
      * @param string $year Year for archiving (e.g., "2024")
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (bool|int|string)[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, file?: string, size?: false|int}
      */
     public static function createDatabaseBackup(string $year): array
     {
@@ -32,7 +35,7 @@ class Manager
             $archiveDir = __DIR__ . '/../../archives/' . $year;
 
             // Create archive directory if it doesn't exist
-            if (!file_exists($archiveDir)) {
+            if (! file_exists($archiveDir)) {
                 mkdir($archiveDir, 0755, true);
             }
 
@@ -62,20 +65,20 @@ class Manager
                     'success' => true,
                     'message' => 'Database backup created successfully',
                     'file' => $backupFile,
-                    'size' => filesize($backupFile)
+                    'size' => filesize($backupFile),
                 ];
             }
 
             return [
                 'success' => false,
-                'message' => 'Database backup failed: ' . implode("\n", $output)
+                'message' => 'Database backup failed: ' . implode("\n", $output),
             ];
         } catch (Exception $e) {
             error_log('Database backup failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Backup error: ' . $e->getMessage()
+                'message' => 'Backup error: ' . $e->getMessage(),
             ];
         }
     }
@@ -84,7 +87,10 @@ class Manager
      * Export all data to CSV files
      *
      * @param string $year Year for archiving
-     * @return array<string, mixed> Result with success status and file list
+     *
+     * @return (bool|string|string[])[] Result with success status and file list
+     *
+     * @psalm-return array{success: bool, message: string, files?: array{children: string, families: string, sponsorships: string, email_log: string}}
      */
     public static function exportAllDataToCSV(string $year): array
     {
@@ -92,7 +98,7 @@ class Manager
             $timestamp = date('Y-m-d_H-i-s');
             $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-            if (!file_exists($archiveDir)) {
+            if (! file_exists($archiveDir)) {
                 mkdir($archiveDir, 0755, true);
             }
 
@@ -139,14 +145,14 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'All data exported successfully',
-                'files' => $exports
+                'files' => $exports,
             ];
         } catch (Exception $e) {
             error_log('CSV export failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Export error: ' . $e->getMessage()
+                'message' => 'Export error: ' . $e->getMessage(),
             ];
         }
     }
@@ -182,7 +188,10 @@ class Manager
      * Create archive summary document
      *
      * @param string $year Year for archiving
-     * @return array<string, mixed> Result with success status and file path
+     *
+     * @return (bool|string)[] Result with success status and file path
+     *
+     * @psalm-return array{success: bool, message: string, file?: string}
      */
     public static function createArchiveSummary(string $year): array
     {
@@ -195,7 +204,7 @@ class Manager
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
                 'families' => Connection::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
                 'sponsorships' => Connection::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
-                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0
+                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
             ];
 
             $sponsorshipStats = Connection::fetchAll("
@@ -248,14 +257,14 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Archive summary created',
-                'file' => $summaryFile
+                'file' => $summaryFile,
             ];
         } catch (Exception $e) {
             error_log('Archive summary creation failed: ' . $e->getMessage());
 
             return [
                 'success' => false,
-                'message' => 'Summary creation error: ' . $e->getMessage()
+                'message' => 'Summary creation error: ' . $e->getMessage(),
             ];
         }
     }
@@ -263,7 +272,9 @@ class Manager
     /**
      * Clear all seasonal data (DESTRUCTIVE - use with caution!)
      *
-     * @return array<string, mixed> Result with success status and deleted counts
+     * @return ((int|mixed)[]|bool|string)[] Result with success status and deleted counts
+     *
+     * @psalm-return array{success: bool, message: string, deleted?: array{children: 0|mixed, families: 0|mixed, sponsorships: 0|mixed, email_log: 0|mixed}}
      */
     public static function clearSeasonalData(): array
     {
@@ -275,7 +286,7 @@ class Manager
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
                 'families' => Connection::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
                 'sponsorships' => Connection::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
-                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0
+                'email_log' => Connection::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
             ];
 
             // Delete in correct order (respecting foreign keys)
@@ -295,7 +306,7 @@ class Manager
             return [
                 'success' => true,
                 'message' => 'Seasonal data cleared successfully',
-                'deleted' => $beforeCounts
+                'deleted' => $beforeCounts,
             ];
         } catch (Exception $e) {
             Connection::rollback();
@@ -303,7 +314,7 @@ class Manager
 
             return [
                 'success' => false,
-                'message' => 'Data clearing error: ' . $e->getMessage()
+                'message' => 'Data clearing error: ' . $e->getMessage(),
             ];
         }
     }
@@ -313,7 +324,10 @@ class Manager
      *
      * @param string $year Year for archiving
      * @param string $confirmationCode Security confirmation code
-     * @return array<string, mixed> Result with success status and detailed results
+     *
+     * @return ((array|string)[]|bool|mixed|string)[] Result with success status and detailed results
+     *
+     * @psalm-return array{success: bool, message: string, results?: array{backup: array<string, mixed>, export?: array<string, mixed>, summary?: array<string, mixed>, clear?: array<string, mixed>}, deleted_counts?: mixed, errors?: list{'CSV export failed'|'Data clearing failed - Data may be partially deleted!'|'Database backup failed'}}
      */
     public static function performYearEndReset(string $year, string $confirmationCode): array
     {
@@ -322,7 +336,7 @@ class Manager
         if ($confirmationCode !== $expectedCode) {
             return [
                 'success' => false,
-                'message' => 'Invalid confirmation code. Expected: ' . $expectedCode
+                'message' => 'Invalid confirmation code. Expected: ' . $expectedCode,
             ];
         }
 
@@ -332,28 +346,28 @@ class Manager
         // Step 1: Create database backup
         $backupResult = self::createDatabaseBackup($year);
         $results['backup'] = $backupResult;
-        if (!$backupResult['success']) {
+        if (! $backupResult['success']) {
             $errors[] = 'Database backup failed';
 
             return [
                 'success' => false,
                 'message' => 'Year-end reset aborted: Database backup failed',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
         // Step 2: Export all data to CSV
         $exportResult = self::exportAllDataToCSV($year);
         $results['export'] = $exportResult;
-        if (!$exportResult['success']) {
+        if (! $exportResult['success']) {
             $errors[] = 'CSV export failed';
 
             return [
                 'success' => false,
                 'message' => 'Year-end reset aborted: CSV export failed',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
@@ -364,14 +378,14 @@ class Manager
         // Step 4: Clear seasonal data
         $clearResult = self::clearSeasonalData();
         $results['clear'] = $clearResult;
-        if (!$clearResult['success']) {
+        if (! $clearResult['success']) {
             $errors[] = 'Data clearing failed - Data may be partially deleted!';
 
             return [
                 'success' => false,
                 'message' => 'WARNING: Data clearing failed. Check database state!',
                 'results' => $results,
-                'errors' => $errors
+                'errors' => $errors,
             ];
         }
 
@@ -379,20 +393,22 @@ class Manager
             'success' => true,
             'message' => 'Year-end reset completed successfully',
             'results' => $results,
-            'deleted_counts' => $clearResult['deleted']
+            'deleted_counts' => $clearResult['deleted'],
         ];
     }
 
     /**
      * Get list of available archives (individual archive sets by timestamp)
      *
-     * @return array<int, array<string, mixed>> List of available archives
+     * @return (bool|int|string)[][] List of available archives
+     *
+     * @psalm-return list<array{backup_file: non-empty-string, date: string, file_count: int<0, max>, has_data: bool, has_summary: bool, path: non-empty-string, size: int<min, max>, timestamp: string, year: non-empty-string}>
      */
     public static function getAvailableArchives(): array
     {
         $archivesDir = __DIR__ . '/../../archives';
 
-        if (!file_exists($archivesDir)) {
+        if (! file_exists($archivesDir)) {
             return [];
         }
 
@@ -409,7 +425,7 @@ class Manager
             // Find all backup files in this year to identify individual archives
             $backupFiles = glob($yearDir . '/database_backup_*.sql');
 
-            if (!$backupFiles) {
+            if (! $backupFiles) {
                 continue;
             }
 
@@ -461,18 +477,19 @@ class Manager
                         'has_summary' => $hasSummary,
                         'has_data' => $hasData,
                         'file_count' => $fileCount,
-                        'size' => $size
+                        'size' => $size,
                     ];
                 }
             }
         }
 
         // Sort by year and timestamp descending (newest first)
-        usort($archives, function($a, $b) {
+        usort($archives, function ($a, $b) {
             $yearCompare = strcmp((string) $b['year'], (string) $a['year']);
             if ($yearCompare !== 0) {
                 return $yearCompare;
             }
+
             return strcmp((string) $b['timestamp'], (string) $a['timestamp']);
         });
 
@@ -484,6 +501,7 @@ class Manager
      *
      * @param string $dir Directory path
      * @return int Size in bytes
+     * @phpstan-ignore-next-line method.unused
      */
     private static function getDirectorySize(string $dir): int
     {
@@ -509,6 +527,7 @@ class Manager
      * Format bytes to human readable
      *
      * @param int $bytes Size in bytes
+     *
      * @return string Formatted size string
      */
     public static function formatBytes(int $bytes): string
@@ -534,7 +553,10 @@ class Manager
      * @param string $year Archive year
      * @param string $backupFile Backup filename (not full path)
      * @param bool $debug Enable detailed debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (scalar|string[])[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, debug_log: list{0: string, 1?: string, 2?: string, 3?: string, 4?: string, 5?: string, 6?: string, 7?: string, 8?: string}, duration?: float, file_size?: false|int}
      */
     public static function restoreDatabase(string $year, string $backupFile, bool $debug = true): array
     {
@@ -546,14 +568,14 @@ class Manager
             $backupPath = $archiveDir . '/' . $backupFile;
 
             // Validate backup file exists
-            if (!file_exists($backupPath)) {
+            if (! file_exists($backupPath)) {
                 $debugLog[] = "ERROR: Backup file not found at: {$backupPath}";
                 error_log("Archive restore failed: Backup file not found - {$backupPath}");
 
                 return [
                     'success' => false,
                     'message' => 'Backup file not found',
-                    'debug_log' => $debugLog
+                    'debug_log' => $debugLog,
                 ];
             }
 
@@ -596,7 +618,7 @@ class Manager
                     'message' => 'Database restored successfully',
                     'duration' => $duration,
                     'file_size' => $fileSize,
-                    'debug_log' => $debugLog
+                    'debug_log' => $debugLog,
                 ];
             }
 
@@ -607,7 +629,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Database restore failed: ' . implode("\n", $output),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         } catch (Exception $e) {
             $debugLog[] = "EXCEPTION: " . $e->getMessage();
@@ -616,7 +638,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Restore error: ' . $e->getMessage(),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
     }
@@ -625,16 +647,19 @@ class Manager
      * Get restore preview - what data would be restored
      *
      * @param string $year Archive year
-     * @return array<string, mixed> Preview data
+     *
+     * @return (bool|int|int[]|null|string)[] Preview data
+     *
+     * @psalm-return array{success: bool, year?: string, summary?: false|null|string, counts?: array{children: int<0, max>, families: int<0, max>, sponsorships: int<0, max>, email_log: int<0, max>}, backup_file?: null|string, backup_size?: false|int, backup_date?: null|string, message?: 'Archive not found'}
      */
     public static function getRestorePreview(string $year): array
     {
         $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-        if (!file_exists($archiveDir)) {
+        if (! file_exists($archiveDir)) {
             return [
                 'success' => false,
-                'message' => 'Archive not found'
+                'message' => 'Archive not found',
             ];
         }
 
@@ -685,7 +710,7 @@ class Manager
         }
 
         // Fallback to newest backup if no match found
-        if (!$latestBackup) {
+        if (! $latestBackup) {
             $backupFiles = glob($archiveDir . '/database_backup_*.sql');
             if ($backupFiles) {
                 usort($backupFiles, function ($a, $b) {
@@ -724,7 +749,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Invalid confirmation code. Expected: ' . $expectedCode,
-                'debug_log' => ['Confirmation code mismatch']
+                'debug_log' => ['Confirmation code mismatch'],
             ];
         }
 
@@ -733,22 +758,24 @@ class Manager
 
         // Get preview to find backup file
         $preview = self::getRestorePreview($year);
-        if (!$preview['success']) {
+        if (! $preview['success']) {
             $debugLog[] = "ERROR: Archive not found";
+
             return [
                 'success' => false,
                 'message' => 'Archive not found for year: ' . $year,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
         $backupFile = $preview['backup_file'];
-        if (!$backupFile) {
+        if (! $backupFile) {
             $debugLog[] = "ERROR: No backup file found in archive";
+
             return [
                 'success' => false,
                 'message' => 'No database backup found in archive',
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -759,24 +786,23 @@ class Manager
         $debugLog[] = "--- Starting Database Restore ---";
         $restoreResult = self::restoreDatabase($year, $backupFile, $debug);
 
-        // Merge debug logs
-        if (isset($restoreResult['debug_log'])) {
-            $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
-        }
+        // Merge debug logs (debug_log always exists in return array)
+        $debugLog = array_merge($debugLog, $restoreResult['debug_log']);
 
-        if (!$restoreResult['success']) {
+        if (! $restoreResult['success']) {
             $debugLog[] = "❌ DATABASE RESTORE FAILED";
             error_log("Archive restoration failed for {$year}: " . $restoreResult['message']);
 
             return [
                 'success' => false,
                 'message' => 'Archive restoration failed: ' . $restoreResult['message'],
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
         // Verify restoration by counting records
         $debugLog[] = "--- Verifying Restoration ---";
+
         try {
             $verifyStats = [
                 'children' => Connection::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
@@ -800,7 +826,7 @@ class Manager
                 'message' => 'Archive restored successfully',
                 'restored_counts' => $verifyStats,
                 'duration' => $restoreResult['duration'] ?? 0,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         } catch (Exception $e) {
             $debugLog[] = "ERROR during verification: " . $e->getMessage();
@@ -808,7 +834,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Restore completed but verification failed: ' . $e->getMessage(),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
     }
@@ -816,7 +842,9 @@ class Manager
     /**
      * Get list of archives that will be deleted (all but last 2 with data)
      *
-     * @return array<string, mixed> Array with archives to keep and delete
+     * @return (array[]|float|int|mixed)[] Array with archives to keep and delete
+     *
+     * @psalm-return array{to_keep: list<array<string, mixed>>, to_delete: list<array<string, mixed>>, delete_count: int<0, max>, total_size: mixed, total_size_mb: float}
      */
     public static function getArchivesForDeletion(): array
     {
@@ -832,6 +860,7 @@ class Manager
             if ($a['year'] !== $b['year']) {
                 return $b['year'] <=> $a['year'];
             }
+
             return $b['timestamp'] <=> $a['timestamp'];
         });
 
@@ -850,7 +879,7 @@ class Manager
             'to_delete' => $toDelete,
             'delete_count' => count($toDelete),
             'total_size' => $totalSize,
-            'total_size_mb' => round($totalSize / 1024 / 1024, 2)
+            'total_size_mb' => round($totalSize / 1024 / 1024, 2),
         ];
     }
 
@@ -860,18 +889,21 @@ class Manager
      * @param string $year Year of archive
      * @param string $timestamp Timestamp of archive (YYYY-MM-DD_HH-MM-SS)
      * @param bool $debug Enable debug logging
-     * @return array<string, mixed> Result with success status and details
+     *
+     * @return (scalar|string[])[] Result with success status and details
+     *
+     * @psalm-return array{success: bool, message: string, deleted_files?: list<non-falsy-string>, deleted_size?: int<min, max>, deleted_size_mb?: float, debug_log: list{0?: string,...}, errors?: non-empty-list<non-falsy-string>}
      */
     public static function deleteArchive(string $year, string $timestamp, bool $debug = false): array
     {
         $debugLog = [];
         $archiveDir = __DIR__ . '/../../archives/' . $year;
 
-        if (!is_dir($archiveDir)) {
+        if (! is_dir($archiveDir)) {
             return [
                 'success' => false,
                 'message' => "Archive directory not found for year: {$year}",
-                'debug_log' => ['Archive directory does not exist']
+                'debug_log' => ['Archive directory does not exist'],
             ];
         }
 
@@ -929,7 +961,7 @@ class Manager
                 'deleted_files' => $deletedFiles,
                 'deleted_size' => $deletedSize,
                 'errors' => $errors,
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -945,7 +977,7 @@ class Manager
             'deleted_files' => $deletedFiles,
             'deleted_size' => $deletedSize,
             'deleted_size_mb' => round($deletedSize / 1024 / 1024, 2),
-            'debug_log' => $debugLog
+            'debug_log' => $debugLog,
         ];
     }
 
@@ -965,7 +997,7 @@ class Manager
             return [
                 'success' => false,
                 'message' => 'Invalid confirmation code. Expected: DELETE OLD ARCHIVES',
-                'debug_log' => ['Confirmation code mismatch']
+                'debug_log' => ['Confirmation code mismatch'],
             ];
         }
 
@@ -977,12 +1009,13 @@ class Manager
 
         if ($deletionInfo['delete_count'] === 0) {
             $debugLog[] = "No archives to delete (keeping last 2 with data)";
+
             return [
                 'success' => true,
                 'message' => 'No archives to delete',
                 'deleted_count' => 0,
                 'kept_count' => count($deletionInfo['to_keep']),
-                'debug_log' => $debugLog
+                'debug_log' => $debugLog,
             ];
         }
 
@@ -1008,10 +1041,8 @@ class Manager
                 $debugLog[] = "❌ Failed: " . $result['message'];
             }
 
-            // Merge individual delete logs
-            if (isset($result['debug_log'])) {
-                $debugLog = array_merge($debugLog, $result['debug_log']);
-            }
+            // Merge individual delete logs (debug_log always exists in return array)
+            $debugLog = array_merge($debugLog, $result['debug_log']);
         }
 
         $debugLog[] = "=== Deletion Complete ===";
@@ -1029,7 +1060,7 @@ class Manager
             'kept_count' => count($deletionInfo['to_keep']),
             'total_deleted_mb' => round($totalDeleted / 1024 / 1024, 2),
             'errors' => $errors,
-            'debug_log' => $debugLog
+            'debug_log' => $debugLog,
         ];
     }
 }

@@ -22,7 +22,7 @@ use CFK\Archive\Manager as ArchiveManager;
 use CFK\Database\Connection as Database;
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -40,7 +40,7 @@ try {
         'children' => (int)($childrenResult['count'] ?? 0),
         'families' => (int)($familiesResult['count'] ?? 0),
         'sponsorships' => (int)($sponsorshipsResult['count'] ?? 0),
-        'email_log' => (int)($emailLogResult['count'] ?? 0)
+        'email_log' => (int)($emailLogResult['count'] ?? 0),
     ];
 } catch (Exception $e) {
     error_log("Failed to get stats: " . $e->getMessage());
@@ -48,7 +48,7 @@ try {
         'children' => 0,
         'families' => 0,
         'sponsorships' => 0,
-        'email_log' => 0
+        'email_log' => 0,
     ];
 }
 
@@ -70,7 +70,7 @@ $deletionPreview = null;
 
 // Debug: Log all requests (only in debug mode)
 if (config('app_debug', false)) {
-    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST)));
 }
 
 // Get deletion preview for display
@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_delete'])) {
     }
 
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         error_log("DELETE_ARCHIVES: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
@@ -130,7 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
     }
 
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         error_log("ARCHIVE_RESTORE: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
@@ -159,12 +159,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
                 // Refresh stats to show restored data
                 try {
                     $currentStats = [
-                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
+                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
+                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
+                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
                     ];
-                } catch (Exception $e) {
+                } catch (Exception) {
                     // Keep existing stats
                 }
             } else {
@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
     }
 
     // Verify CSRF token
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         error_log("YEAR_END_RESET: CSRF token verification FAILED");
         $errors[] = 'Security token invalid. Please try again.';
     } else {
@@ -193,7 +193,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
 
         if (empty($year)) {
             $errors[] = 'Please enter the year.';
-        } elseif (!preg_match('/^\d{4}$/', $year)) {
+        } elseif (! preg_match('/^\d{4}$/', $year)) {
             $errors[] = 'Year must be a 4-digit number.';
         } else {
             // Perform reset
@@ -216,7 +216,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_reset'])) {
                     'children' => 0,
                     'families' => 0,
                     'sponsorships' => 0,
-                    'email_log' => 0
+                    'email_log' => 0,
                 ];
             } else {
                 $errors[] = $resetResult['message'];
@@ -295,7 +295,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <li>Disk Space Freed: <?php echo $deleteResult['total_deleted_mb'] ?? 0; ?> MB</li>
                 </ul>
 
-                <?php if (!empty($deleteResult['errors'])) : ?>
+                <?php if (! empty($deleteResult['errors'])) : ?>
                     <h4>⚠️ Errors During Deletion:</h4>
                     <ul>
                         <?php foreach ($deleteResult['errors'] as $error) : ?>
@@ -307,12 +307,12 @@ include __DIR__ . '/includes/admin_header.php';
         </div>
     <?php endif; ?>
 
-    <?php if (!empty($debugLog)) : ?>
+    <?php if (! empty($debugLog)) : ?>
         <div class="debug-log-section">
             <h3>🔍 Restoration Debug Log</h3>
             <div class="debug-log-content">
                 <?php foreach ($debugLog as $logEntry) : ?>
-                    <div class="debug-log-entry"><?php echo htmlspecialchars($logEntry); ?></div>
+                    <div class="debug-log-entry"><?php echo htmlspecialchars((string) $logEntry); ?></div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -326,7 +326,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['children'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['children']; ?></h3>
                     <p>Children</p>
                 </div>
             </div>
@@ -334,7 +334,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👨‍👩‍👧‍👦</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['families'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['families']; ?></h3>
                     <p>Families</p>
                 </div>
             </div>
@@ -342,7 +342,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['sponsorships'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['sponsorships']; ?></h3>
                     <p>Sponsorships</p>
                 </div>
             </div>
@@ -350,7 +350,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['email_log'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['email_log']; ?></h3>
                     <p>Email Logs</p>
                 </div>
             </div>

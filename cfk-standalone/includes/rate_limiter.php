@@ -7,7 +7,7 @@ declare(strict_types=1);
  * Prevents brute force attacks on magic link requests
  */
 
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -64,7 +64,7 @@ class RateLimiter
 
             $windowResult = Database::fetchRow($sql, [
                 'email' => $email,
-                'window_start' => $windowStart
+                'window_start' => $windowStart,
             ]);
 
             if ($windowResult && $windowResult['count'] >= self::EMAIL_RATE_PER_WINDOW) {
@@ -81,7 +81,7 @@ class RateLimiter
 
             $hourResult = Database::fetchRow($hourSql, [
                 'email' => $email,
-                'hour_start' => $hourStart
+                'hour_start' => $hourStart,
             ]);
 
             if ($hourResult && $hourResult['count'] >= self::EMAIL_RATE_PER_HOUR) {
@@ -91,6 +91,7 @@ class RateLimiter
             return false;
         } catch (Exception $e) {
             error_log('Email rate limit check failed: ' . $e->getMessage());
+
             // On error, deny the request (fail closed for security)
             // Better to block legitimate requests during DB issues than allow attacks
             return true;
@@ -117,7 +118,7 @@ class RateLimiter
 
             $windowResult = Database::fetchRow($sql, [
                 'ip_address' => $ipAddress,
-                'window_start' => $windowStart
+                'window_start' => $windowStart,
             ]);
 
             if ($windowResult && $windowResult['count'] >= self::IP_RATE_PER_WINDOW) {
@@ -134,7 +135,7 @@ class RateLimiter
 
             $hourResult = Database::fetchRow($hourSql, [
                 'ip_address' => $ipAddress,
-                'hour_start' => $hourStart
+                'hour_start' => $hourStart,
             ]);
 
             if ($hourResult && $hourResult['count'] >= self::IP_RATE_PER_HOUR) {
@@ -144,6 +145,7 @@ class RateLimiter
             return false;
         } catch (Exception $e) {
             error_log('IP rate limit check failed: ' . $e->getMessage());
+
             // On error, deny the request (fail closed for security)
             // Better to block legitimate requests during DB issues than allow attacks
             return true;
@@ -170,7 +172,7 @@ class RateLimiter
             Database::execute($sql, [
                 'email' => $email,
                 'ip_address' => $ipAddress,
-                'window_start' => $windowStart
+                'window_start' => $windowStart,
             ]);
         } catch (Exception $e) {
             error_log('Failed to record rate limit: ' . $e->getMessage());
@@ -184,9 +186,11 @@ class RateLimiter
     {
         try {
             $sql = "DELETE FROM rate_limit_tracking WHERE window_start < NOW() - INTERVAL 1 HOUR";
+
             return Database::execute($sql, []);
         } catch (Exception $e) {
             error_log('Failed to cleanup rate limits: ' . $e->getMessage());
+
             return 0;
         }
     }

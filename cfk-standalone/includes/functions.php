@@ -8,7 +8,7 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
@@ -27,7 +27,8 @@ function cleanWishesText(string $wishes): string
 {
     // Remove .Wishlist: or Wishlist: prefix (case-insensitive, with or without dot)
     $cleaned = preg_replace('/^\.?\s*wish\s*list\s*:\s*/i', '', trim($wishes));
-    return $cleaned;
+
+    return $cleaned ?? '';
 }
 
 /**
@@ -36,8 +37,11 @@ function cleanWishesText(string $wishes): string
 
 /**
  * Get children with optional filtering and pagination
+ *
+ * @param array<string, mixed> $filters Filter criteria (search, age_category, gender, status, family_id)
+ * @return array<int, array<string, mixed>> Array of child records with family information
  */
-function getChildren(array $filters = [], int $page = 1, int $limit = null): array
+function getChildren(array $filters = [], int $page = 1, ?int $limit = null): array
 {
     $limit = $limit ?? config('children_per_page', 12);
     $offset = ($page - 1) * $limit;
@@ -54,7 +58,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
     $params = [];
 
     // Apply filters
-    if (!empty($filters['search'])) {
+    if (! empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
         $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
@@ -62,7 +66,7 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         $params['search3'] = $searchValue;
     }
 
-    if (!empty($filters['age_category'])) {
+    if (! empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
@@ -73,23 +77,23 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
         }
     }
 
-    if (!empty($filters['gender'])) {
+    if (! empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
 
-    if (!empty($filters['status'])) {
+    if (! empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
 
-    if (!empty($filters['family_id'])) {
+    if (! empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
 
     // Default to available children only
-    if (!isset($filters['status'])) {
+    if (! isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
 
@@ -103,6 +107,8 @@ function getChildren(array $filters = [], int $page = 1, int $limit = null): arr
 
 /**
  * Get total count of children matching filters
+ *
+ * @param array<string, mixed> $filters Filter criteria (same as getChildren)
  */
 function getChildrenCount(array $filters = []): int
 {
@@ -116,7 +122,7 @@ function getChildrenCount(array $filters = []): int
     $params = [];
 
     // Apply same filters as getChildren()
-    if (!empty($filters['search'])) {
+    if (! empty($filters['search'])) {
         $searchValue = '%' . $filters['search'] . '%';
         $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE :search1 OR c.interests LIKE :search2 OR c.wishes LIKE :search3)";
         $params['search1'] = $searchValue;
@@ -124,7 +130,7 @@ function getChildrenCount(array $filters = []): int
         $params['search3'] = $searchValue;
     }
 
-    if (!empty($filters['age_category'])) {
+    if (! empty($filters['age_category'])) {
         global $ageCategories;
         if (isset($ageCategories[$filters['age_category']])) {
             $category = $ageCategories[$filters['age_category']];
@@ -135,32 +141,35 @@ function getChildrenCount(array $filters = []): int
         }
     }
 
-    if (!empty($filters['gender'])) {
+    if (! empty($filters['gender'])) {
         $sql .= " AND c.gender = :gender";
         $params['gender'] = $filters['gender'];
     }
 
-    if (!empty($filters['status'])) {
+    if (! empty($filters['status'])) {
         $sql .= " AND c.status = :status";
         $params['status'] = $filters['status'];
     }
 
-    if (!empty($filters['family_id'])) {
+    if (! empty($filters['family_id'])) {
         $sql .= " AND c.family_id = :family_id";
         $params['family_id'] = $filters['family_id'];
     }
 
     // Default to available children only
-    if (!isset($filters['status'])) {
+    if (! isset($filters['status'])) {
         $sql .= " AND c.status = 'available'";
     }
 
     $result = Database::fetchRow($sql, $params);
+
     return (int) ($result['total'] ?? 0);
 }
 
 /**
  * Get single child by ID with family information
+ *
+ * @return array<string, mixed>|null Child record with family info or null if not found
  */
 function getChildById(int $childId): ?array
 {
@@ -177,8 +186,10 @@ function getChildById(int $childId): ?array
 
 /**
  * Get family members (siblings) for a child
+ *
+ * @return array<int, array<string, mixed>> Array of family member records
  */
-function getFamilyMembers(int $familyId, int $excludeChildId = null): array
+function getFamilyMembers(int $familyId, ?int $excludeChildId = null): array
 {
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
@@ -211,6 +222,7 @@ function getSiblingCount(int $familyId): int
     ";
 
     $result = Database::fetchRow($sql, ['family_id' => $familyId]);
+
     return (int) ($result['count'] ?? 0);
 }
 
@@ -242,26 +254,34 @@ function getPlaceholderImage(?int $age, string $gender): string
 
 /**
  * Get family information by family ID
+ *
+ * @return array<string, mixed>|null Family record or null if not found
  */
 function getFamilyById(int $familyId): ?array
 {
     $sql = "SELECT * FROM families WHERE id = :family_id";
+
     return Database::fetchRow($sql, ['family_id' => $familyId]);
 }
 
 /**
  * Get family information by family number (user-facing ID like 201, 202, etc.)
+ *
+ * @return array<string, mixed>|null Family record or null if not found
  */
 function getFamilyByNumber(string $familyNumber): ?array
 {
     $sql = "SELECT * FROM families WHERE family_number = :family_number";
+
     return Database::fetchRow($sql, ['family_number' => $familyNumber]);
 }
 
 /**
  * Get all family members by family number
+ *
+ * @return array<int, array<string, mixed>> Array of family member records
  */
-function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = null): array
+function getFamilyMembersByNumber(string $familyNumber, ?int $excludeChildId = null): array
 {
     $sql = "
         SELECT c.*, f.family_number, CONCAT(f.family_number, c.child_letter) as display_id
@@ -285,6 +305,9 @@ function getFamilyMembersByNumber(string $familyNumber, int $excludeChildId = nu
 /**
  * Eager load family members for multiple children (prevents N+1 queries)
  * Returns array indexed by family_id containing arrays of siblings
+ *
+ * @param array<int, array<string, mixed>> $children Array of child records
+ * @return array<int, array<int, array<string, mixed>>> Family members grouped by family_id
  */
 function eagerLoadFamilyMembers(array $children): array
 {
@@ -336,6 +359,8 @@ function eagerLoadFamilyMembers(array $children): array
 
 /**
  * Create a sponsorship request
+ *
+ * @param array<string, mixed> $sponsorData Sponsor information (name, email, phone, address, etc.)
  */
 function createSponsorship(int $childId, array $sponsorData): int
 {
@@ -351,7 +376,7 @@ function createSponsorship(int $childId, array $sponsorData): int
         'sponsor_address' => sanitizeString($sponsorData['address'] ?? ''),
         'gift_preference' => $sponsorData['gift_preference'] ?? 'shopping',
         'special_message' => sanitizeString($sponsorData['message'] ?? ''),
-        'status' => 'pending'
+        'status' => 'pending',
     ];
 
     return Database::insert('sponsorships', $sponsorshipData);
@@ -359,6 +384,8 @@ function createSponsorship(int $childId, array $sponsorData): int
 
 /**
  * Get sponsorship by ID
+ *
+ * @return array<string, mixed>|null Sponsorship record with child info or null if not found
  */
 function getSponsorshipById(int $sponsorshipId): ?array
 {
@@ -403,6 +430,7 @@ function displayAge(?int $ageMonths): string
     } else {
         // 36+ months: display as years
         $years = (int)floor($ageMonths / 12);
+
         return $years . ' year' . ($years !== 1 ? 's' : '');
     }
 }
@@ -501,25 +529,33 @@ function setMessage(string $message, string $type = 'success'): void
     $_SESSION['cfk_message'] = ['text' => $message, 'type' => $type];
 }
 
+/**
+ * Get flash message from session
+ *
+ * @return array<string, string>|null Message array with 'text' and 'type' keys, or null
+ */
 function getMessage(): ?array
 {
     if (isset($_SESSION['cfk_message'])) {
         $message = $_SESSION['cfk_message'];
         unset($_SESSION['cfk_message']);
+
         return $message;
     }
+
     return null;
 }
 
 /**
  * Photo handling - Uses avatar system instead of real photos for privacy
+ *
+ * @param array<string, mixed>|null $child Child data (age_months, gender required for avatar selection)
  */
-function getPhotoUrl(string $filename = null, array $child = null): string
+function getPhotoUrl(?string $filename = null, ?array $child = null): string
 {
     // ALWAYS use avatars - no real photos for privacy protection
     if ($child && isset($child['age_months']) && isset($child['gender'])) {
-        require_once __DIR__ . '/avatar_manager.php';
-        return CFK_Avatar_Manager::getAvatarForChild($child);
+        return \CFK\Avatar\Manager::getAvatarForChild($child);
     }
 
     // Fallback avatar if child data not available
@@ -539,7 +575,7 @@ function regenerateSessionIfNeeded(): void
         // Regenerate every 30 minutes
         $regenerateInterval = 1800; // 30 minutes
 
-        if (!isset($_SESSION['last_regeneration'])) {
+        if (! isset($_SESSION['last_regeneration'])) {
             $_SESSION['last_regeneration'] = time();
         } elseif (time() - $_SESSION['last_regeneration'] > $regenerateInterval) {
             session_regenerate_id(true); // Delete old session
@@ -551,12 +587,13 @@ function regenerateSessionIfNeeded(): void
 function isLoggedIn(): bool
 {
     regenerateSessionIfNeeded();
-    return isset($_SESSION['cfk_admin_id']) && !empty($_SESSION['cfk_admin_id']);
+
+    return isset($_SESSION['cfk_admin_id']) && ! empty($_SESSION['cfk_admin_id']);
 }
 
 function requireLogin(): void
 {
-    if (!isLoggedIn()) {
+    if (! isLoggedIn()) {
         header('Location: ' . baseUrl('admin/login.php'));
         exit;
     }
@@ -570,6 +607,13 @@ function validateEmail(string $email): bool
     return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
 }
 
+/**
+ * Validate required fields in data array
+ *
+ * @param array<string, mixed> $data Data to validate
+ * @param array<int, string> $requiredFields List of required field names
+ * @return array<int, string> Array of error messages (empty if valid)
+ */
 function validateRequired(array $data, array $requiredFields): array
 {
     $errors = [];
@@ -578,6 +622,7 @@ function validateRequired(array $data, array $requiredFields): array
             $errors[] = ucfirst($field) . ' is required';
         }
     }
+
     return $errors;
 }
 
@@ -594,7 +639,7 @@ function validateRequired(array $data, array $requiredFields): array
  * @param string $text Button text (will be sanitized)
  * @param string|null $url URL for link buttons (null for form buttons)
  * @param string $type Button type: 'primary', 'secondary', 'success', 'danger', 'outline', 'info', 'warning'
- * @param array $options Additional options:
+ * @param array<string, mixed> $options Additional options:
  *   - 'size': 'large', 'small', or default (string)
  *   - 'id': Element ID (string)
  *   - 'class': Additional CSS classes (string)
@@ -643,7 +688,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     }
 
     // Add size class
-    if (!empty($options['size'])) {
+    if (! empty($options['size'])) {
         $validSizes = ['small', 'large'];
         if (in_array($options['size'], $validSizes)) {
             $classes[] = 'btn-' . $options['size'];
@@ -651,12 +696,12 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     }
 
     // Add block class
-    if (!empty($options['block'])) {
+    if (! empty($options['block'])) {
         $classes[] = 'btn-block';
     }
 
     // Add custom classes
-    if (!empty($options['class'])) {
+    if (! empty($options['class'])) {
         $classes[] = sanitizeString($options['class']);
     }
 
@@ -666,17 +711,17 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     $attrs = [];
 
     // Add ID if provided
-    if (!empty($options['id'])) {
+    if (! empty($options['id'])) {
         $attrs['id'] = sanitizeString($options['id']);
     }
 
     // Add onclick if provided
-    if (!empty($options['onclick'])) {
+    if (! empty($options['onclick'])) {
         $attrs['onclick'] = sanitizeString($options['onclick']);
     }
 
     // Add custom attributes
-    if (!empty($options['attributes']) && is_array($options['attributes'])) {
+    if (! empty($options['attributes']) && is_array($options['attributes'])) {
         foreach ($options['attributes'] as $key => $value) {
             // Allow data-* and zeffy-* attributes without sanitization
             if (str_starts_with($key, 'data-') || str_starts_with($key, 'zeffy-')) {
@@ -697,7 +742,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
     if ($url !== null) {
         // Render as <a> tag
         $target = '';
-        if (!empty($options['target'])) {
+        if (! empty($options['target'])) {
             $target = ' target="' . sanitizeString($options['target']) . '"';
         }
 
@@ -711,7 +756,7 @@ function renderButton(string $text, ?string $url = null, string $type = 'primary
         );
     } else {
         // Render as <button> tag
-        $buttonType = !empty($options['submit']) ? 'submit' : 'button';
+        $buttonType = ! empty($options['submit']) ? 'submit' : 'button';
 
         return sprintf(
             '<button type="%s" class="%s"%s>%s</button>',
@@ -731,8 +776,10 @@ function formatDateTime(?string $datetime): string
     if (empty($datetime)) {
         return "";
     }
+
     try {
         $dt = new DateTime($datetime);
+
         return $dt->format("M j, Y g:i A");
     } catch (Exception $e) {
         return $datetime;
@@ -747,8 +794,10 @@ function formatDate(?string $date): string
     if (empty($date)) {
         return "";
     }
+
     try {
         $dt = new DateTime($date);
+
         return $dt->format("M j, Y");
     } catch (Exception $e) {
         return $date;

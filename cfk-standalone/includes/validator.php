@@ -8,21 +8,26 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 
 class Validator
 {
+    /** @var array<string, array<int, string>> */
     private array $errors = [];
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __construct(private array $data)
     {
     }
 
     /**
      * Validate required fields
+     * @param array<int, string> $fields
      */
     public function required(array $fields): self
     {
@@ -32,6 +37,7 @@ class Validator
                 $this->errors[$field][] = ucfirst(str_replace('_', ' ', $field)) . ' is required';
             }
         }
+
         return $this;
     }
 
@@ -41,9 +47,10 @@ class Validator
     public function email(string $field): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value && !filter_var($value, FILTER_VALIDATE_EMAIL)) {
+        if ($value && ! filter_var($value, FILTER_VALIDATE_EMAIL)) {
             $this->errors[$field][] = 'Must be a valid email address';
         }
+
         return $this;
     }
 
@@ -56,6 +63,7 @@ class Validator
         if (strlen((string)$value) < $min) {
             $this->errors[$field][] = "Must be at least $min characters";
         }
+
         return $this;
     }
 
@@ -68,6 +76,7 @@ class Validator
         if (strlen((string)$value) > $max) {
             $this->errors[$field][] = "Must not exceed $max characters";
         }
+
         return $this;
     }
 
@@ -77,9 +86,10 @@ class Validator
     public function numeric(string $field): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value !== null && !is_numeric($value)) {
+        if ($value !== null && ! is_numeric($value)) {
             $this->errors[$field][] = 'Must be a number';
         }
+
         return $this;
     }
 
@@ -89,46 +99,51 @@ class Validator
     public function integer(string $field): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value !== null && !filter_var($value, FILTER_VALIDATE_INT)) {
+        if ($value !== null && ! filter_var($value, FILTER_VALIDATE_INT)) {
             $this->errors[$field][] = 'Must be a whole number';
         }
+
         return $this;
     }
 
     /**
      * Validate value is in array
+     * @param array<int|string, mixed> $allowed
      */
     public function in(string $field, array $allowed): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value !== null && !in_array($value, $allowed, true)) {
+        if ($value !== null && ! in_array($value, $allowed, true)) {
             $allowedStr = implode(', ', $allowed);
             $this->errors[$field][] = "Must be one of: $allowedStr";
         }
+
         return $this;
     }
 
     /**
      * Validate minimum numeric value
      */
-    public function min(string $field, $min): self
+    public function min(string $field, int|float $min): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value < $min) {
             $this->errors[$field][] = "Must be at least $min";
         }
+
         return $this;
     }
 
     /**
      * Validate maximum numeric value
      */
-    public function max(string $field, $max): self
+    public function max(string $field, int|float $max): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value > $max) {
             $this->errors[$field][] = "Must not exceed $max";
         }
+
         return $this;
     }
 
@@ -138,9 +153,10 @@ class Validator
     public function pattern(string $field, string $pattern, string $message = 'Invalid format'): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value && !preg_match($pattern, (string)$value)) {
+        if ($value && ! preg_match($pattern, (string)$value)) {
             $this->errors[$field][] = $message;
         }
+
         return $this;
     }
 
@@ -153,10 +169,11 @@ class Validator
         if ($value) {
             // Remove common formatting characters
             $cleaned = preg_replace('/[\s\-\(\)\.]/', '', (string)$value);
-            if (!preg_match('/^[\+]?[1]?\d{10,15}$/', (string) $cleaned)) {
+            if (! preg_match('/^[\+]?[1]?\d{10,15}$/', (string) $cleaned)) {
                 $this->errors[$field][] = 'Must be a valid phone number';
             }
         }
+
         return $this;
     }
 
@@ -166,9 +183,10 @@ class Validator
     public function url(string $field): self
     {
         $value = $this->data[$field] ?? null;
-        if ($value && !filter_var($value, FILTER_VALIDATE_URL)) {
+        if ($value && ! filter_var($value, FILTER_VALIDATE_URL)) {
             $this->errors[$field][] = 'Must be a valid URL';
         }
+
         return $this;
     }
 
@@ -180,10 +198,11 @@ class Validator
         $value = $this->data[$field] ?? null;
         if ($value) {
             $d = DateTime::createFromFormat($format, (string)$value);
-            if (!$d || $d->format($format) !== $value) {
+            if (! $d || $d->format($format) !== $value) {
                 $this->errors[$field][] = "Must be a valid date ($format)";
             }
         }
+
         return $this;
     }
 
@@ -197,6 +216,7 @@ class Validator
         if ($value !== $matchValue) {
             $this->errors[$field][] = "Must match " . str_replace('_', ' ', $matchField);
         }
+
         return $this;
     }
 
@@ -206,9 +226,10 @@ class Validator
     public function custom(string $field, callable $callback, string $message = 'Invalid value'): self
     {
         $value = $this->data[$field] ?? null;
-        if (!$callback($value, $this->data)) {
+        if (! $callback($value, $this->data)) {
             $this->errors[$field][] = $message;
         }
+
         return $this;
     }
 
@@ -230,6 +251,7 @@ class Validator
 
     /**
      * Get all errors
+     * @return array<string, array<int, string>>
      */
     public function errors(): array
     {
@@ -246,6 +268,7 @@ class Validator
 
     /**
      * Get all errors as flat array
+     * @return array<int, string>
      */
     public function allErrors(): array
     {
@@ -255,25 +278,29 @@ class Validator
                 $flat[] = $message;
             }
         }
+
         return $flat;
     }
 
     /**
      * Get validated data (only fields that passed validation)
+     * @return array<string, mixed>
      */
     public function validated(): array
     {
         $validated = [];
         foreach ($this->data as $key => $value) {
-            if (!isset($this->errors[$key])) {
+            if (! isset($this->errors[$key])) {
                 $validated[$key] = $value;
             }
         }
+
         return $validated;
     }
 
     /**
      * Static factory method
+     * @param array<string, mixed> $data
      */
     public static function make(array $data): self
     {
@@ -283,6 +310,8 @@ class Validator
 
 /**
  * Helper function for quick validation
+ * @param array<string, mixed> $data
+ * @param array<string, string> $rules
  */
 function validate(array $data, array $rules): Validator
 {
@@ -305,33 +334,43 @@ function validate(array $data, array $rules): Validator
             switch ($ruleName) {
                 case 'required':
                     $validator->required([$field]);
+
                     break;
                 case 'email':
                     $validator->email($field);
+
                     break;
                 case 'min':
                     $validator->minLength($field, (int)$params[0]);
+
                     break;
                 case 'max':
                     $validator->maxLength($field, (int)$params[0]);
+
                     break;
                 case 'numeric':
                     $validator->numeric($field);
+
                     break;
                 case 'integer':
                     $validator->integer($field);
+
                     break;
                 case 'in':
                     $validator->in($field, $params);
+
                     break;
                 case 'phone':
                     $validator->phone($field);
+
                     break;
                 case 'url':
                     $validator->url($field);
+
                     break;
                 case 'date':
                     $validator->date($field, $params[0] ?? 'Y-m-d');
+
                     break;
             }
         }

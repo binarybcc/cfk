@@ -57,12 +57,12 @@ class Manager
 
         $params = [];
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND s.status = :status";
             $params['status'] = $filters['status'];
         }
 
-        if (!empty($filters['sponsor_email'])) {
+        if (! empty($filters['sponsor_email'])) {
             $sql .= " AND s.sponsor_email LIKE :email";
             $params['email'] = '%' . $filters['sponsor_email'] . '%';
         }
@@ -178,7 +178,7 @@ class Manager
 
         $params = [];
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND s.status = :status";
             $params['status'] = $filters['status'];
         }
@@ -221,17 +221,17 @@ class Manager
 
         $params = [];
 
-        if (!empty($filters['age_min'])) {
+        if (! empty($filters['age_min'])) {
             $sql .= " AND c.age_months >= :age_min";
             $params['age_min'] = $filters['age_min'];
         }
 
-        if (!empty($filters['age_max'])) {
+        if (! empty($filters['age_max'])) {
             $sql .= " AND c.age_months <= :age_max";
             $params['age_max'] = $filters['age_max'];
         }
 
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $sql .= " AND c.gender = :gender";
             $params['gender'] = $filters['gender'];
         }
@@ -361,12 +361,12 @@ class Manager
         $params = [];
 
         // Apply filters
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND c.status = :status";
             $params['status'] = $filters['status'];
         }
 
-        if (!empty($filters['sponsored_only'])) {
+        if (! empty($filters['sponsored_only'])) {
             $sql .= " AND s.id IS NOT NULL";
         }
 
@@ -378,7 +378,9 @@ class Manager
     /**
      * Get statistics summary
      *
-     * @return array<string, mixed> Statistics summary
+     * @return (array|int|mixed|null)[] Statistics summary
+     *
+     * @psalm-return array{children: array<string, mixed>|null, sponsorships: array<string, mixed>|null, unique_sponsors: 0|mixed, families: array<string, mixed>|null}
      */
     public static function getStatisticsSummary(): array
     {

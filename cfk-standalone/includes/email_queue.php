@@ -8,25 +8,33 @@ declare(strict_types=1);
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 
+use CFK\Email\Manager as EmailManager;
+
 class CFK_Email_Queue
 {
-    const STATUS_QUEUED = 'queued';
-    const STATUS_PROCESSING = 'processing';
-    const STATUS_SENT = 'sent';
-    const STATUS_FAILED = 'failed';
+    public const STATUS_QUEUED = 'queued';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_SENT = 'sent';
+    public const STATUS_FAILED = 'failed';
 
-    const PRIORITY_LOW = 'low';
-    const PRIORITY_NORMAL = 'normal';
-    const PRIORITY_HIGH = 'high';
-    const PRIORITY_URGENT = 'urgent';
+    public const PRIORITY_LOW = 'low';
+    public const PRIORITY_NORMAL = 'normal';
+    public const PRIORITY_HIGH = 'high';
+    public const PRIORITY_URGENT = 'urgent';
 
     /**
      * Add email to queue
+     *
+     * @param string $recipient Email recipient
+     * @param string $subject Email subject
+     * @param string $body Email body (HTML)
+     * @param array<string, mixed> $options Optional settings (recipient_name, from_email, priority, etc.)
+     * @return int Queue ID
      */
     public static function queue(
         string $recipient,
@@ -46,19 +54,23 @@ class CFK_Email_Queue
             'reference_type' => $options['reference_type'] ?? null,
             'reference_id' => $options['reference_id'] ?? null,
             'metadata' => empty($options['metadata']) ? null : json_encode($options['metadata']),
-            'status' => self::STATUS_QUEUED
+            'status' => self::STATUS_QUEUED,
         ];
 
         try {
             return Database::insert('email_queue', $data);
         } catch (Exception $e) {
             error_log('Failed to queue email: ' . $e->getMessage());
+
             throw $e;
         }
     }
 
     /**
      * Process queued emails (called by cron)
+     *
+     * @param int $limit Maximum emails to process
+     * @return array<string, mixed> Processing statistics (processed, sent, failed, errors)
      */
     public static function processQueue(int $limit = 10): array
     {
@@ -66,7 +78,7 @@ class CFK_Email_Queue
             'processed' => 0,
             'sent' => 0,
             'failed' => 0,
-            'errors' => []
+            'errors' => [],
         ];
 
         try {
@@ -101,6 +113,9 @@ class CFK_Email_Queue
 
     /**
      * Get emails ready to process
+     *
+     * @param int $limit Maximum emails to retrieve
+     * @return array<int, array<string, mixed>> Array of email records
      */
     private static function getEmailsToProcess(int $limit): array
     {
@@ -118,7 +133,7 @@ class CFK_Email_Queue
 
         return Database::fetchAll($sql, [
             'status' => self::STATUS_QUEUED,
-            'limit' => $limit
+            'limit' => $limit,
         ]);
     }
 
@@ -141,7 +156,7 @@ class CFK_Email_Queue
     {
         Database::update('email_queue', [
             'status' => self::STATUS_SENT,
-            'sent_at' => date('Y-m-d H:i:s')
+            'sent_at' => date('Y-m-d H:i:s'),
         ], ['id' => $id]);
     }
 
@@ -152,21 +167,21 @@ class CFK_Email_Queue
     {
         // Get current attempt count
         $email = Database::fetchRow("SELECT attempts, max_attempts FROM email_queue WHERE id = ?", [$id]);
-        $newAttempts = $email['attempts'] + 1;
+        $newAttempts = ($email['attempts'] ?? 0) + 1;
 
         // Calculate next retry time (exponential backoff)
         $retryMinutes = min(60, 2 ** $newAttempts); // 2, 4, 8, 16, 32, 60 minutes
-        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes"));
+        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes") ?: 0);
 
         $updates = [
             'attempts' => $newAttempts,
-            'error_count' => Database::fetchRow("SELECT error_count FROM email_queue WHERE id = ?", [$id])['error_count'] + 1,
+            'error_count' => (Database::fetchRow("SELECT error_count FROM email_queue WHERE id = ?", [$id])['error_count'] ?? 0) + 1,
             'last_error' => substr($error, 0, 500),
-            'next_attempt_at' => $nextAttempt
+            'next_attempt_at' => $nextAttempt,
         ];
 
         // If max attempts reached, mark as failed
-        if ($newAttempts >= $email['max_attempts']) {
+        if ($newAttempts >= ($email['max_attempts'] ?? 3)) {
             $updates['status'] = self::STATUS_FAILED;
         } else {
             $updates['status'] = self::STATUS_QUEUED; // Back to queued for retry
@@ -177,16 +192,14 @@ class CFK_Email_Queue
 
     /**
      * Send individual email
+     *
+     * @param array<string, mixed> $email Email record from database
+     * @return array<string, mixed> Result with success flag and error message
      */
     private static function sendEmail(array $email): array
     {
         try {
-            // Load email manager
-            if (!class_exists('CFK_Email_Manager')) {
-                require_once __DIR__ . '/email_manager.php';
-            }
-
-            $mailer = CFK_Email_Manager::getMailer();
+            $mailer = EmailManager::getMailer();
 
             $mailer->clearAddresses();
             $mailer->clearReplyTos();
@@ -215,18 +228,20 @@ class CFK_Email_Queue
 
             return [
                 'success' => $success,
-                'error' => $success ? null : 'Failed to send email'
+                'error' => $success ? null : 'Failed to send email',
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }
 
     /**
      * Get queue statistics
+     *
+     * @return array<string, int> Statistics by status (queued, processing, sent, failed, total)
      */
     public static function getStats(): array
     {
@@ -246,7 +261,7 @@ class CFK_Email_Queue
             'processing' => 0,
             'sent' => 0,
             'failed' => 0,
-            'total' => 0
+            'total' => 0,
         ];
 
         foreach ($results as $row) {
@@ -273,7 +288,7 @@ class CFK_Email_Queue
         ", [
             'queued' => self::STATUS_QUEUED,
             'failed' => self::STATUS_FAILED,
-            'limit' => $limit
+            'limit' => $limit,
         ]);
     }
 
@@ -282,7 +297,7 @@ class CFK_Email_Queue
      */
     public static function cleanup(int $daysOld = 30): int
     {
-        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
+        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days") ?: 0);
 
         return Database::execute("
             DELETE FROM email_queue
@@ -293,43 +308,43 @@ class CFK_Email_Queue
 
     /**
      * Quick helper to queue sponsor confirmation
+     *
+     * @param array<string, mixed> $sponsorship Sponsorship record with sponsor details
+     * @return int Queue ID
      */
     public static function queueSponsorConfirmation(array $sponsorship): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
         return self::queue(
             $sponsorship['sponsor_email'],
             'Christmas for Kids - Sponsorship Confirmation',
-            CFK_Email_Manager::getSponsorConfirmationTemplate($sponsorship),
+            EmailManager::getSponsorConfirmationTemplate($sponsorship),
             [
                 'recipient_name' => $sponsorship['sponsor_name'],
                 'priority' => self::PRIORITY_HIGH,
                 'reference_type' => 'sponsorship',
-                'reference_id' => $sponsorship['id']
+                'reference_id' => $sponsorship['id'],
             ]
         );
     }
 
     /**
      * Quick helper to queue admin notification
+     *
+     * @param string $subject Email subject
+     * @param string $message Email message body
+     * @param array<string, mixed> $data Additional data (reference_type, reference_id, etc.)
+     * @return int Queue ID
      */
     public static function queueAdminNotification(string $subject, string $message, array $data = []): int
     {
-        if (!class_exists('CFK_Email_Manager')) {
-            require_once __DIR__ . '/email_manager.php';
-        }
-
         return self::queue(
             config('admin_email'),
             'CFK Admin - ' . $subject,
-            CFK_Email_Manager::getAdminNotificationTemplate($subject, $message, $data),
+            EmailManager::getAdminNotificationTemplate($subject, $message, $data),
             [
                 'priority' => self::PRIORITY_NORMAL,
                 'reference_type' => $data['reference_type'] ?? null,
-                'reference_id' => $data['reference_id'] ?? null
+                'reference_id' => $data['reference_id'] ?? null,
             ]
         );
     }

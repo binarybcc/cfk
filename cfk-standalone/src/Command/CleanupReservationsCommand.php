@@ -25,6 +25,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 )]
 class CleanupReservationsCommand extends Command
 {
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -62,6 +63,7 @@ class CleanupReservationsCommand extends Command
             );
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -80,6 +82,7 @@ class CleanupReservationsCommand extends Command
             $timestamp = strtotime("-{$timeout} minutes");
             if ($timestamp === false) {
                 $io->error('Failed to calculate expiration time');
+
                 return Command::FAILURE;
             }
             $expirationTime = date('Y-m-d H:i:s', $timestamp);
@@ -99,6 +102,7 @@ class CleanupReservationsCommand extends Command
 
             if ($expiredReservations === []) {
                 $io->success('No expired reservations found');
+
                 return Command::SUCCESS;
             }
 
@@ -129,6 +133,7 @@ class CleanupReservationsCommand extends Command
             */
         } catch (\Exception $e) {
             $io->error('Cleanup failed: ' . $e->getMessage());
+
             return Command::FAILURE;
         }
     }

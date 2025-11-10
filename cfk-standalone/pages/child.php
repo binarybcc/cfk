@@ -6,21 +6,21 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
 }
 
 // Get child ID
 $childId = sanitizeInt($_GET['id'] ?? 0);
-if (!$childId) {
+if (! $childId) {
     header('Location: ' . baseUrl('?page=children'));
     exit;
 }
 
 // Get child information
 $child = getChildById($childId);
-if (!$child) {
+if (! $child) {
     setMessage('Child not found.', 'error');
     header('Location: ' . baseUrl('?page=children'));
     exit;
@@ -67,7 +67,7 @@ $isAvailable = $child['status'] === 'available';
                         <strong>Age Group:</strong> <?php echo getAgeCategory($child['age_months'] ?? null); ?>
                     </div>
                     
-                    <?php if (!empty($child['school'])) : ?>
+                    <?php if (! empty($child['school'])) : ?>
                         <div class="detail-item">
                             <strong>School:</strong> <?php echo sanitizeString($child['school']); ?>
                         </div>
@@ -84,7 +84,7 @@ $isAvailable = $child['status'] === 'available';
             </div>
         </div>
 
-        <?php if (!$isAvailable) : ?>
+        <?php if (! $isAvailable) : ?>
             <div class="alert alert-warning">
                 <h3>This child is no longer available for sponsorship</h3>
                 <p>
@@ -136,7 +136,7 @@ $isAvailable = $child['status'] === 'available';
             <?php endif; ?>
 
             <!-- Essential Needs -->
-            <?php if (!empty($child['interests'])) : ?>
+            <?php if (! empty($child['interests'])) : ?>
                 <section class="detail-section">
                     <h2>Essential Needs</h2>
                     <p class="interests-text"><?php echo nl2br(sanitizeString($child['interests'])); ?></p>
@@ -144,7 +144,7 @@ $isAvailable = $child['status'] === 'available';
             <?php endif; ?>
 
             <!-- Christmas Wishes -->
-            <?php if (!empty($child['wishes'])) : ?>
+            <?php if (! empty($child['wishes'])) : ?>
                 <section class="detail-section">
                     <h2>Christmas Wishes</h2>
                     <p class="wishes-text"><?php echo nl2br(sanitizeString($child['wishes'])); ?></p>
@@ -152,7 +152,7 @@ $isAvailable = $child['status'] === 'available';
             <?php endif; ?>
 
             <!-- Special Needs -->
-            <?php if (!empty($child['special_needs'])) : ?>
+            <?php if (! empty($child['special_needs'])) : ?>
                 <section class="detail-section">
                     <h2>Special Considerations</h2>
                     <p class="special-needs-text"><?php echo nl2br(sanitizeString($child['special_needs'])); ?></p>
@@ -160,7 +160,7 @@ $isAvailable = $child['status'] === 'available';
             <?php endif; ?>
 
             <!-- Family Information -->
-            <?php if ($siblings !== [] || !empty($child['family_notes'])) : ?>
+            <?php if ($siblings !== [] || ! empty($child['family_notes'])) : ?>
                 <section class="detail-section">
                     <h2>Family Information</h2>
                     
@@ -190,7 +190,7 @@ $isAvailable = $child['status'] === 'available';
                         </div>
                     <?php endif; ?>
                     
-                    <?php if (!empty($child['family_notes'])) : ?>
+                    <?php if (! empty($child['family_notes'])) : ?>
                         <div class="family-notes">
                             <h3>About the Family</h3>
                             <p><?php echo nl2br(sanitizeString($child['family_notes'])); ?></p>
@@ -203,6 +203,7 @@ $isAvailable = $child['status'] === 'available';
         <!-- Sponsorship Action -->
         <?php
         use CFK\Sponsorship\Manager as SponsorshipManager;
+
         $availability = SponsorshipManager::isChildAvailable($child['id']);
         ?>
         <?php if ($availability['available']) : ?>
@@ -219,7 +220,7 @@ $isAvailable = $child['status'] === 'available';
                     
                     <?php if ($siblings !== []) :
                         // Count available siblings
-                        $availableSiblings = array_filter($siblings, fn($s): bool => $s['status'] === 'available');
+                        $availableSiblings = array_filter($siblings, fn ($s): bool => $s['status'] === 'available');
                         $availableCount = count($availableSiblings);
                         ?>
                         <p class="family-sponsor-note">
@@ -230,7 +231,7 @@ $isAvailable = $child['status'] === 'available';
                         <?php if ($availableCount > 0) : ?>
                             <a href="<?php echo baseUrl('?page=sponsor&family_id=' . $child['family_id']); ?>"
                                class="btn btn-large btn-success">
-                                🎁 Sponsor Entire Family (<?php echo ($availableCount + 1); ?> children)
+                                🎁 Sponsor Entire Family (<?php echo($availableCount + 1); ?> children)
                             </a>
                         <?php endif; ?>
 

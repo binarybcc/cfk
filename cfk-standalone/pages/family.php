@@ -7,11 +7,9 @@
  */
 
 // Prevent direct access
-if (!defined('CFK_APP')) {
+if (! defined('CFK_APP')) {
     http_response_code(403);
     die('Direct access not permitted');
-
-global $cspNonce;
 }
 
 // Get family_number from URL (e.g., 201, 202, etc.)
@@ -26,7 +24,7 @@ if (empty($family_number)) {
 // Fetch family information using helper function
 $family = getFamilyByNumber($family_number);
 
-if (!$family) {
+if (! $family) {
     setMessage('Family not found.', 'error');
     header('Location: ' . baseUrl('?page=children'));
     exit;
@@ -45,11 +43,12 @@ if ($members === []) {
 $family_members = $members;
 
 // Count available members
-$available_count = count(array_filter($family_members, fn($member): bool => $member['status'] === 'available'));
+$available_count = count(array_filter($family_members, fn ($member): bool => $member['status'] === 'available'));
 
 $pageTitle = 'Family ' . sanitizeString($family['family_number']);
 
-// Generate CSP nonce for inline scripts
+// CSP nonce is generated in config.php and available globally
+global $cspNonce;
 ?>
 
 <div class="family-page">
@@ -82,7 +81,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
         <?php endif; ?>
     </div>
 
-    <?php if (!empty($family['background_info'])) : ?>
+    <?php if (! empty($family['background_info'])) : ?>
         <div class="family-background">
             <h2>About the Family</h2>
             <p><?php echo nl2br(sanitizeString($family['background_info'])); ?></p>
@@ -111,13 +110,13 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                 <?php
                 $demographics = displayAge($member['age_months']) . ' • ' .
                                ($member['gender'] === 'M' ? 'Boy' : 'Girl');
-                if (!empty($member['grade'])) {
+                if (! empty($member['grade'])) {
                     $demographics .= ' • Grade: ' . sanitizeString($member['grade']);
                 }
                 ?>
                 <div class="member-details" data-demographics="<?php echo $demographics; ?>">
                     <!-- Essential Needs -->
-                    <?php if (!empty($member['interests'])) : ?>
+                    <?php if (! empty($member['interests'])) : ?>
                         <div class="detail-row">
                             <strong>Essential Needs:</strong>
                             <span><?php echo nl2br(sanitizeString($member['interests'])); ?></span>
@@ -125,7 +124,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <?php endif; ?>
 
                     <!-- Christmas Wishes -->
-                    <?php if (!empty($member['wishes'])) : ?>
+                    <?php if (! empty($member['wishes'])) : ?>
                         <div class="detail-row">
                             <strong>Christmas Wishes:</strong>
                             <span><?php echo nl2br(sanitizeString(cleanWishesText($member['wishes']))); ?></span>
@@ -133,7 +132,7 @@ $pageTitle = 'Family ' . sanitizeString($family['family_number']);
                     <?php endif; ?>
 
                     <!-- Special Needs/Considerations -->
-                    <?php if (!empty($member['special_needs'])) : ?>
+                    <?php if (! empty($member['special_needs'])) : ?>
                         <div class="detail-row special-needs">
                             <strong>⚠️ Special Considerations:</strong>
                             <span><?php echo nl2br(sanitizeString($member['special_needs'])); ?></span>

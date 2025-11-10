@@ -18,7 +18,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Check if user is logged in
-if (!isLoggedIn()) {
+if (! isLoggedIn()) {
     header('Location: login.php');
     exit;
 }
@@ -29,7 +29,7 @@ $messageType = '';
 
 // Handle actions
 if ($_POST && isset($_POST['action'])) {
-    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+    if (! verifyCsrfToken($_POST['csrf_token'] ?? '')) {
         $message = 'Security token invalid. Please try again.';
         $messageType = 'error';
     } else {
@@ -40,12 +40,14 @@ if ($_POST && isset($_POST['action'])) {
                 $result = addChild($_POST);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'edit_child':
                 $result = editChild($_POST);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'delete_child':
@@ -53,6 +55,7 @@ if ($_POST && isset($_POST['action'])) {
                 $result = deleteChild($childId);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
 
             case 'toggle_status':
@@ -61,6 +64,7 @@ if ($_POST && isset($_POST['action'])) {
                 $result = updateChildStatus($childId, $newStatus);
                 $message = $result['message'];
                 $messageType = $result['success'] ? 'success' : 'error';
+
                 break;
         }
     }
@@ -120,20 +124,24 @@ if ($ageFilter !== 'all') {
     switch ($ageFilter) {
         case 'birth-4':
             $whereConditions[] = "c.age_months BETWEEN 0 AND 48";
+
             break;
         case 'elementary':
             $whereConditions[] = "c.age_months BETWEEN 60 AND 120";
+
             break;
         case 'middle':
             $whereConditions[] = "c.age_months BETWEEN 132 AND 156";
+
             break;
         case 'high':
             $whereConditions[] = "c.age_months BETWEEN 168 AND 216";
+
             break;
     }
 }
 
-if (!empty($searchQuery)) {
+if (! empty($searchQuery)) {
     $whereConditions[] = "(CONCAT(f.family_number, c.child_letter) LIKE ? OR c.interests LIKE ? OR c.wishes LIKE ? OR f.family_number LIKE ?)";
     $searchTerm = '%' . $searchQuery . '%';
     $params = array_merge($params, [$searchTerm, $searchTerm, $searchTerm, $searchTerm]);
@@ -163,12 +171,18 @@ $children = Database::fetchAll("
 $families = Database::fetchAll("SELECT id, family_number FROM families ORDER BY CAST(family_number AS UNSIGNED) ASC");
 
 // Functions for CRUD operations
-function addChild($data): array
+/**
+ * Add a new child record
+ *
+ * @param array<string, mixed> $data Child data
+ * @return array<string, mixed> Result with success status and message
+ */
+function addChild(array $data): array
 {
     try {
         // Validate required fields
         $validation = validateChildData($data);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
 
@@ -185,10 +199,10 @@ function addChild($data): array
 
             // Create new family with auto-assigned number
             $familyId = Database::insert('families', [
-                'family_number' => $assignedFamilyNumber
+                'family_number' => $assignedFamilyNumber,
             ]);
 
-            if (!$familyId) {
+            if ($familyId === 0) {
                 return ['success' => false, 'message' => 'Failed to create new family'];
             }
 
@@ -210,21 +224,22 @@ function addChild($data): array
             // Find the next available letter
             $letters = range('A', 'Z');
             foreach ($letters as $letter) {
-                if (!in_array($letter, $existingLetters)) {
+                if (! in_array($letter, $existingLetters)) {
                     $assignedChildLetter = $letter;
                     $data['child_letter'] = $assignedChildLetter;
+
                     break;
                 }
             }
 
-            if (!$assignedChildLetter) {
+            if (! $assignedChildLetter) {
                 return ['success' => false, 'message' => 'No available child letters for this family (maximum 26 children per family)'];
             }
         }
 
         // Check if family exists
         $family = Database::fetchRow("SELECT id, family_number FROM families WHERE id = ?", [$data['family_id']]);
-        if (!$family) {
+        if (! $family) {
             return ['success' => false, 'message' => 'Selected family does not exist'];
         }
 
@@ -259,7 +274,7 @@ function addChild($data): array
             'interests' => sanitizeString($data['interests'] ?? ''),
             'wishes' => sanitizeString($data['wishes'] ?? ''),
             'special_needs' => sanitizeString($data['special_needs'] ?? ''),
-            'status' => 'available'
+            'status' => 'available',
         ]);
 
         // Build success message with assigned family/child ID
@@ -273,27 +288,34 @@ function addChild($data): array
         return ['success' => true, 'message' => $successMessage];
     } catch (Exception $e) {
         error_log('Failed to add child: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function editChild($data): array
+/**
+ * Edit an existing child record
+ *
+ * @param array<string, mixed> $data Child data
+ * @return array<string, mixed> Result with success status and message
+ */
+function editChild(array $data): array
 {
     try {
         $childId = sanitizeInt($data['child_id'] ?? 0);
-        if (!$childId) {
+        if (! $childId) {
             return ['success' => false, 'message' => 'Invalid child ID'];
         }
 
         // Validate data
         $validation = validateChildData($data);
-        if (!$validation['valid']) {
+        if (! $validation['valid']) {
             return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
         }
 
         // Check if child exists
         $child = Database::fetchRow("SELECT id, family_id, child_letter FROM children WHERE id = ?", [$childId]);
-        if (!$child) {
+        if (! $child) {
             return ['success' => false, 'message' => 'Child not found'];
         }
 
@@ -329,20 +351,27 @@ function editChild($data): array
             'jacket_size' => sanitizeString($data['jacket_size'] ?? ''),
             'interests' => sanitizeString($data['interests'] ?? ''),
             'wishes' => sanitizeString($data['wishes'] ?? ''),
-            'special_needs' => sanitizeString($data['special_needs'] ?? '')
+            'special_needs' => sanitizeString($data['special_needs'] ?? ''),
         ], ['id' => $childId]);
 
         return ['success' => true, 'message' => 'Child updated successfully'];
     } catch (Exception $e) {
         error_log('Failed to edit child: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function deleteChild($childId): array
+/**
+ * Delete a child record
+ *
+ * @param int $childId Child ID to delete
+ * @return array<string, mixed> Result with success status and message
+ */
+function deleteChild(int $childId): array
 {
     try {
-        if (!$childId) {
+        if (! $childId) {
             return ['success' => false, 'message' => 'Invalid child ID'];
         }
 
@@ -352,7 +381,7 @@ function deleteChild($childId): array
             [$childId]
         );
 
-        if ($sponsorships['count'] > 0) {
+        if (($sponsorships['count'] ?? 0) > 0) {
             return ['success' => false, 'message' => 'Cannot delete child with active sponsorships'];
         }
 
@@ -361,14 +390,22 @@ function deleteChild($childId): array
         return ['success' => true, 'message' => 'Child deleted successfully'];
     } catch (Exception $e) {
         error_log('Failed to delete child: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function updateChildStatus($childId, $newStatus): array
+/**
+ * Update child status
+ *
+ * @param int $childId Child ID
+ * @param string $newStatus New status value
+ * @return array<string, mixed> Result with success status and message
+ */
+function updateChildStatus(int $childId, string $newStatus): array
 {
     try {
-        if (!$childId || !in_array($newStatus, ['available', 'pending', 'sponsored', 'inactive'])) {
+        if (! $childId || ! in_array($newStatus, ['available', 'pending', 'sponsored', 'inactive'])) {
             return ['success' => false, 'message' => 'Invalid parameters'];
         }
 
@@ -377,11 +414,18 @@ function updateChildStatus($childId, $newStatus): array
         return ['success' => true, 'message' => 'Child status updated successfully'];
     } catch (Exception $e) {
         error_log('Failed to update child status: ' . $e->getMessage());
+
         return ['success' => false, 'message' => 'System error occurred. Please try again.'];
     }
 }
 
-function validateChildData($data): array
+/**
+ * Validate child data
+ *
+ * @param array<string, mixed> $data Child data to validate
+ * @return array<string, mixed> Validation result with 'valid' boolean and 'errors' array
+ */
+function validateChildData(array $data): array
 {
     $errors = [];
 
@@ -405,7 +449,7 @@ function validateChildData($data): array
         }
     }
 
-    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || !in_array($data['gender'], ['M', 'F'])) {
+    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || ! in_array($data['gender'], ['M', 'F'])) {
         $errors[] = 'Valid gender is required';
     }
 
@@ -417,7 +461,7 @@ function validateChildData($data): array
 
     return [
         'valid' => $errors === [],
-        'errors' => $errors
+        'errors' => $errors,
     ];
 }
 
@@ -672,7 +716,7 @@ include __DIR__ . '/includes/admin_header.php';
         <div class="stats-summary" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <strong>Total Children: <?php echo $totalCount; ?></strong>
-                <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || !empty($searchQuery)) : ?>
+                <?php if ($statusFilter !== 'all' || $familyFilter !== 'all' || $ageFilter !== 'all' || ! empty($searchQuery)) : ?>
                     (filtered from <?php echo getChildrenCount([]); ?> total)
                 <?php endif; ?>
             </div>
@@ -806,39 +850,39 @@ include __DIR__ . '/includes/admin_header.php';
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem; font-size: 0.8rem;">
                                     <div>
                                         <span style="color: #666;">Shirt:</span>
-                                        <strong><?php echo !empty($child['shirt_size']) ? sanitizeString($child['shirt_size']) : 'N/A'; ?></strong>
+                                        <strong><?php echo empty($child['shirt_size']) ? 'N/A' : sanitizeString($child['shirt_size']); ?></strong>
                                     </div>
                                     <div>
                                         <span style="color: #666;">Pant:</span>
-                                        <strong><?php echo !empty($child['pant_size']) ? sanitizeString($child['pant_size']) : 'N/A'; ?></strong>
+                                        <strong><?php echo empty($child['pant_size']) ? 'N/A' : sanitizeString($child['pant_size']); ?></strong>
                                     </div>
                                     <div>
                                         <span style="color: #666;">Jacket:</span>
-                                        <strong><?php echo !empty($child['jacket_size']) ? sanitizeString($child['jacket_size']) : 'N/A'; ?></strong>
+                                        <strong><?php echo empty($child['jacket_size']) ? 'N/A' : sanitizeString($child['jacket_size']); ?></strong>
                                     </div>
                                     <div>
                                         <span style="color: #666;">Shoe:</span>
-                                        <strong><?php echo !empty($child['shoe_size']) ? sanitizeString($child['shoe_size']) : 'N/A'; ?></strong>
+                                        <strong><?php echo empty($child['shoe_size']) ? 'N/A' : sanitizeString($child['shoe_size']); ?></strong>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="child-details">
-                                <?php if (!empty($child['interests'])) : ?>
+                                <?php if (! empty($child['interests'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Essential Needs</div>
                                         <div class="detail-value"><?php echo sanitizeString($child['interests']); ?></div>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['wishes'])) : ?>
+                                <?php if (! empty($child['wishes'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Christmas Wishes</div>
                                         <div class="detail-value"><?php echo sanitizeString(substr((string) $child['wishes'], 0, 100)); ?><?php echo strlen((string) $child['wishes']) > 100 ? '...' : ''; ?></div>
                                     </div>
                                 <?php endif; ?>
 
-                                <?php if (!empty($child['special_needs'])) : ?>
+                                <?php if (! empty($child['special_needs'])) : ?>
                                     <div class="detail-section">
                                         <div class="detail-label">Special Needs</div>
                                         <div class="detail-value"><?php echo sanitizeString($child['special_needs']); ?></div>
