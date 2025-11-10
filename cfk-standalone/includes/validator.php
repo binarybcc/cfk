@@ -15,14 +15,19 @@ if (! defined('CFK_APP')) {
 
 class Validator
 {
+    /** @var array<string, array<int, string>> */
     private array $errors = [];
 
+    /**
+     * @param array<string, mixed> $data
+     */
     public function __construct(private array $data)
     {
     }
 
     /**
      * Validate required fields
+     * @param array<int, string> $fields
      */
     public function required(array $fields): self
     {
@@ -103,6 +108,7 @@ class Validator
 
     /**
      * Validate value is in array
+     * @param array<int|string, mixed> $allowed
      */
     public function in(string $field, array $allowed): self
     {
@@ -118,7 +124,7 @@ class Validator
     /**
      * Validate minimum numeric value
      */
-    public function min(string $field, $min): self
+    public function min(string $field, int|float $min): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value < $min) {
@@ -131,7 +137,7 @@ class Validator
     /**
      * Validate maximum numeric value
      */
-    public function max(string $field, $max): self
+    public function max(string $field, int|float $max): self
     {
         $value = $this->data[$field] ?? null;
         if ($value !== null && is_numeric($value) && $value > $max) {
@@ -245,6 +251,7 @@ class Validator
 
     /**
      * Get all errors
+     * @return array<string, array<int, string>>
      */
     public function errors(): array
     {
@@ -261,6 +268,7 @@ class Validator
 
     /**
      * Get all errors as flat array
+     * @return array<int, string>
      */
     public function allErrors(): array
     {
@@ -276,6 +284,7 @@ class Validator
 
     /**
      * Get validated data (only fields that passed validation)
+     * @return array<string, mixed>
      */
     public function validated(): array
     {
@@ -291,6 +300,7 @@ class Validator
 
     /**
      * Static factory method
+     * @param array<string, mixed> $data
      */
     public static function make(array $data): self
     {
@@ -300,6 +310,8 @@ class Validator
 
 /**
  * Helper function for quick validation
+ * @param array<string, mixed> $data
+ * @param array<string, string> $rules
  */
 function validate(array $data, array $rules): Validator
 {

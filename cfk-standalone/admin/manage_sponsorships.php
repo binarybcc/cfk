@@ -180,7 +180,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_sponsorship' && isset($_G
 }
 
 // Function to update sponsorship details
-function updateSponsorship($data): array
+/**
+ * @param array<string, mixed> $data
+ * @return array{success: bool, message: string}
+ */
+function updateSponsorship(array $data): array
 {
     try {
         $sponsorshipId = sanitizeInt($data['sponsorship_id'] ?? 0);

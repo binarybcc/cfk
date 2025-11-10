@@ -381,7 +381,7 @@ function deleteChild(int $childId): array
             [$childId]
         );
 
-        if ($sponsorships['count'] > 0) {
+        if (($sponsorships['count'] ?? 0) > 0) {
             return ['success' => false, 'message' => 'Cannot delete child with active sponsorships'];
         }
 

@@ -70,7 +70,7 @@ $deletionPreview = null;
 
 // Debug: Log all requests (only in debug mode)
 if (config('app_debug', false)) {
-    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST)));
 }
 
 // Get deletion preview for display
@@ -159,10 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
                 // Refresh stats to show restored data
                 try {
                     $currentStats = [
-                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'],
+                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'] ?? 0,
+                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'] ?? 0,
+                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'] ?? 0,
+                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count'] ?? 0,
                     ];
                 } catch (Exception) {
                     // Keep existing stats
@@ -326,7 +326,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['children'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['children']; ?></h3>
                     <p>Children</p>
                 </div>
             </div>
@@ -334,7 +334,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👨‍👩‍👧‍👦</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['families'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['families']; ?></h3>
                     <p>Families</p>
                 </div>
             </div>
@@ -342,7 +342,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['sponsorships'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['sponsorships']; ?></h3>
                     <p>Sponsorships</p>
                 </div>
             </div>
@@ -350,7 +350,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['email_log'] ?? 0); ?></h3>
+                    <h3><?php echo $currentStats['email_log']; ?></h3>
                     <p>Email Logs</p>
                 </div>
             </div>

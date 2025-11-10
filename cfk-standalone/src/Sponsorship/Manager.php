@@ -918,9 +918,9 @@ class Manager
                 $result = self::createSponsorshipRequest((int)$childId, $sponsorData);
 
                 if ($result['success']) {
-                    $addedChildren[] = $result['child']['display_id'];
+                    $addedChildren[] = $result['child']['display_id'] ?? '';
                 } else {
-                    $errors[] = $result['message'];
+                    $errors[] = $result['message'] ?? 'Unknown error';
                 }
             }
 
@@ -934,8 +934,8 @@ class Manager
                 return [
                     'success' => true,
                     'message' => 'Successfully added ' . count($addedChildren) . ' child(ren) to your sponsorship!',
-                    'added_children' => $addedChildren,
-                    'errors' => $errors,
+                    'added_children' => array_values($addedChildren),
+                    'errors' => array_values($errors),
                 ];
             } else {
                 return [
@@ -958,9 +958,7 @@ class Manager
      *
      * @param array<string, mixed> $data Sponsor data to validate
      *
-     * @return (array|bool)[] Validation result
-     *
-     * @psalm-return array{valid: bool, errors: array}
+     * @return array{valid: bool, errors: array<int, string>} Validation result
      */
     private static function validateSponsorData(array $data): array
     {

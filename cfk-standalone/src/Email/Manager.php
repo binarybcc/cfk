@@ -23,7 +23,7 @@ class Manager
     /**
      * Initialize PHPMailer instance (public for email queue access)
      *
-     * @return object PHPMailer instance or fallback mailer
+     * @return PHPMailer|object PHPMailer instance or fallback mailer
      */
     public static function getMailer(): object
     {
@@ -92,6 +92,21 @@ class Manager
             public function clearAddresses(): void
             {
                 $this->to = [];
+            }
+
+            public function clearReplyTos(): void
+            {
+                // Fallback mailer doesn't support reply-to
+            }
+
+            public function addCC(string $email, string $name = ''): void
+            {
+                // Fallback mailer doesn't support CC
+            }
+
+            public function addBCC(string $email, string $name = ''): void
+            {
+                // Fallback mailer doesn't support BCC
             }
 
             public function setFrom(string $email, string $name = ''): void

@@ -167,21 +167,21 @@ class CFK_Email_Queue
     {
         // Get current attempt count
         $email = Database::fetchRow("SELECT attempts, max_attempts FROM email_queue WHERE id = ?", [$id]);
-        $newAttempts = $email['attempts'] + 1;
+        $newAttempts = ($email['attempts'] ?? 0) + 1;
 
         // Calculate next retry time (exponential backoff)
         $retryMinutes = min(60, 2 ** $newAttempts); // 2, 4, 8, 16, 32, 60 minutes
-        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes"));
+        $nextAttempt = date('Y-m-d H:i:s', strtotime("+$retryMinutes minutes") ?: 0);
 
         $updates = [
             'attempts' => $newAttempts,
-            'error_count' => Database::fetchRow("SELECT error_count FROM email_queue WHERE id = ?", [$id])['error_count'] + 1,
+            'error_count' => (Database::fetchRow("SELECT error_count FROM email_queue WHERE id = ?", [$id])['error_count'] ?? 0) + 1,
             'last_error' => substr($error, 0, 500),
             'next_attempt_at' => $nextAttempt,
         ];
 
         // If max attempts reached, mark as failed
-        if ($newAttempts >= $email['max_attempts']) {
+        if ($newAttempts >= ($email['max_attempts'] ?? 3)) {
             $updates['status'] = self::STATUS_FAILED;
         } else {
             $updates['status'] = self::STATUS_QUEUED; // Back to queued for retry
@@ -297,7 +297,7 @@ class CFK_Email_Queue
      */
     public static function cleanup(int $daysOld = 30): int
     {
-        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days"));
+        $cutoffDate = date('Y-m-d', strtotime("-$daysOld days") ?: 0);
 
         return Database::execute("
             DELETE FROM email_queue

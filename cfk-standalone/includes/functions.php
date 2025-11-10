@@ -28,7 +28,7 @@ function cleanWishesText(string $wishes): string
     // Remove .Wishlist: or Wishlist: prefix (case-insensitive, with or without dot)
     $cleaned = preg_replace('/^\.?\s*wish\s*list\s*:\s*/i', '', trim($wishes));
 
-    return $cleaned;
+    return $cleaned ?? '';
 }
 
 /**

@@ -126,8 +126,8 @@ if ($_POST !== []) {
             $admin = Database::fetchRow("SELECT username FROM admin_users WHERE id = ?", [$adminId]);
 
             Database::delete('admin_users', ['id' => $adminId]);
-            $message = "Administrator '{$admin['username']}' has been deleted.";
-            error_log("CFK Admin: Admin user deleted: {$admin['username']} by " . $_SESSION['cfk_admin_username']);
+            $message = "Administrator '" . ($admin['username'] ?? 'Unknown') . "' has been deleted.";
+            error_log("CFK Admin: Admin user deleted: " . ($admin['username'] ?? 'Unknown') . " by " . $_SESSION['cfk_admin_username']);
         }
     }
 }
@@ -291,8 +291,8 @@ include __DIR__ . '/includes/admin_header.php';
                                     <?php echo ucfirst((string) $admin['role']); ?>
                                 </span>
                             </td>
-                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime((string) $admin['last_login'])) : 'Never'; ?></td>
-                            <td><?php echo date('M j, Y', strtotime((string) $admin['created_at'])); ?></td>
+                            <td><?php echo $admin['last_login'] ? date('M j, Y g:i A', strtotime((string) $admin['last_login']) ?: 0) : 'Never'; ?></td>
+                            <td><?php echo date('M j, Y', strtotime((string) $admin['created_at']) ?: 0); ?></td>
                             <td class="actions">
                                 <button class="btn btn-sm btn-edit btn-edit-admin"
                                         data-admin-id="<?php echo $admin['id']; ?>"

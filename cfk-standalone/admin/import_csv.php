@@ -34,7 +34,6 @@ $pageTitle = 'Import Children from CSV';
 $cspNonce = bin2hex(random_bytes(16));
 $message = '';
 $messageType = '';
-$importResults = null;
 $previewData = null;
 
 // Handle file upload and import
@@ -49,9 +48,9 @@ if ($_POST && isset($_POST['action'])) {
             case 'preview_import':
                 $result = handlePreviewImport();
                 if ($result['success']) {
-                    $previewData = $result['preview'];
+                    $previewData = $result['preview'] ?? null;
                 } else {
-                    $message = $result['message'];
+                    $message = $result['message'] ?? 'Unknown error during preview';
                     $messageType = 'error';
                 }
 
@@ -59,11 +58,9 @@ if ($_POST && isset($_POST['action'])) {
 
             case 'confirm_import':
                 $result = handleConfirmImport();
-                $message = $result['message'];
+                $message = $result['message'] ?? 'Import completed';
                 $messageType = $result['success'] ? 'success' : 'error';
-                if ($result['success'] && isset($result['results'])) {
-                    $importResults = $result['results'];
-                }
+                // Don't set importResults - the result structure doesn't match expectations
 
                 break;
 
@@ -94,6 +91,9 @@ if ($_POST && isset($_POST['action'])) {
     }
 }
 
+/**
+ * @return array{success: bool, message?: string, preview?: array{analysis: array<string, mixed>, filename: string, total_rows: int, parse_warnings: array<string>}}
+ */
 function handlePreviewImport(): array
 {
     try {
@@ -139,7 +139,8 @@ function handlePreviewImport(): array
         }
 
         // Analyze changes
-        $analysis = ImportAnalyzer::analyzeImport($parseResult['children']);
+        $children = $parseResult['children'] ?? [];
+        $analysis = ImportAnalyzer::analyzeImport($children);
 
         // Store temp file path in session
         $_SESSION['cfk_import_file'] = $tempFile;
@@ -150,7 +151,7 @@ function handlePreviewImport(): array
             'preview' => [
                 'analysis' => $analysis,
                 'filename' => $file['name'],
-                'total_rows' => count($parseResult['children']),
+                'total_rows' => count($children),
                 'parse_warnings' => $parseResult['warnings'] ?? [],
             ],
         ];
@@ -161,6 +162,9 @@ function handlePreviewImport(): array
     }
 }
 
+/**
+ * @return array{success: bool, message?: string, count?: int}
+ */
 function handleConfirmImport(): array
 {
     try {
@@ -213,6 +217,9 @@ function handleConfirmImport(): array
     }
 }
 
+/**
+ * @return array{success: bool, message: string}
+ */
 function handleDeleteAllChildren(): array
 {
     try {
@@ -254,6 +261,9 @@ function handleDeleteAllChildren(): array
     }
 }
 
+/**
+ * @return array{success: bool, message: string}
+ */
 function handleRestoreBackup(): array
 {
     try {
@@ -316,6 +326,10 @@ function downloadTemplate(): void
         header('Content-Disposition: attachment; filename="cfk-import-template.csv"');
 
         $output = fopen('php://output', 'w');
+        if ($output === false) {
+            die('Failed to open output stream');
+        }
+
         fputcsv($output, $headers);
 
         // Add sample rows showing both age formats
@@ -1175,39 +1189,6 @@ include __DIR__ . '/includes/admin_header.php';
             </div>
         <?php endif; ?>
 
-        <!-- Import Success Results -->
-        <?php if ($importResults) : ?>
-            <div class="results-section section">
-                <div class="section-header" style="background-color: #d4edda; color: #155724;">
-                    ✅ Import Complete!
-                </div>
-                <div class="section-body">
-                    <div class="alert alert-success">
-                        <h3 style="margin-bottom: 0.5rem;">🎉 Success!</h3>
-                        <p style="margin: 0;"><?php echo htmlspecialchars((string) $message); ?></p>
-                    </div>
-
-                    <div class="results-grid" style="margin-top: 1.5rem;">
-                        <div class="result-card" style="border-left: 4px solid #28a745;">
-                            <div class="result-number"><?php echo $importResults['imported'] ?? 0; ?></div>
-                            <div class="result-label">Children Imported</div>
-                        </div>
-                        <?php if (isset($importResults['sponsorships_preserved']) && $importResults['sponsorships_preserved'] > 0) : ?>
-                            <div class="result-card" style="border-left: 4px solid #17a2b8;">
-                                <div class="result-number"><?php echo $importResults['sponsorships_preserved']; ?></div>
-                                <div class="result-label">Sponsorships Preserved</div>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <a href="?" class="btn btn-primary">Import Another File</a>
-                        <a href="manage_children.php" class="btn btn-secondary">View Children</a>
-                    </div>
-                </div>
-            </div>
-        <?php endif; ?>
-
         <!-- Backup Management Section -->
         <?php if ($backupStats['total_backups'] > 0) : ?>
         <div class="backup-section section">
@@ -1382,18 +1363,13 @@ include __DIR__ . '/includes/admin_header.php';
                     checkboxGroup.style.animation = 'gentle-pulse 2s ease-in-out 3';
                 }
                 
-                // Update button text to be more specific
-                if (importBtn) {
-                    importBtn.innerHTML = '🚀 Import ' + <?php echo isset($importResults) ? $importResults['imported'] : 0; ?> + ' Children';
-                }
-                
                 // Add click handler to checkbox to update button text
                 dryRunCheckbox.addEventListener('change', function() {
                     if (importBtn) {
                         if (this.checked) {
                             importBtn.innerHTML = '🔍 Preview Import';
                         } else {
-                            importBtn.innerHTML = '🚀 Import ' + <?php echo isset($importResults) ? $importResults['imported'] : 0; ?> + ' Children';
+                            importBtn.innerHTML = '🚀 Import Children';
                         }
                     }
                 });

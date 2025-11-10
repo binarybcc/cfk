@@ -1,0 +1,108 @@
+Note: Using configuration file /home/user/cfk/cfk-standalone/phpstan.neon.
+  0/59 [░░░░░░░░░░░░░░░░░░░░░░░░░░░░]   0%[1G[2K 59/59 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100%
+
+ ------ --------------------------------------------------------- 
+  Line   admin/debug_db_check.php                                 
+ ------ --------------------------------------------------------- 
+  38     Cannot call method fetchColumn() on PDOStatement|false.  
+  41     Cannot call method fetchColumn() on PDOStatement|false.  
+  44     Cannot call method fetchAll() on PDOStatement|false.     
+  52     Cannot call method fetch() on PDOStatement|false.        
+ ------ --------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/import_csv.php                                                  
+ ------ ---------------------------------------------------------------------- 
+  52     Offset 'preview' does not exist on array{success: true, message?:     
+         string, children?: array<int, array<string, mixed>>, errors?:         
+         array<string>, warnings?: array<string>}.                             
+  54     Offset 'message' does not exist on array{success: false, message?:    
+         string, children?: array<int, array<string, mixed>>, errors?:         
+         array<string>, warnings?: array<string>}.                             
+  62     Offset 'message' does not exist on array{success: bool, message?:     
+         string, count?: int}.                                                 
+  64     Offset 'results' on array{success: true, message?: string, count?:    
+         int} in isset() does not exist.                                       
+  64     Result of && is always false.                                         
+         💡 Because the type is coming from a PHPDoc, you can turn off this    
+            check by setting treatPhpDocTypesAsCertain: false in your          
+            phpstan.neon.                                                      
+  145    Offset 'children' does not exist on array{success: true, children?:   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file     
+         not found…'}.                                                         
+  156    Offset 'children' does not exist on array{success: true, children?:   
+         array<int, non-empty-array<string, mixed>>, errors?: array<string>,   
+         warnings?: array<string>, error?: 'Could not open CSV…'|'CSV file     
+         not found…'}.                                                         
+  1195   If condition is always false.                                         
+  1208   Offset 'imported' on *NEVER* on left side of ?? always exists and is  
+         not nullable.                                                         
+  1211   Offset 'sponsorships…' on *NEVER* in isset() always exists and is     
+         not nullable.                                                         
+  1403   Variable $importResults in isset() always exists and is always null.  
+  1412   Variable $importResults in isset() always exists and is always null.  
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ---------------------------------------------------------------------- 
+  Line   admin/reports.php                                                     
+ ------ ---------------------------------------------------------------------- 
+  217    Offset 'unique_sponsors' on array{children: array<string,             
+         mixed>|null, sponsorships: array<string, mixed>|null,                 
+         unique_sponsors: mixed, families: array<string, mixed>|null} on left  
+         side of ?? always exists and is not nullable.                         
+ ------ ---------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   admin/year_end_reset.php                                               
+ ------ ----------------------------------------------------------------------- 
+  73     Variable $_POST on left side of ?? always exists and is not nullable.  
+  329    Offset 'children' on array{children: bool|float|int|string, families:  
+         bool|float|int|string, sponsorships: bool|float|int|string,            
+         email_log: bool|float|int|string} on left side of ?? always exists     
+         and is not nullable.                                                   
+  337    Offset 'families' on array{children: bool|float|int|string, families:  
+         bool|float|int|string, sponsorships: bool|float|int|string,            
+         email_log: bool|float|int|string} on left side of ?? always exists     
+         and is not nullable.                                                   
+  345    Offset 'sponsorships' on array{children: bool|float|int|string,        
+         families: bool|float|int|string, sponsorships: bool|float|int|string,  
+         email_log: bool|float|int|string} on left side of ?? always exists     
+         and is not nullable.                                                   
+  353    Offset 'email_log' on array{children: bool|float|int|string,           
+         families: bool|float|int|string, sponsorships: bool|float|int|string,  
+         email_log: bool|float|int|string} on left side of ?? always exists     
+         and is not nullable.                                                   
+ ------ ----------------------------------------------------------------------- 
+
+ ------ ----------------------------------------------------------------------- 
+  Line   includes/reservation_emails.php                                        
+ ------ ----------------------------------------------------------------------- 
+  343    Parameter #2 $timestamp of function date expects int|null, int|false   
+         given.                                                                 
+  572    Parameter #2 $data of function hash_hmac expects string, string|false  
+         given.                                                                 
+ ------ ----------------------------------------------------------------------- 
+
+ ------ -------------------------------------------------------------------------------------- 
+  Line   includes/validator.php                                                                
+ ------ -------------------------------------------------------------------------------------- 
+  255    Method Validator::errors() return type has no value type specified in                 
+         iterable type array.                                                                  
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  271    Method Validator::allErrors() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  286    Method Validator::validated() return type has no value type specified                 
+         in iterable type array.                                                               
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  301    Method Validator::make() has parameter $data with no value type                       
+         specified in iterable type array.                                                     
+         💡 See:                                                                               
+            https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type  
+  310    Function validate() has parameter $data with no value type specified                  
+         in iterable type array.                                                               
+         💡 See:                                                                               

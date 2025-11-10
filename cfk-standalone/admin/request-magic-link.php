@@ -113,19 +113,19 @@ try {
 
             if (! $sent) {
                 error_log('Magic link email send failed: ' . $mailer->ErrorInfo);
-                MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
+                MagicLinkManager::logEvent(isset($adminUser['id']) ? (int)$adminUser['id'] : null, 'magic_link_email_failed', $ipAddress, $userAgent, 'failed', [
                     'email' => $email,
                     'error' => $mailer->ErrorInfo,
                 ]);
             } else {
                 error_log('Magic link email sent successfully to: ' . $email);
-                MagicLinkManager::logEvent($adminUser['id'], 'magic_link_sent', $ipAddress, $userAgent, 'success', [
+                MagicLinkManager::logEvent(isset($adminUser['id']) ? (int)$adminUser['id'] : null, 'magic_link_sent', $ipAddress, $userAgent, 'success', [
                     'email' => $email,
                 ]);
             }
         } catch (Exception $e) {
             error_log('Magic link email exception: ' . $e->getMessage());
-            MagicLinkManager::logEvent($adminUser['id'], 'magic_link_email_exception', $ipAddress, $userAgent, 'failed', [
+            MagicLinkManager::logEvent(isset($adminUser['id']) ? (int)$adminUser['id'] : null, 'magic_link_email_exception', $ipAddress, $userAgent, 'failed', [
                 'email' => $email,
                 'error' => $e->getMessage(),
             ]);

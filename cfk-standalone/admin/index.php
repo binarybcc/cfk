@@ -157,7 +157,7 @@ include __DIR__ . '/includes/admin_header.php';
                     <div class="attention-info">
                         <strong>Family Code: <?php echo sanitizeString($child['display_id']); ?></strong>
                         <span class="attention-date">
-                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date'])); ?>
+                            Pending since <?php echo date('M j, Y', strtotime((string) $child['request_date']) ?: 0); ?>
                         </span>
                     </div>
                     <div class="attention-actions">
@@ -190,7 +190,7 @@ include __DIR__ . '/includes/admin_header.php';
                                 Status: <span class="status status-<?php echo $sponsorship['status']; ?>">
                                     <?php echo ucfirst((string) $sponsorship['status']); ?>
                                 </span>
-                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date'])); ?>
+                                • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date']) ?: 0); ?>
                             </div>
                         </div>
                         <div class="activity-actions">
