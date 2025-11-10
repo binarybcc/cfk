@@ -56,9 +56,9 @@ if ($_POST && isset($_POST['lookup_email'])) {
     <?php
     // Page header component
     $title = '🔍 Access Your Sponsorships';
-    $description = 'Enter your email to view and manage your Christmas for Kids sponsorships';
-    require_once __DIR__ . '/../includes/components/page_header.php';
-    ?>
+$description = 'Enter your email to view and manage your Christmas for Kids sponsorships';
+require_once __DIR__ . '/../includes/components/page_header.php';
+?>
 
     <div class="lookup-container">
         <?php if ($emailSent) : ?>

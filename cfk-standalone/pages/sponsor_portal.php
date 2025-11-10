@@ -92,13 +92,13 @@ if ($_POST && isset($_POST['add_children'])) {
     <?php
     // Page header component
     $title = '🎄 Your Sponsorship Portal';
-    ob_start();
-    ?>
+ob_start();
+?>
         <p class="sponsor-email">Logged in as: <strong><?php echo sanitizeEmail($sponsorEmail); ?></strong></p>
     <?php
-    $additionalContent = ob_get_clean();
-    require_once __DIR__ . '/../includes/components/page_header.php';
-    ?>
+$additionalContent = ob_get_clean();
+require_once __DIR__ . '/../includes/components/page_header.php';
+?>
 
     <?php if (! $showAddChildren) : ?>
         <!-- Display Sponsorships -->
@@ -211,10 +211,10 @@ if ($_POST && isset($_POST['add_children'])) {
                 <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
 
                 <?php
-        // Get available children
-                $availableChildren = getChildren(['status' => 'available'], 1, 100);
+    // Get available children
+            $availableChildren = getChildren(['status' => 'available'], 1, 100);
 
-                if ($availableChildren === []) : ?>
+if ($availableChildren === []) : ?>
                     <div class="alert alert-info">
                         <p>There are currently no available children to add. All children have been sponsored!</p>
                     </div>

@@ -22,47 +22,6 @@ class Connection
     private static ?PDO $connection = null;
 
     /**
-     * Initialize database connection
-     *
-     * @param array{host?: string, port?: int, database?: string, username?: string, password?: string, charset?: string, options?: array<int, mixed>} $config Database configuration
-     * @throws PDOException If connection fails
-     */
-    public static function init(array $config): void
-    {
-        if (self::$connection instanceof PDO) {
-            return; // Already initialized
-        }
-
-        // Set defaults for missing keys (backward compatibility with old config format)
-        $host = $config['host'] ?? 'localhost';
-        $port = $config['port'] ?? 3306;
-        $database = $config['database'] ?? '';
-        $charset = $config['charset'] ?? 'utf8mb4';
-        $username = $config['username'] ?? '';
-        $password = $config['password'] ?? '';
-        $options = $config['options'] ?? [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ];
-
-        $dsn = sprintf(
-            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
-            $host,
-            $port,
-            $database,
-            $charset
-        );
-
-        self::$connection = new PDO(
-            $dsn,
-            $username,
-            $password,
-            $options
-        );
-    }
-
-    /**
      * Get PDO connection (for transaction support and advanced usage)
      *
      * @return PDO The active PDO connection

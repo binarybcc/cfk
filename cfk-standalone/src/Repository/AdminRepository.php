@@ -15,11 +15,6 @@ class AdminRepository
 {
     private Connection $db;
 
-    public function __construct(Connection $db)
-    {
-        $this->db = $db;
-    }
-
     /**
      * Get dashboard statistics
      *
@@ -115,17 +110,17 @@ class AdminRepository
 
         $params = [];
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND s.status = ?";
             $params[] = $filters['status'];
         }
 
-        if (!empty($filters['date_from'])) {
+        if (! empty($filters['date_from'])) {
             $sql .= " AND s.request_date >= ?";
             $params[] = $filters['date_from'];
         }
 
-        if (!empty($filters['date_to'])) {
+        if (! empty($filters['date_to'])) {
             $sql .= " AND s.request_date <= ?";
             $params[] = $filters['date_to'];
         }

@@ -38,7 +38,7 @@ class ChildController
         $queryParams = $request->getQueryParams();
 
         // Check if viewing a specific family
-        $viewingFamily = !empty($queryParams['family_id']);
+        $viewingFamily = ! empty($queryParams['family_id']);
         $familyId = $viewingFamily ? (int)$queryParams['family_id'] : null;
 
         if ($viewingFamily) {
@@ -109,7 +109,7 @@ class ChildController
         // Get child information
         $child = $this->childRepo->findById($childId);
 
-        if (!$child) {
+        if (! $child) {
             return $this->notFound($response);
         }
 
@@ -125,7 +125,7 @@ class ChildController
         // Count available siblings
         $availableSiblings = array_filter(
             $siblings,
-            fn($s): bool => $s['status'] === 'available'
+            fn ($s): bool => $s['status'] === 'available'
         );
 
         // Prepare view data
@@ -190,15 +190,15 @@ class ChildController
     {
         $filters = [];
 
-        if (!empty($queryParams['search'])) {
+        if (! empty($queryParams['search'])) {
             $filters['search'] = trim($queryParams['search']);
         }
 
-        if (!empty($queryParams['age_category'])) {
+        if (! empty($queryParams['age_category'])) {
             $filters['age_category'] = $queryParams['age_category'];
         }
 
-        if (!empty($queryParams['gender'])) {
+        if (! empty($queryParams['gender'])) {
             $filters['gender'] = $queryParams['gender'];
         }
 

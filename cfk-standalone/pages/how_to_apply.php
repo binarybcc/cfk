@@ -16,9 +16,9 @@ if (! defined('CFK_APP')) {
     <?php
     // Page header component
     $title = '📋 How To Apply For Assistance';
-    $description = 'Information for families seeking Christmas assistance';
-    require_once __DIR__ . '/../includes/components/page_header.php';
-    ?>
+$description = 'Information for families seeking Christmas assistance';
+require_once __DIR__ . '/../includes/components/page_header.php';
+?>
 
     <div class="apply-container">
         <div class="important-dates">

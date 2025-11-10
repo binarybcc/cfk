@@ -247,7 +247,7 @@ header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload"
             <?php
             // Display messages
             $message = getMessage();
-            if ($message) : ?>
+if ($message) : ?>
                 <div class="alert alert-<?php echo $message['type']; ?>">
                     <?php echo sanitizeString($message['text']); ?>
                 </div>

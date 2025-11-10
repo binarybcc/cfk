@@ -78,8 +78,8 @@ $isAvailable = $child['status'] === 'available';
                 <div class="status-badge status-<?php echo $child['status']; ?>">
                     <?php
                     global $childStatusOptions;
-                    echo $childStatusOptions[$child['status']] ?? ucfirst((string) $child['status']);
-                    ?>
+echo $childStatusOptions[$child['status']] ?? ucfirst((string) $child['status']);
+?>
                 </div>
             </div>
         </div>
@@ -204,8 +204,8 @@ $isAvailable = $child['status'] === 'available';
         <?php
         use CFK\Sponsorship\Manager as SponsorshipManager;
 
-        $availability = SponsorshipManager::isChildAvailable($child['id']);
-        ?>
+$availability = SponsorshipManager::isChildAvailable($child['id']);
+?>
         <?php if ($availability['available']) : ?>
             <div class="sponsorship-action">
                 <div class="action-content">

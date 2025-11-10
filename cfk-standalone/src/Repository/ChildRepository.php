@@ -16,16 +16,11 @@ class ChildRepository
 {
     private Connection $db;
 
-    public function __construct(Connection $db)
-    {
-        $this->db = $db;
-    }
-
     /**
      * Find child by ID with full details
      *
      * @param int $id Child ID
-     * @return array|null Child data or null if not found
+     * @return array<string, mixed>|null Child data or null if not found
      */
     public function findById(int $id): ?array
     {
@@ -48,7 +43,7 @@ class ChildRepository
      *
      * @param int $familyId Family ID
      * @param int|null $excludeChildId Child ID to exclude
-     * @return array Array of sibling records
+     * @return array<int, array<string, mixed>> Array of sibling records
      */
     public function findFamilyMembers(int $familyId, ?int $excludeChildId = null): array
     {
@@ -71,45 +66,12 @@ class ChildRepository
     }
 
     /**
-     * Check if a child exists
-     *
-     * @param int $id Child ID
-     * @return bool True if child exists
-     */
-    public function exists(int $id): bool
-    {
-        $sql = "SELECT COUNT(*) as count FROM children WHERE id = ?";
-        $result = Connection::fetchRow($sql, [$id]);
-
-        return isset($result['count']) && $result['count'] > 0;
-    }
-
-    /**
-     * Get child's display ID (family number)
-     *
-     * @param int $id Child ID
-     * @return string|null Display ID or null if not found
-     */
-    public function getDisplayId(int $id): ?string
-    {
-        $sql = "SELECT f.family_number
-                FROM children c
-                JOIN families f ON c.family_id = f.id
-                WHERE c.id = ?
-                LIMIT 1";
-
-        $result = Connection::fetchRow($sql, [$id]);
-
-        return $result['family_number'] ?? null;
-    }
-
-    /**
      * Find all children with filters and pagination
      *
-     * @param array $filters Filter criteria (search, age_category, gender, status, family_id)
+     * @param array<string, mixed> $filters Filter criteria (search, age_category, gender, status, family_id)
      * @param int $page Current page number
      * @param int $limit Results per page
-     * @return array Array of child records
+     * @return array<int, array<string, mixed>> Array of child records
      */
     public function findAll(array $filters = [], int $page = 1, int $limit = 12): array
     {
@@ -124,7 +86,7 @@ class ChildRepository
         $params = [];
 
         // Apply filters
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $searchValue = '%' . $filters['search'] . '%';
             $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE ?
                       OR c.interests LIKE ?
@@ -134,7 +96,7 @@ class ChildRepository
             $params[] = $searchValue;
         }
 
-        if (!empty($filters['age_category'])) {
+        if (! empty($filters['age_category'])) {
             // Get age categories from config
             global $ageCategories;
             if (isset($ageCategories[$filters['age_category']])) {
@@ -145,23 +107,23 @@ class ChildRepository
             }
         }
 
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $sql .= " AND c.gender = ?";
             $params[] = $filters['gender'];
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND c.status = ?";
             $params[] = $filters['status'];
         }
 
-        if (!empty($filters['family_id'])) {
+        if (! empty($filters['family_id'])) {
             $sql .= " AND c.family_id = ?";
             $params[] = $filters['family_id'];
         }
 
         // Default to available children only
-        if (!isset($filters['status'])) {
+        if (! isset($filters['status'])) {
             $sql .= " AND c.status = 'available'";
         }
 
@@ -175,7 +137,7 @@ class ChildRepository
     /**
      * Count children matching filters
      *
-     * @param array $filters Filter criteria (same as findAll)
+     * @param array<string, mixed> $filters Filter criteria (same as findAll)
      * @return int Total count
      */
     public function count(array $filters = []): int
@@ -188,7 +150,7 @@ class ChildRepository
         $params = [];
 
         // Apply same filters as findAll()
-        if (!empty($filters['search'])) {
+        if (! empty($filters['search'])) {
             $searchValue = '%' . $filters['search'] . '%';
             $sql .= " AND (CONCAT(f.family_number, c.child_letter) LIKE ?
                       OR c.interests LIKE ?
@@ -198,7 +160,7 @@ class ChildRepository
             $params[] = $searchValue;
         }
 
-        if (!empty($filters['age_category'])) {
+        if (! empty($filters['age_category'])) {
             global $ageCategories;
             if (isset($ageCategories[$filters['age_category']])) {
                 $category = $ageCategories[$filters['age_category']];
@@ -208,23 +170,23 @@ class ChildRepository
             }
         }
 
-        if (!empty($filters['gender'])) {
+        if (! empty($filters['gender'])) {
             $sql .= " AND c.gender = ?";
             $params[] = $filters['gender'];
         }
 
-        if (!empty($filters['status'])) {
+        if (! empty($filters['status'])) {
             $sql .= " AND c.status = ?";
             $params[] = $filters['status'];
         }
 
-        if (!empty($filters['family_id'])) {
+        if (! empty($filters['family_id'])) {
             $sql .= " AND c.family_id = ?";
             $params[] = $filters['family_id'];
         }
 
         // Default to available children only
-        if (!isset($filters['status'])) {
+        if (! isset($filters['status'])) {
             $sql .= " AND c.status = 'available'";
         }
 
@@ -236,8 +198,8 @@ class ChildRepository
     /**
      * Eager load family members for multiple children (prevents N+1 queries)
      *
-     * @param array $children Array of child records
-     * @return array Associative array indexed by family_id containing siblings
+     * @param array<int, array<string, mixed>> $children Array of child records
+     * @return array<int, array<int, array<string, mixed>>> Associative array indexed by family_id containing siblings
      */
     public function eagerLoadFamilyMembers(array $children): array
     {
@@ -277,7 +239,7 @@ class ChildRepository
      * Find family by ID
      *
      * @param int $familyId Family ID
-     * @return array|null Family record or null if not found
+     * @return array<string, mixed>|null Family record or null if not found
      */
     public function findFamilyById(int $familyId): ?array
     {

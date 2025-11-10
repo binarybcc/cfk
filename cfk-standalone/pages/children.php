@@ -108,8 +108,8 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
         $additionalContent = '';
     }
 
-    require_once __DIR__ . '/../includes/components/page_header.php';
-    ?>
+require_once __DIR__ . '/../includes/components/page_header.php';
+?>
 
     <!-- Filters Section (hidden in family view mode) - Alpine.js Enhanced for Instant Search -->
     <?php if (! $viewingFamily) : ?>
@@ -303,7 +303,7 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 <!-- Children Cards -->
                 <?php foreach ($children as $child) : ?>
                     <?php
-                    $siblingCount = getSiblingCount($child['family_id']);
+                $siblingCount = getSiblingCount($child['family_id']);
                     ?>
                     <div class="child-card child-card-v2">
                         <!-- Top Section: Image + Metadata Side by Side -->
@@ -424,24 +424,24 @@ $baseUrl = baseUrl('?page=children' . ($queryString !== '' && $queryString !== '
                 <?php
                 // Preserve all query params except 'p' (page number)
                 $queryParams = $_GET;
-                unset($queryParams['p']);
-                $baseQuery = http_build_query($queryParams);
-                $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
+            unset($queryParams['p']);
+            $baseQuery = http_build_query($queryParams);
+            $baseQuery = $baseQuery !== '' && $baseQuery !== '0' ? '&' . $baseQuery : '';
 
             // Calculate page range to display
-                $delta = 2; // Number of pages to show on each side of current page
-                $rangeStart = max(1, $currentPage - $delta);
-                $rangeEnd = min($totalPages, $currentPage + $delta);
+            $delta = 2; // Number of pages to show on each side of current page
+            $rangeStart = max(1, $currentPage - $delta);
+            $rangeEnd = min($totalPages, $currentPage + $delta);
 
             // Adjust range if we're near the start or end
-                if ($rangeEnd - $rangeStart < $delta * 2) {
-                    if ($currentPage < $totalPages / 2) {
-                        $rangeEnd = min($totalPages, $rangeStart + ($delta * 2));
-                    } else {
-                        $rangeStart = max(1, $rangeEnd - ($delta * 2));
-                    }
+            if ($rangeEnd - $rangeStart < $delta * 2) {
+                if ($currentPage < $totalPages / 2) {
+                    $rangeEnd = min($totalPages, $rangeStart + ($delta * 2));
+                } else {
+                    $rangeStart = max(1, $rangeEnd - ($delta * 2));
                 }
-                ?>
+            }
+?>
 
                 <nav class="pagination" role="navigation" aria-label="Pagination Navigation">
                     <!-- First Page -->

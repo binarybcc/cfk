@@ -21,9 +21,9 @@ global $cspNonce;
     <?php
     // Page header component
     $title = 'About Christmas for Kids';
-    $description = 'Our mission is to ensure every child in our community experiences the magic and joy of Christmas morning.';
-    require_once __DIR__ . '/../includes/components/page_header.php';
-    ?>
+$description = 'Our mission is to ensure every child in our community experiences the magic and joy of Christmas morning.';
+require_once __DIR__ . '/../includes/components/page_header.php';
+?>
 
     <div class="about-content">
         <section class="mission-section">
@@ -110,9 +110,9 @@ global $cspNonce;
                 </div>
                 <div class="impact-stat">
                     <div class="stat-number"><?php
-                    $familyCount = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0;
-                    echo $familyCount;
-                    ?></div>
+                $familyCount = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0;
+echo $familyCount;
+?></div>
                     <div class="stat-label">Families Supported</div>
                 </div>
                 <div class="impact-stat">

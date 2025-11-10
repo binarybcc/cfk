@@ -220,8 +220,8 @@ $cspNonce = bin2hex(random_bytes(16));
         <?php
         // Display success messages (e.g., after logout)
         $message = getMessage();
-        if ($message && $message['type'] === 'success') :
-            ?>
+if ($message && $message['type'] === 'success') :
+    ?>
             <div class="success-message">
                 <?php echo htmlspecialchars((string) $message['text']); ?>
             </div>

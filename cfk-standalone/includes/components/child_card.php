@@ -93,8 +93,8 @@ $showFamilyButton = $options['show_family_button'] ?? false;
                 <strong>Has <?php echo count($siblings); ?> sibling<?php echo count($siblings) > 1 ? 's' : ''; ?>:</strong>
                 <?php
                 $siblingCodes = array_map(fn ($s) => sanitizeString($s['display_id']), $siblings);
-                echo implode(', ', $siblingCodes);
-                ?>
+            echo implode(', ', $siblingCodes);
+            ?>
             </div>
         <?php endif; ?>
 

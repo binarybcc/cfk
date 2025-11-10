@@ -110,10 +110,10 @@ global $cspNonce;
                 <?php
                 $demographics = displayAge($member['age_months']) . ' • ' .
                                ($member['gender'] === 'M' ? 'Boy' : 'Girl');
-                if (! empty($member['grade'])) {
-                    $demographics .= ' • Grade: ' . sanitizeString($member['grade']);
-                }
-                ?>
+            if (! empty($member['grade'])) {
+                $demographics .= ' • Grade: ' . sanitizeString($member['grade']);
+            }
+            ?>
                 <div class="member-details" data-demographics="<?php echo $demographics; ?>">
                     <!-- Essential Needs -->
                     <?php if (! empty($member['interests'])) : ?>

@@ -519,7 +519,7 @@ include __DIR__ . '/includes/admin_header.php';
                     $unsponsoredCount++;
                 }
             }
-            ?>
+?>
 
             <div class="report-header">
                 <h2>Complete Children & Sponsor Export</h2>

@@ -77,10 +77,12 @@ class AdminController
                 $filters = $this->buildReportFilters($queryParams);
                 $data['sponsorships'] = $this->adminRepo->getAllSponsorships($filters);
                 $data['filters'] = $filters;
+
                 break;
 
             case 'children':
                 $data['childrenStats'] = $this->adminRepo->getChildrenStats();
+
                 break;
 
             case 'summary':
@@ -88,6 +90,7 @@ class AdminController
                 $data['sponsorshipSummary'] = $this->adminRepo->getSponsorshipSummary();
                 $data['childrenStats'] = $this->adminRepo->getChildrenStats();
                 $data['dashboardStats'] = $this->adminRepo->getDashboardStats();
+
                 break;
         }
 
@@ -109,8 +112,9 @@ class AdminController
         if (empty($email)) {
             $response->getBody()->write(json_encode([
                 'success' => false,
-                'message' => 'Email required'
+                'message' => 'Email required',
             ]));
+
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(400);
@@ -121,15 +125,17 @@ class AdminController
         if ($sponsor) {
             $response->getBody()->write(json_encode([
                 'success' => true,
-                'sponsor' => $sponsor
+                'sponsor' => $sponsor,
             ]));
+
             return $response->withHeader('Content-Type', 'application/json');
         }
 
         $response->getBody()->write(json_encode([
             'success' => false,
-            'message' => 'Sponsor not found'
+            'message' => 'Sponsor not found',
         ]));
+
         return $response
             ->withHeader('Content-Type', 'application/json')
             ->withStatus(404);
@@ -155,11 +161,12 @@ class AdminController
         ];
 
         // Validate email
-        if (!filter_var($newData['sponsor_email'], FILTER_VALIDATE_EMAIL)) {
+        if (! filter_var($newData['sponsor_email'], FILTER_VALIDATE_EMAIL)) {
             $response->getBody()->write(json_encode([
                 'success' => false,
-                'message' => 'Invalid email address'
+                'message' => 'Invalid email address',
             ]));
+
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(400);
@@ -171,14 +178,16 @@ class AdminController
             $response->getBody()->write(json_encode([
                 'success' => true,
                 'message' => 'Sponsor information updated successfully',
-                'rows_affected' => $rowsAffected
+                'rows_affected' => $rowsAffected,
             ]));
+
             return $response->withHeader('Content-Type', 'application/json');
         } catch (\Exception $e) {
             $response->getBody()->write(json_encode([
                 'success' => false,
-                'message' => 'Failed to update sponsor information'
+                'message' => 'Failed to update sponsor information',
             ]));
+
             return $response
                 ->withHeader('Content-Type', 'application/json')
                 ->withStatus(500);
@@ -195,15 +204,15 @@ class AdminController
     {
         $filters = [];
 
-        if (!empty($queryParams['status'])) {
+        if (! empty($queryParams['status'])) {
             $filters['status'] = $queryParams['status'];
         }
 
-        if (!empty($queryParams['date_from'])) {
+        if (! empty($queryParams['date_from'])) {
             $filters['date_from'] = $queryParams['date_from'];
         }
 
-        if (!empty($queryParams['date_to'])) {
+        if (! empty($queryParams['date_to'])) {
             $filters['date_to'] = $queryParams['date_to'];
         }
 
