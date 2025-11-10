@@ -452,6 +452,23 @@ cfk-standalone/docs/
 
 ## Development Guidelines
 
+### Slim Framework Template Architecture (v1.9+)
+
+**CRITICAL: ALL Slim templates MUST use modular component pattern.**
+
+**Full Documentation:** `cfk-standalone/docs/technical/slim-template-architecture.md`
+
+**Quick Reference:**
+- ✅ Header/footer in `templates/components/` (reusable)
+- ✅ Layouts in `templates/layouts/` (use `{% include %}`)
+- ✅ Feature templates extend layouts (use `{% extends %}`)
+- ❌ NEVER duplicate header/footer code
+- ❌ NEVER inline header/footer in feature templates
+
+**Single Source of Truth:** Update once, applies everywhere.
+
+**This is the professional standard for template systems. No exceptions.**
+
 ### Working with This Codebase
 
 1. **Remember**: This is NOT WordPress. No hooks, no shortcodes, no WP functions.
