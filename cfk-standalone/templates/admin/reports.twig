@@ -1,0 +1,472 @@
+{# Admin Reports Template - Week 3 Part 3 #}
+
+<div class="admin-reports">
+    <div class="reports-header">
+        <h1>Reports</h1>
+        <p class="reports-subtitle">View comprehensive statistics and data</p>
+    </div>
+
+    {# Report Type Selector #}
+    <div class="report-selector">
+        <h2>Select Report Type</h2>
+        <div class="report-buttons">
+            <a href="/slim.php/admin/reports?type=summary"
+               class="btn {% if reportType == 'summary' %}btn-primary{% else %}btn-secondary{% endif %}">
+                📊 Summary Report
+            </a>
+            <a href="/slim.php/admin/reports?type=sponsorships"
+               class="btn {% if reportType == 'sponsorships' %}btn-primary{% else %}btn-secondary{% endif %}">
+                🎁 Sponsorships Report
+            </a>
+            <a href="/slim.php/admin/reports?type=children"
+               class="btn {% if reportType == 'children' %}btn-primary{% else %}btn-secondary{% endif %}">
+                👥 Children Statistics
+            </a>
+        </div>
+    </div>
+
+    {# Summary Report #}
+    {% if reportType == 'summary' %}
+        <div class="report-section">
+            <h2>Summary Report</h2>
+
+            {# Dashboard Stats #}
+            <div class="stats-overview">
+                <h3>Overall Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">{{ dashboardStats.total_children }}</div>
+                        <div class="stat-label">Total Children</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ dashboardStats.available_children }}</div>
+                        <div class="stat-label">Available</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ sponsorshipSummary.total_sponsorships }}</div>
+                        <div class="stat-label">Total Sponsorships</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">{{ sponsorshipSummary.unique_sponsors }}</div>
+                        <div class="stat-label">Unique Sponsors</div>
+                    </div>
+                </div>
+            </div>
+
+            {# Sponsorship Breakdown #}
+            <div class="breakdown-section">
+                <h3>Sponsorship Status Breakdown</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Count</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for status, count in sponsorshipSummary.by_status %}
+                            {% set percentage = (count / sponsorshipSummary.total_sponsorships * 100)|round(1) %}
+                            <tr>
+                                <td>
+                                    <span class="status-badge status-{{ status }}">
+                                        {{ status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>{{ count }}</td>
+                                <td>{{ percentage }}%</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# Children Breakdown #}
+            <div class="breakdown-section">
+                <h3>Children by Age Group</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Age Group</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group, count in childrenStats.by_age_group %}
+                            <tr>
+                                <td>{{ group }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Sponsorships Report #}
+    {% if reportType == 'sponsorships' %}
+        <div class="report-section">
+            <h2>Sponsorships Report</h2>
+
+            {# Filters #}
+            <div class="report-filters">
+                <form method="get" action="/slim.php/admin/reports" class="filter-form">
+                    <input type="hidden" name="type" value="sponsorships">
+
+                    <div class="filter-group">
+                        <label for="status">Status</label>
+                        <select name="status" id="status">
+                            <option value="">All</option>
+                            <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="completed" {% if filters.status == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="cancelled" {% if filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="date_from">Date From</label>
+                        <input type="date" name="date_from" id="date_from" value="{{ filters.date_from ?? '' }}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="date_to">Date To</label>
+                        <input type="date" name="date_to" id="date_to" value="{{ filters.date_to ?? '' }}">
+                    </div>
+
+                    <div class="filter-actions">
+                        <button type="submit" class="btn btn-primary">Apply Filters</button>
+                        <a href="/slim.php/admin/reports?type=sponsorships" class="btn btn-secondary">Clear</a>
+                    </div>
+                </form>
+            </div>
+
+            {# Results #}
+            {% if sponsorships %}
+                <div class="report-results">
+                    <p class="results-count">Found {{ sponsorships|length }} sponsorships</p>
+
+                    <div class="table-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Child ID</th>
+                                    <th>Sponsor Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sponsorship in sponsorships %}
+                                    <tr>
+                                        <td>{{ sponsorship.request_date|date('M d, Y') }}</td>
+                                        <td>Family {{ sponsorship.child_display_id }}</td>
+                                        <td>{{ sponsorship.sponsor_name }}</td>
+                                        <td>{{ sponsorship.sponsor_email }}</td>
+                                        <td>
+                                            <span class="status-badge status-{{ sponsorship.status }}">
+                                                {{ sponsorship.status|capitalize }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="export-actions">
+                        <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+                    </div>
+                </div>
+            {% else %}
+                <p class="no-data">No sponsorships found matching the selected filters.</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {# Children Statistics Report #}
+    {% if reportType == 'children' %}
+        <div class="report-section">
+            <h2>Children Statistics</h2>
+
+            {# By Status #}
+            <div class="breakdown-section">
+                <h3>Children by Status</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for status, count in childrenStats.by_status %}
+                            <tr>
+                                <td>
+                                    <span class="status-badge status-{{ status }}">
+                                        {{ status|capitalize }}
+                                    </span>
+                                </td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# By Age Group #}
+            <div class="breakdown-section">
+                <h3>Children by Age Group</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Age Group</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for group, count in childrenStats.by_age_group %}
+                            <tr>
+                                <td>{{ group }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {# By Gender #}
+            <div class="breakdown-section">
+                <h3>Children by Gender</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Gender</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for gender, count in childrenStats.by_gender %}
+                            <tr>
+                                <td>{{ gender == 'M' ? 'Male' : 'Female' }}</td>
+                                <td>{{ count }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Admin Reports Styles */
+.admin-reports {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.reports-header {
+    margin-bottom: 30px;
+}
+
+.reports-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 5px;
+}
+
+.reports-subtitle {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.report-selector {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.report-selector h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+.report-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.report-section {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.report-section h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #2c5530;
+}
+
+.stats-overview {
+    margin-bottom: 30px;
+}
+
+.stats-overview h3 {
+    margin-bottom: 15px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: #f5f5f5;
+    border-radius: 6px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c5530;
+}
+
+.stat-label {
+    color: #666;
+    margin-top: 5px;
+}
+
+.breakdown-section {
+    margin-bottom: 30px;
+}
+
+.breakdown-section h3 {
+    margin-bottom: 15px;
+}
+
+.report-filters {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+}
+
+.filter-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+}
+
+.report-results {
+    margin-top: 20px;
+}
+
+.results-count {
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.report-table th,
+.report-table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.report-table th {
+    background: #f5f5f5;
+    font-weight: bold;
+}
+
+.report-table tr:hover {
+    background: #f9f9f9;
+}
+
+.export-actions {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.no-data {
+    text-align: center;
+    color: #666;
+    padding: 40px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: bold;
+}
+
+.status-available {
+    background: #4caf50;
+    color: white;
+}
+
+.status-pending {
+    background: #ff9800;
+    color: white;
+}
+
+.status-sponsored, .status-completed {
+    background: #2196f3;
+    color: white;
+}
+
+.status-cancelled {
+    background: #f44336;
+    color: white;
+}
+
+@media print {
+    .report-selector,
+    .report-filters,
+    .export-actions {
+        display: none;
+    }
+}
+</style>

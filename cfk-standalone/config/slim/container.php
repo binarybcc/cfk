@@ -73,10 +73,19 @@ $container->register(CFK\Controller\TestController::class)
 
 /**
  * Child Controller
- * Handles child profile viewing (Week 2 migration)
+ * Handles child profile viewing (Week 2-3 migration)
  */
 $container->register(CFK\Controller\ChildController::class)
     ->addArgument(new Reference('repository.child'))
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
+/**
+ * Admin Controller
+ * Handles admin dashboard and reports (Week 3)
+ */
+$container->register(CFK\Controller\AdminController::class)
+    ->addArgument(new Reference('repository.admin'))
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
@@ -89,6 +98,14 @@ $container->register(CFK\Controller\ChildController::class)
  * Data access layer for child-related queries
  */
 $container->register('repository.child', CFK\Repository\ChildRepository::class)
+    ->addArgument(new Reference('db.connection'))
+    ->setPublic(true);
+
+/**
+ * Admin Repository
+ * Data access layer for admin dashboard and reports (Week 3)
+ */
+$container->register('repository.admin', CFK\Repository\AdminRepository::class)
     ->addArgument(new Reference('db.connection'))
     ->setPublic(true);
 

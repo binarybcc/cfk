@@ -13,6 +13,7 @@ declare(strict_types=1);
  * - New style: /children (Slim routes)
  */
 
+use CFK\Controller\AdminController;
 use CFK\Controller\ChildController;
 use CFK\Controller\TestController;
 use Slim\App;
@@ -55,12 +56,40 @@ return function (App $app) {
     $app->get('/children/{id:\d+}', [ChildController::class, 'show']);
 
     // =========================================================================
+    // Admin Routes (Week 3 Migration - Parts 2 & 3)
+    // =========================================================================
+
+    /**
+     * Admin Dashboard: /admin/dashboard
+     * Display admin statistics and recent activity
+     * Migrated from: admin/index.php
+     */
+    $app->get('/admin/dashboard', [AdminController::class, 'dashboard']);
+
+    /**
+     * Admin Reports: /admin/reports
+     * Display comprehensive reports and statistics
+     * Migrated from: admin/reports.php
+     */
+    $app->get('/admin/reports', [AdminController::class, 'reports']);
+
+    /**
+     * Get Sponsor Data: /admin/api/sponsor (AJAX)
+     * Retrieve sponsor information by email
+     */
+    $app->get('/admin/api/sponsor', [AdminController::class, 'getSponsor']);
+
+    /**
+     * Update Sponsor: /admin/api/sponsor (AJAX)
+     * Update sponsor information
+     */
+    $app->post('/admin/api/sponsor', [AdminController::class, 'updateSponsor']);
+
+    // =========================================================================
     // Future Routes (Will be added during migration)
     // =========================================================================
 
-    // Week 3-8: Additional Features
-    // $app->get('/children', [ChildController::class, 'index']);
-    // $app->get('/admin/dashboard', [AdminController::class, 'dashboard']);
+    // Week 4-8: Additional Features
     // $app->post('/cart/add', [CartController::class, 'add']);
     // etc.
 
