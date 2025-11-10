@@ -13,9 +13,9 @@ if (!defined('CFK_APP')) {
 
 $pageTitle = 'Home';
 
-// Get count statistics for hero section
-$totalAvailable = getChildrenCount(['status' => 'available']);
-$totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children WHERE status = 'available'")['total'] ?? 0;
+// Get count statistics for hero section - total children and families this season
+$totalChildren = getChildrenCount(); // All children regardless of status
+$totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0; // All families
 ?>
 
 <div class="home-page">
@@ -30,12 +30,12 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
                 </p>
                 <div class="hero-stats">
                     <div class="stat">
-                        <strong><?php echo $totalAvailable; ?></strong>
-                        <span>Children Need Sponsors</span>
+                        <strong><?php echo $totalChildren; ?></strong>
+                        <span>Children We're Helping</span>
                     </div>
                     <div class="stat">
                         <strong><?php echo $totalFamilies; ?></strong>
-                        <span>Families Seeking Help</span>
+                        <span>Families We're Helping</span>
                     </div>
                 </div>
             </div>
