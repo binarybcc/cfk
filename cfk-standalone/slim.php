@@ -11,6 +11,9 @@ declare(strict_types=1);
  * Access via: /slim.php/slim-test or /slim.php/slim-test-view
  */
 
+// Security constant (required by config.php)
+define('CFK_APP', true);
+
 // Load Composer autoloader
 require __DIR__ . '/vendor/autoload.php';
 
