@@ -89,6 +89,14 @@ $container->register(CFK\Controller\AdminController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Sponsor Controller
+ * Handles sponsor email lookup and portal access (Week 4)
+ */
+$container->register(CFK\Controller\SponsorController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================

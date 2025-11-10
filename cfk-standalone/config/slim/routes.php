@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use CFK\Controller\AdminController;
 use CFK\Controller\ChildController;
+use CFK\Controller\SponsorController;
 use CFK\Controller\TestController;
 use Slim\App;
 
@@ -86,10 +87,28 @@ return function (App $app) {
     $app->post('/admin/api/sponsor', [AdminController::class, 'updateSponsor']);
 
     // =========================================================================
+    // Sponsor Routes (Week 4 Migration)
+    // =========================================================================
+
+    /**
+     * Sponsor Lookup Form: /sponsor/lookup (GET)
+     * Display email lookup form for portal access
+     * Migrated from: ?page=sponsor_lookup
+     */
+    $app->get('/sponsor/lookup', [SponsorController::class, 'showLookupForm']);
+
+    /**
+     * Sponsor Lookup Form: /sponsor/lookup (POST)
+     * Process email lookup and send magic link
+     * Migrated from: ?page=sponsor_lookup (POST)
+     */
+    $app->post('/sponsor/lookup', [SponsorController::class, 'processLookup']);
+
+    // =========================================================================
     // Future Routes (Will be added during migration)
     // =========================================================================
 
-    // Week 4-8: Additional Features
+    // Week 5-8: Additional Features
     // $app->post('/cart/add', [CartController::class, 'add']);
     // etc.
 

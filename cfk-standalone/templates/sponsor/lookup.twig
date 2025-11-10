@@ -1,0 +1,91 @@
+{% extends "base.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block content %}
+<div class="lookup-page">
+    {# Page Header #}
+    <div class="page-header">
+        <h1>🔍 Access Your Sponsorships</h1>
+        <p>Enter your email to view and manage your Christmas for Kids sponsorships</p>
+    </div>
+
+    <div class="lookup-container">
+        {% if emailSent %}
+            {# Success Message #}
+            <div class="alert alert-success">
+                <h2>✉️ Check Your Email!</h2>
+                <p><strong>We've sent you a secure access link.</strong></p>
+                <p>Click the link in your email to access your sponsorship portal. The link will expire in 30 minutes.</p>
+                <p><strong>Email not received?</strong></p>
+                <ul>
+                    <li>Check your spam/junk folder</li>
+                    <li>Make sure you entered the correct email address</li>
+                    <li>Wait a few minutes and try again</li>
+                    <li>Contact us at <a href="mailto:{{ adminEmail }}">{{ adminEmail }}</a> if problems persist</li>
+                </ul>
+            </div>
+        {% else %}
+            {# Lookup Form #}
+            <div class="lookup-form-container">
+                <div class="info-section">
+                    <h3>What can you do in the portal?</h3>
+                    <ul class="feature-list">
+                        <li>✓ View all your sponsored children with complete details</li>
+                        <li>✓ See which children are in the same family</li>
+                        <li>✓ Add more children to your sponsorship</li>
+                        <li>✓ Download shopping lists for gift buying</li>
+                        <li>✓ View sponsorship status (pending/confirmed/completed)</li>
+                    </ul>
+
+                    <div class="security-note">
+                        <strong>🔒 Secure Access:</strong> No password needed! We'll send you a secure, one-time access link via email.
+                    </div>
+                </div>
+
+                <form method="POST" action="/sponsor/lookup" class="lookup-form" id="lookupForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+                    {% if errors is not empty %}
+                        <div class="alert alert-error" role="alert" aria-live="polite">
+                            <strong>Error:</strong>
+                            <ul id="form-errors">
+                                {% for error in errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <div class="form-group">
+                        <label for="sponsor_email" class="form-label">Your Email Address <span aria-label="required">*</span></label>
+                        <input type="email"
+                               id="sponsor_email"
+                               name="sponsor_email"
+                               class="form-input{% if errors is not empty %} input-error{% endif %}"
+                               placeholder="example@email.com"
+                               value="{{ submittedEmail }}"
+                               required
+                               aria-required="true"
+                               aria-describedby="email-help{% if errors is not empty %} form-errors{% endif %}"
+                               {% if errors is not empty %}aria-invalid="true"{% endif %}
+                               autocomplete="email">
+                        <div id="email-help" class="form-help">Enter the email address you used when sponsoring</div>
+                    </div>
+
+                    <button type="submit" name="lookup_email" class="btn btn-large btn-primary">
+                        Send Access Link
+                    </button>
+                </form>
+
+                <div class="help-section">
+                    <h4>Need Help?</h4>
+                    <p><strong>Don't have sponsorships yet?</strong> <a href="/children">Browse available children</a></p>
+                    <p><strong>Forgot which email you used?</strong> Contact us at <a href="mailto:{{ adminEmail }}">{{ adminEmail }}</a></p>
+                    <p><strong>Need to make changes?</strong> Email us - we're happy to help!</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
