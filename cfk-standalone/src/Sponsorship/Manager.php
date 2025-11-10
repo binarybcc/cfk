@@ -388,39 +388,6 @@ class Manager
     }
 
     /**
-     * Send portal access email to sponsor
-     *
-     * @param string $email Sponsor email address
-     * @return array{success: bool, message: string} Result with success status and message
-     */
-    public static function sendPortalAccessEmail(string $email): array
-    {
-        try {
-            // Use the Email Manager to send the access link
-            $success = \CFK\Email\Manager::sendAccessLink($email);
-
-            if ($success) {
-                return [
-                    'success' => true,
-                    'message' => 'Access link sent successfully',
-                ];
-            }
-
-            return [
-                'success' => false,
-                'message' => 'Failed to send access link. Please try again or contact support.',
-            ];
-        } catch (\Exception $e) {
-            error_log('sendPortalAccessEmail failed: ' . $e->getMessage());
-
-            return [
-                'success' => false,
-                'message' => 'An error occurred while sending the email. Please try again.',
-            ];
-        }
-    }
-
-    /**
      * Get portal access email template
      *
      * @param string $sponsorName Sponsor name
