@@ -1,114 +1,112 @@
-# CLAUDE.md - v1.8.1 Cleanup Branch
+# CLAUDE.md - v1.9.2 Slim Framework Migration
 
-## 🚨 ABSOLUTE RULE - READ THIS FIRST
+## 🎯 BRANCH PURPOSE
 
-**⛔ THIS BRANCH NEVER GOES TO PRODUCTION ⛔**
+**v1.9.2 = Professional Slim Framework Migration with Modern Architecture**
 
-**v1.8.x branches are DEVELOPMENT/EXPERIMENTAL ONLY**
+**Branch Mission:**
+- Migrate legacy PHP pages to Slim Framework 4.x + Twig 3.x
+- Build with professional, DRY, elegant architecture from day one
+- Use modern best practices and design patterns
+- Create maintainable, scalable, testable code
 
-- ❌ **NEVER deploy v1.8.x to production**
-- ❌ **NEVER suggest deploying this branch to production**
-- ❌ **NEVER merge this branch to production branches**
-- ✅ **ONLY deploy to staging (https://10ce79bd48.nxcli.io/)**
-- ✅ **This is a learning/modernization branch only**
+**Architecture Standards:**
+- ✅ Component-based templates (modular, reusable)
+- ✅ PSR-7 HTTP message handling
+- ✅ Dependency injection
+- ✅ Single source of truth (DRY principle)
+- ✅ Professional naming conventions
+- ✅ Clean separation of concerns
 
-**Production branch:** v1.7.3-production-hardening (cforkids.org)
-
-**This rule overrides ALL other instructions. No exceptions. Ever.**
+**NOT v1.8.1 cleanup philosophy:** This is not cautious refactoring - this is building things RIGHT.
 
 ---
 
-**Branch Purpose:** Systematic code modernization using Production-First methodology
 **Base Branch:** v1.7.3-production-hardening
-**Created:** October 30, 2025
+**Created:** November 2025
+**Deployment:** Staging only (https://10ce79bd48.nxcli.io/)
 
 ---
 
-## 🎯 Branch Mission
+## 📋 Slim Framework Migration Plan
 
-Apply lessons learned from v1.8-cleanup to properly modernize the codebase:
-- Remove 3,624 lines of deprecated wrapper files
-- Fix all PHPStan critical errors in production code
-- Apply quality checks to ALL production code (admin, includes, pages, cron)
-- Maintain 100% production stability throughout process
+**Weeks 1-3:** ✅ COMPLETED
+- Infrastructure setup (Composer, Twig, DI container, routing)
+- Basic routes and controllers
+- Template system foundation
+
+**Week 4:** ✅ COMPLETED (In Progress)
+- Simple forms (sponsor email lookup)
+- Modular component architecture established
+- Professional template patterns documented
+
+**Week 5:** Next Up
+- Children browse/profile pages
+- Search and filtering
+- Individual child profiles
+
+**Week 6+:** Future
+- Complex workflows (cart, reservations, sponsorships)
+- Admin pages
+- Full feature parity with legacy system
 
 ---
 
-## 📋 Master Plan
+## 🚨 Critical Rules for v1.9.2
 
-**Primary Documentation:** `docs/v1.8.1-cleanup-plan.md`
+### 1. Professional Architecture First
 
-This comprehensive plan includes:
-- 4-phase execution strategy
-- Production-First quality methodology
-- Testing protocols for each phase
-- Success metrics and rollback procedures
+**Priority Order:**
+1. ✅ **DRY (Don't Repeat Yourself)** - Single source of truth always
+2. ✅ **Component-based architecture** - Modular, reusable pieces
+3. ✅ **Best practices** - Follow PSR standards, design patterns
+4. ✅ **Elegant code** - Clean, readable, maintainable
+5. ✅ **Testing** - Verify functionality on staging
 
----
+**We are building it RIGHT, not just making it work.**
 
-## 🚨 Critical Rules for This Branch
+### 2. Template Architecture Standards (MANDATORY)
 
-### 1. Production First Principle (ALWAYS)
+**EVERY template must follow component pattern:**
+- ✅ Extract header/footer to `templates/components/`
+- ✅ Layouts use `{% include 'components/header.twig' %}`
+- ✅ Feature templates `{% extends 'layouts/base.twig' %}`
+- ❌ NEVER duplicate header/footer code
+- ❌ NEVER inline header/footer in templates
 
-```
-Priority 1: ALL production code (admin, includes, pages, cron) - SCAN EVERYTHING
-Priority 2: Modern code (src/)
-Priority 3: Dead/deprecated code cleanup
-Priority 4: Architecture improvements
-```
+**See:** `docs/technical/slim-template-architecture.md`
 
-**Never exclude production code from quality checks - even if it's "old" or "being migrated"**
+### 3. Development Workflow
 
-### 2. Quality Checks Before Every Commit
+**For every feature:**
+1. Design with professional architecture
+2. Implement with modern patterns
+3. Test on staging
+4. Document in code and markdown
+5. Commit with descriptive messages
 
-```bash
-# Run BEFORE committing
-vendor/bin/phpstan analyse admin/ includes/ pages/ cron/ src/ --level 6
-./tests/security-functional-tests.sh
-```
-
-**Expected:** 35/36 functional tests pass (v1.7.3 baseline)
-
-### 3. One Change at a Time
-
-- Delete ONE deprecated file per commit
-- Fix ONE critical error per commit
-- Test after EVERY change
-- Document as you go (not afterward)
+**Quality over speed. Build once, build right.**
 
 ### 4. Testing Protocol
 
-After ANY code change:
-1. Run PHPStan (verify no new errors)
-2. Deploy to staging for testing (if user-facing change)
+After implementing feature:
+1. Test locally (if possible)
+2. Deploy to staging: `sshpass -p ... scp files...`
 3. Manual testing on staging: https://10ce79bd48.nxcli.io/
+4. Verify all functionality works
+5. Hard refresh browser to clear cache
 
-### 5. 🚨 DEPLOYMENT RULE (MANDATORY)
+### 5. Deployment
 
-**⛔ THIS BRANCH (v1.8.x) NEVER GOES TO PRODUCTION - EVER ⛔**
+**Staging Only:**
+- ✅ Deploy v1.9.2 to staging anytime
+- ✅ Test all changes on staging
+- ✅ Iterate and improve
 
-**See absolute rule at top of this file. v1.8.x is DEVELOPMENT ONLY.**
-
-**Allowed deployments for this branch:**
-- ✅ **Staging only:** https://10ce79bd48.nxcli.io/
-- ❌ **NEVER production:** cforkids.org
-
-**Workflow for this branch:**
-```
-1. Make changes locally
-2. Commit to git (v1.8.1-cleanup branch)
-3. Deploy to STAGING only (if needed for testing)
-4. Document learnings
-5. Test patterns
-```
-
-**This branch exists to:**
-- Learn modernization patterns
-- Validate quality improvements
-- Test dead code removal safely
-- Document lessons for future production branches
-
-**Production deployments:** Use v1.7.3-production-hardening or future production branches only
+**Production:**
+- Will be merged to production branch when complete
+- After full testing and validation
+- When feature parity achieved
 
 ---
 
@@ -245,61 +243,57 @@ open docs/metrics/index.html
 
 ## 📚 Key Documentation References
 
-### Planning & Methodology:
-- **Master Plan**: `docs/v1.8.1-cleanup-plan.md` (THIS IS PRIMARY)
-- **Dead Code Analysis**: `docs/audits/dead-code-analysis-report.md`
-- **Testing Checklist**: `docs/testing/v1.8-cleanup-testing-checklist.md`
-- **Production First Principle**: `CLAUDE.md` in parent repo (lines 5-48)
+### Slim Framework Migration:
+- **Template Architecture**: `docs/technical/slim-template-architecture.md` (CRITICAL)
+- **Slim Framework Docs**: https://www.slimframework.com/docs/v4/
+- **Twig Template Docs**: https://twig.symfony.com/doc/3.x/
 
-### v1.7.3 Production Reference:
-- **Current Production Status**: `PROJECT-STATUS.md`
+### Project Reference:
+- **Project Overview**: Parent `CLAUDE.md` (Architecture, Database Schema)
 - **Security Model**: Magic-link only (no password auth)
-- **CSP Implementation**: Nonce-based (see admin/includes/admin_header.php)
+- **Current Production**: v1.7.3-production-hardening branch
 
 ---
 
-## 🎯 Current Phase Status
+## 🎯 Current Status
 
-**Phase:** Not started - Planning complete
-**Next Step:** Phase 1.1 - Run PHPStan baseline on ALL production code
+**Week 4: Simple Forms** ✅ COMPLETED
+- ✅ Sponsor email lookup form migrated
+- ✅ Modular component architecture established
+- ✅ Header/footer extracted to components
+- ✅ Professional template patterns documented
+- ✅ Deployed and tested on staging
 
-**Checklist before starting:**
-- [x] Branch created from v1.7.3
-- [x] Master plan documented
-- [x] Testing methodology defined
-- [x] Staging environment accessible (https://10ce79bd48.nxcli.io/)
-- [ ] PHPStan baseline created
-- [ ] Manual testing on staging verified
-
----
-
-## 🚫 What NOT to Do
-
-**Mistakes from v1.8-cleanup to avoid:**
-
-1. ❌ **Don't exclude admin/ from quality checks** - This hid 9 critical bugs
-2. ❌ **Don't make multiple changes without testing** - One at a time only
-3. ❌ **Don't merge conflicting security models** - v1.7.3 uses magic-link only
-4. ❌ **Don't document afterward** - Document as you code
-5. ❌ **Don't prioritize architecture over production safety** - Production first, always
+**Next Up: Week 5** 🎯
+- Children browse page (search, filter, pagination)
+- Individual child profile pages
+- Reusable child card component
 
 ---
 
-## ✅ Success Criteria
+## 🎓 Lessons Learned & Best Practices
 
-**⛔ REMINDER: This branch NEVER goes to production ⛔**
+**From Week 4 Migration:**
 
-**This branch is successful when these learning/modernization goals are achieved:**
+1. ✅ **Extract components from the start** - Don't inline header/footer
+2. ✅ **Use component includes** - `{% include 'components/header.twig' %}`
+3. ✅ **Single source of truth** - Update once, applies everywhere
+4. ✅ **Professional architecture first** - Build it right, not just working
+5. ✅ **Test on staging after every feature** - Catch issues early
 
-- [ ] All deprecated wrapper files deleted (3,624 lines)
-- [ ] PHPStan critical errors reduced by 50%+
-- [ ] Functional tests: 35/36 pass (no regression)
-- [ ] All production code scanned and clean
-- [ ] Documentation complete and current
-- [ ] Lessons learned documented for future production branches
-- [ ] Patterns validated on staging environment
+---
 
-**Purpose:** Learn and validate modernization patterns for future use in production branches
+## ✅ Migration Success Criteria
+
+**This migration is successful when:**
+
+- [ ] All public pages migrated to Slim/Twig
+- [ ] All admin pages migrated to Slim/Twig
+- [ ] Feature parity with v1.7.3 achieved
+- [ ] Component-based architecture throughout
+- [ ] Clean, maintainable, DRY codebase
+- [ ] Fully tested on staging
+- [ ] Ready for production merge
 
 ---
 
@@ -361,4 +355,4 @@ templates/
 
 ---
 
-**Remember:** This cleanup follows the Production-First methodology. Every decision prioritizes production stability over architectural elegance.
+**Remember:** v1.9.2 is about professional, elegant, DRY architecture. We're building it RIGHT from the start, not just making it work. Every decision prioritizes best practices, maintainability, and clean code.
