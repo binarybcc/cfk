@@ -37,8 +37,15 @@ return function (App $app) {
     $app->get('/slim-test-view', [TestController::class, 'testView']);
 
     // =========================================================================
-    // Child Routes (Week 2 Migration)
+    // Child Routes (Week 2-3 Migration)
     // =========================================================================
+
+    /**
+     * Children List Page: /children
+     * Display all children with filtering and pagination
+     * Migrated from: ?page=children
+     */
+    $app->get('/children', [ChildController::class, 'index']);
 
     /**
      * Child Detail Page: /children/{id}

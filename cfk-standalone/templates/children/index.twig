@@ -1,0 +1,383 @@
+{# Children List Template - Week 3 Migration #}
+
+<div class="children-page">
+    {# Page Header #}
+    {% if viewingFamily and familyInfo %}
+        <div class="page-header">
+            <h1>Family {{ familyInfo.family_number }}</h1>
+            <p>All children in this family who need Christmas sponsorship.</p>
+            <div class="family-view-actions">
+                <a href="?page=children" class="btn btn-secondary">← Back to All Children</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="page-header">
+            <h1>Children Needing Christmas Sponsorship</h1>
+            <p>Each child represents a family in our community who could use extra support this Christmas season. Browse the children below and select someone to sponsor.</p>
+        </div>
+    {% endif %}
+
+    {# Filters Section (hidden in family view) #}
+    {% if not viewingFamily %}
+        <div class="filters-section">
+            <form method="get" action="/slim.php/children" class="filters-form">
+                {# Search Input #}
+                <div class="filter-group">
+                    <label for="search">Search</label>
+                    <input type="text"
+                           id="search"
+                           name="search"
+                           value="{{ filters.search ?? '' }}"
+                           placeholder="Family ID, interests, wishes...">
+                </div>
+
+                {# Age Category Filter #}
+                <div class="filter-group">
+                    <label for="age_category">Age Group</label>
+                    <select id="age_category" name="age_category">
+                        <option value="">All Ages</option>
+                        <option value="birth_to_4" {% if filters.age_category == 'birth_to_4' %}selected{% endif %}>Birth to 4 Years</option>
+                        <option value="elementary" {% if filters.age_category == 'elementary' %}selected{% endif %}>Elementary (5-10)</option>
+                        <option value="middle_school" {% if filters.age_category == 'middle_school' %}selected{% endif %}>Middle School (11-13)</option>
+                        <option value="high_school" {% if filters.age_category == 'high_school' %}selected{% endif %}>High School (14-18)</option>
+                    </select>
+                </div>
+
+                {# Gender Filter #}
+                <div class="filter-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender">
+                        <option value="">All</option>
+                        <option value="M" {% if filters.gender == 'M' %}selected{% endif %}>Male</option>
+                        <option value="F" {% if filters.gender == 'F' %}selected{% endif %}>Female</option>
+                    </select>
+                </div>
+
+                {# Per Page Selector #}
+                <div class="filter-group">
+                    <label for="per_page">Show</label>
+                    <select id="per_page" name="per_page">
+                        {% for option in perPageOptions %}
+                            <option value="{{ option }}" {% if perPage == option %}selected{% endif %}>
+                                {{ option }} per page
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="/slim.php/children" class="btn btn-secondary">Clear</a>
+                </div>
+            </form>
+
+            {# Results Summary #}
+            <div class="results-summary">
+                <p>Showing {{ children|length }} of {{ totalCount }} children</p>
+            </div>
+        </div>
+    {% endif %}
+
+    {# Children Grid #}
+    {% if children %}
+        <div class="children-grid">
+            {% for child in children %}
+                <div class="child-card" data-child-id="{{ child.id }}">
+                    {# Photo #}
+                    <div class="child-photo">
+                        <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                             alt="Avatar for Family {{ child.display_id }}">
+                    </div>
+
+                    {# Basic Info #}
+                    <div class="child-info">
+                        <h3>Family {{ child.display_id }}</h3>
+
+                        <div class="child-details">
+                            <div class="detail-item">
+                                <strong>Age:</strong> {{ formatAge(child.age_months) }}
+                            </div>
+                            <div class="detail-item">
+                                <strong>Grade:</strong> {{ child.grade ?: 'Not specified' }}
+                            </div>
+                            {% if child.gender %}
+                                <div class="detail-item">
+                                    <strong>Gender:</strong> {{ child.gender == 'M' ? 'Male' : 'Female' }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {# Siblings Info #}
+                        {% if siblingsByFamily[child.family_id] %}
+                            {% set availableSiblings = siblingsByFamily[child.family_id]|filter(s => s.status == 'available') %}
+                            {% if availableSiblings|length > 1 %}
+                                <div class="siblings-info">
+                                    <span class="sibling-badge">
+                                        👨‍👩‍👧‍👦 {{ availableSiblings|length - 1 }} sibling(s) also need sponsorship
+                                    </span>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        {# Actions #}
+                        <div class="child-actions">
+                            <a href="/slim.php/children/{{ child.id }}" class="btn btn-primary">
+                                View Profile
+                            </a>
+
+                            {% if child.status == 'available' %}
+                                <a href="?page=sponsor&child_id={{ child.id }}" class="btn btn-success">
+                                    Sponsor Now
+                                </a>
+                            {% else %}
+                                <span class="status-badge status-{{ child.status }}">
+                                    {{ child.status|capitalize }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {# Pagination #}
+        {% if totalPages > 1 and not viewingFamily %}
+            <div class="pagination">
+                {% set queryString = paginationParams|url_encode %}
+
+                {# Previous Button #}
+                {% if currentPage > 1 %}
+                    <a href="/slim.php/children?p={{ currentPage - 1 }}{% if queryString %}&{{ queryString }}{% endif %}"
+                       class="btn btn-secondary">
+                        ← Previous
+                    </a>
+                {% endif %}
+
+                {# Page Numbers #}
+                <div class="page-numbers">
+                    {% for page in 1..totalPages %}
+                        {% if page == currentPage %}
+                            <span class="current-page">{{ page }}</span>
+                        {% elseif page == 1 or page == totalPages or (page >= currentPage - 2 and page <= currentPage + 2) %}
+                            <a href="/slim.php/children?p={{ page }}{% if queryString %}&{{ queryString }}{% endif %}">
+                                {{ page }}
+                            </a>
+                        {% elseif page == currentPage - 3 or page == currentPage + 3 %}
+                            <span>...</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                {# Next Button #}
+                {% if currentPage < totalPages %}
+                    <a href="/slim.php/children?p={{ currentPage + 1 }}{% if queryString %}&{{ queryString }}{% endif %}"
+                       class="btn btn-secondary">
+                        Next →
+                    </a>
+                {% endif %}
+            </div>
+
+            {# Pagination Info #}
+            <div class="pagination-info">
+                <p>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} total children)</p>
+            </div>
+        {% endif %}
+    {% else %}
+        {# No Results #}
+        <div class="no-results">
+            <h2>No children found</h2>
+            <p>Try adjusting your filters or search criteria.</p>
+            <a href="/slim.php/children" class="btn btn-primary">View All Children</a>
+        </div>
+    {% endif %}
+
+    {# Call to Action #}
+    {% if not viewingFamily %}
+        <div class="cta-section">
+            <h2>Can't Decide? We Can Help!</h2>
+            <p>If you're having trouble choosing which child to sponsor, we can help match you with a family that fits your preferences.</p>
+            <a href="?page=donate" class="btn btn-success btn-large">Make a General Donation</a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+/* Basic styling for children list page */
+.children-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+}
+
+.filters-section {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+}
+
+.results-summary {
+    text-align: center;
+    color: #666;
+}
+
+.children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.child-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+}
+
+.child-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.child-photo img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.child-info {
+    padding: 15px;
+}
+
+.child-info h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #2c5530;
+}
+
+.child-details {
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.siblings-info {
+    margin: 10px 0;
+}
+
+.sibling-badge {
+    display: inline-block;
+    background: #e3f2fd;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.child-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.page-numbers {
+    display: flex;
+    gap: 5px;
+}
+
+.page-numbers a,
+.page-numbers .current-page {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+}
+
+.page-numbers .current-page {
+    background: #2c5530;
+    color: white;
+    font-weight: bold;
+}
+
+.pagination-info {
+    text-align: center;
+    color: #666;
+}
+
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.cta-section {
+    text-align: center;
+    padding: 40px;
+    background: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 40px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.status-sponsored {
+    background: #4caf50;
+    color: white;
+}
+
+.status-pending {
+    background: #ff9800;
+    color: white;
+}
+</style>

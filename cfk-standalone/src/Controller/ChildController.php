@@ -27,6 +27,69 @@ class ChildController
     }
 
     /**
+     * Display children list with filters and pagination
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @return Response
+     */
+    public function index(Request $request, Response $response): Response
+    {
+        $queryParams = $request->getQueryParams();
+
+        // Check if viewing a specific family
+        $viewingFamily = !empty($queryParams['family_id']);
+        $familyId = $viewingFamily ? (int)$queryParams['family_id'] : null;
+
+        if ($viewingFamily) {
+            return $this->familyView($request, $response, $familyId);
+        }
+
+        // Normal browsing mode with filters
+        $filters = $this->buildFilters($queryParams);
+
+        // Pagination
+        $currentPage = max(1, (int)($queryParams['p'] ?? 1));
+        $perPageOptions = [12, 24, 48];
+        $perPage = isset($queryParams['per_page']) && in_array((int)$queryParams['per_page'], $perPageOptions, true)
+            ? (int)$queryParams['per_page']
+            : 12;
+
+        // Get children and count
+        $children = $this->childRepo->findAll($filters, $currentPage, $perPage);
+        $totalCount = $this->childRepo->count($filters);
+        $totalPages = (int)ceil($totalCount / $perPage);
+
+        // Eager load family members to prevent N+1 queries
+        $siblingsByFamily = $this->childRepo->eagerLoadFamilyMembers($children);
+
+        // Build query string for pagination
+        $paginationParams = array_filter([
+            'search' => $filters['search'] ?? null,
+            'age_category' => $filters['age_category'] ?? null,
+            'gender' => $filters['gender'] ?? null,
+            'per_page' => $perPage !== 12 ? $perPage : null,
+        ]);
+
+        // Prepare view data
+        $data = [
+            'children' => $children,
+            'siblingsByFamily' => $siblingsByFamily,
+            'totalCount' => $totalCount,
+            'currentPage' => $currentPage,
+            'totalPages' => $totalPages,
+            'perPage' => $perPage,
+            'perPageOptions' => $perPageOptions,
+            'filters' => $filters,
+            'paginationParams' => $paginationParams,
+            'pageTitle' => 'Children Needing Christmas Sponsorship',
+            'viewingFamily' => false,
+        ];
+
+        return $this->view->render($response, 'children/index.twig', $data);
+    }
+
+    /**
      * Display individual child profile
      *
      * @param Request $request PSR-7 request
@@ -77,6 +140,69 @@ class ChildController
 
         // Render template
         return $this->view->render($response, 'children/show.twig', $data);
+    }
+
+    /**
+     * Family view mode - show only children in one family
+     *
+     * @param Request $request
+     * @param Response $response
+     * @param int $familyId
+     * @return Response
+     */
+    private function familyView(Request $request, Response $response, int $familyId): Response
+    {
+        $filters = ['family_id' => $familyId];
+        $children = $this->childRepo->findAll($filters, 1, 999);
+
+        if (empty($children)) {
+            return $this->notFound($response);
+        }
+
+        $familyInfo = $this->childRepo->findFamilyById($familyId);
+        $siblingsByFamily = [$familyId => $children];
+
+        $data = [
+            'children' => $children,
+            'siblingsByFamily' => $siblingsByFamily,
+            'familyInfo' => $familyInfo,
+            'totalCount' => count($children),
+            'currentPage' => 1,
+            'totalPages' => 1,
+            'perPage' => 12,
+            'perPageOptions' => [12, 24, 48],
+            'filters' => $filters,
+            'paginationParams' => [],
+            'pageTitle' => 'Family ' . ($familyInfo['family_number'] ?? ''),
+            'viewingFamily' => true,
+        ];
+
+        return $this->view->render($response, 'children/index.twig', $data);
+    }
+
+    /**
+     * Build filters from query parameters
+     *
+     * @param array $queryParams
+     * @return array
+     */
+    private function buildFilters(array $queryParams): array
+    {
+        $filters = [];
+
+        if (!empty($queryParams['search'])) {
+            $filters['search'] = trim($queryParams['search']);
+        }
+
+        if (!empty($queryParams['age_category'])) {
+            $filters['age_category'] = $queryParams['age_category'];
+        }
+
+        if (!empty($queryParams['gender'])) {
+            $filters['gender'] = $queryParams['gender'];
+        }
+
+        return $filters;
     }
 
     /**
