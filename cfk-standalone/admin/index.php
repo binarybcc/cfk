@@ -36,7 +36,7 @@ $pageTitle = 'Admin Dashboard';
 
 // Get dashboard statistics
 $stats = [
-    'total_children' => getChildrenCount([]),
+    'total_children' => Database::fetchRow("SELECT COUNT(*) as total FROM children")['total'] ?? 0, // All children regardless of status
     'available_children' => getChildrenCount(['status' => 'available']),
     'pending_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'pending'")['total'] ?? 0,
     'completed_sponsorships' => Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status = 'completed'")['total'] ?? 0,
