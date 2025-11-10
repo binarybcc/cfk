@@ -300,6 +300,7 @@ class Validator
 
     /**
      * Static factory method
+     * @param array<string, mixed> $data
      */
     public static function make(array $data): self
     {
@@ -309,6 +310,8 @@ class Validator
 
 /**
  * Helper function for quick validation
+ * @param array<string, mixed> $data
+ * @param array<string, string> $rules
  */
 function validate(array $data, array $rules): Validator
 {

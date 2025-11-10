@@ -24,7 +24,6 @@ class Manager
      * Initialize PHPMailer instance (public for email queue access)
      *
      * @return PHPMailer|object PHPMailer instance or fallback mailer
-     * @phpstan-return PHPMailer
      */
     public static function getMailer(): object
     {

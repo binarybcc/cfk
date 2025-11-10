@@ -34,7 +34,6 @@ $pageTitle = 'Import Children from CSV';
 $cspNonce = bin2hex(random_bytes(16));
 $message = '';
 $messageType = '';
-$importResults = null;
 $previewData = null;
 
 // Handle file upload and import
@@ -93,7 +92,7 @@ if ($_POST && isset($_POST['action'])) {
 }
 
 /**
- * @return array{success: bool, message?: string, children?: array<int, array<string, mixed>>, errors?: array<string>, warnings?: array<string>}
+ * @return array{success: bool, message?: string, preview?: array{analysis: array<string, mixed>, filename: string, total_rows: int, parse_warnings: array<string>}}
  */
 function handlePreviewImport(): array
 {
@@ -1186,28 +1185,6 @@ include __DIR__ . '/includes/admin_header.php';
                             </small>
                         </div>
                     </form>
-                </div>
-            </div>
-        <?php endif; ?>
-
-        <!-- Import Success Results -->
-        <?php if ($importResults) : ?>
-            <div class="results-section section">
-                <div class="section-header" style="background-color: #d4edda; color: #155724;">
-                    ✅ Import Complete!
-                </div>
-                <div class="section-body">
-                    <div class="alert alert-success">
-                        <h3 style="margin-bottom: 0.5rem;">🎉 Success!</h3>
-                        <p style="margin: 0;"><?php echo htmlspecialchars((string) $message); ?></p>
-                    </div>
-
-                    <!-- Import results would be displayed here if available -->
-
-                    <div style="text-align: center; margin-top: 2rem;">
-                        <a href="?" class="btn btn-primary">Import Another File</a>
-                        <a href="manage_children.php" class="btn btn-secondary">View Children</a>
-                    </div>
                 </div>
             </div>
         <?php endif; ?>

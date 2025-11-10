@@ -113,8 +113,9 @@ if ($_POST && isset($_POST['submit_sponsorship'])) {
 
 // Check availability
 if ($isFamilySponsorship) {
-    $isAvailable = $childrenToSponsor !== [];
-    $unavailableReason = $isAvailable ? '' : 'All family members are already sponsored or unavailable.';
+    // If we reach here, we have available children (checked earlier at line 29)
+    $isAvailable = true;
+    $unavailableReason = '';
 } else {
     $availability = SponsorshipManager::isChildAvailable($childId);
     $isAvailable = $availability['available'];

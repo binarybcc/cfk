@@ -201,7 +201,7 @@ if ($_POST && isset($_POST['add_children'])) {
                 <p>Select additional children you'd like to sponsor. They'll be added to your existing sponsorship.</p>
             </div>
 
-            <?php if ($addChildrenResult && ! $addChildrenResult['success']) : ?>
+            <?php if ($addChildrenResult !== null && $addChildrenResult['success'] === false) : ?>
                 <div class="alert alert-error">
                     <?php echo sanitizeString($addChildrenResult['message']); ?>
                 </div>
