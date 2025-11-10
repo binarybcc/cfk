@@ -19,6 +19,22 @@
 
     <!-- Selections System -->
     <script src="{{ baseUrl('assets/js/selections.js') }}"></script>
+
+    <style>
+        /* Logo Styling - match header.php sizing */
+        .logo-image {
+            height: 70px;
+            width: auto;
+            max-width: 100%;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .logo-image {
+                height: 45px;
+            }
+        }
+    </style>
 </head>
 <body>
     <header class="main-header">
