@@ -51,6 +51,9 @@ AppFactory::setContainer($container);
 // Create Slim App
 $app = AppFactory::create();
 
+// Set base path (for /slim.php/... URLs)
+$app->setBasePath('/slim.php');
+
 // Add Routing Middleware
 $app->addRoutingMiddleware();
 
