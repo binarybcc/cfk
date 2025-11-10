@@ -86,6 +86,43 @@ Child cards rendered: 5
 
 ---
 
+## WordPress Table Cleanup (2025-11-09)
+
+### Cleanup Executed
+
+**Script:** `database/cleanup-wordpress-tables.sql`
+**Backup:** `backup_before_wordpress_cleanup_20251110_000840.sql` (19MB)
+**Tables Removed:** 76 WordPress/WooCommerce legacy tables
+
+**Categories Removed:**
+- WooCommerce tables (56): actionscheduler, wc_*, woocommerce_*
+- WordPress core tables (12): wp_comments, wp_posts, wp_users, etc.
+- Plugin tables (8): aws_*, e_*, snippets, rsssl_*, wpmail*
+
+### Verification
+
+```bash
+./database/schema-check.sh staging
+
+✓ All 11 required tables exist
+✓ age_months column exists
+✓ name column exists
+✓ No WordPress table pollution
+
+✅ Schema validation PASSED
+```
+
+**Before:** 85 tables (5 app + 80 WordPress/WooCommerce)
+**After:** 11 tables (11 app + 0 WordPress/WooCommerce)
+
+**Impact:**
+- Database size reduced
+- Cleaner schema (matches production)
+- Faster backups and queries
+- No legacy data conflicts
+
+---
+
 ## Code Changes
 
 ### Reverted Temporary Fix
@@ -136,9 +173,10 @@ Now that database has age_months column, these pages should work but need verifi
 ### Medium Priority
 
 **WordPress Table Cleanup:**
-- 76 WordPress/WooCommerce tables still exist
-- See migration script for DROP TABLE statements
-- Consider removing after verifying application works
+- ✅ **COMPLETED** - All 76 WordPress/WooCommerce tables removed
+- Backup created: backup_before_wordpress_cleanup_20251110_000840.sql (19MB)
+- Schema validation passed: 0 WordPress tables remain
+- Staging database now clean (matches production)
 
 **Update schema.sql:**
 - Current schema.sql doesn't match production
@@ -201,7 +239,7 @@ mysql -h localhost -u $(grep DB_USER .env | cut -d= -f2) \
 - [ ] Test CSV import/export
 
 ### ⏳ Pending
-- [ ] Remove WordPress tables
+- [x] Remove WordPress tables (COMPLETED - 2025-11-09)
 - [ ] Update schema.sql from production
 - [ ] Integrate schema-check into deployment
 - [ ] Document for production deployment

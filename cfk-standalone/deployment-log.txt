@@ -4,3 +4,4 @@
 [Sun Nov  9 17:45:37 EST 2025] Deployed v1.8.1-cleanup to STAGING (10ce79bd48.nxcli.io) - Fixed Connection::init()
 [Sun Nov  9 18:05:13 EST 2025] Deployed v1.8.1-cleanup to STAGING (10ce79bd48.nxcli.io) - Fixed children page age_months bug
 [Sun Nov  9 18:29:15 EST 2025] Ran database migration 001-staging-to-production-schema.sql - Added age_months column
+[Sun Nov  9 19:10:42 EST 2025] Removed 76 WordPress/WooCommerce legacy tables from staging database
