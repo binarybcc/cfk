@@ -14,8 +14,9 @@ if (!defined('CFK_APP')) {
 $pageTitle = 'Home';
 
 // Get count statistics for hero section - total children and families this season
-$totalChildren = getChildrenCount(); // All children regardless of status
-$totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0; // All families
+// Direct SQL to count ALL children (getChildrenCount() has a default status='available' filter)
+$totalChildren = Database::fetchRow("SELECT COUNT(*) as total FROM children")['total'] ?? 0;
+$totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0;
 ?>
 
 <div class="home-page">
