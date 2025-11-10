@@ -79,13 +79,13 @@ class SponsorController
                 if ($sponsorships === []) {
                     $errors[] = 'No sponsorships found for this email address. Please check your email or contact us for assistance.';
                 } else {
-                    // Generate verification token and send email
-                    $result = SponsorshipManager::sendPortalAccessEmail($email);
+                    // Send email with sponsorship details (no portal, just details in email)
+                    $success = \CFK\Email\Manager::sendMultiChildSponsorshipEmail($email, $sponsorships);
 
-                    if ($result['success']) {
+                    if ($success) {
                         $emailSent = true;
                     } else {
-                        $errors[] = $result['message'];
+                        $errors[] = 'Failed to send email. Please try again or contact us for assistance.';
                     }
                 }
             }
