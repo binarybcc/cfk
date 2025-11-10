@@ -43,7 +43,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="/sponsor/lookup" class="lookup-form" id="lookupForm">
+                <form method="POST" action="{{ baseUrl('slim.php/sponsor/lookup') }}" class="lookup-form" id="lookupForm">
                     <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
 
                     {% if errors is not empty %}
