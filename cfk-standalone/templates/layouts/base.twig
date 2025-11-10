@@ -1,0 +1,59 @@
+{# Base Layout Template - Slim Framework #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ pageTitle ?? 'Christmas for Kids' }}{% endblock %} - Christmas for Kids</title>
+    <meta name="description" content="Connect with local children who need Christmas support">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ baseUrl('assets/css/styles.css') }}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ baseUrl('assets/images/favicon.ico') }}">
+
+    <!-- Alpine.js v3.14.1 -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/collapse@3.14.1/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.1/dist/cdn.min.js"></script>
+
+    <!-- Selections System -->
+    <script src="{{ baseUrl('assets/js/selections.js') }}"></script>
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="{{ baseUrl('') }}" class="logo-link">
+                        <img src="{{ baseUrl('assets/images/cfk-logo.png') }}" alt="Christmas for Kids" class="logo-image">
+                    </a>
+                    <p class="tagline">Bringing Christmas joy to local children in need</p>
+                </div>
+                <nav class="main-nav">
+                    <a href="{{ baseUrl('') }}" class="nav-link">Home</a>
+                    <a href="{{ baseUrl('slim.php/children') }}" class="nav-link">Children</a>
+                    <a href="{{ baseUrl('?page=how_to_apply') }}" class="nav-link">How to Apply</a>
+                    <a href="{{ baseUrl('slim.php/sponsor/lookup') }}" class="nav-link">My Sponsorships</a>
+                    <a href="{{ baseUrl('?page=about') }}" class="nav-link">About</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; {{ "now"|date('Y') }} Christmas for Kids. All rights reserved.</p>
+                <p>Bringing Christmas joy to families in need.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
