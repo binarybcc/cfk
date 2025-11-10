@@ -14,6 +14,9 @@ declare(strict_types=1);
 // Security constant (required by config.php)
 define('CFK_APP', true);
 
+// Start session (required for CSRF tokens and authentication)
+session_start();
+
 // Load Composer autoloader
 require __DIR__ . '/vendor/autoload.php';
 
