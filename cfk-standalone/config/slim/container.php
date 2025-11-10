@@ -33,13 +33,30 @@ $container->register('db.connection', Connection::class)
  * Auto-escaping enabled for XSS prevention
  */
 $container->register('twig', Twig::class)
-    ->setFactory([Twig::class, 'create'])
-    ->addArgument(__DIR__ . '/../../templates')
-    ->addArgument([
-        'cache' => false, // Disable cache during development
-        'debug' => config('environment') !== 'production',
-        'auto_reload' => true,
-    ])
+    ->setFactory(function () {
+        // Create Twig environment
+        $twig = Twig::create(__DIR__ . '/../../templates', [
+            'cache' => false, // Disable cache during development
+            'debug' => config('environment') !== 'production',
+            'auto_reload' => true,
+        ]);
+
+        // Get Twig environment to add functions
+        $env = $twig->getEnvironment();
+
+        // Add PHP helper functions as Twig functions
+        $env->addFunction(new \Twig\TwigFunction('getPhotoUrl', 'getPhotoUrl'));
+        $env->addFunction(new \Twig\TwigFunction('formatAge', 'formatAge'));
+        $env->addFunction(new \Twig\TwigFunction('getAgeCategory', 'getAgeCategory'));
+        $env->addFunction(new \Twig\TwigFunction('baseUrl', 'baseUrl'));
+        $env->addFunction(new \Twig\TwigFunction('sanitizeString', 'sanitizeString'));
+
+        // Add global variables
+        global $childStatusOptions;
+        $env->addGlobal('childStatusOptions', $childStatusOptions ?? []);
+
+        return $twig;
+    })
     ->setPublic(true);
 
 // =============================================================================
@@ -54,15 +71,26 @@ $container->register(CFK\Controller\TestController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Child Controller
+ * Handles child profile viewing (Week 2 migration)
+ */
+$container->register(CFK\Controller\ChildController::class)
+    ->addArgument(new Reference('repository.child'))
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================
 
-// Will be added as we migrate features
-// Example:
-// $container->register('repository.child', CFK\Repository\ChildRepository::class)
-//     ->addArgument(new Reference('db.connection'))
-//     ->setPublic(true);
+/**
+ * Child Repository
+ * Data access layer for child-related queries
+ */
+$container->register('repository.child', CFK\Repository\ChildRepository::class)
+    ->addArgument(new Reference('db.connection'))
+    ->setPublic(true);
 
 // =============================================================================
 // Services (Business Logic Layer)

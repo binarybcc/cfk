@@ -13,6 +13,7 @@ declare(strict_types=1);
  * - New style: /children (Slim routes)
  */
 
+use CFK\Controller\ChildController;
 use CFK\Controller\TestController;
 use Slim\App;
 
@@ -36,11 +37,19 @@ return function (App $app) {
     $app->get('/slim-test-view', [TestController::class, 'testView']);
 
     // =========================================================================
-    // Future Routes (Will be added during migration)
+    // Child Routes (Week 2 Migration)
     // =========================================================================
 
-    // Week 2: First Feature (Child Detail)
-    // $app->get('/children/{id:\d+}', [ChildController::class, 'show']);
+    /**
+     * Child Detail Page: /children/{id}
+     * Display individual child profile
+     * Migrated from: ?page=child&id={id}
+     */
+    $app->get('/children/{id:\d+}', [ChildController::class, 'show']);
+
+    // =========================================================================
+    // Future Routes (Will be added during migration)
+    // =========================================================================
 
     // Week 3-8: Additional Features
     // $app->get('/children', [ChildController::class, 'index']);

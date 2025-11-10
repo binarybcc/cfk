@@ -1,0 +1,44 @@
+{# 404 Not Found Template #}
+
+<div class="error-page">
+    <div class="error-content">
+        <h1>404 - Not Found</h1>
+        <p class="error-message">{{ message ?? 'The page you are looking for could not be found.' }}</p>
+
+        <div class="error-actions">
+            <a href="?page=children" class="btn btn-primary">
+                Browse Children
+            </a>
+            <a href="/" class="btn btn-secondary">
+                Return Home
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    max-width: 600px;
+    margin: 100px auto;
+    padding: 40px;
+    text-align: center;
+}
+
+.error-content h1 {
+    font-size: 3rem;
+    color: #dc3545;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    color: #666;
+}
+
+.error-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+</style>

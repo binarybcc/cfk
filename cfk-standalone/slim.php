@@ -26,6 +26,9 @@ $dotenv->load();
 // Load configuration
 require_once __DIR__ . '/config/config.php';
 
+// Load helper functions (getPhotoUrl, formatAge, etc.)
+require_once __DIR__ . '/includes/functions.php';
+
 // Initialize database connection (required for future routes)
 use CFK\Database\Connection;
 
