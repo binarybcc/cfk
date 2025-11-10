@@ -334,4 +334,31 @@ git push origin cleanup/remove-archive-wrapper
 
 ---
 
+## 🎨 Slim Framework Template Architecture (CRITICAL)
+
+**ALL Slim templates MUST use modular component pattern.**
+
+**Documentation:** `docs/technical/slim-template-architecture.md`
+
+**Structure:**
+```
+templates/
+├── components/       # Reusable pieces (header.twig, footer.twig)
+├── layouts/          # Page structures (base.twig, admin.twig)
+└── {feature}/        # Feature templates (extend layouts)
+```
+
+**Rules:**
+- ✅ Extract header/footer to `components/`
+- ✅ Layouts use `{% include 'components/header.twig' %}`
+- ✅ Feature templates `{% extends 'layouts/base.twig' %}`
+- ❌ NEVER duplicate header/footer code in templates
+- ❌ NEVER inline header/footer in feature templates
+
+**Single Source of Truth:** Update header once → applies everywhere
+
+**This is the professional standard. No exceptions.**
+
+---
+
 **Remember:** This cleanup follows the Production-First methodology. Every decision prioritizes production stability over architectural elegance.
