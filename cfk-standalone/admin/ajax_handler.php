@@ -19,6 +19,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
 
 // Use namespaced classes
+use CFK\Child\Manager as ChildManager;
 use CFK\Sponsorship\Manager as SponsorshipManager;
 
 // Set JSON response headers
@@ -108,9 +109,9 @@ function handleChildAction(string $action, array $data): array
     }
 
     return match ($action) {
-        'toggle_status' => toggleChildStatus($childId),
-        'delete_child' => deleteChild($childId),
-        'edit_child' => editChild($data),
+        'toggle_status' => ChildManager::toggleChildStatus($childId),
+        'delete_child' => ChildManager::deleteChild($childId),
+        'edit_child' => ChildManager::editChild($data),
         default => ['success' => false, 'message' => 'Invalid child action']
     };
 }
@@ -136,63 +137,7 @@ function handleAdminAction(string $action, array $data): array
     };
 }
 
-/**
- * Toggle child status between available and inactive
- *
- * @return array<string, mixed> JSON response with 'success' and 'message' keys
- */
-function toggleChildStatus(int $childId): array
-{
-    $child = Database::fetchRow("SELECT status FROM children WHERE id = ?", [$childId]);
-
-    if (! $child) {
-        return ['success' => false, 'message' => 'Child not found'];
-    }
-
-    $newStatus = $child['status'] === 'available' ? 'inactive' : 'available';
-
-    $success = Database::execute(
-        "UPDATE children SET status = ? WHERE id = ?",
-        [$newStatus, $childId]
-    );
-
-    if ($success !== 0) {
-        return [
-            'success' => true,
-            'message' => 'Child status updated to ' . $newStatus,
-            'new_status' => $newStatus,
-        ];
-    }
-
-    return ['success' => false, 'message' => 'Failed to update child status'];
-}
-
-/**
- * Delete a child
- *
- * @param int $childId Child ID to delete
- * @return array<string, mixed> Result with success status and message
- */
-function deleteChild(int $childId): array
-{
-    // Check if child is sponsored
-    $sponsorships = Database::fetchAll(
-        "SELECT id FROM sponsorships WHERE child_id = ? AND status IN ('confirmed', 'logged')",
-        [$childId]
-    );
-
-    if ($sponsorships !== []) {
-        return ['success' => false, 'message' => 'Cannot delete: Child is currently sponsored'];
-    }
-
-    $success = Database::execute("DELETE FROM children WHERE id = ?", [$childId]);
-
-    if ($success !== 0) {
-        return ['success' => true, 'message' => 'Child deleted successfully'];
-    }
-
-    return ['success' => false, 'message' => 'Failed to delete child'];
-}
+// Child functions moved to src/Child/Manager.php
 
 /**
  * Create admin (placeholder - not implemented)
@@ -263,113 +208,4 @@ function editSponsorship(array $data): array
     }
 }
 
-/**
- * Edit child details
- *
- * @param array<string, mixed> $data Child data to update
- * @return array<string, mixed> Result with success status and message
- */
-function editChild(array $data): array
-{
-    try {
-        $childId = sanitizeInt($data['child_id'] ?? 0);
-        if (! $childId) {
-            return ['success' => false, 'message' => 'Invalid child ID'];
-        }
-
-        // Validate required fields
-        $validation = validateChildData($data);
-        if (! $validation['valid']) {
-            return ['success' => false, 'message' => 'Please fix the following errors: ' . implode(', ', $validation['errors'])];
-        }
-
-        // Check if child exists
-        $child = Database::fetchRow("SELECT id, family_id, child_letter FROM children WHERE id = ?", [$childId]);
-        if (! $child) {
-            return ['success' => false, 'message' => 'Child not found'];
-        }
-
-        // Check if child_letter is unique within family (if changed)
-        if ($child['family_id'] != $data['family_id'] || $child['child_letter'] != $data['child_letter']) {
-            $existing = Database::fetchRow(
-                "SELECT id FROM children WHERE family_id = ? AND child_letter = ? AND id != ?",
-                [$data['family_id'], $data['child_letter'], $childId]
-            );
-            if ($existing) {
-                return ['success' => false, 'message' => 'Child letter already exists in this family'];
-            }
-        }
-
-        // Convert age to months if years provided
-        $ageMonths = sanitizeInt($data['age_months'] ?? 0);
-        $ageYears = sanitizeInt($data['age_years'] ?? 0);
-
-        if ($ageYears > 0) {
-            $ageMonths = $ageYears * 12;
-        }
-
-        Database::update('children', [
-            'family_id' => sanitizeInt($data['family_id']),
-            'child_letter' => sanitizeString($data['child_letter']),
-            'age_months' => $ageMonths,
-            'grade' => sanitizeString($data['grade']),
-            'gender' => sanitizeString($data['gender']),
-            'school' => sanitizeString($data['school'] ?? ''),
-            'shirt_size' => sanitizeString($data['shirt_size'] ?? ''),
-            'pant_size' => sanitizeString($data['pant_size'] ?? ''),
-            'shoe_size' => sanitizeString($data['shoe_size'] ?? ''),
-            'jacket_size' => sanitizeString($data['jacket_size'] ?? ''),
-            'interests' => sanitizeString($data['interests'] ?? ''),
-            'wishes' => sanitizeString($data['wishes'] ?? ''),
-            'special_needs' => sanitizeString($data['special_needs'] ?? ''),
-        ], ['id' => $childId]);
-
-        return ['success' => true, 'message' => 'Child updated successfully'];
-    } catch (Exception $e) {
-        error_log('Failed to edit child: ' . $e->getMessage());
-
-        return ['success' => false, 'message' => 'System error occurred. Please try again.'];
-    }
-}
-
-/**
- * Validate child data
- *
- * @param array<string, mixed> $data Child data to validate
- * @return array{valid: bool, errors: array<int, string>} Validation result with valid flag and errors array
- */
-function validateChildData(array $data): array
-{
-    $errors = [];
-
-    // Name is optional - no validation needed
-
-    // Validate age (in months or years)
-    $ageMonths = sanitizeInt($data['age_months'] ?? 0);
-    $ageYears = sanitizeInt($data['age_years'] ?? 0);
-
-    if ($ageYears > 0) {
-        $ageMonths = $ageYears * 12;
-    }
-
-    if ($ageMonths < 1 || $ageMonths > 216) { // 1 month to 18 years
-        $errors[] = 'Age must be between 1 month and 18 years';
-    }
-
-    if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || ! in_array($data['gender'], ['M', 'F'])) {
-        $errors[] = 'Valid gender is required';
-    }
-
-    if (in_array(trim($data['child_letter'] ?? ''), ['', '0'], true) || ! preg_match('/^[A-Z]$/', (string) $data['child_letter'])) {
-        $errors[] = 'Child letter must be a single uppercase letter (A-Z)';
-    }
-
-    if (empty(sanitizeInt($data['family_id'] ?? 0))) {
-        $errors[] = 'Family selection is required';
-    }
-
-    return [
-        'valid' => $errors === [],
-        'errors' => $errors,
-    ];
-}
+// editChild and validateChildData functions moved to src/Child/Manager.php

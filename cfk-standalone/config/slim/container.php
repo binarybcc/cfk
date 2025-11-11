@@ -94,6 +94,38 @@ $container->register(CFK\Controller\SponsorController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Content Controller
+ * Handles static content pages (Week 7 migration)
+ */
+$container->register(CFK\Controller\ContentController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
+/**
+ * Cart Controller
+ * Handles reservation cart functionality (Week 6 Phase 3)
+ */
+$container->register(CFK\Controller\CartController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
+/**
+ * Portal Controller
+ * Handles sponsor portal (Week 6 Phase 4)
+ */
+$container->register(CFK\Controller\PortalController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
+/**
+ * Admin Child Controller
+ * Handles admin CRUD for children (Week 8 Part 2)
+ */
+$container->register(CFK\Controller\AdminChildController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================

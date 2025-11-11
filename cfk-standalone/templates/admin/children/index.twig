@@ -1,0 +1,246 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.child-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.child-header {
+    background: linear-gradient(135deg, #2c5530 0%, #4a7c59 100%);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.child-id {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.child-body {
+    padding: 1rem;
+}
+
+.child-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.info-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.2rem;
+}
+
+.info-value {
+    font-weight: 500;
+}
+
+.child-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary { background: #2c5530; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-success { background: #28a745; color: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+    <div class="page-actions">
+        <a href="{{ baseUrl('admin/manage_children.php') }}#add-child" class="btn btn-primary">+ Add Child</a>
+    </div>
+</div>
+
+{# Filters #}
+<form method="GET" action="{{ baseUrl('/slim.php/admin/children') }}" class="filters">
+    <div class="filter-group">
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All Statuses</option>
+            <option value="available" {% if filters.status == 'available' %}selected{% endif %}>Available</option>
+            <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="sponsored" {% if filters.status == 'sponsored' %}selected{% endif %}>Sponsored</option>
+            <option value="inactive" {% if filters.status == 'inactive' %}selected{% endif %}>Inactive</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="family">Family:</label>
+        <select name="family" id="family">
+            <option value="all">All Families</option>
+            {% for family in familyNumbers %}
+                <option value="{{ family.family_number }}" {% if filters.family == family.family_number %}selected{% endif %}>
+                    Family {{ family.family_number }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="age">Age Group:</label>
+        <select name="age" id="age">
+            <option value="all" {% if filters.age == 'all' %}selected{% endif %}>All Ages</option>
+            <option value="birth-4" {% if filters.age == 'birth-4' %}selected{% endif %}>Birth-4 (0-4 yrs)</option>
+            <option value="elementary" {% if filters.age == 'elementary' %}selected{% endif %}>Elementary (5-10 yrs)</option>
+            <option value="middle" {% if filters.age == 'middle' %}selected{% endif %}>Middle School (11-13 yrs)</option>
+            <option value="high" {% if filters.age == 'high' %}selected{% endif %}>High School (14-18 yrs)</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="search">Search:</label>
+        <input type="text" name="search" id="search" value="{{ filters.search }}" placeholder="Search by ID, interests, wishes...">
+    </div>
+
+    <div class="filter-group" style="align-self: flex-end;">
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+    </div>
+</form>
+
+{# Pagination Info #}
+<div class="pagination-info">
+    <p>Showing {{ children|length }} of {{ pagination.totalCount }} children</p>
+</div>
+
+{# Children Grid #}
+<div class="children-grid">
+    {% for child in children %}
+        <div class="child-card">
+            <div class="child-header">
+                <span class="child-id">{{ child.display_id }}</span>
+                <span class="badge badge-{{ child.status }}">{{ child.status|upper }}</span>
+            </div>
+            <div class="child-body">
+                <div class="child-info">
+                    <div class="info-item">
+                        <span class="info-label">Age:</span>
+                        <span class="info-value">{{ formatAge(child.age_months) }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Gender:</span>
+                        <span class="info-value">{{ child.gender == 'M' ? 'Male' : 'Female' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Grade:</span>
+                        <span class="info-value">{{ child.grade }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Shirt:</span>
+                        <span class="info-value">{{ child.shirt_size }}</span>
+                    </div>
+                </div>
+
+                {% if child.interests %}
+                    <div class="info-item">
+                        <span class="info-label">Interests:</span>
+                        <span class="info-value">{{ child.interests }}</span>
+                    </div>
+                {% endif %}
+
+                {% if child.wishes %}
+                    <div class="info-item">
+                        <span class="info-label">Wishes:</span>
+                        <span class="info-value">{{ child.wishes }}</span>
+                    </div>
+                {% endif %}
+
+                <div class="child-actions">
+                    <a href="{{ baseUrl('admin/manage_children.php') }}?edit={{ child.id }}" class="btn btn-secondary btn-sm">Edit</a>
+                    <form method="POST" action="{{ baseUrl('/slim.php/admin/children/' ~ child.id ~ '/delete') }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this child?');">
+                        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <p>No children found matching your filters.</p>
+    {% endfor %}
+</div>
+
+{# Pagination #}
+{% if pagination.totalPages > 1 %}
+    <div class="pagination">
+        {% if pagination.currentPage > 1 %}
+            <a href="?page={{ pagination.currentPage - 1 }}&{{ query_params }}" class="btn btn-secondary">« Previous</a>
+        {% endif %}
+
+        <span class="pagination-info">Page {{ pagination.currentPage }} of {{ pagination.totalPages }}</span>
+
+        {% if pagination.currentPage < pagination.totalPages %}
+            <a href="?page={{ pagination.currentPage + 1 }}&{{ query_params }}" class="btn btn-secondary">Next »</a>
+        {% endif %}
+    </div>
+{% endif %}
+{% endblock %}

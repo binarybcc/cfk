@@ -13,6 +13,7 @@ declare(strict_types=1);
  * - New style: /children (Slim routes)
  */
 
+use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
 use CFK\Controller\CartController;
 use CFK\Controller\ChildController;
@@ -124,6 +125,48 @@ return function (App $app) {
      * Update sponsor information
      */
     $app->post('/admin/api/sponsor', [AdminController::class, 'updateSponsor']);
+
+    /**
+     * Admin Children Management: /admin/children (GET)
+     * Display children list with filters and pagination
+     * Migrated from: admin/manage_children.php (Week 8 Part 2)
+     */
+    $app->get('/admin/children', [AdminChildController::class, 'index']);
+
+    /**
+     * Create Child: /admin/children (POST)
+     * Create a new child record
+     * Week 8 Part 2 Migration
+     */
+    $app->post('/admin/children', [AdminChildController::class, 'create']);
+
+    /**
+     * Update Child: /admin/children/{id} (POST)
+     * Update an existing child record
+     * Week 8 Part 2 Migration
+     */
+    $app->post('/admin/children/{id:\\d+}', [AdminChildController::class, 'update']);
+
+    /**
+     * Delete Child: /admin/children/{id}/delete (POST)
+     * Delete a child record
+     * Week 8 Part 2 Migration
+     */
+    $app->post('/admin/children/{id:\\d+}/delete', [AdminChildController::class, 'delete']);
+
+    /**
+     * Toggle Child Status: /admin/children/{id}/toggle-status (POST - AJAX)
+     * Toggle child status between available and inactive
+     * Week 8 Part 2 Migration
+     */
+    $app->post('/admin/children/{id:\\d+}/toggle-status', [AdminChildController::class, 'toggleStatus']);
+
+    /**
+     * Get Child Data: /admin/children/{id}/data (GET - AJAX)
+     * Retrieve child data for editing modal
+     * Week 8 Part 2 Migration
+     */
+    $app->get('/admin/children/{id:\\d+}/data', [AdminChildController::class, 'getData']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)
