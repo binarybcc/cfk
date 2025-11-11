@@ -97,6 +97,18 @@ else
     exit 1
 fi
 
+# Run composer install on production (for autoloader)
+echo -e "${GREEN}Running composer install on production...${NC}"
+sshpass -p "$SSH_PASSWORD" ssh -o StrictHostKeyChecking=no -p ${SSH_PORT:-22} \
+    "${SSH_USER}@${SSH_HOST}" \
+    "cd ${SSH_REMOTE_PATH} && composer install --no-dev --optimize-autoloader --no-interaction 2>&1"
+
+if [ $? -eq 0 ]; then
+    echo -e "  ${GREEN}✓ Composer dependencies installed${NC}\n"
+else
+    echo -e "  ${YELLOW}⚠ Composer install failed (may need to run manually)${NC}\n"
+fi
+
 # Cleanup local package
 rm "$PACKAGE_PATH"
 
