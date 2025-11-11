@@ -193,10 +193,6 @@ include __DIR__ . '/includes/admin_header.php';
                                 • <?php echo date('M j, Y g:i A', strtotime((string) $sponsorship['request_date']) ?: 0); ?>
                             </div>
                         </div>
-                        <div class="activity-actions">
-                            <a href="view_sponsorship.php?id=<?php echo $sponsorship['id']; ?>" 
-                               class="btn btn-small btn-primary">View Details</a>
-                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
