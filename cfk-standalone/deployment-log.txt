@@ -1,3 +1,6 @@
 [Thu Oct 30 12:04:59 EDT 2025] Deployed v1.8.1-cleanup to STAGING
 [Thu Oct 30 17:47:52 EDT 2025] Deployed v1.7.3-production-hardening (cd955a1) to PRODUCTION - Fixed admin navigation consistency
+[Sun Nov  9 19:21:56 EST 2025] Deployed v1.7.3-production-hardening (70cfef5) to PRODUCTION - Updated homepage stats to show total impact
+[Sun Nov  9 19:43:36 EST 2025] Deployed v1.7.3-production-hardening (e3bbd55) to PRODUCTION - Fixed homepage count to show ALL children
+[Sun Nov  9 19:46:29 EST 2025] Deployed v1.7.3-production-hardening (80f8c25) to PRODUCTION - Fixed admin dashboard count to show 259 children
 [Mon Nov 10 15:29:03 EST 2025] Deployed v1.9.2 (49b4722) to STAGING - PHPStan cleanup + Slim Week 3 complete
