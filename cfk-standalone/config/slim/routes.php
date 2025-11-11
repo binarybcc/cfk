@@ -87,7 +87,7 @@ return function (App $app) {
     $app->post('/admin/api/sponsor', [AdminController::class, 'updateSponsor']);
 
     // =========================================================================
-    // Sponsor Routes (Week 4 Migration)
+    // Sponsor Routes (Week 4 & 6 Migration)
     // =========================================================================
 
     /**
@@ -104,11 +104,37 @@ return function (App $app) {
      */
     $app->post('/sponsor/lookup', [SponsorController::class, 'processLookup']);
 
+    /**
+     * Single Child Sponsorship Form: /sponsor/child/{id} (GET)
+     * Display sponsorship form for individual child
+     * Migrated from: ?page=sponsor&child_id={id}
+     * Week 6 Migration
+     */
+    $app->get('/sponsor/child/{id:\d+}', [SponsorController::class, 'showSponsorForm']);
+
+    /**
+     * Single Child Sponsorship Form: /sponsor/child/{id} (POST)
+     * Process sponsorship request submission
+     * Migrated from: ?page=sponsor&child_id={id} (POST)
+     * Week 6 Migration
+     */
+    $app->post('/sponsor/child/{id:\d+}', [SponsorController::class, 'submitSponsorship']);
+
+    /**
+     * Sponsorship Success Page: /sponsorship/success (GET)
+     * Display success message after sponsorship submission
+     * Migrated from: ?page=reservation_success
+     * Week 6 Migration
+     */
+    $app->get('/sponsorship/success', [SponsorController::class, 'showSuccess']);
+
     // =========================================================================
     // Future Routes (Will be added during migration)
     // =========================================================================
 
-    // Week 5-8: Additional Features
+    // Week 6-8: Additional Features
+    // $app->get('/sponsor/family/{id:\d+}', [SponsorController::class, 'showFamilyForm']);
+    // $app->post('/sponsor/family/{id:\d+}', [SponsorController::class, 'submitFamilySponsorship']);
     // $app->post('/cart/add', [CartController::class, 'add']);
     // etc.
 

@@ -1,0 +1,41 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+    <link rel="stylesheet" href="{{ baseUrl('assets/css/sponsorship-form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container container--narrow">
+    {# Page Header #}
+    <header class="page-header">
+        <h1 class="page-header__title">{{ pageTitle }}</h1>
+        <p class="page-header__subtitle">
+            Complete the form below to request sponsorship.
+            You'll receive confirmation within 24 hours.
+        </p>
+    </header>
+
+    {# Include the reusable sponsorship form component #}
+    {% include 'components/sponsorship-form.twig' with {
+        children: children,
+        formData: formData,
+        errors: errors,
+        csrfToken: csrfToken,
+        submitUrl: submitUrl,
+        isFamily: isFamily,
+        adminEmail: adminEmail
+    } %}
+
+    {# Back to Browse Link #}
+    <div class="page-navigation">
+        <a href="{{ baseUrl('/children') }}" class="link-back">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0L10 2L4 8L10 14L8 16L0 8L8 0Z"/>
+            </svg>
+            Back to Browse Children
+        </a>
+    </div>
+</div>
+{% endblock %}

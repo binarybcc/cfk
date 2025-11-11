@@ -1,0 +1,237 @@
+{#
+  Sponsorship Form Component - Reusable Form for Single/Family Sponsorships
+
+  @param array children - Array of child objects to sponsor (single or multiple)
+  @param array formData - Pre-filled form data (for validation errors)
+  @param array errors - Validation errors to display
+  @param string csrfToken - CSRF protection token
+  @param string submitUrl - Form action URL
+  @param bool isFamily - Whether this is a family sponsorship (default: false)
+  @param string adminEmail - Admin email for support
+
+  Features:
+  - Single or family sponsorship support
+  - Full validation error display
+  - Gift preference selection
+  - CSRF protection
+  - Mobile responsive
+  - Accessibility compliant
+#}
+
+{% set isFamily = isFamily|default(false) %}
+{% set adminEmail = adminEmail|default('christmasforkids@upstatetoday.com') %}
+
+<div class="sponsorship-form">
+    {# Display errors if any #}
+    {% if errors|length > 0 %}
+        <div class="alert alert--error" role="alert">
+            <h3 class="alert__title">Please correct the following errors:</h3>
+            <ul class="alert__list">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {# Show children being sponsored #}
+    <div class="sponsorship-summary">
+        <h2 class="sponsorship-summary__title">
+            {% if isFamily %}
+                You are sponsoring {{ children|length }} children from Family {{ children[0].family_number }}
+            {% else %}
+                You are sponsoring Child {{ children[0].display_id }}
+            {% endif %}
+        </h2>
+
+        <div class="sponsorship-summary__children">
+            {% for child in children %}
+                <div class="sponsored-child">
+                    <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                         alt="Avatar for {{ child.display_id }}"
+                         class="sponsored-child__photo">
+                    <div class="sponsored-child__details">
+                        <strong>{{ child.display_id }}</strong> -
+                        {{ displayAge(child.age_months) }},
+                        {{ child.gender == 'M' ? 'Boy' : 'Girl' }},
+                        {{ child.grade }}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <p class="sponsorship-summary__note">
+            <strong>Thank you for your generosity!</strong> Please provide your information below to complete the sponsorship request.
+        </p>
+    </div>
+
+    {# Sponsorship Form #}
+    <form method="POST" action="{{ submitUrl }}" class="form form--sponsorship" id="sponsorshipForm">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+        <input type="hidden" name="submit_sponsorship" value="1">
+
+        <fieldset class="form__section">
+            <legend class="form__legend">Your Contact Information</legend>
+
+            {# Name Field #}
+            <div class="form__group">
+                <label for="sponsor_name" class="form__label">
+                    Full Name <span class="form__required" aria-label="required">*</span>
+                </label>
+                <input
+                    type="text"
+                    id="sponsor_name"
+                    name="sponsor_name"
+                    class="form__input"
+                    value="{{ formData.name|default('') }}"
+                    required
+                    aria-required="true"
+                    placeholder="John Smith"
+                    maxlength="100">
+                <span class="form__hint">Please enter your full name as you'd like it to appear on correspondence.</span>
+            </div>
+
+            {# Email Field #}
+            <div class="form__group">
+                <label for="sponsor_email" class="form__label">
+                    Email Address <span class="form__required" aria-label="required">*</span>
+                </label>
+                <input
+                    type="email"
+                    id="sponsor_email"
+                    name="sponsor_email"
+                    class="form__input"
+                    value="{{ formData.email|default('') }}"
+                    required
+                    aria-required="true"
+                    placeholder="john@example.com"
+                    maxlength="255">
+                <span class="form__hint">We'll send confirmation details to this email address.</span>
+            </div>
+
+            {# Phone Field (Optional) #}
+            <div class="form__group">
+                <label for="sponsor_phone" class="form__label">
+                    Phone Number <span class="form__optional">(optional)</span>
+                </label>
+                <input
+                    type="tel"
+                    id="sponsor_phone"
+                    name="sponsor_phone"
+                    class="form__input"
+                    value="{{ formData.phone|default('') }}"
+                    placeholder="(555) 123-4567"
+                    maxlength="20">
+                <span class="form__hint">In case we need to contact you about your sponsorship.</span>
+            </div>
+
+            {# Address Field (Optional) #}
+            <div class="form__group">
+                <label for="sponsor_address" class="form__label">
+                    Mailing Address <span class="form__optional">(optional)</span>
+                </label>
+                <textarea
+                    id="sponsor_address"
+                    name="sponsor_address"
+                    class="form__textarea"
+                    rows="3"
+                    placeholder="123 Main St, Anytown, ST 12345"
+                    maxlength="500">{{ formData.address|default('') }}</textarea>
+                <span class="form__hint">If you'd like to receive a thank you card or updates by mail.</span>
+            </div>
+        </fieldset>
+
+        <fieldset class="form__section">
+            <legend class="form__legend">Gift Preference</legend>
+
+            <div class="form__group">
+                <p class="form__description">How would you like to provide gifts for your sponsored child{% if isFamily %}ren{% endif %}?</p>
+
+                <div class="form__radio-group">
+                    <label class="form__radio">
+                        <input
+                            type="radio"
+                            name="gift_preference"
+                            value="shopping"
+                            {% if formData.gift_preference|default('shopping') == 'shopping' %}checked{% endif %}
+                            required>
+                        <span class="form__radio-label">
+                            <strong>I'll do the shopping</strong>
+                            <span class="form__radio-hint">You'll receive a detailed shopping list with sizes, interests, and wishes</span>
+                        </span>
+                    </label>
+
+                    <label class="form__radio">
+                        <input
+                            type="radio"
+                            name="gift_preference"
+                            value="gift_card"
+                            {% if formData.gift_preference|default('') == 'gift_card' %}checked{% endif %}>
+                        <span class="form__radio-label">
+                            <strong>Gift Card</strong>
+                            <span class="form__radio-hint">Provide a gift card and we'll help the family shop</span>
+                        </span>
+                    </label>
+
+                    <label class="form__radio">
+                        <input
+                            type="radio"
+                            name="gift_preference"
+                            value="cash_donation"
+                            {% if formData.gift_preference|default('') == 'cash_donation' %}checked{% endif %}>
+                        <span class="form__radio-label">
+                            <strong>Cash Donation</strong>
+                            <span class="form__radio-hint">Make a monetary donation and we'll purchase gifts</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+
+        <fieldset class="form__section">
+            <legend class="form__legend">Special Message <span class="form__optional">(optional)</span></legend>
+
+            <div class="form__group">
+                <label for="special_message" class="form__label">
+                    Message to the child{% if isFamily %}ren's family{% endif %}
+                </label>
+                <textarea
+                    id="special_message"
+                    name="special_message"
+                    class="form__textarea"
+                    rows="4"
+                    placeholder="A brief message of encouragement or holiday wishes..."
+                    maxlength="1000">{{ formData.message|default('') }}</textarea>
+                <span class="form__hint">Your message will be shared with the family (optional)</span>
+            </div>
+        </fieldset>
+
+        {# Form Actions #}
+        <div class="form__actions">
+            <button type="submit" class="btn btn--primary btn--large">
+                <svg class="btn__icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0L10.5 5L16 5.75L12 9.5L13 15.25L8 12.5L3 15.25L4 9.5L0 5.75L5.5 5L8 0Z"/>
+                </svg>
+                {% if isFamily %}
+                    Submit Family Sponsorship
+                {% else %}
+                    Submit Sponsorship Request
+                {% endif %}
+            </button>
+
+            <a href="{{ baseUrl('/children') }}" class="btn btn--secondary btn--large">
+                Cancel
+            </a>
+        </div>
+
+        {# Form Footer Info #}
+        <div class="form__footer">
+            <p class="form__footer-text">
+                <strong>What happens next?</strong> After submitting your request, you'll receive an email confirmation within 24 hours with details about your sponsored child{% if isFamily %}ren{% endif %} and next steps.
+            </p>
+            <p class="form__footer-text">
+                <strong>Questions?</strong> Contact us at <a href="mailto:{{ adminEmail }}">{{ adminEmail }}</a>
+            </p>
+        </div>
+    </form>
+</div>

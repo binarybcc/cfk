@@ -103,4 +103,160 @@ class SponsorController
 
         return $this->view->render($response, 'sponsor/lookup.twig', $data);
     }
+
+    /**
+     * Display sponsorship form for a single child
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @param array<string, mixed> $args Route arguments
+     * @return Response
+     */
+    public function showSponsorForm(Request $request, Response $response, array $args): Response
+    {
+        $childId = (int) $args['id'];
+
+        // Check if child is available
+        $availability = SponsorshipManager::isChildAvailable($childId);
+        $child = $availability['child'];
+
+        if (! $child) {
+            // Child not found - redirect to children list
+            $_SESSION['flash_message'] = 'Child not found.';
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        if (! $availability['available']) {
+            // Child not available - redirect with message
+            $_SESSION['flash_message'] = $availability['reason'];
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        // Prepare view data
+        $data = [
+            'pageTitle' => 'Sponsor ' . $child['display_id'],
+            'children' => [$child],
+            'formData' => [],
+            'errors' => [],
+            'csrfToken' => \generateCsrfToken(),
+            'submitUrl' => \baseUrl('/sponsor/child/' . $childId),
+            'isFamily' => false,
+            'adminEmail' => \config('admin_email'),
+        ];
+
+        return $this->view->render($response, 'sponsor/form.twig', $data);
+    }
+
+    /**
+     * Process sponsorship form submission for a single child
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @param array<string, mixed> $args Route arguments
+     * @return Response
+     */
+    public function submitSponsorship(Request $request, Response $response, array $args): Response
+    {
+        $childId = (int) $args['id'];
+        $parsedBody = $request->getParsedBody();
+        $errors = [];
+        $formData = [];
+
+        // Verify CSRF token
+        if (! \verifyCsrfToken($parsedBody['csrf_token'] ?? '')) {
+            $errors[] = 'Security token invalid. Please try again.';
+        } else {
+            // Collect form data
+            $formData = [
+                'name' => $parsedBody['sponsor_name'] ?? '',
+                'email' => $parsedBody['sponsor_email'] ?? '',
+                'phone' => $parsedBody['sponsor_phone'] ?? '',
+                'address' => $parsedBody['sponsor_address'] ?? '',
+                'gift_preference' => $parsedBody['gift_preference'] ?? 'shopping',
+                'message' => $parsedBody['special_message'] ?? '',
+            ];
+
+            // Attempt to create sponsorship
+            $result = SponsorshipManager::createSponsorshipRequest($childId, $formData);
+
+            if ($result['success']) {
+                // Success! Get the sponsorship details for success page
+                $sponsorshipId = $result['sponsorship_id'];
+                $sponsorships = SponsorshipManager::getSponsorshipsWithDetails($formData['email']);
+
+                // Store in session for success page
+                $_SESSION['sponsorship_success'] = $sponsorships;
+
+                // Redirect to success page
+                return $response
+                    ->withHeader('Location', \baseUrl('/sponsorship/success'))
+                    ->withStatus(302);
+            }
+
+            // Error occurred
+            $errors[] = $result['message'];
+        }
+
+        // Re-display form with errors
+        $availability = SponsorshipManager::isChildAvailable($childId);
+        $child = $availability['child'];
+
+        if (! $child) {
+            $_SESSION['flash_message'] = 'Child not found.';
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        $data = [
+            'pageTitle' => 'Sponsor ' . $child['display_id'],
+            'children' => [$child],
+            'formData' => $formData,
+            'errors' => $errors,
+            'csrfToken' => \generateCsrfToken(),
+            'submitUrl' => \baseUrl('/sponsor/child/' . $childId),
+            'isFamily' => false,
+            'adminEmail' => \config('admin_email'),
+        ];
+
+        return $this->view->render($response, 'sponsor/form.twig', $data);
+    }
+
+    /**
+     * Display sponsorship success page
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @return Response
+     */
+    public function showSuccess(Request $request, Response $response): Response
+    {
+        // Get sponsorships from session
+        $sponsorships = $_SESSION['sponsorship_success'] ?? [];
+
+        if ($sponsorships === []) {
+            // No sponsorships in session - redirect to children list
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        // Clear from session
+        unset($_SESSION['sponsorship_success']);
+
+        // Prepare view data
+        $data = [
+            'sponsorships' => $sponsorships,
+            'adminEmail' => \config('admin_email'),
+        ];
+
+        return $this->view->render($response, 'sponsor/success.twig', $data);
+    }
 }
