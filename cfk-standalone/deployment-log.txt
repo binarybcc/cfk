@@ -8,3 +8,4 @@
 [Tue Nov 11 10:39:08 EST 2025] Deployed v1.9.2 (7e422d0) to STAGING - Complete with v1.7.3 merges, branch tools, deploy.sh updates
 [Tue Nov 11 10:55:56 EST 2025] Deployed v1.9.2 (commit e72641d) to STAGING
 [Tue Nov 11 11:09:46 EST 2025] Fixed age column references - Deployed to STAGING (commit 76e6284)
+[Tue Nov 11 11:15:27 EST 2025] CRITICAL: Deployed manage_children.php (contains addChild/editChild functions) to STAGING
