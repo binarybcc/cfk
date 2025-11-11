@@ -87,6 +87,47 @@
 
 **Quality over speed. Build once, build right.**
 
+### 3.5. Branch Sync Workflow (CRITICAL)
+
+**At the start of EVERY session:**
+
+```bash
+# 1. Check your current branch is synced with GitHub
+/sync-check
+
+# 2. Check if feature/parent branches have new commits
+/check-branches
+
+# 3. Merge important updates (production fixes, security patches)
+git merge origin/branch-name  # if needed
+```
+
+**Why this matters:**
+- ✅ Stay in sync with production fixes
+- ✅ Get security patches immediately
+- ✅ Prevent branch divergence
+- ✅ Easier merges later
+
+**What to merge immediately:**
+- ✅ Production bug fixes (always merge)
+- ✅ Security patches (always merge)
+- ✅ Parent branch updates (v1.7.3-production-hardening)
+
+**What to evaluate first:**
+- ⚠️ Experimental features
+- ⚠️ Breaking changes
+- ⚠️ Large refactors
+
+**When merging would conflict with modern architecture:**
+- Review the changes first
+- Cherry-pick specific commits if needed
+- Or delay merge until after current feature is complete
+
+**Tools:**
+- `/sync-check` - Check current branch vs GitHub
+- `/check-branches` - Check all branches for updates
+- `./check-all-branches.sh` - Manual script version
+
 ### 4. Testing Protocol
 
 After implementing feature:
