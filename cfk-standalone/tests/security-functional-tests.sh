@@ -1,9 +1,16 @@
 #!/bin/bash
 # Security Functional Tests for CFK Sponsorship System
 # Tests authentication, session management, and critical security flows
-# Environment: Docker (http://localhost:8082)
+# Environment: Docker (http://localhost:8082) or Remote (https://...)
 
-set -e
+# Don't exit on error - let tests fail gracefully
+# set -e (disabled to allow remote testing without Docker)
+
+# Detect if testing remote server (skip Docker-dependent tests)
+IS_REMOTE=false
+if [[ "$BASE_URL" == https://* ]]; then
+    IS_REMOTE=true
+fi
 
 # Colors for output
 RED='\033[0;31m'
@@ -13,7 +20,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Test configuration
-BASE_URL="http://localhost:8082"
+BASE_URL="${BASE_URL:-http://localhost:8082}"
 ADMIN_URL="$BASE_URL/admin"
 COOKIES_FILE="/tmp/cfk_test_cookies.txt"
 TEST_RESULTS="/tmp/cfk_test_results.txt"
@@ -100,35 +107,41 @@ for file in "${CRITICAL_FILES[@]}"; do
 done
 echo ""
 
-# Test 4: Check for broken links in admin files
-echo "Test 4: Admin Link Integrity"
-info_test "Scanning admin PHP files for broken links..."
-BROKEN_LINKS=0
+# Test 4: Check for broken links in admin files (Docker only)
+if ! $IS_REMOTE; then
+    echo "Test 4: Admin Link Integrity"
+    info_test "Scanning admin PHP files for broken links..."
+    BROKEN_LINKS=0
 
-# Extract links from admin files
-docker exec cfk-web bash -c "cd /var/www/html/admin && grep -roh 'href=\"[^\"]*\.php\"' . | sed 's/href=\"//;s/\"//' | sort -u" > /tmp/cfk_admin_links.txt || true
+    # Extract links from admin files
+    docker exec cfk-web bash -c "cd /var/www/html/admin && grep -roh 'href=\"[^\"]*\.php\"' . | sed 's/href=\"//;s/\"//' | sort -u" > /tmp/cfk_admin_links.txt || true
 
-while IFS= read -r link; do
-    # Skip external links and anchors
-    if [[ "$link" == http* ]] || [[ "$link" == \#* ]]; then
-        continue
+    while IFS= read -r link; do
+        # Skip external links and anchors
+        if [[ "$link" == http* ]] || [[ "$link" == \#* ]]; then
+            continue
+        fi
+
+        TOTAL_TESTS=$((TOTAL_TESTS + 1))
+        RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$ADMIN_URL/$link")
+
+        if [ "$RESPONSE" -eq 404 ]; then
+            fail_test "Broken link in admin: $link" "200/30x" "404"
+            BROKEN_LINKS=$((BROKEN_LINKS + 1))
+        else
+            pass_test "Link OK: $link"
+        fi
+    done < /tmp/cfk_admin_links.txt
+
+    if [ $BROKEN_LINKS -eq 0 ]; then
+        info_test "No broken links found"
     fi
-
-    TOTAL_TESTS=$((TOTAL_TESTS + 1))
-    RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "$ADMIN_URL/$link")
-
-    if [ "$RESPONSE" -eq 404 ]; then
-        fail_test "Broken link in admin: $link" "200/30x" "404"
-        BROKEN_LINKS=$((BROKEN_LINKS + 1))
-    else
-        pass_test "Link OK: $link"
-    fi
-done < /tmp/cfk_admin_links.txt
-
-if [ $BROKEN_LINKS -eq 0 ]; then
-    info_test "No broken links found"
+    echo ""
+else
+    echo "Test 4: Admin Link Integrity"
+    info_test "Skipped (Docker-dependent test, remote server)"
+    echo ""
 fi
-echo ""
 
 # Test 5: Session security headers
 echo "Test 5: Session Security Configuration"
@@ -160,24 +173,30 @@ else
 fi
 echo ""
 
-# Test 7: Rate limiting functionality
-echo "Test 7: Rate Limiting (Simulated)"
-info_test "Testing rate limiter class existence..."
-TOTAL_TESTS=$((TOTAL_TESTS + 1))
+# Test 7: Rate limiting functionality (Docker only)
+if ! $IS_REMOTE; then
+    echo "Test 7: Rate Limiting (Simulated)"
+    info_test "Testing rate limiter class existence..."
+    TOTAL_TESTS=$((TOTAL_TESTS + 1))
 
-RATE_LIMITER_CHECK=$(docker exec cfk-web php -r "
+    RATE_LIMITER_CHECK=$(docker exec cfk-web php -r "
 define('CFK_APP', true);
 session_start();
 require_once '/var/www/html/includes/rate_limiter.php';
 echo class_exists('RateLimiter') ? 'OK' : 'MISSING';
 " 2>&1)
 
-if echo "$RATE_LIMITER_CHECK" | grep -q "OK"; then
-    pass_test "RateLimiter class loads successfully"
+    if echo "$RATE_LIMITER_CHECK" | grep -q "OK"; then
+        pass_test "RateLimiter class loads successfully"
+    else
+        fail_test "RateLimiter class" "OK" "$RATE_LIMITER_CHECK"
+    fi
+    echo ""
 else
-    fail_test "RateLimiter class" "OK" "$RATE_LIMITER_CHECK"
+    echo "Test 7: Rate Limiting (Simulated)"
+    info_test "Skipped (Docker-dependent test, remote server)"
+    echo ""
 fi
-echo ""
 
 # Test 8: Database connection
 echo "Test 8: Database Connection"

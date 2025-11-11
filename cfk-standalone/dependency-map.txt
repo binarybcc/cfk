@@ -1,198 +1,75 @@
-admin/ajax_sponsorship_action.php:require_once __DIR__ . '/../config/config.php';
-admin/ajax_sponsorship_action.php:require_once __DIR__ . '/../includes/functions.php';
-admin/year_end_reset.php:require_once __DIR__ . '/../config/config.php';
-admin/year_end_reset.php:require_once __DIR__ . '/../includes/functions.php';
-admin/year_end_reset.php:include __DIR__ . '/includes/admin_header.php';
-admin/year_end_reset.php:                       required>
-admin/year_end_reset.php:                       required>
-admin/year_end_reset.php:                           required>
-admin/year_end_reset.php:                           required>
-admin/year_end_reset.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/login.php:require_once __DIR__ . '/../config/config.php';
-admin/login.php:require_once __DIR__ . '/../includes/functions.php';
-admin/login.php:                       required
-admin/magic-link-sent.php:require_once __DIR__ . '/../config/config.php';
-admin/index.php:require_once __DIR__ . '/../config/config.php';
-admin/index.php:require_once __DIR__ . '/../includes/functions.php';
-admin/index.php:include __DIR__ . '/includes/admin_header.php';
-admin/index.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/import_csv.php:require_once __DIR__ . '/../config/config.php';
-admin/import_csv.php:require_once __DIR__ . '/../includes/functions.php';
-admin/import_csv.php:include __DIR__ . '/includes/admin_header.php';
-admin/import_csv.php:        .requirements {
-admin/import_csv.php:        .requirements h4 {
-admin/import_csv.php:        .requirements ul {
-admin/import_csv.php:        .requirements li {
-admin/import_csv.php:                        <input type="text" id="confirm_delete" name="confirm_delete" required 
-admin/import_csv.php:                    <div class="requirements">
-admin/import_csv.php:                                               required
-admin/import_csv.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/reports.php:require_once __DIR__ . '/../config/config.php';
-admin/reports.php:require_once __DIR__ . '/../includes/functions.php';
-admin/reports.php:include __DIR__ . '/includes/admin_header.php';
-admin/reports.php:                <p><strong>This report includes all children in the database with complete information:</strong></p>
-admin/reports.php:                <input type="text" name="sponsor_name" id="editSponsorName" required
-admin/reports.php:                <input type="email" name="new_email" id="editNewEmail" required
-admin/reports.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/test-forms.php:require_once __DIR__ . '/../config/config.php';
-admin/test-forms.php:require_once __DIR__ . '/../includes/functions.php';
-admin/logout.php:require_once __DIR__ . '/../config/config.php';
-admin/logout.php:require_once __DIR__ . '/../includes/functions.php';
-admin/includes/admin_footer.php:                if (rule.required && !value) {
-admin/includes/admin_footer.php:                    errors.push(`${rule.label || field} is required`);
-admin/ajax_handler.php:require_once __DIR__ . '/../config/config.php';
-admin/ajax_handler.php:require_once __DIR__ . '/../includes/functions.php';
-admin/ajax_handler.php:        // Validate required fields
-admin/ajax_handler.php:        $errors[] = 'Valid gender is required';
-admin/ajax_handler.php:        $errors[] = 'Family selection is required';
-admin/manage_children.php:require_once __DIR__ . '/../config/config.php';
-admin/manage_children.php:require_once __DIR__ . '/../includes/functions.php';
-admin/manage_children.php:        // Validate required fields
-admin/manage_children.php:    // Age validation - require exactly one of months or years
-admin/manage_children.php:        $errors[] = 'Age is required (enter either months or years)';
-admin/manage_children.php:        $errors[] = 'Valid gender is required';
-admin/manage_children.php:        $errors[] = 'Family selection is required';
-admin/manage_children.php:include __DIR__ . '/includes/admin_header.php';
-admin/manage_children.php:                            <select id="childGender" name="gender" required>
-admin/manage_children.php:                            <select id="childFamily" name="family_id" required>
-admin/manage_children.php:                    alert('Please fill in all required fields (marked with *)');
-admin/manage_children.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/manage_sponsorships.php:require_once __DIR__ . '/../config/config.php';
-admin/manage_sponsorships.php:require_once __DIR__ . '/../includes/functions.php';
-admin/manage_sponsorships.php:include __DIR__ . '/includes/admin_header.php';
-admin/manage_sponsorships.php:                <textarea name="reason" id="reason" required placeholder="Please provide a reason for cancelling this sponsorship..." style="width: 100%; min-height: 100px; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-admin/manage_sponsorships.php:                <input type="text" name="sponsor_name" id="editSponsorName" required
-admin/manage_sponsorships.php:                <input type="email" name="sponsor_email" id="editSponsorEmail" required
-admin/manage_sponsorships.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/verify-magic-link.php:require_once __DIR__ . '/../config/config.php';
-admin/verify-magic-link.php:require_once __DIR__ . '/../includes/functions.php';
-admin/verify-magic-link.php:require_once __DIR__ . '/../includes/email_manager.php';
-admin/request-magic-link.php:require_once __DIR__ . '/../config/config.php';
-admin/request-magic-link.php:require_once __DIR__ . '/../includes/email_manager.php';
-admin/request-magic-link.php:require_once __DIR__ . '/../includes/rate_limiter.php';
-admin/request-magic-link.php:require_once __DIR__ . '/../includes/magic_link_email_template.php';
-admin/request-magic-link.php:        throw new Exception('Email is required');
-admin/debug_db_check.php:require_once __DIR__ . '/../config/config.php';
-admin/debug_db_check.php:require_once __DIR__ . '/../includes/functions.php';
-admin/debug_db_check.php:include __DIR__ . '/includes/admin_header.php';
-admin/debug_db_check.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-admin/manage_admins.php:require_once __DIR__ . '/../config/config.php';
-admin/manage_admins.php:require_once __DIR__ . '/../includes/functions.php';
-admin/manage_admins.php:            $error = 'Username, email, and password are required.';
-admin/manage_admins.php:include __DIR__ . '/includes/admin_header.php';
-admin/manage_admins.php:                    <label for="username" class="required">Username</label>
-admin/manage_admins.php:                           required
-admin/manage_admins.php:                    <label for="email" class="required">Email Address</label>
-admin/manage_admins.php:                           required
-admin/manage_admins.php:                    <label for="password" class="required">Password</label>
-admin/manage_admins.php:                           required
-admin/manage_admins.php:                    <label for="confirm_password" class="required">Confirm Password</label>
-admin/manage_admins.php:                           required
-admin/manage_admins.php:                <label for="role" class="required">Role</label>
-admin/manage_admins.php:                <select id="role" name="role" class="form-control" required>
-admin/manage_admins.php:                                                   required>
-admin/manage_admins.php:                                            <select name="role" class="form-control" required>
-admin/manage_admins.php:.form-group label.required::after {
-admin/manage_admins.php:<?php include __DIR__ . '/includes/admin_footer.php'; ?>
-includes/functions.php:        require_once __DIR__ . '/avatar_manager.php';
-includes/functions.php:function requireLogin(): void
-includes/functions.php:function validateRequired(array $data, array $requiredFields): array
-includes/functions.php:    foreach ($requiredFields as $field) {
-includes/functions.php:            $errors[] = ucfirst($field) . ' is required';
-includes/validator.php:     * Validate required fields
-includes/validator.php:    public function required(array $fields): self
-includes/validator.php:                $this->errors[$field][] = ucfirst(str_replace('_', ' ', $field)) . ' is required';
-includes/validator.php:                case 'required':
-includes/validator.php:                    $validator->required([$field]);
-includes/sponsorship_manager.php:                // Get full sponsorship data for emails (includes ALL child details for shopping)
-includes/sponsorship_manager.php:        // Load validator if not already included
-includes/sponsorship_manager.php:            require_once __DIR__ . '/validator.php';
-includes/sponsorship_manager.php:            'name' => 'required|min:2|max:100',
-includes/sponsorship_manager.php:            'email' => 'required|email|max:255',
-includes/sponsorship_manager.php:                'message' => 'Access token is required.',
-includes/reservation_functions.php:                'message' => 'Missing required information: name, email, and at least one child selection.'
-includes/header_temp.php:header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-includes/reservation_emails.php:require_once __DIR__ . '/email_manager.php';
-includes/reservation_emails.php:require_once __DIR__ . '/functions.php'; // For cleanWishesText()
-includes/reservation_emails.php:                                    You do <strong>not</strong> need to buy everything on a child\'s Wish List. Typically, a package includes:
-includes/reservation_emails.php:                                    <li style="margin-bottom: 10px;"><strong>Gifts must NOT be wrapped</strong> - If desired, you may include gift wrap</li>
-includes/reservation_emails.php:    $text .= "Typically, a package includes:\n";
-includes/reservation_emails.php:    $text .= "  • Gifts must NOT be wrapped - If desired, you may include gift wrap\n";
-includes/reservation_emails.php:                            <p style="font-size: 14px; color: #666; margin: 0 0 20px 0; padding: 10px; background-color: #f8f9fa; border-left: 3px solid #2c5530; border-radius: 4px;"><strong>📌 Tip:</strong> Save this email for reference when shopping! All the information you need is included below.</p>
-includes/reservation_emails.php:                                    You do <strong>not</strong> need to buy everything on a child\'s Wish List. Typically, a package includes:
-includes/reservation_emails.php:                                    <li style="margin-bottom: 10px;"><strong>Gifts must NOT be wrapped</strong> - If desired, you may include gift wrap</li>
-includes/reservation_emails.php:    $text .= "Typically, a package includes:\n";
-includes/reservation_emails.php:    $text .= "  • Gifts must NOT be wrapped - If desired, you may include gift wrap\n";
-includes/components/child_card.php:// Validate required parameter
-includes/components/child_card.php:    trigger_error('Child card component requires $child array parameter', E_USER_WARNING);
-includes/header.php:header("Strict-Transport-Security: max-age=31536000; includeSubDomains; preload");
-includes/import_analyzer.php:// with existing require_once statements
-includes/email_queue.php:                require_once __DIR__ . '/email_manager.php';
-includes/email_queue.php:            require_once __DIR__ . '/email_manager.php';
-includes/email_queue.php:            require_once __DIR__ . '/email_manager.php';
-includes/footer.php:        if (cartPages.includes(currentPage)) {
-includes/csv_handler.php:        // Check for required columns
-includes/csv_handler.php:        foreach (self::REQUIRED_COLUMNS as $required) {
-includes/csv_handler.php:            if (!in_array($required, $headers)) {
-includes/csv_handler.php:                $missing[] = $required;
-includes/csv_handler.php:            $this->errors[] = 'Missing required columns: ' . implode(', ', $missing);
-includes/csv_handler.php:        // Validate required fields
-includes/csv_handler.php:                    $this->errors[] = "Row $rowNumber: Missing or invalid required field '$field'";
-includes/csv_handler.php:                $this->errors[] = "Row $rowNumber: Missing required field '$field'";
-includes/csv_handler.php:        // Ensure required fields have values - handle months format
-includes/email_manager.php:// with existing require_once statements
-includes/email_manager.php:                require_once __DIR__ . '/../vendor/autoload.php';
-includes/magic_link_manager.php:// with existing require_once statements
-includes/backup_manager.php:            require_once __DIR__ . '/csv_handler.php';
-includes/backup_manager.php:            require_once __DIR__ . '/csv_handler.php';
-pages/sponsor.php:                               required>
-pages/sponsor.php:                               required>
-pages/sponsor_lookup.php:    require_once __DIR__ . '/../includes/components/page_header.php';
-pages/sponsor_lookup.php:                        <label for="sponsor_email" class="form-label">Your Email Address <span aria-label="required">*</span></label>
-pages/sponsor_lookup.php:                               required
-pages/sponsor_lookup.php:                               aria-required="true"
-pages/family.php:                if (selectedIds.includes(childId)) {
-pages/family.php:            const allAdded = Array.from(allButtons).every(btn => selectedIds.includes(parseInt(btn.getAttribute('data-child-id'))));
-pages/how_to_apply.php:    require_once __DIR__ . '/../includes/components/page_header.php';
-pages/how_to_apply.php:        <div class="requirements-section">
-pages/how_to_apply.php:            <ul class="requirements-list">
-pages/how_to_apply.php:                        <span>What if I don't have all the required documents?</span>
-pages/how_to_apply.php:                        <p>Unfortunately, we cannot process your application without the required documentation. If you have a current DSS Family Profile or proof of Food Stamps, that's all you need. Otherwise, you must bring proof of income, proof children live with you, and valid photo ID. Contact us at <a href="mailto:christmasforkids@upstatetoday.com">christmasforkids@upstatetoday.com</a> if you have questions about specific documents.</p>
-pages/how_to_apply.php:.requirements-section {
-pages/how_to_apply.php:.requirements-section h2 {
-pages/how_to_apply.php:.requirements-list {
-pages/how_to_apply.php:.requirements-list li {
-pages/children.php:    require_once __DIR__ . '/../includes/components/page_header.php';
-pages/children.php:                if (selectedIds.includes(childData.id)) {
-pages/my_sponsorships.php:require_once __DIR__ . '/../includes/reservation_functions.php';
-pages/my_sponsorships.php:require_once __DIR__ . '/../includes/reservation_emails.php';
-pages/my_sponsorships.php:                            <label for="sponsor_email" class="form-label">Your Email Address <span aria-label="required">*</span></label>
-pages/my_sponsorships.php:                                   required
-pages/my_sponsorships.php:                                   aria-required="true"
-pages/confirm_sponsorship.php:                        <label for="sponsor_name">Full Name <span class="required" aria-label="required">*</span></label>
-pages/confirm_sponsorship.php:                            required
-pages/confirm_sponsorship.php:                            aria-required="true"
-pages/confirm_sponsorship.php:                        <label for="sponsor_email">Email Address <span class="required" aria-label="required">*</span></label>
-pages/confirm_sponsorship.php:                            required
-pages/confirm_sponsorship.php:                            aria-required="true"
-pages/confirm_sponsorship.php:                                required>
-pages/confirm_sponsorship.php:                this.errors.name = 'Name is required';
-pages/confirm_sponsorship.php:                this.errors.email = 'Email is required';
-pages/confirm_sponsorship.php:.required {
-pages/reservation_review.php:                alert('Missing required information. Redirecting to form...');
-pages/about.php:    require_once __DIR__ . '/../includes/components/page_header.php';
-pages/sponsor_portal.php:    require_once __DIR__ . '/../includes/components/page_header.php';
-cron/cleanup_magic_links.php:require_once __DIR__ . '/../config/config.php';
-cron/cleanup_magic_links.php:require_once __DIR__ . '/../includes/magic_link_manager.php';
-cron/cleanup_magic_links.php:require_once __DIR__ . '/../includes/rate_limiter.php';
-cron/cleanup_portal_tokens.php:require_once __DIR__ . '/../config/config.php';
-cron/cleanup_portal_tokens.php:require_once __DIR__ . '/../includes/sponsorship_manager.php';
-cron/cleanup_expired_sponsorships.php:require_once __DIR__ . '/../config/config.php';
-cron/cleanup_expired_sponsorships.php:require_once __DIR__ . '/../includes/functions.php';
-cron/cleanup_expired_sponsorships.php:require_once __DIR__ . '/../includes/sponsorship_manager.php';
-cron/process_email_queue.php:require_once __DIR__ . '/../config/config.php';
-cron/process_email_queue.php:require_once __DIR__ . '/../includes/email_queue.php';
-cron/cleanup_emails.php:require_once __DIR__ . '/../config/config.php';
-cron/cleanup_emails.php:require_once __DIR__ . '/../includes/email_queue.php';
-cron/cleanup_remember_tokens.php:require_once __DIR__ . '/../config/config.php';
-cron/cleanup_remember_tokens.php:require_once __DIR__ . '/../includes/remember_me_tokens.php';
+admin/ajax_sponsorship_action.php:17:require_once __DIR__ . '/../config/config.php';
+admin/ajax_sponsorship_action.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/year_end_reset.php:17:require_once __DIR__ . '/../config/config.php';
+admin/year_end_reset.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/year_end_reset.php:230:include __DIR__ . '/includes/admin_header.php';
+admin/year_end_reset.php:391:                       required>
+admin/year_end_reset.php:402:                       required>
+admin/year_end_reset.php:496:                           required>
+admin/year_end_reset.php:575:                           required>
+admin/login.php:17:require_once __DIR__ . '/../config/config.php';
+admin/login.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/login.php:251:                       required
+admin/magic-link-sent.php:12:require_once __DIR__ . '/../config/config.php';
+admin/index.php:17:require_once __DIR__ . '/../config/config.php';
+admin/index.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/index.php:69:include __DIR__ . '/includes/admin_header.php';
+admin/import_csv.php:17:require_once __DIR__ . '/../config/config.php';
+admin/import_csv.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/import_csv.php:356:include __DIR__ . '/includes/admin_header.php';
+admin/import_csv.php:1005:                                               required
+admin/reports.php:17:require_once __DIR__ . '/../config/config.php';
+admin/reports.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/reports.php:144:include __DIR__ . '/includes/admin_header.php';
+admin/logout.php:17:require_once __DIR__ . '/../config/config.php';
+admin/logout.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/ajax_handler.php:18:require_once __DIR__ . '/../config/config.php';
+admin/ajax_handler.php:19:require_once __DIR__ . '/../includes/functions.php';
+admin/manage_children.php:17:require_once __DIR__ . '/../config/config.php';
+admin/manage_children.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/manage_children.php:470:include __DIR__ . '/includes/admin_header.php';
+admin/manage_sponsorships.php:18:require_once __DIR__ . '/../config/config.php';
+admin/manage_sponsorships.php:19:require_once __DIR__ . '/../includes/functions.php';
+admin/manage_sponsorships.php:276:include __DIR__ . '/includes/admin_header.php';
+admin/verify-magic-link.php:13:require_once __DIR__ . '/../config/config.php';
+admin/verify-magic-link.php:14:require_once __DIR__ . '/../includes/functions.php';
+admin/request-magic-link.php:12:require_once __DIR__ . '/../config/config.php';
+admin/request-magic-link.php:13:require_once __DIR__ . '/../includes/rate_limiter.php';
+admin/request-magic-link.php:14:require_once __DIR__ . '/../includes/magic_link_email_template.php';
+admin/debug_db_check.php:12:require_once __DIR__ . '/../config/config.php';
+admin/debug_db_check.php:13:require_once __DIR__ . '/../includes/functions.php';
+admin/debug_db_check.php:61:include __DIR__ . '/includes/admin_header.php';
+admin/manage_admins.php:17:require_once __DIR__ . '/../config/config.php';
+admin/manage_admins.php:18:require_once __DIR__ . '/../includes/functions.php';
+admin/manage_admins.php:144:include __DIR__ . '/includes/admin_header.php';
+admin/manage_admins.php:188:                           required
+admin/manage_admins.php:201:                           required
+admin/manage_admins.php:222:                           required
+admin/manage_admins.php:234:                           required
+admin/manage_admins.php:336:                                                   required>
+includes/reservation_emails.php:15:require_once __DIR__ . '/functions.php'; // For cleanWishesText()
+pages/sponsor.php:266:                               required>
+pages/sponsor.php:276:                               required>
+pages/sponsor_lookup.php:60:    require_once __DIR__ . '/../includes/components/page_header.php';
+pages/sponsor_lookup.php:118:                               required
+pages/how_to_apply.php:20:    require_once __DIR__ . '/../includes/components/page_header.php';
+pages/children.php:109:    require_once __DIR__ . '/../includes/components/page_header.php';
+pages/my_sponsorships.php:15:require_once __DIR__ . '/../includes/reservation_functions.php';
+pages/my_sponsorships.php:16:require_once __DIR__ . '/../includes/reservation_emails.php';
+pages/my_sponsorships.php:337:                                   required
+pages/confirm_sponsorship.php:77:                            required
+pages/confirm_sponsorship.php:95:                            required
+pages/confirm_sponsorship.php:141:                                required>
+pages/about.php:25:    require_once __DIR__ . '/../includes/components/page_header.php';
+pages/sponsor_portal.php:100:    require_once __DIR__ . '/../includes/components/page_header.php';
+cron/cleanup_magic_links.php:16:require_once __DIR__ . '/../config/config.php';
+cron/cleanup_magic_links.php:17:require_once __DIR__ . '/../includes/rate_limiter.php';
+cron/cleanup_portal_tokens.php:14:require_once __DIR__ . '/../config/config.php';
+cron/cleanup_expired_sponsorships.php:14:require_once __DIR__ . '/../config/config.php';
+cron/cleanup_expired_sponsorships.php:15:require_once __DIR__ . '/../includes/functions.php';
+cron/process_email_queue.php:18:require_once __DIR__ . '/../config/config.php';
+cron/process_email_queue.php:19:require_once __DIR__ . '/../includes/email_queue.php';
+cron/cleanup_emails.php:18:require_once __DIR__ . '/../config/config.php';
+cron/cleanup_emails.php:19:require_once __DIR__ . '/../includes/email_queue.php';
+cron/cleanup_remember_tokens.php:14:require_once __DIR__ . '/../config/config.php';
+cron/cleanup_remember_tokens.php:15:require_once __DIR__ . '/../includes/remember_me_tokens.php';
