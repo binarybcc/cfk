@@ -1,0 +1,211 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+    <style>
+        .add-children-page {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--spacing-xl);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .form-header h1 {
+            color: var(--color-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .form-header p {
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-lg);
+        }
+
+        .alert {
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            border: 2px solid #fca5a5;
+            color: #991b1b;
+        }
+
+        .alert-info {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            color: #0c4a6e;
+        }
+
+        .available-children-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: var(--spacing-lg);
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .child-checkbox-card {
+            position: relative;
+            cursor: pointer;
+            border: 3px solid var(--color-border-lighter);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .child-checkbox-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .child-checkbox-card input[type="checkbox"] {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: var(--color-primary);
+        }
+
+        .child-checkbox-card input[type="checkbox"]:checked ~ .checkbox-card-content {
+            opacity: 1;
+        }
+
+        .child-checkbox-card:has(input:checked) {
+            border-color: var(--color-primary);
+            background: #f0f4f1;
+        }
+
+        .checkbox-card-content {
+            opacity: 0.7;
+            transition: opacity 0.2s ease;
+        }
+
+        .checkbox-child-photo {
+            text-align: center;
+            margin-bottom: var(--spacing-md);
+        }
+
+        .checkbox-child-photo img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--color-border-lighter);
+        }
+
+        .checkbox-child-info {
+            text-align: center;
+        }
+
+        .checkbox-child-info h4 {
+            margin: 0 0 var(--spacing-xs) 0;
+            color: var(--color-primary);
+            font-size: var(--font-size-lg);
+        }
+
+        .checkbox-child-info p {
+            margin: 0;
+            color: var(--color-text-secondary);
+            font-size: var(--font-size-sm);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .available-children-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .form-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="add-children-page">
+    <div class="form-header">
+        <h1>Add More Children to Your Sponsorship</h1>
+        <p>Select additional children you'd like to sponsor. They'll be added to your existing sponsorship.</p>
+    </div>
+
+    {# Display errors #}
+    {% if errors %}
+        <div class="alert alert-error">
+            <ul style="margin: 0; padding-left: 1.5rem;">
+                {% for error in errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if availableChildren is empty %}
+        {# No available children #}
+        <div class="alert alert-info">
+            <p><strong>All children have been sponsored!</strong></p>
+            <p>There are currently no available children to add. Thank you for your generosity!</p>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ baseUrl('/portal?token=' ~ token|url_encode) }}" class="btn btn--primary btn--large">
+                ← Back to Portal
+            </a>
+        </div>
+
+    {% else %}
+        {# Display available children #}
+        <form method="POST" action="{{ baseUrl('/portal/add?token=' ~ token|url_encode) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+            <div class="available-children-grid">
+                {% for child in availableChildren %}
+                    <label class="child-checkbox-card">
+                        <input type="checkbox" name="child_ids[]" value="{{ child.id }}">
+                        <div class="checkbox-card-content">
+                            <div class="checkbox-child-photo">
+                                <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                                     alt="Avatar for {{ child.display_id }}">
+                            </div>
+                            <div class="checkbox-child-info">
+                                <h4>{{ child.display_id }}</h4>
+                                <p>{{ displayAge(child.age_months) }}</p>
+                                <p>{{ child.gender == 'M' ? 'Boy' : 'Girl' }}</p>
+                                <p>{{ child.grade }}</p>
+                            </div>
+                        </div>
+                    </label>
+                {% endfor %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn--success btn--large">
+                    ✓ Add Selected Children
+                </button>
+                <a href="{{ baseUrl('/portal?token=' ~ token|url_encode) }}" class="btn btn--secondary btn--large">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

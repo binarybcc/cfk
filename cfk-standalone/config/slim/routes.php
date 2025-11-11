@@ -16,6 +16,7 @@ declare(strict_types=1);
 use CFK\Controller\AdminController;
 use CFK\Controller\CartController;
 use CFK\Controller\ChildController;
+use CFK\Controller\PortalController;
 use CFK\Controller\SponsorController;
 use CFK\Controller\TestController;
 use Slim\App;
@@ -171,6 +172,32 @@ return function (App $app) {
      * Week 6 Phase 3 Migration
      */
     $app->get('/cart/success', [CartController::class, 'success']);
+
+    // =========================================================================
+    // Portal Routes (Week 6 Phase 4 Migration)
+    // =========================================================================
+
+    /**
+     * Sponsor Portal: /portal (GET)
+     * Display all sponsorships for verified sponsor (via token)
+     * Migrated from: ?page=sponsor_portal
+     * Week 6 Phase 4 Migration
+     */
+    $app->get('/portal', [PortalController::class, 'viewSponsorships']);
+
+    /**
+     * Add Children to Sponsorship: /portal/add (GET)
+     * Display form to add more children to existing sponsorship
+     * Week 6 Phase 4 Migration
+     */
+    $app->get('/portal/add', [PortalController::class, 'showAddChildren']);
+
+    /**
+     * Add Children to Sponsorship: /portal/add (POST)
+     * Process adding children to existing sponsorship
+     * Week 6 Phase 4 Migration
+     */
+    $app->post('/portal/add', [PortalController::class, 'addChildren']);
 
     // =========================================================================
     // Future Routes (Will be added during migration)
