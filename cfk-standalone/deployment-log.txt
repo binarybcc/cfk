@@ -17,3 +17,5 @@
 [Tue Nov 11 11:27:46 EST 2025] CRITICAL FIX: Added missing 'name' field (auto-generated from family+letter) - Deployed to STAGING (commit 6726d3c)
 [Tue Nov 11 11:31:35 EST 2025] CRITICAL FIX #2: Use existing child_letter from DB (not form) - Deployed to STAGING
 [Tue Nov 11 14:28:44 EST 2025] Deployed v1.9.2 with Week 6-7 features (commit e1d81ac) to STAGING - Cart, portal, content pages
+[Tue Nov 11 17:29:27 EST 2025] Deployed v1.9.2 (85a8c29) to STAGING - Merged v1.8.1-cleanup and week5-children-refactor
+[Tue Nov 11 17:39:28 EST 2025] CRITICAL FIX: Integrated Slim bootstrap into index.php (commit 922df52) - Fixed blank pages
