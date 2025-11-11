@@ -259,4 +259,167 @@ class SponsorController
 
         return $this->view->render($response, 'sponsor/success.twig', $data);
     }
+
+    /**
+     * Display family sponsorship form
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @param array<string, mixed> $args Route arguments
+     * @return Response
+     */
+    public function showFamilyForm(Request $request, Response $response, array $args): Response
+    {
+        $familyId = (int) $args['id'];
+
+        // Get all children in family
+        $allChildren = \CFK\Repository\ChildRepository::getByFamily($familyId);
+
+        if ($allChildren === []) {
+            $_SESSION['flash_message'] = 'Family not found.';
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        // Filter for available children only
+        $availableChildren = array_filter($allChildren, fn($child) => $child['status'] === 'available');
+
+        if ($availableChildren === []) {
+            $_SESSION['flash_message'] = 'No available children in this family to sponsor.';
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        // Reset array keys after filtering
+        $availableChildren = array_values($availableChildren);
+
+        // Get family number for page title
+        $familyNumber = $availableChildren[0]['family_number'];
+
+        // Prepare view data
+        $data = [
+            'pageTitle' => 'Sponsor Family ' . $familyNumber,
+            'children' => $availableChildren,
+            'formData' => [],
+            'errors' => [],
+            'csrfToken' => \generateCsrfToken(),
+            'submitUrl' => \baseUrl('/sponsor/family/' . $familyId),
+            'isFamily' => true,
+            'adminEmail' => \config('admin_email'),
+        ];
+
+        return $this->view->render($response, 'sponsor/form.twig', $data);
+    }
+
+    /**
+     * Process family sponsorship form submission
+     *
+     * @param Request $request PSR-7 request
+     * @param Response $response PSR-7 response
+     * @param array<string, mixed> $args Route arguments
+     * @return Response
+     */
+    public function submitFamilySponsorship(Request $request, Response $response, array $args): Response
+    {
+        $familyId = (int) $args['id'];
+        $parsedBody = $request->getParsedBody();
+        $errors = [];
+        $formData = [];
+
+        // Verify CSRF token
+        if (! \verifyCsrfToken($parsedBody['csrf_token'] ?? '')) {
+            $errors[] = 'Security token invalid. Please try again.';
+        } else {
+            // Collect form data
+            $formData = [
+                'name' => $parsedBody['sponsor_name'] ?? '',
+                'email' => $parsedBody['sponsor_email'] ?? '',
+                'phone' => $parsedBody['sponsor_phone'] ?? '',
+                'address' => $parsedBody['sponsor_address'] ?? '',
+                'gift_preference' => $parsedBody['gift_preference'] ?? 'shopping',
+                'message' => $parsedBody['special_message'] ?? '',
+            ];
+
+            // Get all available children in family
+            $allChildren = \CFK\Repository\ChildRepository::getByFamily($familyId);
+            $availableChildren = array_filter($allChildren, fn($child) => $child['status'] === 'available');
+
+            if ($availableChildren === []) {
+                $errors[] = 'No available children in this family to sponsor.';
+            } else {
+                // Attempt to create sponsorships for all children
+                $successfulSponsorships = [];
+                $failedChildren = [];
+                $allSuccessful = true;
+
+                foreach ($availableChildren as $child) {
+                    $result = SponsorshipManager::createSponsorshipRequest((int) $child['id'], $formData);
+
+                    if ($result['success']) {
+                        $successfulSponsorships[] = $child['display_id'];
+                    } else {
+                        $failedChildren[] = [
+                            'id' => $child['display_id'],
+                            'error' => $result['message']
+                        ];
+                        $allSuccessful = false;
+                    }
+                }
+
+                if ($allSuccessful && count($successfulSponsorships) > 0) {
+                    // All succeeded! Get sponsorship details for success page
+                    $sponsorships = SponsorshipManager::getSponsorshipsWithDetails($formData['email']);
+
+                    // Store in session for success page
+                    $_SESSION['sponsorship_success'] = $sponsorships;
+
+                    // Redirect to success page
+                    return $response
+                        ->withHeader('Location', \baseUrl('/sponsorship/success'))
+                        ->withStatus(302);
+                }
+
+                // Some or all failed
+                if (count($successfulSponsorships) > 0) {
+                    $errors[] = 'Successfully sponsored: ' . implode(', ', $successfulSponsorships);
+                }
+
+                foreach ($failedChildren as $failed) {
+                    $errors[] = "Failed to sponsor {$failed['id']}: {$failed['error']}";
+                }
+            }
+        }
+
+        // Re-display form with errors
+        $allChildren = \CFK\Repository\ChildRepository::getByFamily($familyId);
+        $availableChildren = array_filter($allChildren, fn($child) => $child['status'] === 'available');
+        $availableChildren = array_values($availableChildren);
+
+        if ($availableChildren === []) {
+            $_SESSION['flash_message'] = 'No available children in this family to sponsor.';
+            $_SESSION['flash_type'] = 'error';
+            return $response
+                ->withHeader('Location', \baseUrl('/children'))
+                ->withStatus(302);
+        }
+
+        $familyNumber = $availableChildren[0]['family_number'];
+
+        $data = [
+            'pageTitle' => 'Sponsor Family ' . $familyNumber,
+            'children' => $availableChildren,
+            'formData' => $formData,
+            'errors' => $errors,
+            'csrfToken' => \generateCsrfToken(),
+            'submitUrl' => \baseUrl('/sponsor/family/' . $familyId),
+            'isFamily' => true,
+            'adminEmail' => \config('admin_email'),
+        ];
+
+        return $this->view->render($response, 'sponsor/form.twig', $data);
+    }
 }

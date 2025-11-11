@@ -74,6 +74,16 @@
                         <a href="{{ baseUrl }}/sponsor/child/{{ child.id }}" class="btn btn-success">
                             Sponsor Now
                         </a>
+
+                        {# Show "Sponsor Family" button if there are available siblings #}
+                        {% if siblingsByFamily and siblingsByFamily[child.family_id] %}
+                            {% set availableSiblings = siblingsByFamily[child.family_id]|filter(s => s.status == 'available') %}
+                            {% if availableSiblings|length > 1 %}
+                                <a href="{{ baseUrl }}/sponsor/family/{{ child.family_id }}" class="btn btn-secondary">
+                                    👨‍👩‍👧‍👦 Sponsor Entire Family ({{ availableSiblings|length }})
+                                </a>
+                            {% endif %}
+                        {% endif %}
                     {% else %}
                         <span class="status-badge status-{{ child.status }}">
                             {{ child.status|capitalize }}

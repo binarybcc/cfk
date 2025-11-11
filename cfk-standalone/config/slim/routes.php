@@ -128,14 +128,30 @@ return function (App $app) {
      */
     $app->get('/sponsorship/success', [SponsorController::class, 'showSuccess']);
 
+    /**
+     * Family Sponsorship Form: /sponsor/family/{id} (GET)
+     * Display sponsorship form for entire family
+     * Migrated from: ?page=sponsor&family_id={id}
+     * Week 6 Phase 2 Migration
+     */
+    $app->get('/sponsor/family/{id:\d+}', [SponsorController::class, 'showFamilyForm']);
+
+    /**
+     * Family Sponsorship Form: /sponsor/family/{id} (POST)
+     * Process family sponsorship request submission
+     * Migrated from: ?page=sponsor&family_id={id} (POST)
+     * Week 6 Phase 2 Migration
+     */
+    $app->post('/sponsor/family/{id:\d+}', [SponsorController::class, 'submitFamilySponsorship']);
+
     // =========================================================================
     // Future Routes (Will be added during migration)
     // =========================================================================
 
     // Week 6-8: Additional Features
-    // $app->get('/sponsor/family/{id:\d+}', [SponsorController::class, 'showFamilyForm']);
-    // $app->post('/sponsor/family/{id:\d+}', [SponsorController::class, 'submitFamilySponsorship']);
+    // $app->get('/cart', [CartController::class, 'show']);
     // $app->post('/cart/add', [CartController::class, 'add']);
+    // $app->post('/cart/remove', [CartController::class, 'remove']);
     // etc.
 
     // =========================================================================
