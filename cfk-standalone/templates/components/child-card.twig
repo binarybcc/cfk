@@ -71,6 +71,14 @@
                     </a>
 
                     {% if child.status == 'available' %}
+                        {# Add to Cart Button - using existing SelectionsManager #}
+                        <button type="button"
+                                class="btn btn-outline"
+                                onclick="addChildToCart({{ child.id }}, '{{ child.display_id }}', {{ child.age_months }}, '{{ child.gender }}', '{{ child.grade }}', '{{ child.school }}', '{{ child.interests }}', '{{ child.wishes }}', '{{ child.shirt_size }}', '{{ child.pant_size }}', '{{ child.jacket_size }}', '{{ child.shoe_size }}', {{ child.family_id }})"
+                                data-child-id="{{ child.id }}">
+                            🛒 Add to Cart
+                        </button>
+
                         <a href="{{ baseUrl }}/sponsor/child/{{ child.id }}" class="btn btn-success">
                             Sponsor Now
                         </a>

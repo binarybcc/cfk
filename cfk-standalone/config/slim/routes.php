@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use CFK\Controller\AdminController;
+use CFK\Controller\CartController;
 use CFK\Controller\ChildController;
 use CFK\Controller\SponsorController;
 use CFK\Controller\TestController;
@@ -145,14 +146,38 @@ return function (App $app) {
     $app->post('/sponsor/family/{id:\d+}', [SponsorController::class, 'submitFamilySponsorship']);
 
     // =========================================================================
+    // Cart Routes (Week 6 Phase 3 Migration)
+    // =========================================================================
+
+    /**
+     * Cart Review Page: /cart/review (GET)
+     * Display cart review page with all selected children
+     * Migrated from: ?page=reservation_review
+     * Week 6 Phase 3 Migration
+     */
+    $app->get('/cart/review', [CartController::class, 'review']);
+
+    /**
+     * Create Reservation: /cart/api/create (POST - JSON API)
+     * Create reservation from cart selections
+     * Week 6 Phase 3 Migration
+     */
+    $app->post('/cart/api/create', [CartController::class, 'createReservation']);
+
+    /**
+     * Cart Success Page: /cart/success (GET)
+     * Display success message after reservation creation
+     * Migrated from: ?page=reservation_success
+     * Week 6 Phase 3 Migration
+     */
+    $app->get('/cart/success', [CartController::class, 'success']);
+
+    // =========================================================================
     // Future Routes (Will be added during migration)
     // =========================================================================
 
-    // Week 6-8: Additional Features
-    // $app->get('/cart', [CartController::class, 'show']);
-    // $app->post('/cart/add', [CartController::class, 'add']);
-    // $app->post('/cart/remove', [CartController::class, 'remove']);
-    // etc.
+    // Week 7-8: Additional Features
+    // Future enhancements
 
     // =========================================================================
     // Legacy Fallback (During Migration)

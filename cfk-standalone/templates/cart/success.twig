@@ -1,0 +1,242 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+    <style>
+        .success-page {
+            max-width: 800px;
+            margin: 3rem auto;
+            padding: 0 1rem;
+        }
+
+        .success-hero {
+            background: linear-gradient(135deg, #2c5530 0%, #1e3d24 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .success-hero__icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .success-hero__icon svg {
+            width: 48px;
+            height: 48px;
+        }
+
+        .success-hero__title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0 0 1rem 0;
+        }
+
+        .success-hero__subtitle {
+            font-size: 1.125rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .success-details {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .success-details__title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c5530;
+            margin: 0 0 1.5rem 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 0.75rem;
+        }
+
+        .info-box {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-box p {
+            margin: 0 0 0.75rem 0;
+            line-height: 1.6;
+        }
+
+        .info-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        .info-box strong {
+            color: #2c5530;
+        }
+
+        .next-steps {
+            background: #f0f9ff;
+            border: 2px solid #bae6fd;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .next-steps__title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0c4a6e;
+            margin: 0 0 1rem 0;
+        }
+
+        .next-steps__list {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .next-steps__list li {
+            margin-bottom: 0.75rem;
+            line-height: 1.6;
+        }
+
+        .next-steps__list li strong {
+            color: #0c4a6e;
+        }
+
+        .success-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .success-actions {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        .form__footer {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .form__footer-text {
+            margin: 0 0 1rem 0;
+            font-size: 0.9375rem;
+            color: #4b5563;
+            line-height: 1.6;
+        }
+
+        .form__footer-text:last-child {
+            margin-bottom: 0;
+        }
+
+        .form__footer-text strong {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .form__footer-text a {
+            color: #2c5530;
+            text-decoration: underline;
+        }
+
+        .form__footer-text a:hover {
+            color: #1e3d24;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="success-page">
+    {# Success Hero Section #}
+    <div class="success-hero">
+        <div class="success-hero__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h1 class="success-hero__title">Thank You for Your Generosity!</h1>
+        <p class="success-hero__subtitle">
+            Your reservation has been received and is being processed.
+        </p>
+    </div>
+
+    {# Reservation Details #}
+    <div class="success-details">
+        <h2 class="success-details__title">Your Reservation</h2>
+
+        <div class="info-box">
+            <p><strong>Number of Children:</strong> {{ childrenCount }}</p>
+            <p><strong>Confirmation Email Sent To:</strong> {{ sponsorEmail }}</p>
+            <p style="color: #6b7280; font-size: 0.9375rem; margin-top: 1rem;">
+                Your reservation will be held for 48 hours. Please check your email for complete details
+                and instructions on how to complete your sponsorship.
+            </p>
+        </div>
+    </div>
+
+    {# Next Steps #}
+    <div class="next-steps">
+        <h2 class="next-steps__title">What Happens Next?</h2>
+        <ol class="next-steps__list">
+            <li>
+                <strong>Check Your Email:</strong> Within the next few minutes, you'll receive a confirmation
+                email with complete child information, including sizes, interests, wishes, and shopping lists.
+            </li>
+            <li>
+                <strong>Complete Your Reservation:</strong> Follow the instructions in the email to finalize
+                your sponsorship. Your reservation is held for 48 hours.
+            </li>
+            <li>
+                <strong>Shopping Time:</strong> Purchase gifts that match your sponsored children's interests
+                and needs using the shopping lists provided.
+            </li>
+            <li>
+                <strong>Gift Delivery:</strong> Drop off gifts at our collection center by the deadline
+                specified in your confirmation email.
+            </li>
+            <li>
+                <strong>Making Christmas Magic:</strong> We'll ensure your gifts reach your sponsored
+                children on Christmas!
+            </li>
+        </ol>
+    </div>
+
+    {# Action Buttons #}
+    <div class="success-actions">
+        <a href="{{ baseUrl('/children') }}" class="btn btn--primary btn--large">
+            Sponsor More Children
+        </a>
+        <a href="{{ baseUrl('/') }}" class="btn btn--secondary btn--large">
+            Return to Homepage
+        </a>
+    </div>
+
+    {# Support Contact #}
+    <div class="form__footer">
+        <p class="form__footer-text">
+            <strong>Questions or concerns?</strong> Please don't hesitate to contact us at
+            <a href="mailto:{{ adminEmail }}">{{ adminEmail }}</a>
+        </p>
+        <p class="form__footer-text" style="margin-bottom: 0;">
+            Thank you for being part of Christmas for Kids and making the holidays special for children in need!
+        </p>
+    </div>
+</div>
+{% endblock %}

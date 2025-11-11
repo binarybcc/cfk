@@ -33,8 +33,8 @@
                     <li><a href="{{ baseUrl('?page=children') }}">Children</a></li>
                     <li><a href="{{ baseUrl('?page=how_to_apply') }}">How to Apply</a></li>
                     <li class="selections-link">
-                        <a href="{{ baseUrl('?page=my_sponsorships') }}">
-                            My Sponsorships
+                        <a href="{{ baseUrl('/cart/review') }}" onclick="return getCartCount() > 0 || (alert('Your cart is empty'), false)">
+                            🛒 My Cart
                             <span id="selections-badge" class="selections-badge">0</span>
                         </a>
                     </li>
