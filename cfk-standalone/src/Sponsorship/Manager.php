@@ -468,4 +468,228 @@ class Manager
         </body>
         </html>";
     }
+
+    // ============================================================
+    // ADMIN MANAGEMENT METHODS
+    // ============================================================
+
+    /**
+     * Mark sponsorship as logged in external system
+     *
+     * @param int $sponsorshipId Sponsorship ID
+     * @return array{success: bool, message: string} Operation result
+     */
+    public static function logSponsorship(int $sponsorshipId): array
+    {
+        try {
+            $sponsorship = Connection::fetchRow(
+                "SELECT s.id, s.child_id, s.status
+                 FROM sponsorships s
+                 WHERE s.id = ?",
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                return ['success' => false, 'message' => 'Sponsorship not found'];
+            }
+
+            if ($sponsorship['status'] !== 'confirmed') {
+                return ['success' => false, 'message' => 'Only confirmed sponsorships can be logged'];
+            }
+
+            // Update sponsorship status to logged
+            Connection::update('sponsorships', [
+                'status' => self::STATUS_LOGGED,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], ['id' => $sponsorshipId]);
+
+            return ['success' => true, 'message' => 'Sponsorship marked as logged'];
+        } catch (Exception $e) {
+            error_log('Failed to log sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+            return ['success' => false, 'message' => 'System error occurred'];
+        }
+    }
+
+    /**
+     * Mark sponsorship as completed
+     *
+     * @param int $sponsorshipId Sponsorship ID
+     * @return array{success: bool, message: string} Operation result
+     */
+    public static function completeSponsorship(int $sponsorshipId): array
+    {
+        try {
+            $sponsorship = Connection::fetchRow(
+                "SELECT s.id, s.child_id, s.status
+                 FROM sponsorships s
+                 WHERE s.id = ?",
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                return ['success' => false, 'message' => 'Sponsorship not found'];
+            }
+
+            // Update sponsorship status to completed
+            Connection::update('sponsorships', [
+                'status' => self::STATUS_COMPLETED,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], ['id' => $sponsorshipId]);
+
+            // Update child status to completed
+            Connection::update('children', [
+                'status' => self::STATUS_COMPLETED
+            ], ['id' => $sponsorship['child_id']]);
+
+            return ['success' => true, 'message' => 'Sponsorship marked as completed'];
+        } catch (Exception $e) {
+            error_log('Failed to complete sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+            return ['success' => false, 'message' => 'System error occurred'];
+        }
+    }
+
+    /**
+     * Reverse logged status back to confirmed
+     *
+     * @param int $sponsorshipId Sponsorship ID
+     * @return array{success: bool, message: string} Operation result
+     */
+    public static function unlogSponsorship(int $sponsorshipId): array
+    {
+        try {
+            $sponsorship = Connection::fetchRow(
+                "SELECT s.id, s.status
+                 FROM sponsorships s
+                 WHERE s.id = ?",
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                return ['success' => false, 'message' => 'Sponsorship not found'];
+            }
+
+            if ($sponsorship['status'] !== self::STATUS_LOGGED) {
+                return ['success' => false, 'message' => 'Only logged sponsorships can be unlogged'];
+            }
+
+            // Revert status to confirmed
+            Connection::update('sponsorships', [
+                'status' => self::STATUS_SPONSORED,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], ['id' => $sponsorshipId]);
+
+            return ['success' => true, 'message' => 'Sponsorship status reverted to confirmed'];
+        } catch (Exception $e) {
+            error_log('Failed to unlog sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+            return ['success' => false, 'message' => 'System error occurred'];
+        }
+    }
+
+    /**
+     * Cancel a sponsorship with reason
+     *
+     * @param int $sponsorshipId Sponsorship ID
+     * @param string $reason Cancellation reason
+     * @return array{success: bool, message: string} Operation result
+     */
+    public static function cancelSponsorship(int $sponsorshipId, string $reason = ''): array
+    {
+        try {
+            $sponsorship = Connection::fetchRow(
+                "SELECT s.id, s.child_id, s.status
+                 FROM sponsorships s
+                 WHERE s.id = ?",
+                [$sponsorshipId]
+            );
+
+            if (!$sponsorship) {
+                return ['success' => false, 'message' => 'Sponsorship not found'];
+            }
+
+            // Start transaction to update both sponsorship and child
+            Connection::beginTransaction();
+
+            // Update sponsorship to cancelled
+            Connection::update('sponsorships', [
+                'status' => 'cancelled',
+                'cancellation_reason' => $reason,
+                'updated_at' => date('Y-m-d H:i:s')
+            ], ['id' => $sponsorshipId]);
+
+            // Release child back to available
+            Connection::update('children', [
+                'status' => self::STATUS_AVAILABLE
+            ], ['id' => $sponsorship['child_id']]);
+
+            Connection::commit();
+
+            return ['success' => true, 'message' => 'Sponsorship cancelled and child released'];
+        } catch (Exception $e) {
+            Connection::rollback();
+            error_log('Failed to cancel sponsorship ' . $sponsorshipId . ': ' . $e->getMessage());
+            return ['success' => false, 'message' => 'System error occurred'];
+        }
+    }
+
+    /**
+     * Get sponsorship statistics for admin dashboard
+     *
+     * @return array{total: int, pending: int, confirmed: int, logged: int, completed: int} Statistics
+     */
+    public static function getStats(): array
+    {
+        try {
+            $stats = Connection::fetchRow("
+                SELECT
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = 'confirmed' THEN 1 ELSE 0 END) as confirmed,
+                    SUM(CASE WHEN status = 'logged' THEN 1 ELSE 0 END) as logged,
+                    SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+                FROM sponsorships
+                WHERE status != 'cancelled'
+            ");
+
+            return [
+                'total' => (int) ($stats['total'] ?? 0),
+                'pending' => (int) ($stats['pending'] ?? 0),
+                'confirmed' => (int) ($stats['confirmed'] ?? 0),
+                'logged' => (int) ($stats['logged'] ?? 0),
+                'completed' => (int) ($stats['completed'] ?? 0)
+            ];
+        } catch (Exception $e) {
+            error_log('Failed to get sponsorship stats: ' . $e->getMessage());
+            return ['total' => 0, 'pending' => 0, 'confirmed' => 0, 'logged' => 0, 'completed' => 0];
+        }
+    }
+
+    /**
+     * Get children that need admin attention (pending too long, etc.)
+     *
+     * @return array<int, array<string, mixed>> List of children needing attention
+     */
+    public static function getChildrenNeedingAttention(): array
+    {
+        try {
+            // Get pending sponsorships older than 24 hours
+            $oldPending = Connection::fetchAll("
+                SELECT s.*,
+                       CONCAT(f.family_number, c.child_letter) as child_display_id,
+                       c.age_months as child_age,
+                       c.gender as child_gender,
+                       TIMESTAMPDIFF(HOUR, s.request_date, NOW()) as hours_pending
+                FROM sponsorships s
+                JOIN children c ON s.child_id = c.id
+                JOIN families f ON c.family_id = f.id
+                WHERE s.status = 'pending'
+                AND s.request_date < DATE_SUB(NOW(), INTERVAL 24 HOUR)
+                ORDER BY s.request_date ASC
+            ");
+
+            return $oldPending;
+        } catch (Exception $e) {
+            error_log('Failed to get children needing attention: ' . $e->getMessage());
+            return [];
+        }
+    }
 }
