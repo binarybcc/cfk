@@ -18,22 +18,55 @@ require_once __DIR__ . '/includes/functions.php';
 
 // Get requested page
 $page = $_GET['page'] ?? 'home';
-$validPages = ['home', 'children', 'child', 'family', 'sponsor', 'about', 'donate', 'sponsor_lookup', 'sponsor_portal', 'how_to_apply', 'my_sponsorships', 'selections', 'confirm_sponsorship', 'reservation_review', 'reservation_success'];
 
-// Redirect search to children page with search parameter (before headers are sent)
+// ============================================================================
+// MIGRATION: Redirect legacy query string routes → new Slim Framework routes
+// ============================================================================
+// All public-facing pages have been migrated to clean Slim routes.
+// Redirect old ?page= URLs to new routes for SEO and user bookmarks.
+
+$legacyRedirects = [
+    'children' => '/children',
+    'child' => isset($_GET['id']) ? '/children/' . (int)$_GET['id'] : '/children',
+    'about' => '/about',
+    'donate' => '/donate',
+    'how_to_apply' => '/how-to-apply',
+    'sponsor_lookup' => '/sponsor/lookup',
+    'sponsor_portal' => isset($_GET['token']) ? '/portal?token=' . urlencode($_GET['token']) : '/sponsor/lookup',
+    'my_sponsorships' => '/portal',
+    'sponsor' => isset($_GET['child_id']) ? '/sponsor/child/' . (int)$_GET['child_id'] :
+                 (isset($_GET['family_id']) ? '/sponsor/family/' . (int)$_GET['family_id'] : '/children'),
+    'family' => isset($_GET['id']) ? '/sponsor/family/' . (int)$_GET['id'] : '/children',
+    'reservation_review' => '/cart/review',
+    'reservation_success' => '/cart/success',
+    'confirm_sponsorship' => '/children', // Obsolete - redirect to browse
+    'selections' => '/cart/review', // Old cart name
+];
+
+// Perform redirect if this is a migrated page
+if (isset($legacyRedirects[$page])) {
+    header('Location: ' . baseUrl($legacyRedirects[$page]), true, 301); // 301 = Permanent redirect
+    exit;
+}
+
+// Special handling for search
 if ($page === 'search') {
     $searchQuery = sanitizeString($_GET['q'] ?? $_GET['search'] ?? '');
     if (!empty($searchQuery)) {
-        header('Location: ' . baseUrl('?page=children&search=' . urlencode($searchQuery)));
+        header('Location: ' . baseUrl('/children?search=' . urlencode($searchQuery)), true, 301);
     } else {
-        header('Location: ' . baseUrl('?page=children'));
+        header('Location: ' . baseUrl('/children'), true, 301);
     }
     exit;
 }
 
-// Default to children listing if page is invalid
+// Legacy pages list (now only used for temp_landing)
+$validPages = ['home', 'temp_landing'];
+
+// Default to homepage (/) if page is invalid
 if (!in_array($page, $validPages)) {
-    $page = 'children';
+    header('Location: ' . baseUrl('/'), true, 301);
+    exit;
 }
 
 // ============================================================================
@@ -67,59 +100,27 @@ if ($showTempLanding) {
 }
 
 // Route to appropriate page
+// NOTE: Most pages now use Slim Framework routes. Only temp_landing and home remain here.
 switch ($page) {
     case 'home':
         if ($showTempLanding) {
             include __DIR__ . '/pages/temp_landing.php';
         } else {
-            include __DIR__ . '/pages/home.php';
+            // Redirect to Slim route
+            header('Location: ' . baseUrl('/'), true, 301);
+            exit;
         }
         break;
-    case 'children':
-        include __DIR__ . '/pages/children.php';
+
+    case 'temp_landing':
+        // Explicit temp landing (for preview mode)
+        include __DIR__ . '/pages/temp_landing.php';
         break;
-    case 'child':
-        include __DIR__ . '/pages/child.php';
-        break;
-    case 'family':
-        include __DIR__ . '/pages/family.php';
-        break;
-    case 'sponsor':
-        include __DIR__ . '/pages/sponsor.php';
-        break;
-    case 'about':
-        include __DIR__ . '/pages/about.php';
-        break;
-    case 'donate':
-        include __DIR__ . '/pages/donate.php';
-        break;
-    case 'sponsor_lookup':
-        include __DIR__ . '/pages/sponsor_lookup.php';
-        break;
-    case 'sponsor_portal':
-        include __DIR__ . '/pages/sponsor_portal.php';
-        break;
-    case 'how_to_apply':
-        include __DIR__ . '/pages/how_to_apply.php';
-        break;
-    case 'my_sponsorships':
-        include __DIR__ . '/pages/my_sponsorships.php';
-        break;
-    case 'selections':
-        // Redirect old selections page to new unified page
-        header('Location: ' . baseUrl('?page=my_sponsorships'));
-        exit;
-    case 'confirm_sponsorship':
-        include __DIR__ . '/pages/confirm_sponsorship.php';
-        break;
-    case 'reservation_review':
-        include __DIR__ . '/pages/reservation_review.php';
-        break;
-    case 'reservation_success':
-        include __DIR__ . '/pages/reservation_success.php';
-        break;
+
     default:
-        include __DIR__ . '/pages/children.php';
+        // Should never reach here due to redirects above
+        header('Location: ' . baseUrl('/'), true, 301);
+        exit;
 }
 
 // Include footer
