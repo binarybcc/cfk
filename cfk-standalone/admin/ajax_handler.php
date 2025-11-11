@@ -300,10 +300,18 @@ function editChild(array $data): array
             }
         }
 
+        // Convert age to months if years provided
+        $ageMonths = sanitizeInt($data['age_months'] ?? 0);
+        $ageYears = sanitizeInt($data['age_years'] ?? 0);
+
+        if ($ageYears > 0) {
+            $ageMonths = $ageYears * 12;
+        }
+
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
-            'age' => sanitizeInt($data['age']),
+            'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
             'school' => sanitizeString($data['school'] ?? ''),
@@ -336,9 +344,16 @@ function validateChildData(array $data): array
 
     // Name is optional - no validation needed
 
-    $age = sanitizeInt($data['age'] ?? 0);
-    if ($age < 1 || $age > 18) {
-        $errors[] = 'Age must be between 1 and 18';
+    // Validate age (in months or years)
+    $ageMonths = sanitizeInt($data['age_months'] ?? 0);
+    $ageYears = sanitizeInt($data['age_years'] ?? 0);
+
+    if ($ageYears > 0) {
+        $ageMonths = $ageYears * 12;
+    }
+
+    if ($ageMonths < 1 || $ageMonths > 216) { // 1 month to 18 years
+        $errors[] = 'Age must be between 1 month and 18 years';
     }
 
     if (in_array(trim($data['gender'] ?? ''), ['', '0'], true) || ! in_array($data['gender'], ['M', 'F'])) {

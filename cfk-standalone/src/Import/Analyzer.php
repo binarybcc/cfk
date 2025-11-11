@@ -171,15 +171,17 @@ class Analyzer
         }
 
         // Check for age decrease (likely error)
-        if (isset($changes['age'])) {
-            $oldAge = (int) $changes['age']['old'];
-            $newAge = (int) $changes['age']['new'];
+        if (isset($changes['age_months'])) {
+            $oldAgeMonths = (int) $changes['age_months']['old'];
+            $newAgeMonths = (int) $changes['age_months']['new'];
 
-            if ($newAge < $oldAge && $oldAge > 0) {
+            if ($newAgeMonths < $oldAgeMonths && $oldAgeMonths > 0) {
+                $oldAgeDisplay = displayAge($oldAgeMonths);
+                $newAgeDisplay = displayAge($newAgeMonths);
                 $warnings[] = [
                     'type' => 'age_decreased',
                     'severity' => 'medium',
-                    'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}): Age decreased from {$oldAge} to {$newAge} (possible error?)",
+                    'message' => "Child {$oldChild['name']} (Family {$oldChild['family_id']}{$oldChild['child_letter']}): Age decreased from {$oldAgeDisplay} to {$newAgeDisplay} (possible error?)",
                     'child' => $oldChild,
                 ];
             }

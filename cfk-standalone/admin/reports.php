@@ -561,7 +561,7 @@ include __DIR__ . '/includes/admin_header.php';
                         <tr>
                             <td><?php echo sanitizeString($row['child_id']); ?></td>
                             <td><?php echo sanitizeString($row['child_name']); ?></td>
-                            <td><?php echo $row['age']; ?></td>
+                            <td><?php echo displayAge($row['age_months']); ?></td>
                             <td><?php echo $row['gender'] === 'M' ? 'Boy' : 'Girl'; ?></td>
                             <td><?php echo sanitizeString($row['grade'] ?? '-'); ?></td>
                             <td><span class="status-badge status-<?php echo $row['child_status']; ?>"><?php echo ucfirst((string) $row['child_status']); ?></span></td>

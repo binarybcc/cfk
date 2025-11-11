@@ -109,7 +109,7 @@ class Handler
                 $familyId = $row['family_id']; // Use parsed family ID
                 $this->imported[] = [
                     'name' => $row['name'],
-                    'age' => $row['age'],
+                    'age_months' => $row['age_months'],
                     'family_id' => $familyId,
                     'child_id' => 999, // Fake ID for dry run
                 ];
@@ -125,7 +125,7 @@ class Handler
                 if ($childId) {
                     $this->imported[] = [
                         'name' => $row['name'],
-                        'age' => $row['age'],
+                        'age_months' => $row['age_months'],
                         'family_id' => $familyId,
                         'child_id' => $childId,
                     ];
