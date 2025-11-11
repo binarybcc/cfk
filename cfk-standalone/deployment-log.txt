@@ -11,3 +11,4 @@
 [Tue Nov 11 11:15:27 EST 2025] CRITICAL: Deployed manage_children.php (contains addChild/editChild functions) to STAGING
 [Tue Nov 11 11:27:46 EST 2025] CRITICAL FIX: Added missing 'name' field (auto-generated from family+letter) - Deployed to STAGING (commit 6726d3c)
 [Tue Nov 11 11:31:35 EST 2025] CRITICAL FIX #2: Use existing child_letter from DB (not form) - Deployed to STAGING
+[Tue Nov 11 14:28:44 EST 2025] Deployed v1.9.2 with Week 6-7 features (commit e1d81ac) to STAGING - Cart, portal, content pages
