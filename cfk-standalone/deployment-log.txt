@@ -10,3 +10,4 @@
 [Tue Nov 11 11:09:46 EST 2025] Fixed age column references - Deployed to STAGING (commit 76e6284)
 [Tue Nov 11 11:15:27 EST 2025] CRITICAL: Deployed manage_children.php (contains addChild/editChild functions) to STAGING
 [Tue Nov 11 11:27:46 EST 2025] CRITICAL FIX: Added missing 'name' field (auto-generated from family+letter) - Deployed to STAGING (commit 6726d3c)
+[Tue Nov 11 11:31:35 EST 2025] CRITICAL FIX #2: Use existing child_letter from DB (not form) - Deployed to STAGING
