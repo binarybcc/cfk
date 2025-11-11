@@ -323,16 +323,8 @@ function editChild(array $data): array
             return ['success' => false, 'message' => 'Child not found'];
         }
 
-        // Check if child_letter is unique within family (if changed)
-        if ($child['family_id'] != $data['family_id'] || $child['child_letter'] != $data['child_letter']) {
-            $existing = Database::fetchRow(
-                "SELECT id FROM children WHERE family_id = ? AND child_letter = ? AND id != ?",
-                [$data['family_id'], $data['child_letter'], $childId]
-            );
-            if ($existing) {
-                return ['success' => false, 'message' => 'Child letter already exists in this family'];
-            }
-        }
+        // Note: child_letter is NOT editable (auto-assigned), so use existing value
+        // Family changes are allowed but rare - child keeps their letter in the new family
 
         // Convert age to months if years provided
         $ageMonths = sanitizeInt($data['age_months'] ?? 0);
@@ -343,13 +335,14 @@ function editChild(array $data): array
         }
 
         // Get updated family info for name generation
+        // Note: Use existing child_letter (not from form - it's not editable)
         $updatedFamily = Database::fetchRow("SELECT family_number FROM families WHERE id = ?", [sanitizeInt($data['family_id'])]);
-        $defaultName = $updatedFamily['family_number'] . sanitizeString($data['child_letter']);
+        $defaultName = $updatedFamily['family_number'] . $child['child_letter'];
 
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
-            'child_letter' => sanitizeString($data['child_letter']),
-            'name' => $defaultName, // Update name if family/letter changed
+            'child_letter' => $child['child_letter'], // Use existing letter (not editable)
+            'name' => $defaultName, // Update name if family changed
             'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
