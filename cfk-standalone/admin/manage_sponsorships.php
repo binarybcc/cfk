@@ -1232,6 +1232,9 @@ include __DIR__ . '/includes/admin_header.php';
 <script nonce="<?php echo $cspNonce; ?>">
 // CSP-compliant JavaScript for manage_sponsorships.php
 document.addEventListener('DOMContentLoaded', function() {
+    // ===== CSRF Token for Dynamic Forms =====
+    const csrfToken = '<?php echo generateCsrfToken(); ?>';
+
     // ===== DOM Element References =====
     const selectAllCheckbox = document.getElementById('select-all-checkbox');
     const selectAllHeader = document.getElementById('select-all-header');
@@ -1571,7 +1574,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // confirmed → logged: Show Unlog (blue) and Mark Complete (gray) buttons
             actionsCell.innerHTML = `
                 <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="csrf_token" value="${csrfToken}">
                     <input type="hidden" name="action" value="unlog">
                     <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
                     <button type="submit" class="btn-action btn-unlog" title="Remove from logged status">
@@ -1579,7 +1582,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </form>
                 <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="csrf_token" value="${csrfToken}">
                     <input type="hidden" name="action" value="complete">
                     <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
                     <button type="submit" class="btn-action btn-complete-logged" title="Mark as complete (gifts delivered)">
@@ -1591,7 +1594,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // logged → confirmed: Show Mark Logged (gray) and Mark Complete (gray) buttons
             actionsCell.innerHTML = `
                 <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="csrf_token" value="${csrfToken}">
                     <input type="hidden" name="action" value="log">
                     <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
                     <button type="submit" class="btn-action btn-log-pending" title="Mark as logged in external spreadsheet">
@@ -1599,7 +1602,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </form>
                 <form method="POST" style="display: inline;">
-                    <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                    <input type="hidden" name="csrf_token" value="${csrfToken}">
                     <input type="hidden" name="action" value="complete">
                     <input type="hidden" name="sponsorship_id" value="${form.querySelector('[name="sponsorship_id"]').value}">
                     <button type="submit" class="btn-action btn-complete-pending" title="Mark as complete (gifts delivered)">
