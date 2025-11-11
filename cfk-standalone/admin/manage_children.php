@@ -260,9 +260,13 @@ function addChild(array $data): array
             $ageMonths = $ageYears * 12;
         }
 
+        // Generate default name from family number + child letter (for database NOT NULL requirement)
+        $defaultName = $family['family_number'] . $assignedChildLetter;
+
         $childId = Database::insert('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
+            'name' => $defaultName, // Required NOT NULL field
             'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
@@ -338,9 +342,14 @@ function editChild(array $data): array
             $ageMonths = $ageYears * 12;
         }
 
+        // Get updated family info for name generation
+        $updatedFamily = Database::fetchRow("SELECT family_number FROM families WHERE id = ?", [sanitizeInt($data['family_id'])]);
+        $defaultName = $updatedFamily['family_number'] . sanitizeString($data['child_letter']);
+
         Database::update('children', [
             'family_id' => sanitizeInt($data['family_id']),
             'child_letter' => sanitizeString($data['child_letter']),
+            'name' => $defaultName, // Update name if family/letter changed
             'age_months' => $ageMonths,
             'grade' => sanitizeString($data['grade']),
             'gender' => sanitizeString($data['gender']),
