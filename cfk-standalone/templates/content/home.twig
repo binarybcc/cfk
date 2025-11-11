@@ -1,0 +1,144 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+    <style>
+        .home-page {
+            padding: 0;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #2c5530 0%, #1e3d24 100%);
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .hero-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 1.5rem 0;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 1.25rem;
+            line-height: 1.6;
+            margin: 0 0 2rem 0;
+            opacity: 0.95;
+        }
+
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0 3rem 0;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat strong {
+            display: block;
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fbbf24;
+        }
+
+        .stat span {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .hero-cta-primary {
+            animation: gentlePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 3rem 1.5rem;
+            }
+
+            .hero-content h1 {
+                font-size: 1.75rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .stat strong {
+                font-size: 2rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+            }
+
+            .hero-actions .btn {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="home-page">
+    <section class="hero">
+        <div class="hero-inner">
+            <div class="hero-content">
+                <h1>Make Christmas Magical for a Child in Need</h1>
+                <p class="hero-subtitle">
+                    Every child deserves to experience the wonder and joy of Christmas morning.
+                    Your generosity can make that dream come true for local families facing difficult times.
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <strong>{{ totalChildren }}</strong>
+                        <span>Children We're Helping</span>
+                    </div>
+                    <div class="stat">
+                        <strong>{{ totalFamilies }}</strong>
+                        <span>Families We're Helping</span>
+                    </div>
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="{{ baseUrl('/children') }}" class="btn btn--primary btn--large hero-cta-primary">
+                    View Children Needing Sponsorship
+                </a>
+                <a href="{{ baseUrl('/donate') }}" class="btn btn--success btn--large">
+                    Make a Donation
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -16,6 +16,7 @@ declare(strict_types=1);
 use CFK\Controller\AdminController;
 use CFK\Controller\CartController;
 use CFK\Controller\ChildController;
+use CFK\Controller\ContentController;
 use CFK\Controller\PortalController;
 use CFK\Controller\SponsorController;
 use CFK\Controller\TestController;
@@ -39,6 +40,42 @@ return function (App $app) {
      * Returns HTML response
      */
     $app->get('/slim-test-view', [TestController::class, 'testView']);
+
+    // =========================================================================
+    // Content Pages (Week 7 Migration)
+    // =========================================================================
+
+    /**
+     * Homepage: / (GET)
+     * Main landing page with hero section and statistics
+     * Migrated from: ?page=home
+     * Week 7 Migration
+     */
+    $app->get('/', [ContentController::class, 'home']);
+
+    /**
+     * About Page: /about (GET)
+     * Information about Christmas for Kids organization
+     * Migrated from: ?page=about
+     * Week 7 Migration
+     */
+    $app->get('/about', [ContentController::class, 'about']);
+
+    /**
+     * Donate Page: /donate (GET)
+     * Donation information and Zeffy embedded form
+     * Migrated from: ?page=donate
+     * Week 7 Migration
+     */
+    $app->get('/donate', [ContentController::class, 'donate']);
+
+    /**
+     * How To Apply Page: /how-to-apply (GET)
+     * Information for families applying for assistance
+     * Migrated from: ?page=how_to_apply
+     * Week 7 Migration
+     */
+    $app->get('/how-to-apply', [ContentController::class, 'howToApply']);
 
     // =========================================================================
     // Child Routes (Week 2-3 Migration)
