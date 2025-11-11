@@ -1,0 +1,146 @@
+{#
+  Child Card Component - Reusable display component for children
+
+  A flexible, DRY component that displays child information in multiple contexts.
+  Single source of truth for all child card displays across the application.
+
+  @param object child - Child data object (required)
+  @param string variant - Display variant: 'grid'|'sibling'|'list' (default: 'grid')
+  @param array siblings - Array of siblings data (optional, for grid variant)
+  @param object siblingsByFamily - Grouped siblings data (optional, for grid variant)
+  @param bool showActions - Show action buttons (default: true)
+  @param string baseUrl - Base URL for routing (default: '/slim.php')
+
+  Usage:
+    {% include 'components/child-card.twig' with {
+        child: childData,
+        variant: 'grid',
+        showActions: true
+    } %}
+#}
+
+{% set variant = variant|default('grid') %}
+{% set showActions = showActions is defined ? showActions : true %}
+{% set baseUrl = baseUrl|default('/slim.php') %}
+
+{% if variant == 'grid' %}
+    {# Grid Card - Full card for browse pages #}
+    <div class="child-card child-card--grid" data-child-id="{{ child.id }}">
+        {# Photo #}
+        <div class="child-card__photo">
+            <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                 alt="Avatar for Family {{ child.display_id }}"
+                 loading="lazy">
+        </div>
+
+        {# Content #}
+        <div class="child-card__content">
+            <h3 class="child-card__title">Family {{ child.display_id }}</h3>
+
+            <div class="child-card__details">
+                <div class="child-card__detail-item">
+                    <strong>Age:</strong> {{ formatAge(child.age_months) }}
+                </div>
+                <div class="child-card__detail-item">
+                    <strong>Grade:</strong> {{ child.grade ?: 'Not specified' }}
+                </div>
+                {% if child.gender %}
+                    <div class="child-card__detail-item">
+                        <strong>Gender:</strong> {{ child.gender == 'M' ? 'Male' : 'Female' }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {# Siblings Info #}
+            {% if siblingsByFamily and siblingsByFamily[child.family_id] %}
+                {% set availableSiblings = siblingsByFamily[child.family_id]|filter(s => s.status == 'available') %}
+                {% if availableSiblings|length > 1 %}
+                    <div class="child-card__siblings-info">
+                        <span class="child-card__sibling-badge">
+                            👨‍👩‍👧‍👦 {{ availableSiblings|length - 1 }} sibling(s) also need sponsorship
+                        </span>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            {# Actions #}
+            {% if showActions %}
+                <div class="child-card__actions">
+                    <a href="{{ baseUrl }}/children/{{ child.id }}" class="btn btn-primary">
+                        View Profile
+                    </a>
+
+                    {% if child.status == 'available' %}
+                        <a href="{{ baseUrl }}/sponsor/child/{{ child.id }}" class="btn btn-success">
+                            Sponsor Now
+                        </a>
+                    {% else %}
+                        <span class="status-badge status-{{ child.status }}">
+                            {{ child.status|capitalize }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% elseif variant == 'sibling' %}
+    {# Sibling Card - Compact card for family member displays #}
+    <div class="child-card child-card--sibling" data-child-id="{{ child.id }}">
+        <div class="child-card__photo child-card__photo--small">
+            <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                 alt="Avatar for Family {{ child.display_id }}"
+                 loading="lazy">
+        </div>
+
+        <div class="child-card__content">
+            <h4 class="child-card__title child-card__title--small">
+                Family {{ child.display_id }}
+            </h4>
+            <p class="child-card__meta">{{ formatAge(child.age_months) }}</p>
+
+            {% if child.status %}
+                <div class="status-badge status-{{ child.status }}">
+                    {{ childStatusOptions[child.status] ?? child.status|capitalize }}
+                </div>
+            {% endif %}
+
+            {% if showActions %}
+                <a href="{{ baseUrl }}/children/{{ child.id }}"
+                   class="btn btn-small btn-secondary">
+                    View Profile
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+{% elseif variant == 'list' %}
+    {# List Card - Compact horizontal card for list views #}
+    <div class="child-card child-card--list" data-child-id="{{ child.id }}">
+        <div class="child-card__photo child-card__photo--thumbnail">
+            <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
+                 alt="Avatar for Family {{ child.display_id }}"
+                 loading="lazy">
+        </div>
+
+        <div class="child-card__content child-card__content--horizontal">
+            <div class="child-card__info">
+                <h4 class="child-card__title">Family {{ child.display_id }}</h4>
+                <p class="child-card__meta">
+                    {{ formatAge(child.age_months) }} •
+                    {{ child.gender == 'M' ? 'Male' : 'Female' }} •
+                    {{ child.grade ?: 'Grade not specified' }}
+                </p>
+            </div>
+
+            {% if showActions %}
+                <div class="child-card__actions child-card__actions--inline">
+                    <a href="{{ baseUrl }}/children/{{ child.id }}" class="btn btn-small btn-primary">
+                        View
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endif %}

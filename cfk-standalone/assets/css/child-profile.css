@@ -1,0 +1,415 @@
+/**
+ * Child Profile Page Styles
+ *
+ * Styles for individual child profile pages with detailed information.
+ */
+
+/* =============================================================================
+   Page Container
+   ============================================================================= */
+
+.child-profile-page {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* =============================================================================
+   Breadcrumb
+   ============================================================================= */
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 12px 0;
+    font-size: 0.95rem;
+}
+
+.breadcrumb a {
+    color: #2c5530;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.breadcrumb a:hover {
+    color: #1a3320;
+    text-decoration: underline;
+}
+
+.breadcrumb span[aria-current="page"] {
+    color: #666;
+    font-weight: 500;
+}
+
+/* =============================================================================
+   Profile Header
+   ============================================================================= */
+
+.profile-header {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 40px;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.profile-photo {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.profile-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.profile-basic-info h1 {
+    font-size: 2rem;
+    color: #2c5530;
+    margin: 0 0 20px 0;
+}
+
+.basic-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    font-size: 1rem;
+}
+
+.detail-item strong {
+    color: #2c5530;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+/* =============================================================================
+   Alert Banners
+   ============================================================================= */
+
+.alert {
+    padding: 20px 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+}
+
+.alert h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+}
+
+.alert p {
+    margin: 10px 0;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.alert-warning h3 {
+    color: #856404;
+}
+
+/* =============================================================================
+   Profile Details
+   ============================================================================= */
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.detail-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.detail-section h2 {
+    font-size: 1.6rem;
+    color: #2c5530;
+    margin: 0 0 20px 0;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.detail-section h3 {
+    font-size: 1.3rem;
+    color: #2c5530;
+    margin: 25px 0 15px 0;
+}
+
+/* =============================================================================
+   Clothing Sizes
+   ============================================================================= */
+
+.size-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.size-item {
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+    font-size: 1.05rem;
+}
+
+.size-item strong {
+    color: #2c5530;
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+/* =============================================================================
+   Text Content
+   ============================================================================= */
+
+.interests-text,
+.wishes-text,
+.special-needs-text {
+    line-height: 1.7;
+    font-size: 1.05rem;
+    color: #444;
+    white-space: pre-wrap;
+}
+
+/* =============================================================================
+   Siblings Section
+   ============================================================================= */
+
+.siblings-section {
+    margin-top: 20px;
+}
+
+.siblings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.family-notes {
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.family-notes p {
+    line-height: 1.7;
+    font-size: 1.05rem;
+    color: #444;
+    white-space: pre-wrap;
+}
+
+/* =============================================================================
+   Sponsorship Action
+   ============================================================================= */
+
+.sponsorship-action {
+    background: linear-gradient(135deg, #2c5530 0%, #3a6d3e 100%);
+    color: white;
+    padding: 40px;
+    border-radius: 8px;
+    text-align: center;
+    margin: 40px 0;
+    box-shadow: 0 4px 12px rgba(44, 85, 48, 0.3);
+}
+
+.action-content h2 {
+    font-size: 2rem;
+    margin: 0 0 15px 0;
+    color: white;
+}
+
+.action-content p {
+    font-size: 1.15rem;
+    margin-bottom: 25px;
+    opacity: 0.95;
+}
+
+.action-content .btn {
+    font-size: 1.1rem;
+    padding: 15px 40px;
+    margin: 10px;
+}
+
+.family-sponsor-section {
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.family-sponsor-note {
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.sponsorship-unavailable {
+    margin: 40px 0;
+}
+
+/* =============================================================================
+   Other Ways to Help
+   ============================================================================= */
+
+.other-help {
+    text-align: center;
+    padding: 40px 30px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-top: 40px;
+}
+
+.other-help h2 {
+    font-size: 1.8rem;
+    color: #2c5530;
+    margin: 0 0 15px 0;
+}
+
+.other-help p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+.help-options {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+
+@media (max-width: 968px) {
+    .profile-header {
+        grid-template-columns: 1fr;
+        gap: 25px;
+    }
+
+    .profile-photo {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .siblings-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .child-profile-page {
+        padding: 15px;
+    }
+
+    .profile-header {
+        padding: 20px;
+    }
+
+    .profile-basic-info h1 {
+        font-size: 1.6rem;
+    }
+
+    .basic-details {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .detail-section {
+        padding: 20px;
+    }
+
+    .detail-section h2 {
+        font-size: 1.4rem;
+    }
+
+    .size-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sponsorship-action {
+        padding: 30px 20px;
+    }
+
+    .action-content h2 {
+        font-size: 1.6rem;
+    }
+
+    .action-content p {
+        font-size: 1rem;
+    }
+
+    .action-content .btn {
+        font-size: 1rem;
+        padding: 12px 30px;
+        width: 100%;
+        margin: 8px 0;
+    }
+
+    .help-options {
+        flex-direction: column;
+    }
+
+    .help-options .btn {
+        width: 100%;
+    }
+}
+
+/* =============================================================================
+   Print Styles
+   ============================================================================= */
+
+@media print {
+    .breadcrumb,
+    .sponsorship-action,
+    .sponsorship-unavailable,
+    .other-help {
+        display: none;
+    }
+
+    .profile-header {
+        grid-template-columns: 250px 1fr;
+        gap: 20px;
+        padding: 15px;
+        background: none;
+        box-shadow: none;
+    }
+
+    .profile-photo {
+        box-shadow: none;
+    }
+
+    .detail-section {
+        padding: 15px;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+
+    .siblings-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

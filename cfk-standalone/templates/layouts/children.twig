@@ -1,0 +1,13 @@
+{#
+  Children Page Layout
+
+  Extends the base layout and adds children-specific CSS.
+  Use this layout for all children-related pages (browse, profile, etc.)
+#}
+{% extends "layouts/base.twig" %}
+
+{% block head_extra %}
+    <!-- Children Page Specific CSS -->
+    <link rel="stylesheet" href="{{ baseUrl('assets/css/children.css') }}">
+    <link rel="stylesheet" href="{{ baseUrl('assets/css/child-profile.css') }}">
+{% endblock %}

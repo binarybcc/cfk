@@ -9,6 +9,10 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="{{ baseUrl('assets/css/styles.css') }}">
+    <link rel="stylesheet" href="{{ baseUrl('assets/css/child-card.css') }}">
+
+    {# Page-specific CSS can be added via head_extra block #}
+    {% block head_extra %}{% endblock %}
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ baseUrl('assets/images/favicon.ico') }}">
