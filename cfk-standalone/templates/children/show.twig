@@ -1,14 +1,18 @@
-{# Child Profile Template #}
+{% extends "layouts/children.twig" %}
 
+{% block title %}Family {{ child.display_id }} - Child Profile{% endblock %}
+
+{% block content %}
 <div class="child-profile-page">
-    {# Breadcrumb #}
-    <nav class="breadcrumb">
-        <a href="?page=children">All Children</a>
-        <span>&raquo;</span>
-        <span>Family {{ child.display_id }}</span>
+    {# Breadcrumb Navigation #}
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="/slim.php/children">All Children</a>
+        <span aria-hidden="true">&raquo;</span>
+        <span aria-current="page">Family {{ child.display_id }}</span>
     </nav>
 
     <div class="child-profile">
+        {# Profile Header #}
         <div class="profile-header">
             <div class="profile-photo">
                 <img src="{{ getPhotoUrl(child.photo_filename, child) }}"
@@ -17,7 +21,6 @@
 
             <div class="profile-basic-info">
                 <h1>Family Code: {{ child.display_id }}</h1>
-                <p class="child-id">ID: {{ child.display_id }}</p>
 
                 <div class="basic-details">
                     <div class="detail-item">
@@ -48,7 +51,7 @@
 
         {# Unavailable Warning #}
         {% if not isAvailable %}
-            <div class="alert alert-warning">
+            <div class="alert alert-warning" role="alert">
                 <h3>This child is no longer available for sponsorship</h3>
                 <p>
                     {% if child.status == 'sponsored' %}
@@ -59,12 +62,13 @@
                         This child is not currently available for sponsorship.
                     {% endif %}
                 </p>
-                <a href="?page=children" class="btn btn-primary">
+                <a href="/slim.php/children" class="btn btn-primary">
                     View Other Children
                 </a>
             </div>
         {% endif %}
 
+        {# Profile Details #}
         <div class="profile-details">
             {# Clothing Sizes #}
             {% if child.shirt_size or child.pant_size or child.shoe_size or child.jacket_size %}
@@ -132,22 +136,12 @@
                             <h3>Siblings Also Needing Sponsorship</h3>
                             <div class="siblings-grid">
                                 {% for sibling in siblings %}
-                                    <div class="sibling-card">
-                                        <div class="sibling-photo">
-                                            <img src="{{ getPhotoUrl(sibling.photo_filename, sibling) }}"
-                                                 alt="Avatar for {{ sibling.name }}">
-                                        </div>
-                                        <div class="sibling-info">
-                                            <h4>{{ sibling.name }}</h4>
-                                            <p>ID: {{ sibling.display_id }}</p>
-                                            <p>{{ formatAge(sibling.age_months) }}</p>
-                                            <div class="status-badge status-{{ sibling.status }}">
-                                                {{ childStatusOptions[sibling.status] ?? sibling.status|capitalize }}
-                                            </div>
-                                            <a href="?page=child&id={{ sibling.id }}"
-                                               class="btn btn-small btn-secondary">View Profile</a>
-                                        </div>
-                                    </div>
+                                    {% include 'components/child-card.twig' with {
+                                        child: sibling,
+                                        variant: 'sibling',
+                                        showActions: true,
+                                        baseUrl: '/slim.php'
+                                    } %}
                                 {% endfor %}
                             </div>
                         </div>
@@ -167,42 +161,42 @@
         {% if availability.available %}
             <div class="sponsorship-action">
                 <div class="action-content">
-                    <h2>Sponsor Child {{ child.display_id }}</h2>
+                    <h2>Sponsor Family {{ child.display_id }}</h2>
                     <p>Ready to make this child's Christmas special?
                        Click below to begin the sponsorship process.</p>
 
-                    <a href="?page=sponsor&child_id={{ child.id }}"
+                    <a href="/slim.php/sponsor/child/{{ child.id }}"
                        class="btn btn-large btn-primary">
                         Sponsor This Child
                     </a>
 
-                    {% if siblings %}
-                        <p class="family-sponsor-note">
-                            <strong>Consider sponsoring siblings together!</strong>
-                            Keeping families connected during Christmas creates even more joy.
-                        </p>
+                    {% if siblings and availableSiblingsCount > 0 %}
+                        <div class="family-sponsor-section">
+                            <p class="family-sponsor-note">
+                                <strong>✨ Consider sponsoring siblings together!</strong><br>
+                                Keeping families connected during Christmas creates even more joy.
+                            </p>
 
-                        {% if availableSiblingsCount > 0 %}
-                            <a href="?page=sponsor&family_id={{ child.family_id }}"
+                            <a href="/slim.php/sponsor/family/{{ child.family_id }}"
                                class="btn btn-large btn-success">
                                 🎁 Sponsor Entire Family ({{ availableSiblingsCount + 1 }} children)
                             </a>
-                        {% endif %}
 
-                        <a href="?page=children&family_id={{ child.family_id }}"
-                           class="btn btn-secondary">
-                            View All Family Members
-                        </a>
+                            <a href="/slim.php/children?family_id={{ child.family_id }}"
+                               class="btn btn-secondary">
+                                View All Family Members
+                            </a>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         {% else %}
             <div class="sponsorship-unavailable">
-                <div class="alert alert-warning">
+                <div class="alert alert-warning" role="alert">
                     <h2>Sponsorship Status</h2>
                     <p><strong>{{ availability.reason }}</strong></p>
                     <p>This child is no longer available for new sponsorship requests.</p>
-                    <a href="?page=children" class="btn btn-primary">
+                    <a href="/slim.php/children" class="btn btn-primary">
                         Browse Other Children
                     </a>
                 </div>
@@ -214,13 +208,14 @@
             <h2>Other Ways to Help</h2>
             <p>Not ready to sponsor a specific child? You can still make a difference:</p>
             <div class="help-options">
-                <a href="?page=children" class="btn btn-secondary">
+                <a href="/slim.php/children" class="btn btn-secondary">
                     Browse Other Children
                 </a>
-                <a href="?page=donate" class="btn btn-success">
+                <a href="/slim.php/donate" class="btn btn-success">
                     Make a General Donation
                 </a>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}

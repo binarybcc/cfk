@@ -1,0 +1,347 @@
+/**
+ * Children Browse Page Styles
+ *
+ * Styles for the children listing page including filters,
+ * grid layout, and pagination.
+ */
+
+/* =============================================================================
+   Page Container
+   ============================================================================= */
+
+.children-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* =============================================================================
+   Page Header
+   ============================================================================= */
+
+.page-header {
+    margin-bottom: 40px;
+    text-align: center;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    color: #2c5530;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.family-view-actions {
+    margin-top: 20px;
+}
+
+/* =============================================================================
+   Filters Section
+   ============================================================================= */
+
+.filters-section {
+    background: #f8f9fa;
+    padding: 25px;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #2c5530;
+}
+
+.filter-group input,
+.filter-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    background: white;
+    transition: border-color 0.2s ease;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #2c5530;
+    box-shadow: 0 0 0 3px rgba(44, 85, 48, 0.1);
+}
+
+.filter-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.results-summary {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 15px;
+}
+
+.results-summary p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* =============================================================================
+   Children Grid
+   ============================================================================= */
+
+.children-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+/* =============================================================================
+   Pagination
+   ============================================================================= */
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.pagination__numbers {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.pagination__numbers a,
+.pagination__current-page {
+    min-width: 40px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-decoration: none;
+    color: #2c5530;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.pagination__numbers a:hover {
+    background: #f5f5f5;
+    border-color: #2c5530;
+}
+
+.pagination__current-page {
+    background: #2c5530;
+    color: white;
+    border-color: #2c5530;
+    font-weight: 600;
+}
+
+.pagination__prev,
+.pagination__next {
+    font-weight: 500;
+}
+
+.pagination-info {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.pagination-info p {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* =============================================================================
+   No Results
+   ============================================================================= */
+
+.no-results {
+    text-align: center;
+    padding: 80px 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin: 40px 0;
+}
+
+.no-results h2 {
+    font-size: 2rem;
+    color: #2c5530;
+    margin-bottom: 15px;
+}
+
+.no-results p {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* =============================================================================
+   Call to Action Section
+   ============================================================================= */
+
+.cta-section {
+    text-align: center;
+    padding: 50px 30px;
+    background: linear-gradient(135deg, #2c5530 0%, #3a6d3e 100%);
+    color: white;
+    border-radius: 8px;
+    margin-top: 60px;
+    box-shadow: 0 4px 12px rgba(44, 85, 48, 0.2);
+}
+
+.cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.cta-section p {
+    font-size: 1.1rem;
+    margin-bottom: 25px;
+    opacity: 0.95;
+}
+
+.cta-section .btn {
+    font-size: 1.1rem;
+    padding: 15px 40px;
+}
+
+/* =============================================================================
+   Responsive Design
+   ============================================================================= */
+
+@media (max-width: 768px) {
+    .children-page {
+        padding: 15px;
+    }
+
+    .page-header h1 {
+        font-size: 1.8rem;
+    }
+
+    .page-header p {
+        font-size: 1rem;
+    }
+
+    .filters-section {
+        padding: 20px;
+    }
+
+    .filters-form {
+        grid-template-columns: 1fr;
+    }
+
+    .filter-actions {
+        flex-direction: column;
+    }
+
+    .filter-actions .btn {
+        width: 100%;
+    }
+
+    .children-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .pagination {
+        gap: 8px;
+    }
+
+    .pagination__numbers {
+        gap: 4px;
+    }
+
+    .pagination__numbers a,
+    .pagination__current-page {
+        min-width: 36px;
+        height: 36px;
+        padding: 6px 10px;
+        font-size: 0.9rem;
+    }
+
+    .cta-section {
+        padding: 40px 20px;
+        margin-top: 40px;
+    }
+
+    .cta-section h2 {
+        font-size: 1.5rem;
+    }
+
+    .cta-section p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .pagination__prev,
+    .pagination__next {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+}
+
+/* =============================================================================
+   Print Styles
+   ============================================================================= */
+
+@media print {
+    .filters-section,
+    .pagination,
+    .pagination-info,
+    .cta-section,
+    .family-view-actions {
+        display: none;
+    }
+
+    .children-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .page-header {
+        margin-bottom: 20px;
+    }
+}
