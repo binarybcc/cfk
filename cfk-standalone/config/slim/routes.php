@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use CFK\Controller\AdminArchiveController;
+use CFK\Controller\AdminAuthController;
 use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
 use CFK\Controller\AdminImportController;
@@ -313,6 +314,42 @@ return function (App $app) {
      * Week 8 Part 2 Phase 7
      */
     $app->post('/admin/users/{id:\\d+}/delete', [AdminUserController::class, 'delete']);
+
+    /**
+     * Admin Login Page: /admin/login (GET)
+     * Display passwordless magic link login form
+     * Migrated from: admin/login.php (Week 8 Part 2 Phase 8)
+     */
+    $app->get('/admin/login', [AdminAuthController::class, 'showLogin']);
+
+    /**
+     * Request Magic Link: /admin/auth/request-magic-link (POST)
+     * API endpoint to generate and send magic link email
+     * Migrated from: admin/request-magic-link.php (Week 8 Part 2 Phase 8)
+     */
+    $app->post('/admin/auth/request-magic-link', [AdminAuthController::class, 'requestMagicLink']);
+
+    /**
+     * Magic Link Sent Page: /admin/auth/magic-link-sent (GET)
+     * Confirmation page after requesting magic link
+     * Migrated from: admin/magic-link-sent.php (Week 8 Part 2 Phase 8)
+     */
+    $app->get('/admin/auth/magic-link-sent', [AdminAuthController::class, 'showMagicLinkSent']);
+
+    /**
+     * Verify Magic Link: /admin/auth/verify-magic-link (GET/POST)
+     * Validate magic link token and create admin session
+     * Migrated from: admin/verify-magic-link.php (Week 8 Part 2 Phase 8)
+     */
+    $app->get('/admin/auth/verify-magic-link', [AdminAuthController::class, 'verifyMagicLink']);
+    $app->post('/admin/auth/verify-magic-link', [AdminAuthController::class, 'verifyMagicLink']);
+
+    /**
+     * Admin Logout: /admin/logout (GET)
+     * Destroy admin session and redirect to login
+     * Migrated from: admin/logout.php (Week 8 Part 2 Phase 8)
+     */
+    $app->get('/admin/logout', [AdminAuthController::class, 'logout']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)

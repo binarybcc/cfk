@@ -158,6 +158,14 @@ $container->register(CFK\Controller\AdminUserController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Admin Auth Controller
+ * Handles admin authentication (Week 8 Part 2 Phase 8)
+ */
+$container->register(CFK\Controller\AdminAuthController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================
