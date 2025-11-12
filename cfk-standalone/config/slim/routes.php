@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
+use CFK\Controller\AdminSponsorshipController;
 use CFK\Controller\ChildController;
 use CFK\Controller\ContentController;
 use CFK\Controller\PortalController;
@@ -167,6 +168,43 @@ return function (App $app) {
      * Week 8 Part 2 Migration
      */
     $app->get('/admin/children/{id:\\d+}/data', [AdminChildController::class, 'getData']);
+
+    /**
+     * Admin Sponsorships List: /admin/sponsorships (GET)
+     * Display sponsorships list with filters
+     * Migrated from: admin/manage_sponsorships.php (Week 8 Part 2 Phase 3)
+     */
+    $app->get('/admin/sponsorships', [AdminSponsorshipController::class, 'index']);
+
+    /**
+     * Mark Sponsorship as Logged: /admin/sponsorships/{id}/log (POST)
+     * Week 8 Part 2 Phase 3
+     */
+    $app->post('/admin/sponsorships/{id:\\d+}/log', [AdminSponsorshipController::class, 'markLogged']);
+
+    /**
+     * Unlog Sponsorship: /admin/sponsorships/{id}/unlog (POST)
+     * Week 8 Part 2 Phase 3
+     */
+    $app->post('/admin/sponsorships/{id:\\d+}/unlog', [AdminSponsorshipController::class, 'unlog']);
+
+    /**
+     * Mark Sponsorship as Complete: /admin/sponsorships/{id}/complete (POST)
+     * Week 8 Part 2 Phase 3
+     */
+    $app->post('/admin/sponsorships/{id:\\d+}/complete', [AdminSponsorshipController::class, 'markComplete']);
+
+    /**
+     * Cancel Sponsorship: /admin/sponsorships/{id}/cancel (POST)
+     * Week 8 Part 2 Phase 3
+     */
+    $app->post('/admin/sponsorships/{id:\\d+}/cancel', [AdminSponsorshipController::class, 'cancel']);
+
+    /**
+     * Bulk Actions: /admin/sponsorships/bulk (POST)
+     * Week 8 Part 2 Phase 3
+     */
+    $app->post('/admin/sponsorships/bulk', [AdminSponsorshipController::class, 'bulkAction']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)

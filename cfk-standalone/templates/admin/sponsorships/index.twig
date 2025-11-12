@@ -1,0 +1,348 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c5530;
+    display: block;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.filters {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.filter-group input,
+.filter-group select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.sponsorships-table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    background: #f5f5f5;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #ddd;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f9f9f9;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-pending { background: #fff3cd; color: #856404; }
+.status-confirmed { background: #d1ecf1; color: #0c5460; }
+.status-logged { background: #d4edda; color: #155724; }
+.status-completed { background: #d4edda; color: #155724; }
+.status-cancelled { background: #f8d7da; color: #721c24; }
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.btn-primary { background: #2c5530; color: white; }
+.btn-success { background: #28a745; color: white; }
+.btn-warning { background: #ffc107; color: #333; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+
+.bulk-actions {
+    background: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+</div>
+
+{# Statistics #}
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.pending ?? 0 }}</span>
+        <span class="stat-label">Pending</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.confirmed ?? 0 }}</span>
+        <span class="stat-label">Confirmed</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.logged ?? 0 }}</span>
+        <span class="stat-label">Logged</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.completed ?? 0 }}</span>
+        <span class="stat-label">Completed</span>
+    </div>
+</div>
+
+{# Filters #}
+<form method="GET" action="{{ baseUrl('/admin/sponsorships') }}" class="filters">
+    <div class="filter-group">
+        <label for="status">Status:</label>
+        <select name="status" id="status">
+            <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All Statuses</option>
+            <option value="pending" {% if filters.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="confirmed" {% if filters.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+            <option value="logged" {% if filters.status == 'logged' %}selected{% endif %}>Logged</option>
+            <option value="completed" {% if filters.status == 'completed' %}selected{% endif %}>Completed</option>
+            <option value="cancelled" {% if filters.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="sort">Sort By:</label>
+        <select name="sort" id="sort">
+            <option value="newest" {% if filters.sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="oldest" {% if filters.sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+            <option value="name" {% if filters.sort == 'name' %}selected{% endif %}>Sponsor Name</option>
+            <option value="child" {% if filters.sort == 'child' %}selected{% endif %}>Child ID</option>
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="search">Search:</label>
+        <input type="text" name="search" id="search" value="{{ filters.search }}" placeholder="Sponsor or child ID...">
+    </div>
+
+    <div class="filter-group">
+        <label>
+            <input type="checkbox" name="show_cancelled" value="1" {% if filters.showCancelled %}checked{% endif %}>
+            Show Cancelled
+        </label>
+    </div>
+
+    <div class="filter-group" style="align-self: flex-end;">
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+    </div>
+</form>
+
+{# Bulk Actions #}
+<form method="POST" action="{{ baseUrl('/admin/sponsorships/bulk') }}" id="bulkForm">
+    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+    <div class="bulk-actions">
+        <label>
+            <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)">
+            Select All
+        </label>
+
+        <select name="bulk_action" id="bulkAction" required>
+            <option value="">Bulk Action...</option>
+            <option value="log">Mark as Logged</option>
+            <option value="complete">Mark as Complete</option>
+            <option value="export">Export to CSV</option>
+        </select>
+
+        <button type="submit" class="btn btn-primary" onclick="return confirm('Apply this action to selected sponsorships?')">
+            Apply
+        </button>
+
+        <span id="selectedCount" style="margin-left: auto; color: #666;"></span>
+    </div>
+
+    {# Sponsorships Table #}
+    <div class="sponsorships-table">
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllTable" onclick="toggleSelectAll(this)"></th>
+                    <th>Child</th>
+                    <th>Sponsor</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sponsorship in sponsorships %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="sponsorship_ids[]" value="{{ sponsorship.id }}" class="sponsorship-checkbox" onchange="updateSelectedCount()">
+                    </td>
+                    <td><strong>{{ sponsorship.child_display_id }}</strong><br>
+                        <small>{{ sponsorship.gender == 'M' ? 'Boy' : 'Girl' }}, {{ formatAge(sponsorship.age_months) }}</small>
+                    </td>
+                    <td>{{ sponsorship.sponsor_name }}</td>
+                    <td>{{ sponsorship.sponsor_email }}</td>
+                    <td>{{ sponsorship.sponsor_phone ?? '-' }}</td>
+                    <td>{{ sponsorship.request_date|date('m/d/Y') }}</td>
+                    <td>
+                        <span class="status-badge status-{{ sponsorship.status }}">
+                            {{ sponsorship.status|upper }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="actions">
+                            {% if sponsorship.status == 'confirmed' %}
+                                <form method="POST" action="{{ baseUrl('/admin/sponsorships/' ~ sponsorship.id ~ '/log') }}" style="display:inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                                    <button type="submit" class="btn btn-success btn-sm">Mark Logged</button>
+                                </form>
+                            {% endif %}
+
+                            {% if sponsorship.status == 'logged' %}
+                                <form method="POST" action="{{ baseUrl('/admin/sponsorships/' ~ sponsorship.id ~ '/complete') }}" style="display:inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                                    <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+                                </form>
+                                <form method="POST" action="{{ baseUrl('/admin/sponsorships/' ~ sponsorship.id ~ '/unlog') }}" style="display:inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                                    <button type="submit" class="btn btn-warning btn-sm">Unlog</button>
+                                </form>
+                            {% endif %}
+
+                            {% if sponsorship.status not in ['cancelled', 'completed'] %}
+                                <form method="POST" action="{{ baseUrl('/admin/sponsorships/' ~ sponsorship.id ~ '/cancel') }}" style="display:inline" onsubmit="return confirm('Cancel this sponsorship?')">
+                                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                                    <input type="hidden" name="reason" value="Cancelled by admin">
+                                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                        No sponsorships found matching your filters.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</form>
+
+<script>
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('.sponsorship-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checked = document.querySelectorAll('.sponsorship-checkbox:checked').length;
+    document.getElementById('selectedCount').textContent = checked > 0 ? `${checked} selected` : '';
+
+    // Sync the two "select all" checkboxes
+    const allCheckboxes = document.querySelectorAll('.sponsorship-checkbox');
+    const allChecked = allCheckboxes.length > 0 && Array.from(allCheckboxes).every(cb => cb.checked);
+    document.getElementById('selectAll').checked = allChecked;
+    document.getElementById('selectAllTable').checked = allChecked;
+}
+
+// Validate bulk form submission
+document.getElementById('bulkForm').addEventListener('submit', function(e) {
+    const checked = document.querySelectorAll('.sponsorship-checkbox:checked').length;
+    if (checked === 0) {
+        e.preventDefault();
+        alert('Please select at least one sponsorship');
+        return false;
+    }
+
+    const action = document.getElementById('bulkAction').value;
+    if (!action) {
+        e.preventDefault();
+        alert('Please select a bulk action');
+        return false;
+    }
+});
+</script>
+{% endblock %}

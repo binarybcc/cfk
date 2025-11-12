@@ -126,6 +126,14 @@ $container->register(CFK\Controller\AdminChildController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Admin Sponsorship Controller
+ * Handles admin sponsorship management (Week 8 Part 2 Phase 3)
+ */
+$container->register(CFK\Controller\AdminSponsorshipController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================
