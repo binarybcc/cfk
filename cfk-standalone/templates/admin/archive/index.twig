@@ -1,0 +1,330 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.warning-banner {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.warning-banner h2 {
+    margin: 0 0 1rem 0;
+    font-size: 2rem;
+}
+
+.section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.section h2 {
+    margin-top: 0;
+    color: #2c5530;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid #dee2e6;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #2c5530;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5rem 0.5rem 0.5rem 0;
+}
+
+.btn-danger { background: #dc3545; color: white; }
+.btn-success { background: #28a745; color: white; }
+.btn-warning { background: #ffc107; color: #333; }
+.btn-secondary { background: #6c757d; color: white; }
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.help-text {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+.danger-zone {
+    border: 3px solid #dc3545;
+    background: #fff5f5;
+}
+
+.archive-list {
+    list-style: none;
+    padding: 0;
+}
+
+.archive-item {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.archive-year {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2c5530;
+}
+
+.archive-stats {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.restore-form {
+    display: none;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #e7f5ff;
+    border-radius: 4px;
+    border: 2px solid #0c5460;
+}
+
+.restore-form.active {
+    display: block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="warning-banner">
+    <h2>⚠️ Year-End Reset</h2>
+    <p><strong>DANGER:</strong> This page performs irreversible operations on your database.</p>
+    <p>Always backup your data before proceeding!</p>
+</div>
+
+{# Current Database Stats #}
+<div class="section">
+    <h2>📊 Current Database Statistics</h2>
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="stat-number">{{ currentStats.children }}</span>
+            <span class="stat-label">Children</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-number">{{ currentStats.families }}</span>
+            <span class="stat-label">Families</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-number">{{ currentStats.sponsorships }}</span>
+            <span class="stat-label">Sponsorships</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-number">{{ currentStats.email_log }}</span>
+            <span class="stat-label">Email Logs</span>
+        </div>
+    </div>
+</div>
+
+{# Year-End Reset #}
+<div class="section danger-zone">
+    <h2>🔄 Perform Year-End Reset</h2>
+    <p><strong>This will:</strong></p>
+    <ul>
+        <li>Archive all current children, families, and sponsorships</li>
+        <li>Clear the database to prepare for next year</li>
+        <li>Create a timestamped archive file for historical records</li>
+        <li>Reset auto-increment IDs</li>
+    </ul>
+
+    <form method="POST" action="{{ baseUrl('/admin/archive/reset') }}" onsubmit="return confirmReset()">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <div class="form-group">
+            <label for="confirmation_code">Type <code>RESET</code> to confirm:</label>
+            <input type="text" name="confirmation_code" id="resetConfirmation" autocomplete="off" required>
+            <p class="help-text">This action cannot be undone! Data will be archived before clearing.</p>
+        </div>
+
+        <button type="submit" class="btn btn-danger">
+            🔄 Perform Year-End Reset
+        </button>
+    </form>
+</div>
+
+{# Restore from Archive #}
+<div class="section">
+    <h2>📦 Restore from Archive</h2>
+
+    {% if archives %}
+        <p>Select an archive year to restore:</p>
+        <ul class="archive-list">
+            {% for archive in archives %}
+                <li class="archive-item">
+                    <div>
+                        <span class="archive-year">{{ archive.year }}</span>
+                        <span class="archive-stats">
+                            ({{ archive.children_count }} children, {{ archive.families_count }} families, {{ archive.sponsorships_count }} sponsorships)
+                        </span>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="showRestoreForm('{{ archive.year }}', '{{ archive.timestamp }}')">
+                        Restore
+                    </button>
+                </li>
+
+                {# Restore form for this archive #}
+                <div id="restore-form-{{ archive.year }}" class="restore-form">
+                    <form method="POST" action="{{ baseUrl('/admin/archive/restore') }}" onsubmit="return confirmRestore('{{ archive.year }}')">
+                        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+                        <input type="hidden" name="archive_year" value="{{ archive.year }}">
+                        <input type="hidden" name="archive_timestamp" value="{{ archive.timestamp }}">
+
+                        <h3>Restore {{ archive.year }} Archive</h3>
+                        <p><strong>Warning:</strong> This will replace current data with archived data!</p>
+
+                        <div class="form-group">
+                            <label>Type <code>RESTORE</code> to confirm:</label>
+                            <input type="text" name="restore_confirmation_code" id="restoreConfirmation-{{ archive.year }}" autocomplete="off" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Confirm Restore</button>
+                        <button type="button" class="btn btn-secondary" onclick="hideRestoreForm('{{ archive.year }}')">Cancel</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color: #666; font-style: italic;">No archives available.</p>
+    {% endif %}
+</div>
+
+{# Delete Old Archives #}
+{% if deletionPreview and deletionPreview.archives_to_delete %}
+<div class="section danger-zone">
+    <h2>🗑️ Delete Old Archives</h2>
+    <p>The following archives are older than {{ deletionPreview.keep_years ?? 3 }} years and can be safely deleted:</p>
+
+    <ul>
+        {% for archive in deletionPreview.archives_to_delete %}
+            <li><strong>{{ archive.year }}</strong> - {{ archive.size }}</li>
+        {% endfor %}
+    </ul>
+
+    <p><strong>Total space to be freed:</strong> {{ deletionPreview.total_size }}</p>
+
+    <form method="POST" action="{{ baseUrl('/admin/archive/delete-old') }}" onsubmit="return confirmDelete()">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <div class="form-group">
+            <label>Type <code>DELETE</code> to confirm:</label>
+            <input type="text" name="delete_confirmation_code" id="deleteConfirmation" autocomplete="off" required>
+        </div>
+
+        <button type="submit" class="btn btn-warning">
+            Delete Old Archives
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<script>
+function confirmReset() {
+    const input = document.getElementById('resetConfirmation').value;
+    if (input.toUpperCase() !== 'RESET') {
+        alert('You must type "RESET" to confirm.');
+        return false;
+    }
+    return confirm('Are you ABSOLUTELY SURE you want to perform year-end reset?\n\nThis will:\n- Archive current data\n- Clear the database\n- Reset for next year\n\nThis action cannot be undone!');
+}
+
+function confirmRestore(year) {
+    const input = document.getElementById('restoreConfirmation-' + year).value;
+    if (input.toUpperCase() !== 'RESTORE') {
+        alert('You must type "RESTORE" to confirm.');
+        return false;
+    }
+    return confirm('Are you ABSOLUTELY SURE you want to restore the ' + year + ' archive?\n\nThis will REPLACE all current data!\n\nCurrent data will be lost unless you archive it first.');
+}
+
+function confirmDelete() {
+    const input = document.getElementById('deleteConfirmation').value;
+    if (input.toUpperCase() !== 'DELETE') {
+        alert('You must type "DELETE" to confirm.');
+        return false;
+    }
+    return confirm('Are you sure you want to delete old archives?\n\nThis action cannot be undone!');
+}
+
+function showRestoreForm(year, timestamp) {
+    // Hide all restore forms first
+    document.querySelectorAll('.restore-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    // Show the selected form
+    document.getElementById('restore-form-' + year).classList.add('active');
+}
+
+function hideRestoreForm(year) {
+    document.getElementById('restore-form-' + year).classList.remove('active');
+}
+</script>
+{% endblock %}

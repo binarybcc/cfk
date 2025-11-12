@@ -13,6 +13,7 @@ declare(strict_types=1);
  * - New style: /children (Slim routes)
  */
 
+use CFK\Controller\AdminArchiveController;
 use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
 use CFK\Controller\AdminImportController;
@@ -255,6 +256,34 @@ return function (App $app) {
      * Week 8 Part 2 Phase 4
      */
     $app->post('/admin/import/restore', [AdminImportController::class, 'restoreBackup']);
+
+    /**
+     * Year-End Reset: /admin/archive (GET)
+     * Display year-end reset page
+     * Migrated from: admin/year_end_reset.php (Week 8 Part 2 Phase 5/6)
+     */
+    $app->get('/admin/archive', [AdminArchiveController::class, 'index']);
+
+    /**
+     * Perform Year-End Reset: /admin/archive/reset (POST)
+     * Archive current data and reset for new year
+     * Week 8 Part 2 Phase 5/6
+     */
+    $app->post('/admin/archive/reset', [AdminArchiveController::class, 'reset']);
+
+    /**
+     * Restore from Archive: /admin/archive/restore (POST)
+     * Restore data from a previous year's archive
+     * Week 8 Part 2 Phase 5/6
+     */
+    $app->post('/admin/archive/restore', [AdminArchiveController::class, 'restore']);
+
+    /**
+     * Delete Old Archives: /admin/archive/delete-old (POST)
+     * Delete archives older than retention period
+     * Week 8 Part 2 Phase 5/6
+     */
+    $app->post('/admin/archive/delete-old', [AdminArchiveController::class, 'deleteOld']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)

@@ -142,6 +142,14 @@ $container->register(CFK\Controller\AdminImportController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Admin Archive Controller
+ * Handles year-end reset and archiving (Week 8 Part 2 Phase 5/6)
+ */
+$container->register(CFK\Controller\AdminArchiveController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================
