@@ -1,0 +1,661 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.content-header {
+    margin-bottom: 2rem;
+}
+
+.content-header h1 {
+    font-size: 2rem;
+    color: #2c5530;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 1rem;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 6px;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.action-bar {
+    margin-bottom: 2rem;
+}
+
+.form-panel {
+    background: white;
+    border: 2px solid #2c5530;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    display: none;
+}
+
+.form-panel.active {
+    display: block;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #eee;
+}
+
+.panel-header h2 {
+    margin: 0;
+    color: #2c5530;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #999;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+}
+
+.btn-close:hover {
+    color: #333;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.form-group label.required::after {
+    content: ' *';
+    color: #d32f2f;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #2c5530;
+}
+
+.form-control:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 0.25rem;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #2c5530;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #1e3a21;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+
+.btn-edit {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn-edit:hover {
+    background: #ffb300;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+.data-table-container {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.data-table-container h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #2c5530;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    background: #f8f9fa;
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.data-table tbody td {
+    padding: 1rem 0.75rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.data-table tbody tr:nth-child(4n+1),
+.data-table tbody tr:nth-child(4n+2) {
+    background: white;
+}
+
+.data-table tbody tr:nth-child(4n+3),
+.data-table tbody tr:nth-child(4n+4) {
+    background: #f8f9fa;
+}
+
+.data-table tbody tr:hover {
+    background: #e7f1ff !important;
+    transition: background-color 0.15s ease;
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.badge-primary {
+    background: #007bff;
+    color: white;
+}
+
+.badge-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.badge-info {
+    background: #17a2b8;
+    color: white;
+}
+
+.actions {
+    white-space: nowrap;
+}
+
+.actions .btn {
+    margin-right: 0.5rem;
+}
+
+.edit-row td {
+    background: #f8f9fa !important;
+    padding: 2rem !important;
+}
+
+.inline-edit-form {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 6px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .form-row,
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .data-table {
+        font-size: 0.875rem;
+    }
+
+    .data-table thead th,
+    .data-table tbody td {
+        padding: 0.75rem 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <h1>{{ pageTitle }}</h1>
+    <p class="subtitle">Manage administrator accounts and permissions</p>
+</div>
+
+{% if message %}
+    <div class="alert alert-success">
+        ✓ {{ message }}
+    </div>
+{% endif %}
+
+{% if error %}
+    <div class="alert alert-error">
+        ✗ {{ error }}
+    </div>
+{% endif %}
+
+{# Add New Admin Button #}
+<div class="action-bar">
+    <button type="button" id="show-add-admin-btn" class="btn btn-primary">
+        ➕ Add New Administrator
+    </button>
+</div>
+
+{# Add Admin Form (Hidden by default) #}
+<div id="addAdminForm" class="form-panel">
+    <div class="panel-header">
+        <h2>Add New Administrator</h2>
+        <button type="button" id="hide-add-admin-x" class="btn-close">✕</button>
+    </div>
+
+    <form method="POST" action="{{ baseUrl('/admin/users') }}" id="addAdminFormElement">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="username" class="required">Username</label>
+                <input type="text"
+                       id="username"
+                       name="username"
+                       class="form-control"
+                       required
+                       autocomplete="off"
+                       pattern="[a-zA-Z0-9_-]+"
+                       title="Letters, numbers, underscore, and hyphen only">
+                <small>Letters, numbers, underscore, and hyphen only</small>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="required">Email Address</label>
+                <input type="email"
+                       id="email"
+                       name="email"
+                       class="form-control"
+                       required
+                       autocomplete="off">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="full_name">Full Name</label>
+            <input type="text"
+                   id="full_name"
+                   name="full_name"
+                   class="form-control"
+                   autocomplete="off">
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="password" class="required">Password</label>
+                <input type="password"
+                       id="password"
+                       name="password"
+                       class="form-control"
+                       required
+                       minlength="8"
+                       autocomplete="new-password">
+                <small>Minimum 8 characters</small>
+            </div>
+
+            <div class="form-group">
+                <label for="confirm_password" class="required">Confirm Password</label>
+                <input type="password"
+                       id="confirm_password"
+                       name="confirm_password"
+                       class="form-control"
+                       required
+                       minlength="8"
+                       autocomplete="new-password">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="role" class="required">Role</label>
+            <select id="role" name="role" class="form-control" required>
+                <option value="editor">Editor - Can manage children and sponsorships</option>
+                <option value="admin">Administrator - Full access including user management</option>
+            </select>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                Create Administrator
+            </button>
+            <button type="button" id="cancel-add-admin-btn" class="btn btn-secondary">
+                Cancel
+            </button>
+        </div>
+    </form>
+</div>
+
+{# Admins List #}
+<div class="data-table-container">
+    <h2>Current Administrators</h2>
+
+    {% if admins is empty %}
+        <p class="no-data">No administrators found.</p>
+    {% else %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Last Login</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for admin in admins %}
+                    <tr>
+                        <td>
+                            <strong>{{ admin.username }}</strong>
+                            {% if admin.id == currentAdminId %}
+                                <span class="badge badge-primary">You</span>
+                            {% endif %}
+                        </td>
+                        <td><a href="mailto:{{ admin.email }}">{{ admin.email }}</a></td>
+                        <td>{{ admin.full_name ?: '—' }}</td>
+                        <td>
+                            <span class="badge badge-{{ admin.role == 'admin' ? 'danger' : 'info' }}">
+                                {{ admin.role|capitalize }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if admin.last_login %}
+                                {{ admin.last_login|date('M j, Y g:i A') }}
+                            {% else %}
+                                Never
+                            {% endif %}
+                        </td>
+                        <td>{{ admin.created_at|date('M j, Y') }}</td>
+                        <td class="actions">
+                            <button type="button"
+                                    class="btn btn-sm btn-edit btn-edit-admin"
+                                    data-admin-id="{{ admin.id }}"
+                                    title="Edit">
+                                ✏️ Edit
+                            </button>
+                            {% if admin.id != currentAdminId %}
+                                <button type="button"
+                                        class="btn btn-sm btn-delete btn-delete-admin"
+                                        data-admin-id="{{ admin.id }}"
+                                        data-username="{{ admin.username }}"
+                                        title="Delete">
+                                    🗑️ Delete
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {# Edit Form (Hidden) #}
+                    <tr id="editForm{{ admin.id }}" class="edit-row" style="display: none;">
+                        <td colspan="7">
+                            <div class="inline-edit-form">
+                                <form method="POST" action="{{ baseUrl('/admin/users/' ~ admin.id) }}">
+                                    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label>Username</label>
+                                            <input type="text"
+                                                   value="{{ admin.username }}"
+                                                   class="form-control"
+                                                   disabled>
+                                            <small>Username cannot be changed</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Email Address *</label>
+                                            <input type="email"
+                                                   name="email"
+                                                   value="{{ admin.email }}"
+                                                   class="form-control"
+                                                   required>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Full Name</label>
+                                            <input type="text"
+                                                   name="full_name"
+                                                   value="{{ admin.full_name ?: '' }}"
+                                                   class="form-control">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Role *</label>
+                                            <select name="role" class="form-control" required>
+                                                <option value="editor" {{ admin.role == 'editor' ? 'selected' : '' }}>Editor</option>
+                                                <option value="admin" {{ admin.role == 'admin' ? 'selected' : '' }}>Administrator</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>New Password</label>
+                                            <input type="password"
+                                                   name="new_password"
+                                                   class="form-control"
+                                                   minlength="8"
+                                                   autocomplete="new-password">
+                                            <small>Leave blank to keep current password</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-actions">
+                                        <button type="submit" class="btn btn-primary">
+                                            Save Changes
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-secondary btn-cancel-edit"
+                                                data-admin-id="{{ admin.id }}">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+
+{# Delete Confirmation Form (Hidden) #}
+<form id="deleteForm" method="POST" action="" style="display: none;">
+    <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+    <input type="hidden" name="admin_id" id="deleteAdminId">
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const addAdminForm = document.getElementById('addAdminForm');
+    const addAdminFormElement = document.getElementById('addAdminFormElement');
+    const usernameInput = document.getElementById('username');
+
+    // Show/Hide Add Admin Form
+    document.getElementById('show-add-admin-btn').addEventListener('click', function() {
+        addAdminForm.classList.add('active');
+        usernameInput.focus();
+    });
+
+    function hideAddForm() {
+        addAdminForm.classList.remove('active');
+        addAdminFormElement.reset();
+    }
+
+    document.getElementById('hide-add-admin-x').addEventListener('click', hideAddForm);
+    document.getElementById('cancel-add-admin-btn').addEventListener('click', hideAddForm);
+
+    // Form validation
+    addAdminFormElement.addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+
+        if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            e.preventDefault();
+            return false;
+        }
+
+        if (password.length < 8) {
+            alert('Password must be at least 8 characters long!');
+            e.preventDefault();
+            return false;
+        }
+    });
+
+    // Edit admin buttons
+    document.querySelectorAll('.btn-edit-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+
+            // Hide all other edit forms
+            document.querySelectorAll('.edit-row').forEach(row => {
+                row.style.display = 'none';
+            });
+
+            // Show this edit form
+            const editRow = document.getElementById('editForm' + adminId);
+            if (editRow) {
+                editRow.style.display = 'table-row';
+                editRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+    });
+
+    // Cancel edit buttons
+    document.querySelectorAll('.btn-cancel-edit').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+            const editForm = document.getElementById('editForm' + adminId);
+            if (editForm) {
+                editForm.style.display = 'none';
+            }
+        });
+    });
+
+    // Delete admin buttons
+    document.querySelectorAll('.btn-delete-admin').forEach(button => {
+        button.addEventListener('click', function() {
+            const adminId = this.getAttribute('data-admin-id');
+            const username = this.getAttribute('data-username');
+
+            if (confirm(`Are you sure you want to delete administrator "${username}"?\n\nThis action cannot be undone.`)) {
+                // Create and submit form
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ baseUrl('/admin/users') }}/' + adminId + '/delete';
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrf_token';
+                csrfInput.value = '{{ csrfToken }}';
+                form.appendChild(csrfInput);
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

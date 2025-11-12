@@ -18,6 +18,7 @@ use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
 use CFK\Controller\AdminImportController;
 use CFK\Controller\AdminSponsorshipController;
+use CFK\Controller\AdminUserController;
 use CFK\Controller\ChildController;
 use CFK\Controller\ContentController;
 use CFK\Controller\PortalController;
@@ -284,6 +285,34 @@ return function (App $app) {
      * Week 8 Part 2 Phase 5/6
      */
     $app->post('/admin/archive/delete-old', [AdminArchiveController::class, 'deleteOld']);
+
+    /**
+     * Admin User Management: /admin/users (GET)
+     * Display admin users management page
+     * Migrated from: admin/manage_admins.php (Week 8 Part 2 Phase 7)
+     */
+    $app->get('/admin/users', [AdminUserController::class, 'index']);
+
+    /**
+     * Create Admin User: /admin/users (POST)
+     * Create a new administrator account
+     * Week 8 Part 2 Phase 7
+     */
+    $app->post('/admin/users', [AdminUserController::class, 'create']);
+
+    /**
+     * Update Admin User: /admin/users/{id} (POST)
+     * Update an existing administrator account
+     * Week 8 Part 2 Phase 7
+     */
+    $app->post('/admin/users/{id:\\d+}', [AdminUserController::class, 'update']);
+
+    /**
+     * Delete Admin User: /admin/users/{id}/delete (POST)
+     * Delete an administrator account
+     * Week 8 Part 2 Phase 7
+     */
+    $app->post('/admin/users/{id:\\d+}/delete', [AdminUserController::class, 'delete']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)
