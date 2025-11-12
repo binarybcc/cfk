@@ -10,11 +10,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
 /**
- * Cart Controller
+ * Reservation Controller
  *
- * Handles shopping cart and reservation workflow for multi-child sponsorships.
+ * Handles reservation workflow for multi-child sponsorships.
  */
-class CartController
+class ReservationController
 {
     private Twig $view;
 
@@ -24,7 +24,7 @@ class CartController
     }
 
     /**
-     * Display cart review page
+     * Display reservation review page
      *
      * @param Request $request PSR-7 request
      * @param Response $response PSR-7 response
@@ -49,7 +49,7 @@ class CartController
             "script-src 'self' 'nonce-{$cspNonce}' https://cdn.jsdelivr.net;"
         );
 
-        return $this->view->render($response, 'cart/review.twig', $data);
+        return $this->view->render($response, 'reservation/review.twig', $data);
     }
 
     /**
@@ -120,7 +120,7 @@ class CartController
             // Return error from manager
             return $this->jsonResponse($response, $result, 400);
         } catch (\Exception $e) {
-            error_log('Cart reservation error: ' . $e->getMessage());
+            error_log('Reservation error: ' . $e->getMessage());
 
             return $this->jsonResponse($response, [
                 'success' => false,
@@ -159,7 +159,7 @@ class CartController
             'adminEmail' => \config('admin_email'),
         ];
 
-        return $this->view->render($response, 'cart/success.twig', $data);
+        return $this->view->render($response, 'reservation/success.twig', $data);
     }
 
     /**

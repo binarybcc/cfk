@@ -5,7 +5,7 @@
 {% block head_extra %}
     <style>
         /* Cart Review Page Styles */
-        .cart-review-page {
+        .reservation-review-page {
             max-width: 1200px;
             margin: 0 auto;
             padding: var(--spacing-xl);
@@ -228,7 +228,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="cart-review-page" x-data="cartReviewApp()">
+<div class="reservation-review-page" x-data="reservationReviewApp()">
     <div class="page-header">
         <h1>Review Your Sponsorship</h1>
         <p class="page-header__subtitle">
@@ -356,7 +356,7 @@ function formatAge(ageMonths) {
     }
 }
 
-function cartReviewApp() {
+function reservationReviewApp() {
     return {
         selections: [],
         sponsorData: {},
@@ -381,7 +381,7 @@ function cartReviewApp() {
             // Validate we have data
             if (this.selections.length === 0 || !this.sponsorData.name) {
                 alert('Missing required information. Redirecting to form...');
-                window.location.href = '{{ baseUrl }}/cart/form';
+                window.location.href = '{{ baseUrl }}/reservation/form';
                 return;
             }
 
@@ -389,11 +389,11 @@ function cartReviewApp() {
         },
 
         editInfo() {
-            window.location.href = '{{ baseUrl }}/cart/form';
+            window.location.href = '{{ baseUrl }}/reservation/form';
         },
 
         goBack() {
-            window.location.href = '{{ baseUrl }}/cart/form';
+            window.location.href = '{{ baseUrl }}/reservation/form';
         },
 
         async confirmReservation() {
@@ -409,7 +409,7 @@ function cartReviewApp() {
                 };
 
                 // Call API to create reservation
-                const response = await fetch('{{ baseUrl }}/cart/api/create', {
+                const response = await fetch('{{ baseUrl }}/reservation/api/create', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -434,7 +434,7 @@ function cartReviewApp() {
                     sessionStorage.setItem('cfk_sponsorship_confirmation', JSON.stringify(confirmationData));
 
                     // Redirect to success page
-                    window.location.href = '{{ baseUrl }}/cart/success';
+                    window.location.href = '{{ baseUrl }}/reservation/success';
                 } else {
                     alert('Error: ' + (result.message || 'Failed to create reservation'));
                     this.isSubmitting = false;

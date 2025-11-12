@@ -322,7 +322,7 @@ const SelectionsManager = (() => {
             this.notifyListeners();
 
             if (count > 0) {
-                this.announce('All selections cleared. Your cart is now empty.');
+                this.announce('All selections cleared. You have no selections.');
             }
         }
 
@@ -527,7 +527,7 @@ const StickyBarManager = (() => {
             this.bar = createElement('div', {
                 className: 'selections-sticky-bar',
                 role: 'complementary',
-                'aria-label': 'Shopping cart summary',
+                'aria-label': 'Selections summary',
                 style: 'background-color: #ffffff; z-index: ' + CONFIG.STICKY_Z_INDEX
             }, [
                 createElement('div', { className: 'sticky-bar-content' }, [
@@ -535,8 +535,8 @@ const StickyBarManager = (() => {
                         createElement('span', {
                             className: 'sticky-bar-icon',
                             role: 'img',
-                            'aria-label': 'Shopping cart'
-                        }, '🛒'),
+                            'aria-label': 'Selections'
+                        }, ''),
                         createElement('span', { className: 'sticky-bar-text' }, [
                             createElement('span', {
                                 className: 'sticky-bar-count',

@@ -60,10 +60,10 @@ if ($page !== null) {
         'sponsor' => isset($_GET['child_id']) ? '/sponsor/child/' . (int)$_GET['child_id'] :
                      (isset($_GET['family_id']) ? '/sponsor/family/' . (int)$_GET['family_id'] : '/children'),
         'family' => isset($_GET['id']) ? '/sponsor/family/' . (int)$_GET['id'] : '/children',
-        'reservation_review' => '/cart/review',
-        'reservation_success' => '/cart/success',
+        'reservation_review' => '/reservation/review',
+        'reservation_success' => '/reservation/success',
         'confirm_sponsorship' => '/children',
-        'selections' => '/cart/review',
+        'selections' => '/reservation/review',
         'home' => '/',
     ];
 

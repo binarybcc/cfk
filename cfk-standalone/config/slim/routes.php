@@ -15,10 +15,10 @@ declare(strict_types=1);
 
 use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
-use CFK\Controller\CartController;
 use CFK\Controller\ChildController;
 use CFK\Controller\ContentController;
 use CFK\Controller\PortalController;
+use CFK\Controller\ReservationController;
 use CFK\Controller\SponsorController;
 use CFK\Controller\TestController;
 use Slim\App;
@@ -227,31 +227,31 @@ return function (App $app) {
     $app->post('/sponsor/family/{id:\d+}', [SponsorController::class, 'submitFamilySponsorship']);
 
     // =========================================================================
-    // Cart Routes (Week 6 Phase 3 Migration)
+    // Reservation Routes (Week 6 Phase 3 Migration)
     // =========================================================================
 
     /**
-     * Cart Review Page: /cart/review (GET)
-     * Display cart review page with all selected children
+     * Reservation Review Page: /reservation/review (GET)
+     * Display reservation review page with all selected children
      * Migrated from: ?page=reservation_review
      * Week 6 Phase 3 Migration
      */
-    $app->get('/cart/review', [CartController::class, 'review']);
+    $app->get('/reservation/review', [ReservationController::class, 'review']);
 
     /**
-     * Create Reservation: /cart/api/create (POST - JSON API)
-     * Create reservation from cart selections
+     * Create Reservation: /reservation/api/create (POST - JSON API)
+     * Create reservation from selected children
      * Week 6 Phase 3 Migration
      */
-    $app->post('/cart/api/create', [CartController::class, 'createReservation']);
+    $app->post('/reservation/api/create', [ReservationController::class, 'createReservation']);
 
     /**
-     * Cart Success Page: /cart/success (GET)
+     * Reservation Success Page: /reservation/success (GET)
      * Display success message after reservation creation
      * Migrated from: ?page=reservation_success
      * Week 6 Phase 3 Migration
      */
-    $app->get('/cart/success', [CartController::class, 'success']);
+    $app->get('/reservation/success', [ReservationController::class, 'success']);
 
     // =========================================================================
     // Portal Routes (Week 6 Phase 4 Migration)

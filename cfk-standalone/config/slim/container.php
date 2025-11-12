@@ -103,10 +103,10 @@ $container->register(CFK\Controller\ContentController::class)
     ->setPublic(true);
 
 /**
- * Cart Controller
- * Handles reservation cart functionality (Week 6 Phase 3)
+ * Reservation Controller
+ * Handles reservation functionality (Week 6 Phase 3)
  */
-$container->register(CFK\Controller\CartController::class)
+$container->register(CFK\Controller\ReservationController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
