@@ -1,0 +1,187 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.import-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.import-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #2c5530;
+}
+
+.upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    background: #f9f9f9;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5rem;
+}
+
+.btn-primary { background: #2c5530; color: white; }
+.btn-success { background: #28a745; color: white; }
+.btn-danger { background: #dc3545; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.danger-zone {
+    border: 2px solid #dc3545;
+    background: #fff5f5;
+}
+
+.danger-zone h2 {
+    color: #dc3545;
+}
+
+input[type="file"] {
+    margin: 1rem 0;
+    padding: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    max-width: 400px;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.help-text {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+</div>
+
+{# Upload & Import Section #}
+<div class="import-section">
+    <h2>📤 Upload CSV File</h2>
+
+    <form method="POST" action="{{ baseUrl('/admin/import/preview') }}" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <div class="upload-area">
+            <p><strong>Step 1:</strong> Select your CSV file</p>
+            <input type="file" name="csv_file" accept=".csv,.txt" required>
+            <p class="help-text">Maximum file size: 5MB | Supported formats: .csv, .txt</p>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary">Preview Import</button>
+        </div>
+    </form>
+</div>
+
+{# Template Download #}
+<div class="import-section">
+    <h2>📋 Download CSV Template</h2>
+    <p>Use this template to ensure your CSV file has the correct format.</p>
+
+    <a href="{{ baseUrl('/admin/import/template') }}" class="btn btn-success" download>
+        Download Template
+    </a>
+
+    <div class="help-text" style="margin-top: 1rem;">
+        <strong>Template includes:</strong>
+        <ul>
+            <li>Required columns: family_number, child_letter, gender</li>
+            <li>Age: Enter EITHER age_months OR age_years (not both)</li>
+            <li>Optional: grade, school, clothing sizes, interests, wishes, special_needs</li>
+        </ul>
+    </div>
+</div>
+
+{# Backup & Restore #}
+<div class="import-section">
+    <h2>💾 Backup & Restore</h2>
+
+    <form method="POST" action="{{ baseUrl('/admin/import/restore') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <div class="form-group">
+            <label for="backup_file">Select Backup to Restore:</label>
+            <select name="backup_file" id="backup_file">
+                <option value="">Choose a backup...</option>
+                {# Backup files would be populated here #}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-secondary" onclick="return confirm('This will replace all current data. Continue?')">
+            Restore from Backup
+        </button>
+    </form>
+
+    <p class="help-text" style="margin-top: 1rem;">
+        Backups are automatically created before imports and deletions.
+    </p>
+</div>
+
+{# Danger Zone #}
+<div class="import-section danger-zone">
+    <h2>⚠️ Danger Zone</h2>
+
+    <form method="POST" action="{{ baseUrl('/admin/import/delete-all') }}" onsubmit="return confirmDelete()">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+
+        <p><strong>Delete ALL Children and Families</strong></p>
+        <p class="help-text">This cannot be undone! A backup will be created first.</p>
+
+        <div class="form-group">
+            <label for="confirm">Type <code>DELETE ALL</code> to confirm:</label>
+            <input type="text" name="confirm" id="confirmInput" placeholder="DELETE ALL" autocomplete="off">
+        </div>
+
+        <button type="submit" class="btn btn-danger">Delete All Data</button>
+    </form>
+</div>
+
+<script>
+function confirmDelete() {
+    const input = document.getElementById('confirmInput').value;
+    if (input !== 'DELETE ALL') {
+        alert('You must type "DELETE ALL" to confirm this action.');
+        return false;
+    }
+    return confirm('Are you ABSOLUTELY SURE you want to delete all children and families? This cannot be undone!');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,182 @@
+{% extends "layouts/admin.twig" %}
+
+{% block title %}{{ pageTitle }}{% endblock %}
+
+{% block head_extra %}
+<style>
+.preview-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.preview-section h2 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: #2c5530;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-box {
+    background: #f0f7f1;
+    padding: 1rem;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2c5530;
+    display: block;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.alert {
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+.alert-warning {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    color: #856404;
+}
+
+.alert-info {
+    background: #d1ecf1;
+    border: 1px solid #0c5460;
+    color: #0c5460;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    margin: 0.5rem;
+}
+
+.btn-success { background: #28a745; color: white; }
+.btn-secondary { background: #6c757d; color: white; }
+
+.btn:hover {
+    opacity: 0.9;
+}
+
+.actions {
+    text-align: center;
+    padding: 2rem;
+    border-top: 2px solid #eee;
+    margin-top: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+    <p>Review the data below before importing</p>
+</div>
+
+{# File Info #}
+<div class="preview-section">
+    <h2>📄 File Information</h2>
+    <p><strong>Filename:</strong> {{ preview.filename }}</p>
+    <p><strong>Total Rows:</strong> {{ preview.total_rows }}</p>
+</div>
+
+{# Analysis Summary #}
+<div class="preview-section">
+    <h2>📊 Import Summary</h2>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <span class="stat-number">{{ preview.analysis.total_children ?? 0 }}</span>
+            <span class="stat-label">Children</span>
+        </div>
+
+        <div class="stat-box">
+            <span class="stat-number">{{ preview.analysis.unique_families ?? 0 }}</span>
+            <span class="stat-label">Families</span>
+        </div>
+
+        <div class="stat-box">
+            <span class="stat-number">{{ preview.analysis.gender_counts.M ?? 0 }}</span>
+            <span class="stat-label">Boys</span>
+        </div>
+
+        <div class="stat-box">
+            <span class="stat-number">{{ preview.analysis.gender_counts.F ?? 0 }}</span>
+            <span class="stat-label">Girls</span>
+        </div>
+    </div>
+
+    {# Warnings #}
+    {% if preview.parse_warnings %}
+        <div class="alert alert-warning">
+            <strong>⚠️ Warnings:</strong>
+            <ul>
+                {% for warning in preview.parse_warnings %}
+                    <li>{{ warning }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {# Info #}
+    {% if preview.analysis.duplicates %}
+        <div class="alert alert-info">
+            <strong>ℹ️ Duplicate Check:</strong>
+            {{ preview.analysis.duplicates|length }} potential duplicates detected (same family_number + child_letter)
+        </div>
+    {% endif %}
+</div>
+
+{# Age Distribution #}
+{% if preview.analysis.age_groups %}
+<div class="preview-section">
+    <h2>👶 Age Distribution</h2>
+    <ul>
+        {% for group, count in preview.analysis.age_groups %}
+            <li><strong>{{ group }}:</strong> {{ count }} children</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+{# Confirmation Actions #}
+<div class="actions">
+    <form method="POST" action="{{ baseUrl('/admin/import/confirm') }}" style="display: inline;">
+        <input type="hidden" name="csrf_token" value="{{ csrfToken }}">
+        <button type="submit" class="btn btn-success" onclick="return confirm('Proceed with import?')">
+            ✓ Confirm Import
+        </button>
+    </form>
+
+    <a href="{{ baseUrl('/admin/import') }}" class="btn btn-secondary">
+        ← Cancel
+    </a>
+
+    <div class="help-text" style="margin-top: 1rem;">
+        <p>A backup will be created automatically before importing.</p>
+    </div>
+</div>
+
+{% endblock %}

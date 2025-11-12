@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use CFK\Controller\AdminChildController;
 use CFK\Controller\AdminController;
+use CFK\Controller\AdminImportController;
 use CFK\Controller\AdminSponsorshipController;
 use CFK\Controller\ChildController;
 use CFK\Controller\ContentController;
@@ -205,6 +206,55 @@ return function (App $app) {
      * Week 8 Part 2 Phase 3
      */
     $app->post('/admin/sponsorships/bulk', [AdminSponsorshipController::class, 'bulkAction']);
+
+    /**
+     * Admin CSV Import: /admin/import (GET)
+     * Display CSV import page
+     * Migrated from: admin/import_csv.php (Week 8 Part 2 Phase 4)
+     */
+    $app->get('/admin/import', [AdminImportController::class, 'index']);
+
+    /**
+     * Preview CSV Import: /admin/import/preview (POST)
+     * Upload and preview CSV file before importing
+     * Week 8 Part 2 Phase 4
+     */
+    $app->post('/admin/import/preview', [AdminImportController::class, 'preview']);
+
+    /**
+     * Confirm CSV Import: /admin/import/confirm (POST)
+     * Execute the actual import after preview
+     * Week 8 Part 2 Phase 4
+     */
+    $app->post('/admin/import/confirm', [AdminImportController::class, 'confirm']);
+
+    /**
+     * Download CSV Template: /admin/import/template (GET)
+     * Download CSV template file
+     * Week 8 Part 2 Phase 4
+     */
+    $app->get('/admin/import/template', [AdminImportController::class, 'downloadTemplate']);
+
+    /**
+     * Delete All Children: /admin/import/delete-all (POST)
+     * Dangerous operation - delete all children and families
+     * Week 8 Part 2 Phase 4
+     */
+    $app->post('/admin/import/delete-all', [AdminImportController::class, 'deleteAll']);
+
+    /**
+     * Download Backup: /admin/import/backup/{filename} (GET)
+     * Download a backup file
+     * Week 8 Part 2 Phase 4
+     */
+    $app->get('/admin/import/backup/{filename}', [AdminImportController::class, 'downloadBackup']);
+
+    /**
+     * Restore from Backup: /admin/import/restore (POST)
+     * Restore database from backup file
+     * Week 8 Part 2 Phase 4
+     */
+    $app->post('/admin/import/restore', [AdminImportController::class, 'restoreBackup']);
 
     // =========================================================================
     // Sponsor Routes (Week 4 & 6 Migration)

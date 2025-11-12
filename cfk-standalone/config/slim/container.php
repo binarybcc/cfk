@@ -134,6 +134,14 @@ $container->register(CFK\Controller\AdminSponsorshipController::class)
     ->addArgument(new Reference('twig'))
     ->setPublic(true);
 
+/**
+ * Admin Import Controller
+ * Handles CSV import/export and backups (Week 8 Part 2 Phase 4)
+ */
+$container->register(CFK\Controller\AdminImportController::class)
+    ->addArgument(new Reference('twig'))
+    ->setPublic(true);
+
 // =============================================================================
 // Repositories (Data Access Layer)
 // =============================================================================
