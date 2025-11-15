@@ -1,0 +1,14 @@
+# Protect install directory
+# This prevents direct access to installer files
+
+<Files "*.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+<Files "Installer.php">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Allow access only through install.php in parent directory

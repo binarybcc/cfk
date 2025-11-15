@@ -35,6 +35,9 @@ logs/
 .env.staging
 .env.production
 
+# Installation lock file
+.installed
+
 # Temporary files
 tmp/
 temp/
