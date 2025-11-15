@@ -44,7 +44,7 @@ $dbConfig = [
 // Application Settings
 $appConfig = [
     'app_name' => 'Christmas for Kids',
-    'app_version' => '1.7.3.1',
+    'app_version' => '1.9.3',
     'timezone' => 'America/New_York',
     'debug' => !$isProduction,
     
