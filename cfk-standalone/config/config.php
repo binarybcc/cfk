@@ -67,13 +67,15 @@ $appConfig = [
     'from_email' => 'noreply@cforkids.org',
     'from_name' => 'Christmas for Kids',
 
-    // SMTP Configuration (MailChannels via Nexcess)
+    // SMTP Configuration - Google Workspace SMTP Relay
+    // Server IP 199.189.224.131 must be authorized in Google Admin Console
+    // Apps → Gmail → Routing → SMTP relay service
     'email_use_smtp' => $isProduction, // Use SMTP in production, sendmail in dev
-    'smtp_host' => 'relay.mailchannels.net',
+    'smtp_host' => 'smtp-relay.gmail.com', // Google Workspace SMTP Relay
     'smtp_port' => 587,
-    'smtp_auth' => true,
-    'smtp_username' => getenv('SMTP_USERNAME') ?: '', // Set in environment or here
-    'smtp_password' => getenv('SMTP_PASSWORD') ?: '', // Set in environment or here
+    'smtp_auth' => false, // IP-based authentication (no password needed)
+    'smtp_username' => '', // Not needed for IP authentication
+    'smtp_password' => '', // Not needed for IP authentication
     'smtp_encryption' => 'tls', // TLS encryption on port 587
     
     // Security
