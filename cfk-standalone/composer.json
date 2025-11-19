@@ -8,6 +8,7 @@
         "ext-mbstring": "*",
         "ext-pdo": "*",
         "monolog/monolog": "^3.5",
+        "phpmailer/phpmailer": "^7.0",
         "robmorgan/phinx": "^0.15",
         "slim/psr7": "^1.6",
         "slim/slim": "^4.0",
