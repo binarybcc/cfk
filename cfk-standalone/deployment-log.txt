@@ -2,3 +2,6 @@
 [Sun Nov  9 19:21:56 EST 2025] Deployed v1.7.3-production-hardening (70cfef5) to PRODUCTION - Updated homepage stats to show total impact
 [Sun Nov  9 19:43:36 EST 2025] Deployed v1.7.3-production-hardening (e3bbd55) to PRODUCTION - Fixed homepage count to show ALL children
 [Sun Nov  9 19:46:29 EST 2025] Deployed v1.7.3-production-hardening (80f8c25) to PRODUCTION - Fixed admin dashboard count to show 259 children
+[2025-11-18 16:31:41] Deployed v1.7.3-production-hardening (Google Workspace SMTP) to PRODUCTION
+[2025-11-18 17:23:02] ✅ Google Workspace SMTP migration complete - Magic links working
+[2025-11-19 07:58:11] ✅ Google Workspace SMTP migration complete - Magic links working
