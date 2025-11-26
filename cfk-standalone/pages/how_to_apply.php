@@ -30,7 +30,7 @@ if (!defined('CFK_APP')) {
                 </div>
                 <div class="date-card deadline">
                     <h3>Applications End</h3>
-                    <p class="big-text">November 25</p>
+                    <p class="big-text">November 28</p>
                 </div>
             </div>
 

@@ -451,7 +451,7 @@ $interval = $now->diff($launchTime);
                 </div>
                 <div class="date-card">
                     <strong>Applications End:</strong><br>
-                    November 25
+                    November 28
                 </div>
             </div>
             <div class="hours-info">
