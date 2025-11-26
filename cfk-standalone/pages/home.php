@@ -53,6 +53,11 @@ $totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total F
                     'success',
                     ['size' => 'large']
                 ); ?>
+
+                <!-- Check Donation Information Box -->
+                <div class="check-donation-box">
+                    <p>Donations by CHECK should be made out to <strong>Christmas for Kids</strong> and can be mailed to or dropped off at <strong>The Journal, 210 W North 1st Street, Seneca SC 29678</strong>.</p>
+                </div>
             </div>
         </div>
     </section>
