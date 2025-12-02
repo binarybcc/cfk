@@ -1,11 +1,11 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Year-End Reset Page
  * Administrative tool for archiving and clearing seasonal data
  */
+
+declare(strict_types=1);
 
 // Security constant
 define('CFK_APP', true);
@@ -16,6 +16,7 @@ session_start();
 // Load configuration
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/includes/end_of_season_functions.php';
 
 // Use namespaced classes
 use CFK\Archive\Manager as ArchiveManager;
@@ -67,10 +68,11 @@ $restoreResult = null;
 $deleteResult = null;
 $debugLog = [];
 $deletionPreview = null;
+$eosResult = null; // End of season operation result
 
 // Debug: Log all requests (only in debug mode)
 if (config('app_debug', false)) {
-    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST ?? [])));
+    error_log("YEAR_END_RESET: Page loaded. REQUEST_METHOD=" . ($_SERVER['REQUEST_METHOD'] ?? 'NONE') . ", POST keys: " . implode(',', array_keys($_POST)));
 }
 
 // Get deletion preview for display
@@ -79,6 +81,66 @@ try {
 } catch (Exception $e) {
     error_log("Failed to get deletion preview: " . $e->getMessage());
     $deletionPreview = null;
+}
+
+// Handle end-of-season operations
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['eos_operation'])) {
+    // Verify CSRF token
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $errors[] = 'Security token invalid. Please try again.';
+    } else {
+        $operation = $_POST['eos_operation'] ?? '';
+
+        switch ($operation) {
+            case 'deploy_eos_pages':
+                $eosResult = deployEndOfSeasonPages();
+                if ($eosResult['success']) {
+                    $success = $eosResult['message'];
+                    error_log("End-of-season pages deployed by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown'));
+                } else {
+                    $errors[] = $eosResult['message'];
+                }
+                break;
+
+            case 'restore_active_pages':
+                $eosResult = restoreActiveSeasonPages();
+                if ($eosResult['success']) {
+                    $success = $eosResult['message'];
+                    error_log("Active-season pages restored by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown'));
+                } else {
+                    $errors[] = $eosResult['message'];
+                }
+                break;
+
+            case 'sponsor_remaining':
+                $eosResult = sponsorRemainingChildren(false);
+                if ($eosResult['success']) {
+                    $success = $eosResult['message'];
+                    error_log("Remaining children auto-sponsored by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown') . " - Count: " . $eosResult['count']);
+                } else {
+                    $errors[] = $eosResult['message'];
+                }
+                break;
+
+            case 'rollback_auto_sponsors':
+                $eosResult = rollbackAutoSponsorships(false);
+                if ($eosResult['success']) {
+                    $success = $eosResult['message'];
+                    error_log("Auto-sponsorships rolled back by admin: " . ($_SESSION['cfk_admin_username'] ?? 'unknown') . " - Count: " . $eosResult['count']);
+                } else {
+                    $errors[] = $eosResult['message'];
+                }
+                break;
+
+            case 'preview_sponsor_remaining':
+                $eosResult = sponsorRemainingChildren(true);
+                break;
+
+            case 'preview_rollback':
+                $eosResult = rollbackAutoSponsorships(true);
+                break;
+        }
+    }
 }
 
 // Handle delete archives form submission
@@ -158,11 +220,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['perform_restore'])) {
 
                 // Refresh stats to show restored data
                 try {
+                    $childrenRow = Database::fetchRow("SELECT COUNT(*) as count FROM children");
+                    $familiesRow = Database::fetchRow("SELECT COUNT(*) as count FROM families");
+                    $sponsorshipsRow = Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships");
+                    $emailLogRow = Database::fetchRow("SELECT COUNT(*) as count FROM email_log");
+
                     $currentStats = [
-                        'children' => Database::fetchRow("SELECT COUNT(*) as count FROM children")['count'],
-                        'families' => Database::fetchRow("SELECT COUNT(*) as count FROM families")['count'],
-                        'sponsorships' => Database::fetchRow("SELECT COUNT(*) as count FROM sponsorships")['count'],
-                        'email_log' => Database::fetchRow("SELECT COUNT(*) as count FROM email_log")['count']
+                        'children' => $childrenRow['count'] ?? 0,
+                        'families' => $familiesRow['count'] ?? 0,
+                        'sponsorships' => $sponsorshipsRow['count'] ?? 0,
+                        'email_log' => $emailLogRow['count'] ?? 0
                     ];
                 } catch (Exception $e) {
                     // Keep existing stats
@@ -326,7 +393,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['children'] ?? 0); ?></h3>
+                    <h3><?php echo (int)$currentStats['children']; ?></h3>
                     <p>Children</p>
                 </div>
             </div>
@@ -334,7 +401,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">👨‍👩‍👧‍👦</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['families'] ?? 0); ?></h3>
+                    <h3><?php echo (int)$currentStats['families']; ?></h3>
                     <p>Families</p>
                 </div>
             </div>
@@ -342,7 +409,7 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">🎁</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['sponsorships'] ?? 0); ?></h3>
+                    <h3><?php echo (int)$currentStats['sponsorships']; ?></h3>
                     <p>Sponsorships</p>
                 </div>
             </div>
@@ -350,8 +417,175 @@ include __DIR__ . '/includes/admin_header.php';
             <div class="stat-card">
                 <div class="stat-icon">📧</div>
                 <div class="stat-content">
-                    <h3><?php echo (int)($currentStats['email_log'] ?? 0); ?></h3>
+                    <h3><?php echo (int)$currentStats['email_log']; ?></h3>
                     <p>Email Logs</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- End of Season Operations -->
+    <div class="eos-operations-section">
+        <h2>🎄 End of Season Operations</h2>
+        <p class="section-description">Manage end-of-season tasks: deploy seasonal pages and handle unsponsored children</p>
+
+        <!-- Website Pages Management -->
+        <div class="eos-subsection">
+            <h3>📄 Website Pages</h3>
+            <div class="eos-grid">
+                <div class="eos-card">
+                    <div class="eos-card-header">
+                        <h4>Deploy End-of-Season Pages</h4>
+                        <span class="eos-badge eos-badge-info">Post-Deadline</span>
+                    </div>
+                    <div class="eos-card-body">
+                        <p>Switches website to end-of-season mode:</p>
+                        <ul>
+                            <li>Remove "View Children" navigation links</li>
+                            <li>Display "Thank You" messaging</li>
+                            <li>Emphasize donations</li>
+                            <li>Keep "My Sponsorships" access</li>
+                        </ul>
+                        <p class="eos-note"><strong>When to use:</strong> After sponsorship deadline passes</p>
+                    </div>
+                    <div class="eos-card-actions">
+                        <form method="POST" action="" class="inline-form" onsubmit="return confirm('Deploy end-of-season pages?\n\nThis will:\n• Replace homepage with Thank You page\n• Remove Children/How to Apply/About links\n• Backup current pages\n\nProceed?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="deploy_eos_pages">
+                            <button type="submit" class="btn btn-primary">
+                                🚀 Deploy End-of-Season Pages
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="eos-card">
+                    <div class="eos-card-header">
+                        <h4>Restore Active-Season Pages</h4>
+                        <span class="eos-badge eos-badge-success">New Season</span>
+                    </div>
+                    <div class="eos-card-body">
+                        <p>Restores website to active sponsorship mode:</p>
+                        <ul>
+                            <li>Restore full navigation</li>
+                            <li>Re-enable "View Children" button</li>
+                            <li>Show active sponsorship messaging</li>
+                        </ul>
+                        <p class="eos-note"><strong>When to use:</strong> When starting new season</p>
+                    </div>
+                    <div class="eos-card-actions">
+                        <form method="POST" action="" class="inline-form" onsubmit="return confirm('Restore active-season pages?\n\nThis will:\n• Restore full navigation\n• Enable sponsorship features\n• Backup current pages\n\nProceed?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="restore_active_pages">
+                            <button type="submit" class="btn btn-success">
+                                🔄 Restore Active Pages
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sponsorship Management -->
+        <div class="eos-subsection">
+            <h3>🎁 Unsponsored Children</h3>
+            <div class="eos-grid">
+                <div class="eos-card">
+                    <div class="eos-card-header">
+                        <h4>Auto-Sponsor Remaining Children</h4>
+                        <span class="eos-badge eos-badge-warning">End of Season</span>
+                    </div>
+                    <div class="eos-card-body">
+                        <p>Automatically sponsor all unsponsored children:</p>
+                        <ul>
+                            <li>Finds all children without sponsors</li>
+                            <li>Creates sponsorships for "C-F-K Auto-Sponsor"</li>
+                            <li>Uses special email: end-of-season@christmasforkids.org</li>
+                            <li>Can be rolled back if needed</li>
+                        </ul>
+                        <?php if (isset($eosResult) && isset($eosResult['dry_run']) && $eosResult['dry_run']) : ?>
+                            <div class="eos-preview-result">
+                                <h5>Preview Result:</h5>
+                                <p><strong><?php echo $eosResult['count'] ?? 0; ?> unsponsored children</strong> would be auto-sponsored</p>
+                                <?php if (!empty($eosResult['children'])) : ?>
+                                    <details>
+                                        <summary>View children (<?php echo count($eosResult['children']); ?>)</summary>
+                                        <ul class="eos-children-list">
+                                            <?php foreach ($eosResult['children'] as $child) : ?>
+                                                <li><?php echo sanitizeString($child['display_id']); ?> - <?php echo displayAge($child['age_months']); ?> - <?php echo $child['gender'] === 'M' ? 'Boy' : 'Girl'; ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </details>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="eos-note"><strong>When to use:</strong> After deadline, when children remain unsponsored</p>
+                    </div>
+                    <div class="eos-card-actions">
+                        <form method="POST" action="" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="preview_sponsor_remaining">
+                            <button type="submit" class="btn btn-secondary btn-small">
+                                👁️ Preview
+                            </button>
+                        </form>
+                        <form method="POST" action="" class="inline-form" onsubmit="return confirm('Auto-sponsor all remaining unsponsored children?\n\nThis will create sponsorships for all children who don\'t have sponsors.\n\nSponsor: C-F-K Auto-Sponsor\nEmail: end-of-season@christmasforkids.org\n\nYou can roll this back later if needed.\n\nProceed?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="sponsor_remaining">
+                            <button type="submit" class="btn btn-warning">
+                                🎁 Sponsor Remaining Children
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="eos-card">
+                    <div class="eos-card-header">
+                        <h4>Rollback Auto-Sponsorships</h4>
+                        <span class="eos-badge eos-badge-danger">Undo</span>
+                    </div>
+                    <div class="eos-card-body">
+                        <p>Removes auto-created sponsorships:</p>
+                        <ul>
+                            <li>Finds sponsorships from "C-F-K Auto-Sponsor"</li>
+                            <li>Deletes ONLY auto-created sponsorships</li>
+                            <li>Does NOT affect real CFK sponsorships</li>
+                            <li>Children become unsponsored again</li>
+                        </ul>
+                        <?php if (isset($eosResult) && isset($eosResult['dry_run']) && $eosResult['dry_run'] && isset($eosResult['sponsorships'])) : ?>
+                            <div class="eos-preview-result">
+                                <h5>Preview Result:</h5>
+                                <p><strong><?php echo $eosResult['count']; ?> auto-sponsorships</strong> would be removed</p>
+                                <?php if (!empty($eosResult['sponsorships'])) : ?>
+                                    <details>
+                                        <summary>View sponsorships (<?php echo count($eosResult['sponsorships']); ?>)</summary>
+                                        <ul class="eos-children-list">
+                                            <?php foreach ($eosResult['sponsorships'] as $s) : ?>
+                                                <li>Sponsorship #<?php echo $s['id']; ?> - Child <?php echo sanitizeString($s['display_id']); ?> - <?php echo date('Y-m-d H:i', strtotime($s['confirmation_date'])); ?></li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </details>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <p class="eos-note"><strong>When to use:</strong> To undo auto-sponsorships (for testing or corrections)</p>
+                    </div>
+                    <div class="eos-card-actions">
+                        <form method="POST" action="" class="inline-form">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="preview_rollback">
+                            <button type="submit" class="btn btn-secondary btn-small">
+                                👁️ Preview
+                            </button>
+                        </form>
+                        <form method="POST" action="" class="inline-form" onsubmit="return confirm('Rollback auto-sponsorships?\n\nThis will DELETE all sponsorships created by the auto-sponsor system.\n\nEmail: end-of-season@christmasforkids.org\n\nChildren will become unsponsored again.\n\nProceed?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo generateCsrfToken(); ?>">
+                            <input type="hidden" name="eos_operation" value="rollback_auto_sponsors">
+                            <button type="submit" class="btn btn-danger">
+                                ⏪ Rollback Auto-Sponsorships
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1103,6 +1337,184 @@ include __DIR__ . '/includes/admin_header.php';
 
 .btn-warning:hover {
     background: #e55a28;
+}
+
+/* End of Season Operations Section */
+.eos-operations-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.eos-operations-section h2 {
+    color: #2c5530;
+    margin-bottom: 0.5rem;
+}
+
+.section-description {
+    color: #666;
+    margin-bottom: 2rem;
+}
+
+.eos-subsection {
+    margin-bottom: 3rem;
+}
+
+.eos-subsection:last-child {
+    margin-bottom: 0;
+}
+
+.eos-subsection h3 {
+    color: #2c5530;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #2c5530;
+}
+
+.eos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.eos-card {
+    background: #f8f9fa;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.eos-card:hover {
+    border-color: #2c5530;
+    box-shadow: 0 4px 8px rgba(44, 85, 48, 0.1);
+}
+
+.eos-card-header {
+    background: linear-gradient(135deg, #2c5530 0%, #3a6d3f 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.eos-card-header h4 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.eos-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.eos-badge-info {
+    background: #17a2b8;
+}
+
+.eos-badge-success {
+    background: #28a745;
+}
+
+.eos-badge-warning {
+    background: #ffc107;
+    color: #333;
+}
+
+.eos-badge-danger {
+    background: #dc3545;
+}
+
+.eos-card-body {
+    padding: 1.5rem;
+}
+
+.eos-card-body ul {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.eos-card-body li {
+    margin: 0.5rem 0;
+    color: #555;
+}
+
+.eos-note {
+    background: #fffbea;
+    border-left: 4px solid #f5b800;
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.eos-card-actions {
+    padding: 1rem 1.5rem;
+    background: white;
+    border-top: 1px solid #ddd;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.inline-form {
+    display: inline-block;
+}
+
+.eos-preview-result {
+    background: #e7f3ff;
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.eos-preview-result h5 {
+    color: #004085;
+    margin: 0 0 0.5rem 0;
+}
+
+.eos-preview-result details {
+    margin-top: 0.75rem;
+}
+
+.eos-preview-result summary {
+    cursor: pointer;
+    color: #007bff;
+    font-weight: 600;
+}
+
+.eos-preview-result summary:hover {
+    text-decoration: underline;
+}
+
+.eos-children-list {
+    margin: 0.5rem 0 0 1.5rem;
+    padding: 0;
+}
+
+.eos-children-list li {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+    .eos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .eos-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
 }
 </style>
 
