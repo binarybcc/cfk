@@ -6,3 +6,4 @@
 [2025-11-18 17:23:02] ✅ Google Workspace SMTP migration complete - Magic links working
 [2025-11-19 07:58:11] ✅ Google Workspace SMTP migration complete - Magic links working
 [Wed Nov 26 13:43:25 EST 2025] Updated hero layout proportions - max-width 320px for button area
+[2025-12-01 20:30:30] Deployed v1.7.3-production-hardening (b85213a) to PRODUCTION - End-of-season infrastructure added (dormant)
