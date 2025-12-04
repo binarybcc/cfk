@@ -80,18 +80,6 @@ $totalFamilies = 466;
                 </div>
 
                 <div class="impact-card">
-                    <div class="impact-icon">📦</div>
-                    <h3>Program Support</h3>
-                    <p>Cover operational costs including gift wrapping, distribution, and volunteer coordination.</p>
-                </div>
-
-                <div class="impact-card">
-                    <div class="impact-icon">💝</div>
-                    <h3>Emergency Assistance</h3>
-                    <p>Provide last-minute support for urgent family situations that arise before Christmas.</p>
-                </div>
-
-                <div class="impact-card">
                     <div class="impact-icon">🌟</div>
                     <h3>Next Year's Hope</h3>
                     <p>Build capacity to serve even more children and families in future seasons.</p>
