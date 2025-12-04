@@ -149,18 +149,14 @@ function sponsorRemainingChildren(bool $dryRun = false): array
                 $result = Database::execute(
                     "INSERT INTO sponsorships (
                         child_id, sponsor_name, sponsor_email, sponsor_phone,
-                        sponsor_address, sponsor_city, sponsor_state, sponsor_zip,
-                        confirmation_date, status, notes
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), 'confirmed', ?)",
+                        sponsor_address, confirmation_date, status, notes
+                    ) VALUES (?, ?, ?, ?, ?, NOW(), 'confirmed', ?)",
                     [
                         $child['id'],
                         $CFK_SPONSOR['name'],
                         $CFK_SPONSOR['email'],
                         $CFK_SPONSOR['phone'],
                         $CFK_SPONSOR['address'],
-                        $CFK_SPONSOR['city'],
-                        $CFK_SPONSOR['state'],
-                        $CFK_SPONSOR['zip'],
                         'Auto-sponsored by CFK - End of season unsponsored child'
                     ]
                 );
