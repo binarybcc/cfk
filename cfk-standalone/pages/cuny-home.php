@@ -13,13 +13,9 @@ if (!defined('CFK_APP')) {
 
 $pageTitle = 'Home';
 
-// Get count statistics for hero section - total children and families this season
-// Direct SQL to count ALL children (getChildrenCount() has a default status='available' filter)
-$totalChildren = Database::fetchRow("SELECT COUNT(*) as total FROM children")['total'] ?? 0;
-$totalFamilies = Database::fetchRow("SELECT COUNT(DISTINCT family_id) as total FROM children")['total'] ?? 0;
-
-// Get sponsored count
-$sponsoredCount = Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships WHERE status IN ('confirmed', 'logged')")['total'] ?? 0;
+// Hardcoded final season statistics (2024-2025 season totals)
+$totalChildren = 1010;
+$totalFamilies = 466;
 ?>
 
 <div class="home-page">
@@ -32,12 +28,6 @@ $sponsoredCount = Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships
                     The sponsorship period for this season has ended. Thank you to everyone who helped bring joy to local families!
                     If you've already sponsored children, you can access your sponsorship details below.
                 </p>
-
-                <!-- Season End Notice -->
-                <div class="season-notice">
-                    <h3>🎄 This Season's Impact</h3>
-                    <p>Together, we're helping <strong><?php echo $sponsoredCount; ?> children</strong> from <strong><?php echo $totalFamilies; ?> families</strong> experience the magic of Christmas.</p>
-                </div>
 
                 <div class="hero-stats">
                     <div class="stat">
@@ -143,34 +133,6 @@ $sponsoredCount = Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships
 </div>
 
 <style>
-/* Season End Notice Box */
-.season-notice {
-    background: linear-gradient(135deg, #2c5530 0%, #3a6d3f 100%);
-    color: white;
-    padding: 2rem;
-    border-radius: 12px;
-    margin: 2rem 0;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(44, 85, 48, 0.2);
-}
-
-.season-notice h3 {
-    margin: 0 0 1rem 0;
-    font-size: 1.5rem;
-    color: white;
-}
-
-.season-notice p {
-    margin: 0;
-    font-size: 1.1rem;
-    line-height: 1.6;
-}
-
-.season-notice strong {
-    color: #ffd700;
-    font-weight: 700;
-}
-
 /* Donation Impact Section */
 .donation-impact-section {
     background: linear-gradient(to bottom, #f8fdf9 0%, #ffffff 100%);
@@ -325,18 +287,6 @@ $sponsoredCount = Database::fetchRow("SELECT COUNT(*) as total FROM sponsorships
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
-    .season-notice {
-        padding: 1.5rem;
-    }
-
-    .season-notice h3 {
-        font-size: 1.25rem;
-    }
-
-    .season-notice p {
-        font-size: 1rem;
-    }
-
     .donation-impact-section {
         padding: 2rem 1rem;
     }
