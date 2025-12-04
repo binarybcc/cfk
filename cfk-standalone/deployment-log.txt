@@ -7,3 +7,8 @@
 [2025-11-19 07:58:11] ✅ Google Workspace SMTP migration complete - Magic links working
 [Wed Nov 26 13:43:25 EST 2025] Updated hero layout proportions - max-width 320px for button area
 [2025-12-01 20:30:30] Deployed v1.7.3-production-hardening (b85213a) to PRODUCTION - End-of-season infrastructure added (dormant)
+[Thu Dec  4 01:02:56 EST 2025] Deployed v1.7.3-production-hardening (f46e0f1) to PRODUCTION - Updated pages/cuny-home.php (hardcoded stats, removed season notice)
+[Thu Dec  4 01:10:01 EST 2025] Deployed v1.7.3-production-hardening (66f7510) to PRODUCTION - Updated hero text to emphasize donation need
+[Thu Dec  4 01:12:12 EST 2025] Deployed v1.7.3-production-hardening (85890a2) to PRODUCTION - Removed Program Support and Emergency Assistance cards
+[Thu Dec  4 01:18:24 EST 2025] Deployed v1.7.3-production-hardening (6179056) to PRODUCTION - Fixed sponsor remaining children function (removed non-existent columns)
+[Thu Dec  4 01:22:26 EST 2025] Deployed v1.7.3-production-hardening (968ec69) to PRODUCTION - Fixed auto-sponsor to update children status, ran update script (203 children)
