@@ -25,8 +25,7 @@ $totalFamilies = 466;
             <div class="hero-content">
                 <h1>Thank You for Making Christmas Magical</h1>
                 <p class="hero-subtitle">
-                    The sponsorship period for this season has ended. Thank you to everyone who helped bring joy to local families!
-                    If you've already sponsored children, you can access your sponsorship details below.
+                    The sponsorship period for this season has ended. Thank you to everyone who helped bring joy to local families! Donations are still needed. If you've already sponsored children, you can still access your sponsorship details.
                 </p>
 
                 <div class="hero-stats">
