@@ -146,6 +146,7 @@ function sponsorRemainingChildren(bool $dryRun = false): array
 
         foreach ($unsponsored as $child) {
             try {
+                // Create sponsorship record
                 $result = Database::execute(
                     "INSERT INTO sponsorships (
                         child_id, sponsor_name, sponsor_email, sponsor_phone,
@@ -162,6 +163,11 @@ function sponsorRemainingChildren(bool $dryRun = false): array
                 );
 
                 if ($result) {
+                    // Update child status to 'sponsored'
+                    Database::execute(
+                        "UPDATE children SET status = 'sponsored' WHERE id = ?",
+                        [$child['id']]
+                    );
                     $successCount++;
                 } else {
                     $errorCount++;
