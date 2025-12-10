@@ -30,11 +30,11 @@ $totalFamilies = 466;
 
                 <div class="hero-stats">
                     <div class="stat">
-                        <strong><?php echo $totalChildren; ?></strong>
+                        <strong>1233</strong>
                         <span>Children We're Helping</span>
                     </div>
                     <div class="stat">
-                        <strong><?php echo $totalFamilies; ?></strong>
+                        <strong>527</strong>
                         <span>Families We're Helping</span>
                     </div>
                 </div>
