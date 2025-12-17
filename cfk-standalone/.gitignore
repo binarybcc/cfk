@@ -59,6 +59,7 @@ composer.lock
 /.phpcs-cache
 /rector-cache/
 .claude-flow/
+.serena/
 config/config.production.php
 
 # Temporary test files
