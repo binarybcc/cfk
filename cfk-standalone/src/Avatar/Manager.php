@@ -33,7 +33,19 @@ class Manager
      */
     public static function getAvatarForChild(array $child): string
     {
-        $category = self::determineAvatarCategory((int) $child['age_months'], (string) $child['gender']);
+        // Get age in years - handle both age_months (new schema) and age (old schema)
+        $ageYears = 0;
+        if (isset($child['age_months'])) {
+            // New schema: age_months exists, convert to years
+            $ageYears = (int) floor($child['age_months'] / 12);
+        } elseif (isset($child['age'])) {
+            // Old schema: age in years
+            $ageYears = (int) $child['age'];
+        }
+
+        $gender = (string) ($child['gender'] ?? 'F'); // Default to female if not set
+
+        $category = self::determineAvatarCategory($ageYears, $gender);
 
         return self::getAvatarImagePath($category);
     }
