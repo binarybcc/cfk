@@ -61,6 +61,13 @@ composer.lock
 .claude-flow/
 config/config.production.php
 
+# Claude Code settings (user-specific, not project-specific)
+.claude/settings.json
+.claude/settings.local.json
+
+# Serena MCP plugin directory
+.serena/
+
 # Temporary test files
 admin/test-forms.php
 admin/test_reset_form.php
