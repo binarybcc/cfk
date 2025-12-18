@@ -14,10 +14,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Preferred approach:** Use TodoWrite tool for task tracking when working on multi-step tasks.
 
-**Research Tools:**
-- Use `Grep` tool to search codebase
-- Use `Read` tool to examine files
-- Use `WebSearch` for external documentation
+## Code Analysis & Research Tools
+
+**PRIMARY: Serena MCP** (semantic code analysis - use FIRST!)
+- `get_symbols_overview` - Understand file structure
+- `find_symbol` - Find classes, methods, functions by name
+- `find_referencing_symbols` - Find where code is used
+- `search_for_pattern` - Semantic search with regex
+- `read_file` - Read with line numbers and chunking
+
+**Serena is MUCH more powerful than basic Grep/Read tools for code exploration!**
+
+**Fallback Tools:**
+- `Grep` - Basic text search (use only when Serena isn't appropriate)
+- `Read` - Basic file reading (use only for non-code files)
+- `WebSearch` - External documentation and research
 
 ## Project Overview
 
