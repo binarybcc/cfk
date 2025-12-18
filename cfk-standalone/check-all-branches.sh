@@ -16,9 +16,8 @@ echo ""
 
 # List of branches to check (add more as needed)
 BRANCHES_TO_CHECK=(
-    "claude/v1.9.2-architecture-review-011CUtxqyytmMP363MuDLrGW"
-    "claude/week5-children-refactor-011CUtxqyytmMP363MuDLrGW"
     "v1.7.3-production-hardening"
+    # Add active feature branches here as needed
 )
 
 echo "Checking for new commits on feature branches..."

@@ -2,34 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-# ✅ COMPLETED: Dead Code Cleanup (2025-11-06)
+# 📍 Current Project Status
 
-**Status:** COMPLETED
-**Completion Date:** 2025-11-06
-**Branch:** v1.8.1-cleanup
-**Report:** `cfk-standalone/docs/audits/dead-code-analysis-report.md`
-
-**Summary:**
-- ✅ 9 deprecated wrapper files successfully deleted (3,624 lines removed)
-- ✅ All files in `includes/` directory had functional namespaced replacements in `src/`
-- ✅ No references to deleted files found in codebase
-- ✅ Test suite verified: 35/36 tests passing (v1.7.3 baseline maintained)
-
-**Deleted Files:**
-- includes/sponsorship_manager.php (830 lines)
-- includes/email_manager.php (763 lines)
-- includes/csv_handler.php (561 lines)
-- includes/archive_manager.php (429 lines)
-- includes/report_manager.php (394 lines)
-- includes/avatar_manager.php (353 lines)
-- includes/backup_manager.php (236 lines)
-- includes/import_analyzer.php (29 lines)
-- includes/magic_link_manager.php (29 lines)
-
-**Impact:**
-- Codebase reduction: 3,624 lines
-- Improved code clarity: Single source of truth in `src/` namespace
-- Reduced maintenance burden: No duplicate code paths
+**Active Branch:** v1.9.3 (Slim Framework migration complete)
+**Status:** Production-ready, final validation needed
+**See:** `cfk-standalone/CLAUDE.md` for branch-specific details
 
 ---
 

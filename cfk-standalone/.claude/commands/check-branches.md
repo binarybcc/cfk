@@ -42,19 +42,17 @@ git fetch --all --prune 2>/dev/null
 ```
 
 **What it checks:**
-- claude/v1.9.2-architecture-review-011CUtxqyytmMP363MuDLrGW
-- claude/week5-children-refactor-011CUtxqyytmMP363MuDLrGW
 - v1.7.3-production-hardening (parent/production branch)
+- Any active feature branches
 
 **Output format:**
 ```
 🔄 Checking all branches for new commits...
 
-📍 Current branch: v1.9.2
+📍 Current branch: v1.9.3
 
 Checking for new commits on feature branches...
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ claude/v1.9.2-architecture-review-... (up to date)
 
 ⚠️  v1.7.3-production-hardening
    → 5 new commit(s) since last merge
@@ -161,8 +159,6 @@ Edit `check-all-branches.sh`:
 
 ```bash
 BRANCHES_TO_CHECK=(
-    "claude/v1.9.2-architecture-review-011CUtxqyytmMP363MuDLrGW"
-    "claude/week5-children-refactor-011CUtxqyytmMP363MuDLrGW"
     "v1.7.3-production-hardening"
     "your-new-branch-here"  # Add new branch
 )
@@ -248,10 +244,8 @@ git merge origin/branch-name
 ### Example 1: All Up to Date
 ```
 🔄 Checking all branches for new commits...
-📍 Current branch: v1.9.2
+📍 Current branch: v1.9.3
 
-✅ claude/v1.9.2-architecture-review-... (up to date)
-✅ claude/week5-children-refactor-... (up to date)
 ✅ v1.7.3-production-hardening (up to date)
 
 ✅ Check complete!
@@ -261,9 +255,7 @@ git merge origin/branch-name
 ### Example 2: Updates Available
 ```
 🔄 Checking all branches for new commits...
-📍 Current branch: v1.9.2
-
-✅ claude/v1.9.2-architecture-review-... (up to date)
+📍 Current branch: v1.9.3
 
 ⚠️  v1.7.3-production-hardening
    → 3 new commit(s) since last merge
