@@ -8,6 +8,13 @@
 [Sun Nov  9 19:21:56 EST 2025] Deployed v1.7.3-production-hardening (70cfef5) to PRODUCTION - Updated homepage stats to show total impact
 [Sun Nov  9 19:43:36 EST 2025] Deployed v1.7.3-production-hardening (e3bbd55) to PRODUCTION - Fixed homepage count to show ALL children
 [Sun Nov  9 19:46:29 EST 2025] Deployed v1.7.3-production-hardening (80f8c25) to PRODUCTION - Fixed admin dashboard count to show 259 children
+[Mon Nov 10 12:20:44 EST 2025] Deployed v1.9 branch to STAGING
+[Mon Nov 10 12:28:45 EST 2025] Deployed v1.9 (with PHPStan fixes) to STAGING
+[Mon Nov 10 12:32:21 EST 2025] Deployed Connection::init() fix to STAGING
+[Mon Nov 10 12:42:13 EST 2025] Deployed Slim Framework infrastructure (Week 1) to STAGING
+[Mon Nov 10 12:52:44 EST 2025] Deployed slim.php fix (CFK_APP constant) to STAGING
+[Mon Nov 10 12:57:13 EST 2025] Deployed slim.php fix (base path) to STAGING
+[Mon Nov 10 12:58:08 EST 2025] Installed slim/twig-view on STAGING
 [Mon Nov 10 15:29:03 EST 2025] Deployed v1.9.2 (49b4722) to STAGING - PHPStan cleanup + Slim Week 3 complete
 [Tue Nov 11 10:33:37 EST 2025] Composer install completed on staging - Dependencies verified
 [Tue Nov 11 10:39:08 EST 2025] Deployed v1.9.2 (7e422d0) to STAGING - Complete with v1.7.3 merges, branch tools, deploy.sh updates
