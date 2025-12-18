@@ -207,8 +207,8 @@ class ChildRepository
             return [];
         }
 
-        // Get unique family IDs
-        $familyIds = array_unique(array_column($children, 'family_id'));
+        // Get unique family IDs (re-index for PDO parameter binding)
+        $familyIds = array_values(array_unique(array_column($children, 'family_id')));
 
         if (empty($familyIds)) {
             return [];
