@@ -640,4 +640,5 @@ if (document.readyState === 'loading') {
 // Freeze exports to prevent tampering
 Object.freeze(window.SelectionsManager);
 Object.freeze(window.ToastManager);
-Object.freeze(window.StickyBarManager);
+// Note: StickyBarManager not frozen to allow init() to set properties
+// Object.freeze(window.StickyBarManager);
