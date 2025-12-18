@@ -113,9 +113,13 @@ class AdminArchiveController
                 ->withStatus(302);
         }
 
+        // Get current year for archiving
+        $currentYear = date('Y');
+        $fullConfirmationCode = 'RESET ' . $currentYear;
+
         // Perform reset
         try {
-            $result = ArchiveManager::performYearEndReset();
+            $result = ArchiveManager::performYearEndReset($currentYear, $fullConfirmationCode);
 
             if ($result['success']) {
                 $message = sprintf(
@@ -178,9 +182,12 @@ class AdminArchiveController
                 ->withStatus(302);
         }
 
+        // Build full confirmation code for Archive Manager
+        $fullConfirmationCode = 'RESTORE ' . $archiveYear;
+
         // Perform restore
         try {
-            $result = ArchiveManager::restoreFromArchive($archiveYear, $archiveTimestamp);
+            $result = ArchiveManager::performArchiveRestore($archiveYear, $fullConfirmationCode);
 
             if ($result['success']) {
                 $message = sprintf(
@@ -232,9 +239,12 @@ class AdminArchiveController
                 ->withStatus(302);
         }
 
+        // Build full confirmation code for Archive Manager
+        $fullConfirmationCode = 'DELETE OLD ARCHIVES';
+
         // Perform deletion
         try {
-            $result = ArchiveManager::deleteOldArchives();
+            $result = ArchiveManager::deleteOldArchives($fullConfirmationCode);
 
             if ($result['success']) {
                 $message = sprintf(

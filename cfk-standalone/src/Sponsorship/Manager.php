@@ -692,4 +692,109 @@ class Manager
             return [];
         }
     }
+
+    /**
+     * Clean up expired pending sponsorships
+     *
+     * Deletes sponsorship records that have been pending for more than
+     * PENDING_TIMEOUT_HOURS and releases the associated children.
+     *
+     * @return int Number of expired sponsorships cleaned up
+     */
+    public static function cleanupExpiredPendingSponsorships(): int
+    {
+        try {
+            $db = Connection::getConnection();
+            $db->beginTransaction();
+
+            // Find expired pending sponsorships
+            $timeoutHours = self::PENDING_TIMEOUT_HOURS;
+            $sql = "
+                SELECT s.id, s.child_id
+                FROM sponsorships s
+                WHERE s.status = 'pending'
+                AND s.request_date < DATE_SUB(NOW(), INTERVAL :timeout HOUR)
+            ";
+
+            $expired = Connection::fetchAll($sql, ['timeout' => $timeoutHours]);
+
+            if (empty($expired)) {
+                $db->commit();
+                return 0;
+            }
+
+            $cleanedCount = 0;
+
+            foreach ($expired as $sponsorship) {
+                // Delete the expired sponsorship
+                Connection::execute(
+                    "DELETE FROM sponsorships WHERE id = :id",
+                    ['id' => $sponsorship['id']]
+                );
+
+                // Release the child (set status back to available)
+                Connection::execute(
+                    "UPDATE children SET status = 'available' WHERE id = :child_id",
+                    ['child_id' => $sponsorship['child_id']]
+                );
+
+                $cleanedCount++;
+            }
+
+            $db->commit();
+            error_log("Cleaned up {$cleanedCount} expired pending sponsorships");
+
+            return $cleanedCount;
+        } catch (Exception $e) {
+            if (isset($db) && $db->inTransaction()) {
+                $db->rollback();
+            }
+            error_log('Failed to cleanup expired sponsorships: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Clean up expired portal access tokens
+     *
+     * Deletes portal access tokens that have expired or been used.
+     * Keeps used tokens for 24 hours for audit purposes.
+     *
+     * @return int Number of expired tokens deleted
+     */
+    public static function cleanupExpiredPortalTokens(): int
+    {
+        try {
+            // Delete expired tokens (expired more than 1 hour ago)
+            $expiredCount = Connection::execute("
+                DELETE FROM portal_access_tokens
+                WHERE expires_at < DATE_SUB(NOW(), INTERVAL 1 HOUR)
+            ", []);
+
+            // Delete used tokens (used more than 24 hours ago)
+            $usedCount = Connection::execute("
+                DELETE FROM portal_access_tokens
+                WHERE used_at IS NOT NULL
+                AND used_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ", []);
+
+            // Delete revoked tokens (revoked more than 24 hours ago)
+            $revokedCount = Connection::execute("
+                DELETE FROM portal_access_tokens
+                WHERE revoked_at IS NOT NULL
+                AND revoked_at < DATE_SUB(NOW(), INTERVAL 24 HOUR)
+            ", []);
+
+            $totalDeleted = $expiredCount + $usedCount + $revokedCount;
+
+            if ($totalDeleted > 0) {
+                error_log("Cleaned up {$totalDeleted} portal access tokens (expired: {$expiredCount}, used: {$usedCount}, revoked: {$revokedCount})");
+            }
+
+            return $totalDeleted;
+        } catch (Exception $e) {
+            error_log('Failed to cleanup expired portal tokens: ' . $e->getMessage());
+            return 0;
+        }
+    }
 }
