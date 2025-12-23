@@ -2,6 +2,52 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 📦 Version & Engineering Standards
+
+**Current Version:** v1.9.3
+**Version Location:** `VERSION` file (root)
+**Changelog:** `CHANGELOG.md` (root)
+
+### Versioning Protocol (MANDATORY)
+
+This project follows **Semantic Versioning (SemVer)**:
+- PATCH (1.9.x): Bug fixes, typos
+- MINOR (1.x.0): New features, backwards compatible
+- MAJOR (x.0.0): Breaking changes
+
+**After ANY code changes, Claude MUST:**
+1. Update version in `VERSION` file
+2. Update `CHANGELOG.md` with changes under appropriate section
+3. Create git tag: `git tag -a vX.Y.Z -m "Release vX.Y.Z: description"`
+
+### Commit Message Format (MANDATORY)
+
+All commits use **Conventional Commits**:
+```
+<type>(<scope>): <description>
+
+feat(sponsorship): add bulk confirmation feature
+fix(email): correct template rendering
+docs(guide): update admin documentation
+refactor(db): optimize child queries
+```
+
+**Types:** feat, fix, docs, style, refactor, test, chore, perf, security
+
+### Branch Strategy
+
+- `main` / versioned branches (e.g., `v1.9.3`) - Stable releases
+- `feature/*` - New features
+- `fix/*` - Bug fixes
+
+### Code Conventions
+
+- **PHP:** Modern PHP 8.2+ with strict typing
+- **Naming:** snake_case for variables/functions, PascalCase for classes
+- **Files:** snake_case.php
+
+---
+
 # 📍 Current Project Status
 
 **Active Branch:** v1.9.3 (Slim Framework migration complete)
