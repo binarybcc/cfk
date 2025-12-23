@@ -1,0 +1,43 @@
+#!/bin/bash
+# Conventional Commits validation hook
+# Validates commit messages follow the format: type(scope): description
+
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Regex pattern for conventional commits
+# Types: feat, fix, docs, style, refactor, perf, test, chore, security, revert
+pattern="^(feat|fix|docs|style|refactor|perf|test|chore|security|revert)(\([a-zA-Z0-9_-]+\))?: .{1,100}"
+
+# Check if it's a merge commit (allow those)
+if echo "$commit_msg" | grep -qE "^Merge "; then
+    exit 0
+fi
+
+# Check if commit message matches pattern
+if ! echo "$commit_msg" | head -1 | grep -qE "$pattern"; then
+    echo "❌ Invalid commit message format!"
+    echo ""
+    echo "Expected format: type(scope): description"
+    echo ""
+    echo "Types: feat, fix, docs, style, refactor, perf, test, chore, security, revert"
+    echo ""
+    echo "Examples:"
+    echo "  feat(auth): add two-factor authentication"
+    echo "  fix(email): correct template rendering"
+    echo "  docs(readme): update installation guide"
+    echo ""
+    echo "Your message: $(head -1 "$commit_msg_file")"
+    exit 1
+fi
+
+# Check that subject line is lowercase (after the colon)
+subject=$(echo "$commit_msg" | head -1 | sed 's/^[^:]*: //')
+first_char=$(echo "$subject" | cut -c1)
+if [[ "$first_char" =~ [A-Z] ]]; then
+    echo "❌ Subject line should start with lowercase!"
+    echo "Your subject: $subject"
+    exit 1
+fi
+
+exit 0
